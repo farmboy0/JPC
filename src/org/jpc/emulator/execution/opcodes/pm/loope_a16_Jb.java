@@ -33,43 +33,36 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class loope_a16_Jb extends Executable
-{
+public class loope_a16_Jb extends Executable {
     final int jmp;
     final int blockLength;
     final int instructionLength;
 
-    public loope_a16_Jb(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public loope_a16_Jb(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         jmp = Modrm.Jb(input);
-        instructionLength = (int)input.getAddress()-eip;
-        blockLength = eip-blockStart+instructionLength;
+        instructionLength = (int)input.getAddress() - eip;
+        blockLength = eip - blockStart + instructionLength;
     }
 
-    public Branch execute(Processor cpu)
-    {
-        cpu.r_cx.set16(cpu.r_cx.get16()-1);
-        if ((cpu.r_cx.get16() != 0) && cpu.zf())        {
+    public Branch execute(Processor cpu) {
+        cpu.r_cx.set16(cpu.r_cx.get16() - 1);
+        if ((cpu.r_cx.get16() != 0) && cpu.zf()) {
             int tmpEip = cpu.eip + jmp + blockLength;
             cpu.cs.checkAddress(tmpEip);
             cpu.eip = tmpEip;
             return Branch.T1;
-        }
-        else
-        {
+        } else {
             cpu.eip += blockLength;
             return Branch.T2;
         }
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return true;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

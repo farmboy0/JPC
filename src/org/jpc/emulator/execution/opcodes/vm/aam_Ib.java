@@ -33,29 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class aam_Ib extends Executable
-{
+public class aam_Ib extends Executable {
     final int immb;
 
-    public aam_Ib(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public aam_Ib(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         immb = Modrm.Ib(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        StaticOpcodes.aam(cpu, 0xFF&immb);
+    public Branch execute(Processor cpu) {
+        StaticOpcodes.aam(cpu, 0xFF & immb);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

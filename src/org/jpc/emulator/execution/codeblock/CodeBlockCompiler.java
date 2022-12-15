@@ -33,25 +33,21 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-public interface CodeBlockCompiler
-{
+public interface CodeBlockCompiler {
     /**
      * Create a real-mode codeblock from the given instruction source.
-     *
      * @param block@return codeblock instance
      */
     public RealModeCodeBlock getRealModeCodeBlock(CodeBlock block);
 
     /**
      * Create a protected-mode codeblock from the given instruction source.
-     *
      * @param block@return codeblock instance
      */
     public ProtectedModeCodeBlock getProtectedModeCodeBlock(CodeBlock block);
 
     /**
      * Create a virtual8086-mode codeblock from the given instruction source.
-     *
      * @param block@return codeblock instance
      */
     public Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(CodeBlock block);

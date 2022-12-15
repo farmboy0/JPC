@@ -37,8 +37,7 @@ package org.jpc.emulator;
  * An object which can be registered as the listener on a timer expiry event.
  * @author Chris Dennis
  */
-public interface TimerResponsive
-{
+public interface TimerResponsive {
     /**
      * Called after a timer registered to this object has expired.
      */

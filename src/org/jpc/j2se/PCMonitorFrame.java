@@ -48,19 +48,17 @@ import org.jpc.emulator.PC;
 import org.jpc.support.ArgProcessor;
 
 /**
- * 
  * @author Mike Moleschi
  */
-public class PCMonitorFrame extends JFrame implements Runnable
-{
+public class PCMonitorFrame extends JFrame implements Runnable {
     private static final Logger LOGGING = Logger.getLogger(PCMonitorFrame.class.getName());
     private static final DecimalFormat TWO_DP = new DecimalFormat("0.00");
     private static final DecimalFormat THREE_DP = new DecimalFormat("0.000");
     private static final int COUNTDOWN = 10000000;
-    
+
     protected final PC pc;
     protected final PCMonitor monitor;
-    
+
     private JScrollPane monitorPane;
     private final JProgressBar speedDisplay;
     private JFileChooser configFileChooser;
@@ -69,8 +67,7 @@ public class PCMonitorFrame extends JFrame implements Runnable
     private volatile boolean running;
     private Thread runner;
 
-    public PCMonitorFrame(String title, PC pc, String[] args)
-    {
+    public PCMonitorFrame(String title, PC pc, String[] args) {
         super(title);
         configFileChooser = new JFileChooser(System.getProperty("user.dir"));
 
@@ -80,122 +77,103 @@ public class PCMonitorFrame extends JFrame implements Runnable
         getContentPane().add("Center", monitorPane);
         if (monitor != null)
             monitor.setFrame(monitorPane);
-        
+
         this.pc = pc;
-   
 
         JMenuBar bar = new JMenuBar();
 
         JMenu file = new JMenu("File");
         file.add("Start").addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    start();
-                }
-            });
+            public void actionPerformed(ActionEvent e) {
+                start();
+            }
+        });
         file.add("Stop").addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    stop();
-                }
-            });
+            public void actionPerformed(ActionEvent e) {
+                stop();
+            }
+        });
         file.add("Reset").addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    reset();
-                }
-            });
+            public void actionPerformed(ActionEvent e) {
+                reset();
+            }
+        });
         file.addSeparator();
         file.add("Save Configuration").addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    saveConfig();
-                }
-            });
+            public void actionPerformed(ActionEvent e) {
+                saveConfig();
+            }
+        });
         file.add("Load Configuration").addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    loadConfig();
-                }
-            });
+            public void actionPerformed(ActionEvent e) {
+                loadConfig();
+            }
+        });
         file.addSeparator();
         file.add("Quit").addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    System.exit(0);
-                }
-            });
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
 
         bar.add(file);
-            
+
         speedDisplay = new JProgressBar();
         speedDisplay.setStringPainted(true);
         speedDisplay.setString(" 0.00 Mhz");
         speedDisplay.setPreferredSize(new Dimension(100, 20));
 
         setJMenuBar(bar);
-        
+
         getContentPane().add("South", speedDisplay);
 
-        try
-        {
+        try {
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        }
-        catch (AccessControlException e)
-        {
+        } catch (AccessControlException e) {
             LOGGING.log(Level.WARNING, "Not able to add some components to frame.", e);
         }
     }
-    
-    public JScrollPane getMonitorPane()
-    {
+
+    public JScrollPane getMonitorPane() {
         return monitorPane;
     }
 
-    private boolean updateMHz(long time, long count)
-    {
+    private boolean updateMHz(long time, long count) {
         long t2 = System.currentTimeMillis();
         if (t2 - time < 100)
             return false;
-        
+
         //count = COUNTDOWN - count;
         float mhz = count * 1000.0F / (t2 - time) / 1000000;
 
-        speedDisplay.setValue((int)(mhz/1000));
-        synchronized (TWO_DP) 
-        {
-            speedDisplay.setString(TWO_DP.format(mhz) + " MHz or " + THREE_DP.format(mhz/1000) + " GHz Clock");
+        speedDisplay.setValue((int)(mhz / 1000));
+        synchronized (TWO_DP) {
+            speedDisplay.setString(TWO_DP.format(mhz) + " MHz or " + THREE_DP.format(mhz / 1000) + " GHz Clock");
         }
         return true;
     }
 
-    protected synchronized void stop()
-    {
+    protected synchronized void stop() {
         running = false;
-        if ((runner != null) && runner.isAlive()) 
-        {
-            try 
-            {
+        if ((runner != null) && runner.isAlive()) {
+            try {
                 runner.join(5000);
-            } 
-            catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
 
-            if (runner.isAlive())
-            {
-                try 
-                {
+            if (runner.isAlive()) {
+                try {
                     runner.stop();
-                } 
-                catch (SecurityException e) {}
+                } catch (SecurityException e) {
+                }
             }
         }
-        
+
         runner = null;
         monitor.stopUpdateThread();
     }
 
-    protected synchronized void start()
-    {
+    protected synchronized void start() {
         if (running)
             return;
         monitor.startUpdateThread();
@@ -205,58 +183,43 @@ public class PCMonitorFrame extends JFrame implements Runnable
         runner.start();
     }
 
-    protected synchronized boolean isRunning()
-    {
+    protected synchronized boolean isRunning() {
         return running;
     }
 
-    protected void saveConfig()
-    {
-        if (configFileChooser.showDialog(PCMonitorFrame.this, "Save JPC Configuration") == JFileChooser.APPROVE_OPTION)
-        {
-            try
-            {
+    protected void saveConfig() {
+        if (configFileChooser.showDialog(PCMonitorFrame.this, "Save JPC Configuration") == JFileChooser.APPROVE_OPTION) {
+            try {
                 Option.saveConfig(configFileChooser.getSelectedFile());
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 LOGGING.log(Level.WARNING, "Exception saving configuration.", e);
             }
         }
     }
 
-    protected void loadConfig()
-    {
-        if (configFileChooser.showDialog(PCMonitorFrame.this, "Load JPC Configuration") == JFileChooser.APPROVE_OPTION)
-        {
-            try
-            {
+    protected void loadConfig() {
+        if (configFileChooser.showDialog(PCMonitorFrame.this, "Load JPC Configuration") == JFileChooser.APPROVE_OPTION) {
+            try {
                 Option.loadConfig(configFileChooser.getSelectedFile());
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 LOGGING.log(Level.WARNING, "Exception saving configuration.", e);
             }
         }
     }
 
-    protected void reset()
-    {
+    protected void reset() {
         stop();
         pc.reset();
         start();
     }
 
-    public void run()
-    {
+    public void run() {
         pc.start();
-        try 
-        {
+        try {
             long markTime = System.currentTimeMillis();
             long execCount = COUNTDOWN;
             long totalExec = 0;
-            while (running) 
-            {
+            while (running) {
                 execCount -= pc.execute();
                 if (execCount > 0)
                     continue;
@@ -264,22 +227,18 @@ public class PCMonitorFrame extends JFrame implements Runnable
                 execCount = COUNTDOWN;
 
                 if (updateMHz)
-                    if (updateMHz(markTime, totalExec))
-                    {
+                    if (updateMHz(markTime, totalExec)) {
                         markTime = System.currentTimeMillis();
                         totalExec = 0;
                     }
             }
-        } 
-        finally 
-        {
+        } finally {
             pc.stop();
             LOGGING.log(Level.INFO, "PC Stopped");
         }
     }
 
-    public static void main(String[] args) throws Exception
-    {
+    public static void main(String[] args) throws Exception {
         //JPCStatisticsMonitor.install();
         Option.parse(args);
 
@@ -296,11 +255,11 @@ public class PCMonitorFrame extends JFrame implements Runnable
                         Manifest manifest = jar.getManifest();
                         if (manifest == null)
                             continue;
-                        
+
                         String defaultArgs = manifest.getMainAttributes().getValue("Default-Args");
                         if (defaultArgs == null)
                             continue;
-                                                
+
                         args = defaultArgs.split("\\s");
                         break;
                     } catch (IOException e) {
@@ -313,12 +272,16 @@ public class PCMonitorFrame extends JFrame implements Runnable
                     }
                 }
             }
-            
+
             if (args.length == 0) {
                 LOGGING.log(Level.INFO, "No configuration specified, using defaults");
-                args = new String[]{"-fda", "mem:resources/images/floppy.img",
-                                    "-hda", "mem:resources/images/dosgames.img", "-boot", "fda"
-                };
+                args = new String[] {
+                    "-fda",
+                    "mem:resources/images/floppy.img",
+                    "-hda",
+                    "mem:resources/images/dosgames.img",
+                    "-boot",
+                    "fda" };
             } else {
                 LOGGING.log(Level.INFO, "Using configuration specified in manifest");
             }
@@ -327,7 +290,7 @@ public class PCMonitorFrame extends JFrame implements Runnable
         }
 
         PC pc = new PC(new VirtualClock(), args);
-        
+
         PCMonitorFrame result = new PCMonitorFrame("JPC Monitor", pc, args);
         result.validate();
         result.setVisible(true);
@@ -335,4 +298,3 @@ public class PCMonitorFrame extends JFrame implements Runnable
         result.start();
     }
 }
-

@@ -33,21 +33,18 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class add_Eb_Ib_mem extends Executable
-{
+public class add_Eb_Ib_mem extends Executable {
     final Pointer op1;
     final int immb;
 
-    public add_Eb_Ib_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public add_Eb_Ib_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
         immb = Modrm.Ib(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.flagOp1 = op1.get8(cpu);
         cpu.flagOp2 = immb;
         cpu.flagResult = (byte)(cpu.flagOp1 + cpu.flagOp2);
@@ -57,13 +54,11 @@ public class add_Eb_Ib_mem extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

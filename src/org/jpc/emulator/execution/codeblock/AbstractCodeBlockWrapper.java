@@ -38,45 +38,37 @@ import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.Processor;
 
 /**
- * Abstract implementation of <code>CodeBlock</code> that wraps another CodeBlock
- * implementation.
+ * Abstract implementation of <code>CodeBlock</code> that wraps another CodeBlock implementation.
  * @author Chris Dennis
  */
-public abstract class AbstractCodeBlockWrapper implements CodeBlock
-{
+public abstract class AbstractCodeBlockWrapper implements CodeBlock {
     private volatile CodeBlock actualBlock;
-    
+
     /**
      * Constructs a wrapper around <code>target</code>.
      * @param target <code>CodeBlock</code> instance being wrapped.
      */
-    public AbstractCodeBlockWrapper(CodeBlock target)
-    {
+    public AbstractCodeBlockWrapper(CodeBlock target) {
         actualBlock = target;
     }
 
-    public final int getX86Length()
-    {
-	return actualBlock.getX86Length();
+    public final int getX86Length() {
+        return actualBlock.getX86Length();
     }
-    
-    public final int getX86Count()
-    {
-	return actualBlock.getX86Count();
+
+    public final int getX86Count() {
+        return actualBlock.getX86Count();
     }
-    
-    public Executable.Branch execute(Processor cpu)
-    {
-	return actualBlock.execute(cpu);
+
+    public Executable.Branch execute(Processor cpu) {
+        return actualBlock.execute(cpu);
     }
-    
-    public String getDisplayString()
-    {
+
+    public String getDisplayString() {
         return actualBlock.getDisplayString();
     }
-    
-    public boolean handleMemoryRegionChange(int startAddress, int endAddress)
-    {
+
+    public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         return actualBlock.handleMemoryRegionChange(startAddress, endAddress);
     }
 
@@ -84,22 +76,19 @@ public abstract class AbstractCodeBlockWrapper implements CodeBlock
      * Sets the target block of this wrapper.
      * @param block new target block instance
      */
-    public final void setTargetBlock(CodeBlock block)
-    {
-	actualBlock = block;
+    public final void setTargetBlock(CodeBlock block) {
+        actualBlock = block;
     }
-    
+
     /**
      * Gets a reference to the target block of this wrapper.
      * @return target block of this wrapper
      */
-    public final CodeBlock getTargetBlock()
-    {
-	return actualBlock;
+    public final CodeBlock getTargetBlock() {
+        return actualBlock;
     }
 
-    public Instruction getInstructions()
-    {
+    public Instruction getInstructions() {
         return actualBlock.getInstructions();
     }
 }

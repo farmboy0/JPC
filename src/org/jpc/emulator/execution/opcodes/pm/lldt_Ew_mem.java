@@ -33,45 +33,37 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class lldt_Ew_mem extends Executable
-{
+public class lldt_Ew_mem extends Executable {
     final Pointer op1;
 
-    public lldt_Ew_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public lldt_Ew_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         int selector = op1.get16(cpu) & 0xffff;
 
-	if (selector == 0)
-        {
-	    cpu.ldtr = SegmentFactory.NULL_SEGMENT;
-        }
-        else
-        {
-	Segment newSegment = cpu.getSegment(selector & ~0x4);
-	if (newSegment.getType() != 0x02)
-	    throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
+        if (selector == 0) {
+            cpu.ldtr = SegmentFactory.NULL_SEGMENT;
+        } else {
+            Segment newSegment = cpu.getSegment(selector & ~0x4);
+            if (newSegment.getType() != 0x02)
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
 
-	if (!(newSegment.isPresent()))
-	    throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
-        cpu.ldtr = newSegment;
+            if (!(newSegment.isPresent()))
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
+            cpu.ldtr = newSegment;
         }
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

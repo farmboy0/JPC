@@ -41,10 +41,9 @@ import java.util.logging.*;
  * @author Mike Moleschi
  * @author Chris Dennis
  */
-public class FileBackedSeekableIODevice implements SeekableIODevice
-{
+public class FileBackedSeekableIODevice implements SeekableIODevice {
     private static final Logger LOGGING = Logger.getLogger(FileBackedSeekableIODevice.class.getName());
-    
+
     private String fileName;
     private RandomAccessFile image;
     private boolean readOnly;
@@ -52,11 +51,9 @@ public class FileBackedSeekableIODevice implements SeekableIODevice
     /**
      * Constructs an unconfigured instance.
      * <p>
-     * This must be configured by calling <code>configure</code> before first
-     * use.
+     * This must be configured by calling <code>configure</code> before first use.
      */
-    public FileBackedSeekableIODevice()
-    {
+    public FileBackedSeekableIODevice() {
     }
 
     /**
@@ -64,8 +61,7 @@ public class FileBackedSeekableIODevice implements SeekableIODevice
      * @param spec file path
      * @throws java.io.IOException if the file cannot be opened
      */
-    public void configure(String spec) throws IOException
-    {
+    public void configure(String spec) throws IOException {
         fileName = spec;
 
         try {
@@ -87,29 +83,24 @@ public class FileBackedSeekableIODevice implements SeekableIODevice
      * Constructs an instance using the specified file as backing.
      * @param file file path
      */
-    public FileBackedSeekableIODevice(String file) throws IOException
-    {
+    public FileBackedSeekableIODevice(String file) throws IOException {
         configure(file);
     }
 
-    public void seek(long offset) throws IOException
-    {
+    public void seek(long offset) throws IOException {
         image.seek(offset);
     }
 
-    public int write(byte[] data, int offset, int length) throws IOException
-    {
+    public int write(byte[] data, int offset, int length) throws IOException {
         image.write(data, offset, length);
         return length;
     }
 
-    public int read(byte[] data, int offset, int length) throws IOException
-    {
+    public int read(byte[] data, int offset, int length) throws IOException {
         return image.read(data, offset, length);
     }
 
-    public long length()
-    {
+    public long length() {
         try {
             return image.length();
         } catch (IOException e) {
@@ -117,18 +108,15 @@ public class FileBackedSeekableIODevice implements SeekableIODevice
         }
     }
 
-    public void close() throws IOException
-    {
+    public void close() throws IOException {
         image.close();
     }
-    
-    public boolean readOnly()
-    {
+
+    public boolean readOnly() {
         return readOnly;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return fileName;
     }
 }

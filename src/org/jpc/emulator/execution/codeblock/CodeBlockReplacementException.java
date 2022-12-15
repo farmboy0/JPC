@@ -37,20 +37,16 @@ package org.jpc.emulator.execution.codeblock;
  * Thrown by a codeblock on execution to indicate it requires replacement.
  * @author Chris Dennis
  */
-public class CodeBlockReplacementException extends RuntimeException
-{
+public class CodeBlockReplacementException extends RuntimeException {
     private CodeBlock replacement;
 
     /**
-     * Constructs an exception which requests the throwing block be replaced
-     * with the supplied block.
+     * Constructs an exception which requests the throwing block be replaced with the supplied block.
      * <p>
-     * This is used by the codeblock compilers to inject a faster replacement
-     * block.
+     * This is used by the codeblock compilers to inject a faster replacement block.
      * @param replacement new block to be inserted.
      */
-    public CodeBlockReplacementException(CodeBlock replacement)
-    {
+    public CodeBlockReplacementException(CodeBlock replacement) {
         super("CodeBlock Replacement Trigger Exception");
         this.replacement = replacement;
     }
@@ -59,8 +55,7 @@ public class CodeBlockReplacementException extends RuntimeException
      * Gets the new block instance.
      * @return new block.
      */
-    public CodeBlock getReplacement()
-    {
+    public CodeBlock getReplacement() {
         return replacement;
     }
 }

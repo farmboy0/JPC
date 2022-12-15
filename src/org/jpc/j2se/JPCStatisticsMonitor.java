@@ -43,11 +43,9 @@ import java.util.*;
 import java.util.logging.*;
 
 /**
- *
  * @author Chris Dennis
  */
-public class JPCStatisticsMonitor extends TimerTask
-{
+public class JPCStatisticsMonitor extends TimerTask {
     private static final Logger LOGGING = Logger.getLogger(JPCStatisticsMonitor.class.getName());
     private static final Timer statsTimer = new Timer("Stats Timer", true);
     private static final ClassLoadingMXBean classLoadingBean = ManagementFactory.getClassLoadingMXBean();
@@ -57,16 +55,14 @@ public class JPCStatisticsMonitor extends TimerTask
         jpcVmStatus.setUseParentHandlers(false);
         jpcVmStatus.setLevel(Level.ALL);
     }
-    
-    private JPCStatisticsMonitor(String to) throws IOException
-    {
-        jpcVmStatus.addHandler(new FileHandler(to));         
+
+    private JPCStatisticsMonitor(String to) throws IOException {
+        jpcVmStatus.addHandler(new FileHandler(to));
     }
 
-    public static void install() throws IOException
-    {
+    public static void install() throws IOException {
         try {
-            String logging = System.getProperty("org.jpc.monitor");            
+            String logging = System.getProperty("org.jpc.monitor");
             if (logging != null) {
                 try {
                     statsTimer.scheduleAtFixedRate(new JPCStatisticsMonitor(logging), 0, 5000);
@@ -79,8 +75,7 @@ public class JPCStatisticsMonitor extends TimerTask
         }
     }
 
-    public void run()
-    {
+    public void run() {
         List params = new ArrayList();
         StringBuilder line = new StringBuilder();
 

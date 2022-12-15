@@ -38,8 +38,7 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Calendar;
 
-public class JPCDebuggerControl extends EmulatorControl
-{
+public class JPCDebuggerControl extends EmulatorControl {
     private final Object debugger, pc;
     private final Method execute;
     private final Method setState;
@@ -53,25 +52,22 @@ public class JPCDebuggerControl extends EmulatorControl
     private final Method getPage;
     private final URLClassLoader cl1;
 
-    public JPCDebuggerControl(String jar, String pcName, String[] extraArgs) throws IOException
-    {
+    public JPCDebuggerControl(String jar, String pcName, String[] extraArgs) throws IOException {
         this(jar, concat(CompareToBochs.possibleArgs.get(pcName), extraArgs));
     }
 
-    public JPCDebuggerControl(String jar, String[] args) throws IOException
-    {
+    public JPCDebuggerControl(String jar, String[] args) throws IOException {
         this(jar, args, false, false);
     }
 
-    public JPCDebuggerControl(String jar, String[] args, boolean showScreen, boolean disablePIT) throws IOException
-    {
-        URL[] urls1 = new URL[]{new File(jar).toURL()};
+    public JPCDebuggerControl(String jar, String[] args, boolean showScreen, boolean disablePIT) throws IOException {
+        URL[] urls1 = new URL[] { new File(jar).toURL() };
         cl1 = new URLClassLoader(urls1, EmulatorControl.class.getClassLoader());
 
         try {
             String[] pcargs = args;
             if (disablePIT)
-                pcargs = concat(new String[]{"-bochs"}, args);
+                pcargs = concat(new String[] { "-bochs" }, args);
 
             Class d1 = cl1.loadClass("org.jpc.debugger.JPC");
             Method main = d1.getMethod("main", String[].class);
@@ -96,128 +92,128 @@ public class JPCDebuggerControl extends EmulatorControl
             Method load = c1.getMethod("loadPage", Integer.class, byte[].class, Boolean.class);
             Method startClock = c1.getMethod("start");
             startClock.invoke(pc);
-        } catch (ClassNotFoundException e) {throw new RuntimeException(e.getMessage());}
-        catch (NoSuchMethodException e) {throw new RuntimeException(e.getMessage());}
-        catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
-        catch (InvocationTargetException e) {throw new RuntimeException(e.getMessage());}
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
-    public String disam(byte[] code, Integer ops, Boolean is32Bit)
-    {
+    public String disam(byte[] code, Integer ops, Boolean is32Bit) {
         try {
-            return (String) disam.invoke(pc, code, ops, is32Bit);
-        } catch (InvocationTargetException e)
-        {
+            return (String)disam.invoke(pc, code, ops, is32Bit);
+        } catch (InvocationTargetException e) {
             if (e.getCause().getMessage().contains("Invalid"))
                 return "invalid";
             return "Error during disam: " + e.getMessage();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
-        catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
     }
 
-    public int x86Length(byte[] code, Boolean is32Bit)
-    {
+    public int x86Length(byte[] code, Boolean is32Bit) {
         try {
-            return (Integer) x86Length.invoke(pc, code, is32Bit);
-        } catch (InvocationTargetException e)
-        {
+            return (Integer)x86Length.invoke(pc, code, is32Bit);
+        } catch (InvocationTargetException e) {
             return 0;
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
-        catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
     }
 
-    public String executeInstruction() throws IOException
-    {
+    public String executeInstruction() throws IOException {
         try {
             int blockLength = (Integer)execute.invoke(debugger);
-            return (String) instructionInfo.invoke(pc, new Integer(blockLength));
-        } catch (InvocationTargetException e)
-        {
+            return (String)instructionInfo.invoke(pc, new Integer(blockLength));
+        } catch (InvocationTargetException e) {
             Throwable c = e.getCause();
             if (c instanceof IllegalStateException)
                 return c.getMessage();
             if (c.toString().contains("PAGE_FAULT"))
                 return c.toString();
             throw new RuntimeException(e.getMessage());
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-    public int[] getState() throws IOException
-    {
+    public int[] getState() throws IOException {
         try {
             return (int[])state.invoke(pc);
-        } catch (InvocationTargetException e) {throw new RuntimeException(e.getMessage());}
-        catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
-    }
-
-    public void setPhysicalMemory(int addr, byte[] data) throws IOException
-    {
-        try {
-            setPhysicalMemory.invoke(pc, new Integer(addr), data);
-        } catch (InvocationTargetException e) {throw new RuntimeException(e.getMessage());}
-        catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
-    }
-
-    public Integer getPhysicalPage(Integer page, byte[] data) throws IOException
-    {
-        try {
-            return (Integer) getPage.invoke(pc, page, data, new Boolean(false));
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public Integer getLinearPage(Integer page, byte[] data) throws IOException
-    {
-        try {
-            return (Integer) getPage.invoke(pc, page, data, new Boolean(true));
+            throw new RuntimeException(e.getMessage());
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public void destroy()
-    {
-        try {
-            destroy.invoke(pc);
-        } catch (InvocationTargetException e)
-        {
             throw new RuntimeException(e.getMessage());
         }
-        catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
     }
 
-    public byte[] getCMOS() throws IOException
-    {
+    public void setPhysicalMemory(int addr, byte[] data) throws IOException {
+        try {
+            setPhysicalMemory.invoke(pc, new Integer(addr), data);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public Integer getPhysicalPage(Integer page, byte[] data) throws IOException {
+        try {
+            return (Integer)getPage.invoke(pc, page, data, new Boolean(false));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public Integer getLinearPage(Integer page, byte[] data) throws IOException {
+        try {
+            return (Integer)getPage.invoke(pc, page, data, new Boolean(true));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void destroy() {
+        try {
+            destroy.invoke(pc);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public byte[] getCMOS() throws IOException {
         throw new IllegalStateException("Unimplemented!");
     }
-    public int[] getPit() throws IOException
-    {
+
+    public int[] getPit() throws IOException {
         throw new IllegalStateException("Unimplemented!");
     }
-    public int getPITIntTargetEIP() throws IOException
-    {
+
+    public int getPITIntTargetEIP() throws IOException {
         throw new IllegalStateException("Unimplemented!");
     }
-    public void keysDown(String keys)
-    {
+
+    public void keysDown(String keys) {
         throw new IllegalStateException("Unimplemented!");
     }
-    public void keysUp(String keys)
-    {
+
+    public void keysUp(String keys) {
         throw new IllegalStateException("Unimplemented!");
     }
-    public void sendMouse(Integer dx, Integer dy, Integer dz, Integer buttons)
-    {
+
+    public void sendMouse(Integer dx, Integer dy, Integer dz, Integer buttons) {
         throw new IllegalStateException("Unimplemented!");
     }
 
@@ -225,5 +221,5 @@ public class JPCDebuggerControl extends EmulatorControl
         T[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;
-}
+    }
 }

@@ -33,31 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class shl_Ew_Ib extends Executable
-{
+public class shl_Ew_Ib extends Executable {
     final int op1Index;
     final int immb;
 
-    public shl_Ew_Ib(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public shl_Ew_Ib(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1Index = Modrm.Ew(modrm);
         immb = Modrm.Ib(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         int shift = immb & 0x1f;
-        if(shift != 0)
-        {
-            if (shift <= 16)
-            {
+        if (shift != 0) {
+            if (shift <= 16) {
                 cpu.flagStatus = OSZPC;
-            }
-            else
-            {
+            } else {
                 cpu.flagStatus = SZP;
                 cpu.of = false;
                 cpu.cf = false;
@@ -72,13 +65,11 @@ public class shl_Ew_Ib extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

@@ -33,32 +33,27 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class mov_Ew_Iw_mem extends Executable
-{
+public class mov_Ew_Iw_mem extends Executable {
     final Pointer op1;
     final int immw;
 
-    public mov_Ew_Iw_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public mov_Ew_Iw_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
         immw = Modrm.Iw(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         op1.set16(cpu, (short)immw);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

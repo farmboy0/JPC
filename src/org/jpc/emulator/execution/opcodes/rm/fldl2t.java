@@ -33,27 +33,22 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fldl2t extends Executable
-{
+public class fldl2t extends Executable {
 
-    public fldl2t(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fldl2t(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        cpu.fpu.push(Math.log(10.0)/Math.log(2));
+    public Branch execute(Processor cpu) {
+        cpu.fpu.push(Math.log(10.0) / Math.log(2));
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

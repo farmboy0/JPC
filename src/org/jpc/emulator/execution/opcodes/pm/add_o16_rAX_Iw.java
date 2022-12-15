@@ -33,18 +33,15 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class add_o16_rAX_Iw extends Executable
-{
+public class add_o16_rAX_Iw extends Executable {
     final int immw;
 
-    public add_o16_rAX_Iw(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public add_o16_rAX_Iw(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         immw = Modrm.Iw(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.flagOp1 = cpu.r_eax.get16();
         cpu.flagOp2 = immw;
         cpu.flagResult = (short)(cpu.flagOp1 + cpu.flagOp2);
@@ -54,13 +51,11 @@ public class add_o16_rAX_Iw extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

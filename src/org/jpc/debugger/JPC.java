@@ -60,9 +60,9 @@ public class JPC extends ApplicationFrame implements ActionListener {
     private CodeBlockRecord codeBlocks;
     private RunMenu runMenu;
     private JDesktopPane desktop;
-    private DiskSelector floppyDisk,  hardDisk, cdrom;
-    private JMenuItem createPC,  scanForImages,  loadSnapshot,  saveSnapshot;
-    private JMenuItem fpuFrame, processorFrame, physicalMemoryViewer, linearMemoryViewer, watchpoints, breakpoints, traceFrame,  monitor;
+    private DiskSelector floppyDisk, hardDisk, cdrom;
+    private JMenuItem createPC, scanForImages, loadSnapshot, saveSnapshot;
+    private JMenuItem fpuFrame, processorFrame, physicalMemoryViewer, linearMemoryViewer, watchpoints, breakpoints, traceFrame, monitor;
 
     private JPC(boolean fullScreen) {
         super("JPC Debugger");
@@ -151,13 +151,11 @@ public class JPC extends ApplicationFrame implements ActionListener {
         resyncImageSelection(new File(System.getProperty("user.dir")));
     }
 
-    public int executeStep()
-    {
+    public int executeStep() {
         return runMenu.executeStep();
     }
 
-    private void initialLayout()
-    {
+    private void initialLayout() {
         ProcessorFrame pf = new ProcessorFrame();
         objects.addObject(pf);
         addInternalFrame(desktop, -10, 10, pf);
@@ -202,7 +200,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
 
         public void actionPerformed(ActionEvent evt) {
             if (evt.getSource() == openFile) {
-                JFileChooser chooser = (JFileChooser) objects.getObject(JFileChooser.class);
+                JFileChooser chooser = (JFileChooser)objects.getObject(JFileChooser.class);
                 if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
                     return;
                 }
@@ -319,11 +317,11 @@ public class JPC extends ApplicationFrame implements ActionListener {
     }
 
     protected void frameCloseRequested() {
-        BreakpointsFrame bp = (BreakpointsFrame) objects.getObject(BreakpointsFrame.class);
+        BreakpointsFrame bp = (BreakpointsFrame)objects.getObject(BreakpointsFrame.class);
         if ((bp != null) && bp.isEdited()) {
             bp.dispose();
         }
-        WatchpointsFrame wp = (WatchpointsFrame) objects.getObject(WatchpointsFrame.class);
+        WatchpointsFrame wp = (WatchpointsFrame)objects.getObject(WatchpointsFrame.class);
         if ((wp != null) && wp.isEdited()) {
             wp.dispose();
         }
@@ -339,7 +337,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         Object src = evt.getSource();
 
         if (src == scanForImages) {
-            JFileChooser chooser = (JFileChooser) objects.getObject(JFileChooser.class);
+            JFileChooser chooser = (JFileChooser)objects.getObject(JFileChooser.class);
             if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
                 return;
             }
@@ -361,8 +359,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                         return;
                     }
                     bootType = DriveSet.BootType.FLOPPY;
-                } else if (hardDisk.isBootDevice())
-                {
+                } else if (hardDisk.isBootDevice()) {
                     if (!hardImage.exists()) {
                         alert("Hard disk Image: " + hardImage + " does not exist", "Boot", JOptionPane.ERROR_MESSAGE);
                         return;
@@ -454,11 +451,11 @@ public class JPC extends ApplicationFrame implements ActionListener {
                     System.out.println("Loading a snapshot of JPC");
                     ZipInputStream zin = new ZipInputStream(new FileInputStream(file));
                     zin.getNextEntry();
-                    ((PC) objects.getObject(PC.class)).loadState(zin);
+                    ((PC)objects.getObject(PC.class)).loadState(zin);
                     zin.closeEntry();
-                    ((PCMonitorFrame) objects.getObject(PCMonitorFrame.class)).resizeDisplay();
+                    ((PCMonitorFrame)objects.getObject(PCMonitorFrame.class)).resizeDisplay();
                     zin.getNextEntry();
-                    ((PCMonitorFrame) objects.getObject(PCMonitorFrame.class)).loadMonitorState(zin);
+                    ((PCMonitorFrame)objects.getObject(PCMonitorFrame.class)).loadMonitorState(zin);
                     zin.closeEntry();
                     zin.close();
                     System.out.println("done");
@@ -498,10 +495,10 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 try {
                     ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(file));
                     zip.putNextEntry(new ZipEntry("pc"));
-                    ((PC) objects.getObject(PC.class)).saveState(zip);
+                    ((PC)objects.getObject(PC.class)).saveState(zip);
                     zip.closeEntry();
                     zip.putNextEntry(new ZipEntry("monitor"));
-                    ((PCMonitorFrame) objects.getObject(PCMonitorFrame.class)).saveState(zip);
+                    ((PCMonitorFrame)objects.getObject(PCMonitorFrame.class)).saveState(zip);
                     zip.closeEntry();
                     zip.finish();
                     zip.close();
@@ -510,7 +507,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 }
             }
         } else if (src == processorFrame) {
-            ProcessorFrame pf = (ProcessorFrame) objects.getObject(ProcessorFrame.class);
+            ProcessorFrame pf = (ProcessorFrame)objects.getObject(ProcessorFrame.class);
             if (pf != null) {
                 bringToFront(pf);
             } else {
@@ -519,7 +516,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 10, 10, pf);
             }
         } else if (src == fpuFrame) {
-            FPUFrame pf = (FPUFrame) objects.getObject(FPUFrame.class);
+            FPUFrame pf = (FPUFrame)objects.getObject(FPUFrame.class);
             if (pf != null) {
                 bringToFront(pf);
             } else {
@@ -527,7 +524,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 10, 10, pf);
             }
         } else if (src == physicalMemoryViewer) {
-            MemoryViewer mv = (MemoryViewer) objects.getObject(MemoryViewer.class);
+            MemoryViewer mv = (MemoryViewer)objects.getObject(MemoryViewer.class);
 
             if (mv != null) {
                 bringToFront(mv);
@@ -536,7 +533,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 360, 50, mv);
             }
         } else if (src == linearMemoryViewer) {
-            LinearMemoryViewer lmv = (LinearMemoryViewer) objects.getObject(LinearMemoryViewer.class);
+            LinearMemoryViewer lmv = (LinearMemoryViewer)objects.getObject(LinearMemoryViewer.class);
 
             if (lmv != null) {
                 bringToFront(lmv);
@@ -545,7 +542,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 360, 50, lmv);
             }
         } else if (src == breakpoints) {
-            BreakpointsFrame bp = (BreakpointsFrame) objects.getObject(BreakpointsFrame.class);
+            BreakpointsFrame bp = (BreakpointsFrame)objects.getObject(BreakpointsFrame.class);
             if (bp != null) {
                 bringToFront(bp);
             } else {
@@ -553,7 +550,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 10, 560, bp);
             }
         } else if (src == watchpoints) {
-            WatchpointsFrame wp = (WatchpointsFrame) objects.getObject(WatchpointsFrame.class);
+            WatchpointsFrame wp = (WatchpointsFrame)objects.getObject(WatchpointsFrame.class);
             if (wp != null) {
                 bringToFront(wp);
             } else {
@@ -561,7 +558,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 550, 560, wp);
             }
         } else if (src == traceFrame) {
-            ExecutionTraceFrame tr = (ExecutionTraceFrame) objects.getObject(ExecutionTraceFrame.class);
+            ExecutionTraceFrame tr = (ExecutionTraceFrame)objects.getObject(ExecutionTraceFrame.class);
             if (tr != null) {
                 bringToFront(tr);
             } else {
@@ -570,7 +567,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 30, 100, tr);
             }
         } else if (src == monitor) {
-            PCMonitorFrame m = (PCMonitorFrame) objects.getObject(PCMonitorFrame.class);
+            PCMonitorFrame m = (PCMonitorFrame)objects.getObject(PCMonitorFrame.class);
             if (m != null) {
                 bringToFront(m);
             } else {
@@ -599,7 +596,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 continue;
             }
             try {
-                ((PCListener) obj).executionStarted();
+                ((PCListener)obj).executionStarted();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -612,7 +609,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 continue;
             }
             try {
-                ((PCListener) obj).executionStopped();
+                ((PCListener)obj).executionStopped();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -625,7 +622,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 continue;
             }
             try {
-                ((PCListener) obj).pcDisposed();
+                ((PCListener)obj).pcDisposed();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -638,7 +635,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 continue;
             }
             try {
-                ((PCListener) obj).pcCreated();
+                ((PCListener)obj).pcCreated();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -651,7 +648,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 continue;
             }
             try {
-                ((PCListener) obj).refreshDetails();
+                ((PCListener)obj).refreshDetails();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -659,7 +656,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
     }
 
     public PC loadNewPC(PC pc) {
-        PC oldPC = (PC) objects.removeObject(PC.class);
+        PC oldPC = (PC)objects.removeObject(PC.class);
         if (oldPC != null) {
             notifyPCDisposed();
         }
@@ -684,7 +681,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
             }
         }
 
-        setTitle("JPC Debugger - Boot Device: " + ((DriveSet) pc.getComponent(DriveSet.class)).getBootDevice());
+        setTitle("JPC Debugger - Boot Device: " + ((DriveSet)pc.getComponent(DriveSet.class)).getBootDevice());
         objects.addObject(pc);
         objects.addObject(pc.getProcessor());
         objects.addObject(pc.getComponent(LinearAddressSpace.class));
@@ -707,8 +704,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         return pc;
     }
 
-    public PC createPC(String[] args) throws IOException
-    {
+    public PC createPC(String[] args) throws IOException {
         PC pc = new PC(new VirtualClock(), args);
         loadNewPC(pc);
 
@@ -721,9 +717,9 @@ public class JPC extends ApplicationFrame implements ActionListener {
         zin.getNextEntry();
         pc.loadState(zin);
         zin.closeEntry();
-        ((PCMonitorFrame) objects.getObject(PCMonitorFrame.class)).resizeDisplay();
+        ((PCMonitorFrame)objects.getObject(PCMonitorFrame.class)).resizeDisplay();
         zin.getNextEntry();
-        ((PCMonitorFrame) objects.getObject(PCMonitorFrame.class)).loadMonitorState(zin);
+        ((PCMonitorFrame)objects.getObject(PCMonitorFrame.class)).loadMonitorState(zin);
         zin.closeEntry();
         zin.close();
         return pc;
@@ -754,7 +750,8 @@ public class JPC extends ApplicationFrame implements ActionListener {
             long now = System.currentTimeMillis();
 
             double mhz = 1000.0 * (count - lastCount) / (now - lastTime) / 1000000;
-            setText("Decoded: (" + decoded + " x86 Instr) | Executed: (" + commaSeparate(count) + " x86 Instr) (" + executed + " Blocks) ("+commaSeparate(ticks)+" ticks) | " + fmt.format(mhz) + " MHz");
+            setText("Decoded: (" + decoded + " x86 Instr) | Executed: (" + commaSeparate(count) + " x86 Instr) (" + executed + " Blocks) ("
+                + commaSeparate(ticks) + " ticks) | " + fmt.format(mhz) + " MHz");
             lastCount = count;
             lastTime = now;
         }
@@ -769,13 +766,13 @@ public class JPC extends ApplicationFrame implements ActionListener {
             if (offset == 0) {
                 buf.append(s.substring(0, 3));
                 offset = 3;
-                for (int i = 0; i < (int) ((s.length() - 1) / 3); i++) {
+                for (int i = 0; i < (int)((s.length() - 1) / 3); i++) {
                     buf.append(",");
                     buf.append(s.substring(offset + 3 * i, offset + 3 * i + 3));
                 }
             } else {
                 buf.append(s.substring(0, offset));
-                for (int i = 0; i < (int) ((s.length() - 1) / 3); i++) {
+                for (int i = 0; i < (int)((s.length() - 1) / 3); i++) {
                     buf.append(",");
                     buf.append(s.substring(offset + 3 * i, offset + 3 * i + 3));
                 }
@@ -786,11 +783,12 @@ public class JPC extends ApplicationFrame implements ActionListener {
 
     public void createBlankHardDisk() {
         try {
-            JFileChooser chooser = (JFileChooser) objects.getObject(JFileChooser.class);
+            JFileChooser chooser = (JFileChooser)objects.getObject(JFileChooser.class);
             if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
                 return;
             }
-            String sizeString = JOptionPane.showInputDialog(this, "Enter the size in MB for the disk", "Disk Image Creation", JOptionPane.QUESTION_MESSAGE);
+            String sizeString = JOptionPane.showInputDialog(this, "Enter the size in MB for the disk", "Disk Image Creation",
+                JOptionPane.QUESTION_MESSAGE);
             if (sizeString == null) {
                 return;
             }
@@ -810,8 +808,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         return instance.get(cls);
     }
 
-    public static Object getPC()
-    {
+    public static Object getPC() {
         return instance.getObject(PC.class);
     }
 

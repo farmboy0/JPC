@@ -33,21 +33,18 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class mov_S_Ed extends Executable
-{
+public class mov_S_Ed extends Executable {
     public final int segIndex;
     final int op2Index;
 
-    public mov_S_Ed(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public mov_S_Ed(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         segIndex = Modrm.reg(modrm);
         op2Index = Modrm.Ed(modrm);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
         if (segIndex == Processor.CS_INDEX)
             throw ProcessorException.UNDEFINED;
@@ -55,13 +52,11 @@ public class mov_S_Ed extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

@@ -33,32 +33,27 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class hlt extends Executable
-{
+public class hlt extends Executable {
     final int blockLength;
     final int instructionLength;
 
-    public hlt(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public hlt(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
-        instructionLength = (int)input.getAddress()-eip;
-        blockLength = eip-blockStart+instructionLength;
+        instructionLength = (int)input.getAddress() - eip;
+        blockLength = eip - blockStart + instructionLength;
     }
 
-    public Branch execute(Processor cpu)
-    {
-            cpu.eip += blockLength;
-            cpu.waitForInterrupt();
+    public Branch execute(Processor cpu) {
+        cpu.eip += blockLength;
+        cpu.waitForInterrupt();
         return Branch.Jmp_Unknown;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return true;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

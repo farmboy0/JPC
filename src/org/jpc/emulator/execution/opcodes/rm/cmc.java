@@ -33,28 +33,23 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class cmc extends Executable
-{
+public class cmc extends Executable {
 
-    public cmc(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public cmc(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.cf = cpu.cf() ^ true;
         cpu.flagStatus &= NCF;
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

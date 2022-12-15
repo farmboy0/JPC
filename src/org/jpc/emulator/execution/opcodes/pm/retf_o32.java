@@ -33,20 +33,17 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class retf_o32 extends Executable
-{
+public class retf_o32 extends Executable {
     final int blockLength;
     final int instructionLength;
 
-    public retf_o32(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public retf_o32(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
-        instructionLength = (int)input.getAddress()-eip;
-        blockLength = eip-blockStart+instructionLength;
+        instructionLength = (int)input.getAddress() - eip;
+        blockLength = eip - blockStart + instructionLength;
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.eip += blockLength;
         if (cpu.ss.getDefaultSizeFlag())
             cpu.ret_far_o32_a32(0);
@@ -55,13 +52,11 @@ public class retf_o32 extends Executable
         return Branch.Ret;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return true;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

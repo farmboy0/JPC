@@ -43,13 +43,12 @@ import org.jpc.emulator.processor.Processor;
 import org.jpc.j2se.Option;
 
 /**
- * Class that emulates the 32bit physical address space of the machine.  Mappings
- * between address and blocks are performed either using a single stage lookup on
- * the RAM area for speed, or a two stage lookup for the rest of the address space
- * for space-efficiency.
+ * Class that emulates the 32bit physical address space of the machine. Mappings between address and
+ * blocks are performed either using a single stage lookup on the RAM area for speed, or a two stage
+ * lookup for the rest of the address space for space-efficiency.
  * <p>
- * All addresses are initially mapped to an inner class instance that returns
- * <code>-1</code> on all reads (as all data lines float high).
+ * All addresses are initially mapped to an inner class instance that returns <code>-1</code> on all
+ * reads (as all data lines float high).
  * @author Chris Dennis
  */
 public final class PhysicalAddressSpace extends AddressSpace implements HardwareComponent {
@@ -66,17 +65,16 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
     private static final int BOTTOM_INDEX_MASK = BOTTOM_INDEX_SIZE - 1;
     private static final Memory UNCONNECTED = new UnconnectedMemoryBlock();
     private boolean gateA20MaskState;
-    private Memory[] quickNonA20MaskedIndex,  quickA20MaskedIndex,  quickIndex;
-    private Memory[][] nonA20MaskedIndex,  a20MaskedIndex,  index;
+    private Memory[] quickNonA20MaskedIndex, quickA20MaskedIndex, quickIndex;
+    private Memory[][] nonA20MaskedIndex, a20MaskedIndex, index;
     private LinearAddressSpace linearAddr;
     private CodeBlockManager manager = null;
     public static final boolean track_page_writes = Option.track_writes.value();
     private Set<Integer> dirtyPages = new HashSet();
 
     /**
-     * Constructs an address space which is initially empty.  All addresses are 
-     * mapped to an instance of the inner class <code>UnconnectedMemoryBlock</code>
-     * whose data lines float high.
+     * Constructs an address space which is initially empty. All addresses are mapped to an instance of
+     * the inner class <code>UnconnectedMemoryBlock</code> whose data lines float high.
      */
     public PhysicalAddressSpace(CodeBlockManager manager) {
         this.manager = manager;
@@ -101,7 +99,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         byte[] temp = new byte[0];
         output.writeInt(quick.length);
         for (Memory block : quick) {
-            int blockLength = (int) block.getSize();
+            int blockLength = (int)block.getSize();
             if (block.isAllocated()) {
                 try {
                     if (block instanceof MapWrapper) {
@@ -135,7 +133,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
                     output.writeInt(0);
                     continue;
                 }
-                int blockLength = (int) block.getSize();
+                int blockLength = (int)block.getSize();
                 if (block.isAllocated()) {
                     try {
                         if (block instanceof MapWrapper) {
@@ -182,7 +180,8 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             Memory[] chunk = full[i];
             for (int j = 0; j < chunkLength; j++) {
                 int blockLength = input.readInt();
-                if (blockLength == 0) continue;
+                if (blockLength == 0)
+                    continue;
                 chunk[j] = new LazyCodeBlockMemory(blockLength, manager);
                 Memory block = chunk[j];
                 if (blockLength > 0) {
@@ -196,14 +195,12 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
     }
 
-    private void initialiseMemory()
-    {
+    private void initialiseMemory() {
         for (int i = 0; i < PC.SYS_RAM_SIZE; i += AddressSpace.BLOCK_SIZE) {
             mapMemory(i, new LazyCodeBlockMemory(AddressSpace.BLOCK_SIZE, manager));
         }
         // memory hole, the last 64 K of this is replaced by BIOS shadow ram if the BIOS ROM is 128 K or greater
-        for (int i = 0xD0000; i < 0xF0000; i += AddressSpace.BLOCK_SIZE)
-        {
+        for (int i = 0xD0000; i < 0xF0000; i += AddressSpace.BLOCK_SIZE) {
             mapMemory(i, new PhysicalAddressSpace.UnconnectedMemoryBlock());
         }
     }
@@ -218,44 +215,34 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         setGateA20State(input.readBoolean());
         loadMemory(input, quickNonA20MaskedIndex, nonA20MaskedIndex, manager);
 
-        for (int a = 0; a < TOP_INDEX_SIZE; a++)
-        {
+        for (int a = 0; a < TOP_INDEX_SIZE; a++) {
             if (nonA20MaskedIndex[a] == null)
                 continue;
 
             for (int b = 0; b < BOTTOM_INDEX_SIZE; b++)
-                try
-                {
+                try {
                     a20MaskedIndex[a][b] = nonA20MaskedIndex[a][b];
-                }
-                catch (NullPointerException n)
-                {
+                } catch (NullPointerException n) {
                     a20MaskedIndex[a] = new Memory[BOTTOM_INDEX_SIZE];
                     a20MaskedIndex[a][b] = nonA20MaskedIndex[a][b];
                 }
         }
 
-            //fill in a20 masked full array
-        for (int a = 0; a < TOP_INDEX_SIZE; a++)
-        {
+        //fill in a20 masked full array
+        for (int a = 0; a < TOP_INDEX_SIZE; a++) {
             if (nonA20MaskedIndex[a] == null)
                 continue;
-           
-            for (int b = 0; b < BOTTOM_INDEX_SIZE; b++)
-            {
+
+            for (int b = 0; b < BOTTOM_INDEX_SIZE; b++) {
                 int i = (a << BOTTOM_INDEX_BITS) | b;
 
-                if ((i & (GATEA20_MASK >>> INDEX_SHIFT)) == i)
-                {
+                if ((i & (GATEA20_MASK >>> INDEX_SHIFT)) == i) {
                     int modi = i | (~GATEA20_MASK >>> INDEX_SHIFT);
                     int moda = modi >>> BOTTOM_INDEX_BITS;
                     int modb = modi & BOTTOM_INDEX_BITS;
-                    try
-                    {
+                    try {
                         a20MaskedIndex[moda][modb] = nonA20MaskedIndex[a][b];
-                    } 
-                    catch (NullPointerException n)
-                    {
+                    } catch (NullPointerException n) {
                         a20MaskedIndex[moda] = new Memory[BOTTOM_INDEX_SIZE];
                         a20MaskedIndex[moda][modb] = nonA20MaskedIndex[a][b];
                     }
@@ -265,60 +252,50 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
 
         //fill in a20 masked quick array
         System.arraycopy(quickNonA20MaskedIndex, 0, quickA20MaskedIndex, 0, quickA20MaskedIndex.length);
-        for (int i = 0; i < QUICK_INDEX_SIZE; i++)
-        {
-            if ((i & (GATEA20_MASK >>> INDEX_SHIFT)) == i)
-            {
+        for (int i = 0; i < QUICK_INDEX_SIZE; i++) {
+            if ((i & (GATEA20_MASK >>> INDEX_SHIFT)) == i) {
                 quickA20MaskedIndex[i] = quickNonA20MaskedIndex[i];
                 int modi = i | (~GATEA20_MASK >>> INDEX_SHIFT);
                 quickA20MaskedIndex[modi] = quickNonA20MaskedIndex[i];
             }
         }
     }
-    
-    public void loadState(DataInput in) {}
 
-    public void setEpromWritable(int address, boolean w)
-    {
+    public void loadState(DataInput in) {
+    }
+
+    public void setEpromWritable(int address, boolean w) {
         Memory m = getMemoryBlockAt(address);
-        if (m instanceof EPROMMemory)
-        {
-            ((EPROMMemory) m).setWritable(w);
-        }
-        else
+        if (m instanceof EPROMMemory) {
+            ((EPROMMemory)m).setWritable(w);
+        } else
             System.out.printf("Tried to set non eprom writable at %x\n", address);
     }
 
-    public void setEpromReadable(int address, boolean r)
-    {
+    public void setEpromReadable(int address, boolean r) {
         Memory m = getMemoryBlockAt(address);
-        if (m instanceof EPROMMemory)
-        {
-            ((EPROMMemory) m).setReadable(r);
-        }
-        else
+        if (m instanceof EPROMMemory) {
+            ((EPROMMemory)m).setReadable(r);
+        } else
             System.out.printf("Tried to set non eprom readable at %x\n", address);
     }
 
-    public void setBIOSWritable(boolean w)
-    {
+    public void setBIOSWritable(boolean w) {
         // set Eprom at FFFE0000 writable or not
         for (int page = 0xFFFE0000; page < -1; page += 0x1000)
-            ((EPROMMemory) getMemoryBlockAt(page)).setWritable(w);
+            ((EPROMMemory)getMemoryBlockAt(page)).setWritable(w);
     }
 
-    public CodeBlockManager getCodeBlockManager()
-    {
+    public CodeBlockManager getCodeBlockManager() {
         return manager;
     }
 
     /**
      * Enables or disables the 20th address line.
      * <p>
-     * If set to <code>true</code> then the 20th address line is enabled and memory
-     * access works conventionally.  If set to <code>false</code> then the line 
-     * is held low, and therefore a memory wrapping effect emulating the behaviour
-     * of and original 8086 is acheived.
+     * If set to <code>true</code> then the 20th address line is enabled and memory access works
+     * conventionally. If set to <code>false</code> then the line is held low, and therefore a memory
+     * wrapping effect emulating the behaviour of and original 8086 is acheived.
      * @param value status of the A20 line.
      */
     public void setGateA20State(boolean value) {
@@ -337,25 +314,23 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
     }
 
     /**
-     * Returns the status of the 20th address line.<p>
+     * Returns the status of the 20th address line.
      * <p>
-     * A <code>true</code> return indicates the 20th address line is enabled.  A
-     * <code>false</code> return indicates that the 20th address line is held low
-     * to emulate an 8086 memory system.
+     * <p>
+     * A <code>true</code> return indicates the 20th address line is enabled. A <code>false</code>
+     * return indicates that the 20th address line is held low to emulate an 8086 memory system.
      * @return status of the A20 line.
      */
     public boolean getGateA20State() {
         return gateA20MaskState;
     }
 
-    private void logWrite(int address)
-    {
+    private void logWrite(int address) {
         if (track_page_writes)
             dirtyPages.add(address >>> 12);
     }
 
-    public void getDirtyPages(Set<Integer> res)
-    {
+    public void getDirtyPages(Set<Integer> res) {
         res.addAll(dirtyPages);
         dirtyPages.clear();
     }
@@ -364,60 +339,42 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         return getMemoryBlockAt(offset);
     }
 
-    public byte getByte(int offset)
-    {
+    public byte getByte(int offset) {
         return getReadMemoryBlockAt(offset).getByte(offset & BLOCK_MASK);
     }
 
-    public void setByte(int offset, byte data)
-    {
+    public void setByte(int offset, byte data) {
         getWriteMemoryBlockAt(offset).setByte(offset & BLOCK_MASK, data);
     }
 
-    public short getWord(int offset)
-    {
-        try
-        {
+    public short getWord(int offset) {
+        try {
             return getReadMemoryBlockAt(offset).getWord(offset & BLOCK_MASK);
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
+        } catch (ArrayIndexOutOfBoundsException e) {
             return super.getWord(offset);
         }
     }
 
-    public void setWord(int offset, short data)
-    {
-        try
-        {
+    public void setWord(int offset, short data) {
+        try {
             getWriteMemoryBlockAt(offset).setWord(offset & BLOCK_MASK, data);
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
+        } catch (ArrayIndexOutOfBoundsException e) {
             super.setWord(offset, data);
         }
     }
 
-    public int getDoubleWord(int offset)
-    {
-        try
-        {
+    public int getDoubleWord(int offset) {
+        try {
             return getReadMemoryBlockAt(offset).getDoubleWord(offset & BLOCK_MASK);
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
+        } catch (ArrayIndexOutOfBoundsException e) {
             return super.getDoubleWord(offset);
         }
     }
 
-    public void setDoubleWord(int offset, int data)
-    {
-        try
-        {
+    public void setDoubleWord(int offset, int data) {
+        try {
             getWriteMemoryBlockAt(offset).setDoubleWord(offset & BLOCK_MASK, data);
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
+        } catch (ArrayIndexOutOfBoundsException e) {
             super.setDoubleWord(offset, data);
         }
     }
@@ -437,14 +394,13 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
 //                } catch (Exception e) {}
 //            }
             return getReadMemoryBlockAt(offset).executeReal(cpu, offset & AddressSpace.BLOCK_MASK);
-        } catch (SpanningDecodeException e)
-        {
+        } catch (SpanningDecodeException e) {
             SpanningCodeBlock block = e.getBlock();
 //            if (PC.HISTORY)
 //                PC.logBlock(block.decode(cpu));
             int length = block.decode(cpu).getX86Length();
             // add block to subsequent page to allow invalidation upon a write
-            getReadMemoryBlockAt(offset+0x1000).addSpanningBlock(block, length-(0x1000-(offset & AddressSpace.BLOCK_MASK)));
+            getReadMemoryBlockAt(offset + 0x1000).addSpanningBlock(block, length - (0x1000 - (offset & AddressSpace.BLOCK_MASK)));
             return getReadMemoryBlockAt(offset).executeReal(cpu, offset & AddressSpace.BLOCK_MASK);
         }
     }
@@ -501,14 +457,14 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             memory = mem;
         }
 
-        public void lock(int addr)
-        {}
+        public void lock(int addr) {
+        }
 
-        public void unlock(int addr)
-        {}
+        public void unlock(int addr) {
+        }
 
-        public void addSpanningBlock(SpanningCodeBlock b, int lengthRemaining)
-        {}
+        public void addSpanningBlock(SpanningCodeBlock b, int lengthRemaining) {
+        }
 
         public long getSize() {
             return BLOCK_SIZE;
@@ -519,7 +475,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
 
         public void clear() {
-            memory.clear(baseAddress, (int) getSize());
+            memory.clear(baseAddress, (int)getSize());
         }
 
         public void clear(int start, int length) {
@@ -644,19 +600,21 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
     /**
      * Clears all mapping in the given address range.
      * <p>
-     * The corresponding blocks are pointed to an unconnected memory block whose
-     * data lines all float high.  If the supplied range is not of <code>BLOCK_SIZE</code>
-     * granularity then an <code>IllegalStateException</code> is thrown.
+     * The corresponding blocks are pointed to an unconnected memory block whose data lines all float
+     * high. If the supplied range is not of <code>BLOCK_SIZE</code> granularity then an
+     * <code>IllegalStateException</code> is thrown.
      * @param start inclusive lower bound
      * @param length number of addresses to clear
      * @throws java.lang.IllegalStateException if range is not of <code>BLOCK_SIZE</code> granularity
      */
     public void unmap(int start, int length) {
         if ((start % BLOCK_SIZE) != 0) {
-            throw new IllegalStateException("Cannot deallocate memory starting at " + Integer.toHexString(start) + "; this is not block aligned at " + BLOCK_SIZE + " boundaries");
+            throw new IllegalStateException("Cannot deallocate memory starting at " + Integer.toHexString(start)
+                + "; this is not block aligned at " + BLOCK_SIZE + " boundaries");
         }
         if ((length % BLOCK_SIZE) != 0) {
-            throw new IllegalStateException("Cannot deallocate memory in partial blocks. " + length + " is not a multiple of " + BLOCK_SIZE);
+            throw new IllegalStateException(
+                "Cannot deallocate memory in partial blocks. " + length + " is not a multiple of " + BLOCK_SIZE);
         }
         for (int i = start; i < start + length; i += BLOCK_SIZE) {
             setMemoryBlockAt(i, UNCONNECTED);
@@ -666,9 +624,9 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
     /**
      * Maps the given address range to the <code>underlying</code> object.
      * <p>
-     * This will throw <code>IllegalStateException</code> if either the region is
-     * not of <code>BLOCK_SIZE</code> granularity, or <code>underlying</code> is
-     * not as long as the specified region.
+     * This will throw <code>IllegalStateException</code> if either the region is not of
+     * <code>BLOCK_SIZE</code> granularity, or <code>underlying</code> is not as long as the specified
+     * region.
      * @param underlying memory block to be mapped.
      * @param start inclusive start address.
      * @param length size of mapped region.
@@ -676,10 +634,12 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
      */
     public void mapMemoryRegion(Memory underlying, int start, int length) {
         if (underlying.getSize() < length) {
-            throw new IllegalStateException("Underlying memory (length=" + underlying.getSize() + ") is too short for mapping into region " + length + " bytes long");
+            throw new IllegalStateException(
+                "Underlying memory (length=" + underlying.getSize() + ") is too short for mapping into region " + length + " bytes long");
         }
         if ((start % BLOCK_SIZE) != 0) {
-            throw new IllegalStateException("Cannot map memory starting at " + Integer.toHexString(start) + "; this is not aligned to " + BLOCK_SIZE + " blocks");
+            throw new IllegalStateException(
+                "Cannot map memory starting at " + Integer.toHexString(start) + "; this is not aligned to " + BLOCK_SIZE + " blocks");
         }
         if ((length % BLOCK_SIZE) != 0) {
             throw new IllegalStateException("Cannot map memory in partial blocks: " + length + " is not a multiple of " + BLOCK_SIZE);
@@ -687,28 +647,28 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         unmap(start, length);
         if (Option.log_memory_maps.isSet())
             if (((start & 0xffffffffL) > PC.SYS_RAM_SIZE) || !(underlying instanceof LazyCodeBlockMemory))
-                System.out.printf("Mapping %s into memory from %x to %x\n", underlying, start, start+length);
+                System.out.printf("Mapping %s into memory from %x to %x\n", underlying, start, start + length);
 
         long s = 0xFFFFFFFFl & start;
         for (long i = s; i < s + length; i += BLOCK_SIZE) {
-            Memory w = new MapWrapper(underlying, (int) (i - s));
-            setMemoryBlockAt((int) i, w);
+            Memory w = new MapWrapper(underlying, (int)(i - s));
+            setMemoryBlockAt((int)i, w);
         }
     }
 
     /**
      * Maps the given block into the given address.
      * <p>
-     * The supplied block must be <code>BLOCK_SIZE</code> long, and the start
-     * address must be <code>BLOCK_SIZE</code> granularity otherwise an
-     * <code>IllegalStateException</code> is thrown.
+     * The supplied block must be <code>BLOCK_SIZE</code> long, and the start address must be
+     * <code>BLOCK_SIZE</code> granularity otherwise an <code>IllegalStateException</code> is thrown.
      * @param start address for beginning of <code>block</code>.
      * @param block object to be mapped.
      * @throws java.lang.IllegalStateException if there is an error in the mapping.
      */
     public void mapMemory(int start, Memory block) {
         if ((start % BLOCK_SIZE) != 0) {
-            throw new IllegalStateException("Cannot allocate memory starting at " + Integer.toHexString(start) + "; this is not aligned to " + BLOCK_SIZE + " bytes");
+            throw new IllegalStateException(
+                "Cannot allocate memory starting at " + Integer.toHexString(start) + "; this is not aligned to " + BLOCK_SIZE + " bytes");
         }
         if (block.getSize() != BLOCK_SIZE) {
             throw new IllegalStateException("Can only allocate memory in blocks of " + BLOCK_SIZE);
@@ -716,10 +676,10 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         unmap(start, BLOCK_SIZE);
         if (Option.log_memory_maps.isSet())
             if (block instanceof EPROMMemory)
-                System.out.printf("Mapping %s into memory from %x to %x\n", block, start, start+BLOCK_SIZE);
+                System.out.printf("Mapping %s into memory from %x to %x\n", block, start, start + BLOCK_SIZE);
 
         long s = 0xFFFFFFFFl & start;
-        setMemoryBlockAt((int) s, block);
+        setMemoryBlockAt((int)s, block);
     }
 
     public static final class UnconnectedMemoryBlock implements Memory {
@@ -728,17 +688,23 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             return false;
         }
 
-        public void lock(int addr) {}
+        public void lock(int addr) {
+        }
 
-        public void unlock(int addr) {}
+        public void unlock(int addr) {
+        }
 
-        public void addSpanningBlock(SpanningCodeBlock b, int lengthRemaining) {}
+        public void addSpanningBlock(SpanningCodeBlock b, int lengthRemaining) {
+        }
 
-        public void clear() {}
+        public void clear() {
+        }
 
-        public void clear(int start, int length) {}
+        public void clear(int start, int length) {
+        }
 
-        public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {}
+        public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {
+        }
 
         public void copyArrayIntoContents(int address, byte[] buffer, int off, int len) {
             throw new IllegalStateException("Cannot load array into unconnected memory block");
@@ -749,11 +715,11 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
 
         public byte getByte(int offset) {
-            return (byte) -1;
+            return (byte)-1;
         }
 
         public short getWord(int offset) {
-            return (short) -1;
+            return (short)-1;
         }
 
         public int getDoubleWord(int offset) {
@@ -772,17 +738,23 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             return -1l;
         }
 
-        public void setByte(int offset, byte data) {}
+        public void setByte(int offset, byte data) {
+        }
 
-        public void setWord(int offset, short data) {}
+        public void setWord(int offset, short data) {
+        }
 
-        public void setDoubleWord(int offset, int data) {}
+        public void setDoubleWord(int offset, int data) {
+        }
 
-        public void setQuadWord(int offset, long data) {}
+        public void setQuadWord(int offset, long data) {
+        }
 
-        public void setLowerDoubleQuadWord(int offset, long data) {}
+        public void setLowerDoubleQuadWord(int offset, long data) {
+        }
 
-        public void setUpperDoubleQuadWord(int offset, long data) {}
+        public void setUpperDoubleQuadWord(int offset, long data) {
+        }
 
         public int executeReal(Processor cpu, int offset) {
             throw new IllegalStateException("Trying to execute in Unconnected Block @ 0x" + Integer.toHexString(offset));
@@ -823,7 +795,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
 
     public void acceptComponent(HardwareComponent component) {
         if (component instanceof LinearAddressSpace) {
-            linearAddr = (LinearAddressSpace) component;
+            linearAddr = (LinearAddressSpace)component;
         }
     }
 
@@ -831,8 +803,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         return "Physical Pointer Bus";
     }
 
-    public Integer getPage(Integer addr, byte[] page)
-    {
+    public Integer getPage(Integer addr, byte[] page) {
         Memory block = getMemoryBlockAt(addr);
         if (block instanceof MapWrapper)
             return 0;
@@ -840,16 +811,14 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         return 4096;
     }
 
-    public Integer setPage(Integer addr, byte[] page)
-    {
+    public Integer setPage(Integer addr, byte[] page) {
         Memory block = getMemoryBlockAt(addr);
         if (block instanceof MapWrapper)
             return 0;
         try {
             block.copyArrayIntoContents(0, page, 0, 4096);
             return 4096;
-        } catch (IllegalStateException e)
-        {
+        } catch (IllegalStateException e) {
             System.out.printf("Tried to write to unconnected memory at %x.\n", addr);
             return 0;
         }

@@ -33,29 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class out_o16_Ib_eAX extends Executable
-{
+public class out_o16_Ib_eAX extends Executable {
     final int immb;
 
-    public out_o16_Ib_eAX(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public out_o16_Ib_eAX(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         immb = Modrm.Ib(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        cpu.ioports.ioPortWrite16(0xFF&immb, 0xFFFF&cpu.r_eax.get16());
+    public Branch execute(Processor cpu) {
+        cpu.ioports.ioPortWrite16(0xFF & immb, 0xFFFF & cpu.r_eax.get16());
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

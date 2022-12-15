@@ -33,33 +33,27 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class cmpxchg8b_M extends Executable
-{
+public class cmpxchg8b_M extends Executable {
     final Pointer op1;
 
-    public cmpxchg8b_M(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public cmpxchg8b_M(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        long val1 = cpu.r_edx.get32()& 0xffffffffL;
+    public Branch execute(Processor cpu) {
+        long val1 = cpu.r_edx.get32() & 0xffffffffL;
         val1 = val1 << 32;
         val1 |= (0xffffffffL & cpu.r_eax.get32());
         long val2 = cpu.linearMemory.getQuadWord(op1.get(cpu));
-        if (val1 == val2)
-        {
+        if (val1 == val2) {
             cpu.zf(true);
-            long res = cpu.r_ecx.get32()& 0xffffffffL;
+            long res = cpu.r_ecx.get32() & 0xffffffffL;
             res = res << 32;
             res |= (0xffffffffL & cpu.r_ebx.get32());
             cpu.linearMemory.setQuadWord(op1.get(cpu), res);
-        }
-        else
-        {
+        } else {
             cpu.zf(false);
             cpu.r_eax.set32((int)val2);
             cpu.r_edx.set32((int)(val2 >> 32));
@@ -67,13 +61,11 @@ public class cmpxchg8b_M extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

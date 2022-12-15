@@ -33,16 +33,13 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class inc_o16_eBX extends Executable
-{
+public class inc_o16_eBX extends Executable {
 
-    public inc_o16_eBX(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public inc_o16_eBX(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.cf = Processor.getCarryFlag(cpu.flagStatus, cpu.cf, cpu.flagOp1, cpu.flagOp2, cpu.flagResult, cpu.flagIns);
         cpu.flagOp1 = (short)cpu.r_ebx.get16();
         cpu.flagOp2 = 1;
@@ -53,13 +50,11 @@ public class inc_o16_eBX extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

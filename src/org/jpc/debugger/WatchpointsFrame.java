@@ -45,8 +45,7 @@ import javax.swing.*;
 import org.jpc.debugger.util.*;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
 
-public class WatchpointsFrame extends UtilityFrame implements PCListener
-{
+public class WatchpointsFrame extends UtilityFrame implements PCListener {
     public static final String WATCHPOINT_FILE = "watchpoints.jpc";
     public static final long WATCHPOINT_MAGIC = 0x81057FAB7272F11l;
 
@@ -59,16 +58,15 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
 
     private JCheckBoxMenuItem ignoreWP, watchPrimary;
 
-    public WatchpointsFrame()
-    {
+    public WatchpointsFrame() {
         super("Watchpoints");
 
         watchpointFileName = WATCHPOINT_FILE;
         watchpoints = new Vector();
         model = new WPModel();
         edited = false;
-        
-        addressSpace=(AddressSpace) JPC.getObject(PhysicalAddressSpace.class);
+
+        addressSpace = (AddressSpace)JPC.getObject(PhysicalAddressSpace.class);
 
         wpTable = new JTable(model);
         model.setupColumnWidths(wpTable);
@@ -87,11 +85,11 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
 
         JMenu options = new JMenu("Options");
         options.add("Set Watchpoint").addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt)
-            {
+            public void actionPerformed(ActionEvent evt) {
                 try {
-                    String input = JOptionPane.showInputDialog(WatchpointsFrame.this, "Enter the address (in Hex) for the watchpoint: ", "Watchpoint", JOptionPane.QUESTION_MESSAGE);
-                    int address = (int) Long.parseLong(input.toLowerCase(), 16);
+                    String input = JOptionPane.showInputDialog(WatchpointsFrame.this, "Enter the address (in Hex) for the watchpoint: ",
+                        "Watchpoint", JOptionPane.QUESTION_MESSAGE);
+                    int address = (int)Long.parseLong(input.toLowerCase(), 16);
                     setWatchpoint(address);
                 } catch (Exception e) {
                 }
@@ -99,12 +97,11 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         });
         options.addSeparator();
         options.add("Remove All Watchpoints").addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt)
-            {
+            public void actionPerformed(ActionEvent evt) {
                 removeAllWatchpoints();
             }
         });
-        
+
         options.addSeparator();
         ignoreWP = new JCheckBoxMenuItem("Ignore Watchpoints");
         options.add(ignoreWP);
@@ -121,41 +118,35 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         loadWatchpoints();
     }
 
-    public boolean WatchPrimaryOnly()
-    {
+    public boolean WatchPrimaryOnly() {
         return watchPrimary.getState();
     }
 
-    public boolean ignoreWatchpoints()
-    {
+    public boolean ignoreWatchpoints() {
         return ignoreWP.getState();
     }
 
-    public boolean isEdited()
-    {
+    public boolean isEdited() {
         return edited;
     }
 
-    public void frameClosed()
-    {
-        if (edited)
-        {
-            if (JOptionPane.showConfirmDialog(this, "Do you want to save the changes to the Watchpoints?", "Save Watchpoints", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+    public void frameClosed() {
+        if (edited) {
+            if (JOptionPane.showConfirmDialog(this, "Do you want to save the changes to the Watchpoints?", "Save Watchpoints",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
                 saveWatchpoints();
             edited = false;
         }
-        
+
         JPC.getInstance().objects().removeObject(this);
     }
 
-    class WPFileMenu extends JMenu implements ActionListener
-    {
+    class WPFileMenu extends JMenu implements ActionListener {
         private JMenuItem load, save, saveAs, importWP;
 
-        WPFileMenu()
-        {
+        WPFileMenu() {
             super("File");
-            
+
             load = add("Load Watchpoints");
             load.addActionListener(this);
             save = add("Save Watchpoints");
@@ -166,9 +157,8 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
             importWP = add("Import Watchpoints");
             importWP.addActionListener(this);
         }
-        
-        private String deriveWPFileName(String name)
-        {
+
+        private String deriveWPFileName(String name) {
             String nm = name.toLowerCase();
             if (nm.endsWith(".jpc"))
                 return name;
@@ -177,66 +167,53 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
             if (dot < 0)
                 dot = nm.length();
 
-            return name.substring(0, dot)+".jpc";
+            return name.substring(0, dot) + ".jpc";
         }
-        
-        public void actionPerformed(ActionEvent evt)
-        {
-            JFileChooser chooser = (JFileChooser) JPC.getObject(JFileChooser.class);
-            if (evt.getSource() == load)
-            {
+
+        public void actionPerformed(ActionEvent evt) {
+            JFileChooser chooser = (JFileChooser)JPC.getObject(JFileChooser.class);
+            if (evt.getSource() == load) {
                 if (chooser.showOpenDialog(JPC.getInstance()) != JFileChooser.APPROVE_OPTION)
                     return;
-                
+
                 watchpointFileName = chooser.getSelectedFile().getAbsolutePath();
                 removeAllWatchpoints();
                 loadWatchpoints();
-            }
-            else if (evt.getSource() == save)
-            {
+            } else if (evt.getSource() == save) {
                 saveWatchpoints();
-            }
-            else if (evt.getSource() == importWP)
-            {
+            } else if (evt.getSource() == importWP) {
                 if (chooser.showOpenDialog(JPC.getInstance()) != JFileChooser.APPROVE_OPTION)
                     return;
-                
+
                 removeAllWatchpoints();
                 String fileName = chooser.getSelectedFile().getAbsolutePath();
                 importWatchpoints(fileName, false);
-            }
-            else if (evt.getSource() == saveAs)
-            {
+            } else if (evt.getSource() == saveAs) {
                 if (chooser.showSaveDialog(JPC.getInstance()) != JFileChooser.APPROVE_OPTION)
                     return;
-                
+
                 watchpointFileName = chooser.getSelectedFile().getAbsolutePath();
                 saveWatchpoints();
             }
         }
     }
-    
-    class Deleter extends AbstractAction
-    {
-        public void actionPerformed(ActionEvent evt)
-        {
+
+    class Deleter extends AbstractAction {
+        public void actionPerformed(ActionEvent evt) {
             deleteWatchpoint(wpTable.getSelectedRow());
         }
     }
-    
-    public boolean isWatchpoint(int address)
-    {
+
+    public boolean isWatchpoint(int address) {
         Watchpoint wp = new Watchpoint(address);
         return watchpoints.contains(wp);
     }
 
-    public void setWatchpoint(int address)
-    {
+    public void setWatchpoint(int address) {
         setWatchpoint(address, false);
     }
 
-    public void setWatchpoint(int address, boolean isPrimary)
-    {
+    public void setWatchpoint(int address, boolean isPrimary) {
         Watchpoint wp = new Watchpoint(address);
         int idx = watchpoints.indexOf(wp);
         if (idx < 0)
@@ -247,19 +224,17 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         if (isPrimary)
             wp.isPrimary = isPrimary;
 
-        edited = true; 
+        edited = true;
         JPC.getInstance().refresh();
     }
 
-    public void removeAllWatchpoints()
-    {
+    public void removeAllWatchpoints() {
         watchpoints.clear();
         edited = true;
         JPC.getInstance().refresh();
     }
 
-    public void removeWatchpoint(int address)
-    {
+    public void removeWatchpoint(int address) {
         Watchpoint wp = new Watchpoint(address);
         int idx = watchpoints.indexOf(wp);
         if (idx < 0)
@@ -268,22 +243,18 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         deleteWatchpoint(idx);
     }
 
-    public Watchpoint checkForWatch()
-    {
+    public Watchpoint checkForWatch() {
         return checkForWatch(watchPrimary.getState());
     }
 
-    public Watchpoint checkForWatch(boolean isPrimary)
-    {
+    public Watchpoint checkForWatch(boolean isPrimary) {
         if (ignoreWP.getState())
             return null;
-
 
         for (Watchpoint wp : watchpoints) {
             byte b = addressSpace.getByte(wp.address);
             //if ((b != (byte) 0xff) && (b != 0) && (wp.value!=b))
-            if (wp.value!=b)
-            {
+            if (wp.value != b) {
                 if (isPrimary && !wp.isPrimary)
                     continue;
 
@@ -294,8 +265,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         return null;
     }
 
-    private void deleteWatchpoint(int index)
-    {
+    private void deleteWatchpoint(int index) {
         try {
             watchpoints.remove(index);
         } catch (IndexOutOfBoundsException e) {
@@ -305,8 +275,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         JPC.getInstance().refresh();
     }
 
-    public class Watchpoint implements Comparable<Watchpoint>
-    {
+    public class Watchpoint implements Comparable<Watchpoint> {
         private int address;
         private int value;
         private boolean isPrimary;
@@ -314,38 +283,32 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         private boolean watchForValue;
         private byte watchValue;
 
-        Watchpoint(int addr)
-        {
+        Watchpoint(int addr) {
             this(addr, false, (byte)0, false);
         }
 
-        public Watchpoint(String name, int addr, byte watchValue, boolean watchForValue)
-        {
+        public Watchpoint(String name, int addr, byte watchValue, boolean watchForValue) {
             this(addr, false, watchValue, watchForValue);
             this.name = name;
         }
-        
-        Watchpoint(int addr, boolean primary, byte watchValue, boolean watchForValue)
-        {
+
+        Watchpoint(int addr, boolean primary, byte watchValue, boolean watchForValue) {
             address = addr;
             isPrimary = primary;
             name = "";
-            value=addressSpace.getByte(addr);
+            value = addressSpace.getByte(addr);
             this.watchValue = watchValue;
             this.watchForValue = watchForValue;
         }
 
-        
-        public boolean equals(Object another)
-        {
+        public boolean equals(Object another) {
             if (!(another instanceof Watchpoint))
                 return false;
 
-            return (address == ((Watchpoint) another).address) && (watchValue == ((Watchpoint) another).watchValue);
+            return (address == ((Watchpoint)another).address) && (watchValue == ((Watchpoint)another).watchValue);
         }
 
-        public int compareTo(Watchpoint wp)
-        {
+        public int compareTo(Watchpoint wp) {
             if (address != wp.address)
                 return address - wp.address;
             if (watchValue == wp.watchValue)
@@ -355,93 +318,76 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
             return 1;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
-        
-        public int getAddress()
-        {
+
+        public int getAddress() {
             return address;
         }
 
-        public int getValue()
-        {
+        public int getValue() {
             return value;
         }
- 
-        public void updateValue()
-        {
-            value=addressSpace.getByte(address);
+
+        public void updateValue() {
+            value = addressSpace.getByte(address);
         }
 
-        public boolean isWatchingForValue()
-        {
+        public boolean isWatchingForValue() {
             return watchForValue;
         }
 
-        public byte getWatchTarget()
-        {
+        public byte getWatchTarget() {
             return watchValue;
         }
 
-        public boolean isPrimary()
-        {
+        public boolean isPrimary() {
             return isPrimary;
         }
     }
 
-    class WPModel extends BasicTableModel
-    {
-        WPModel()
-        {
-            super(new String[]{"Address", "Name", "Primary", "Watch target", "Watch for value"}, new int[]{80, 250, 70, 90, 90});
+    class WPModel extends BasicTableModel {
+        WPModel() {
+            super(new String[] { "Address", "Name", "Primary", "Watch target", "Watch for value" }, new int[] { 80, 250, 70, 90, 90 });
         }
-        
-        public int getRowCount()
-        {
+
+        public int getRowCount() {
             return watchpoints.size();
         }
 
-        public boolean isCellEditable(int row, int column)
-        {
+        public boolean isCellEditable(int row, int column) {
             return true;
         }
 
-        public Class getColumnClass(int col)
-        {
+        public Class getColumnClass(int col) {
             if ((col == 2) || (col == 4))
                 return Boolean.class;
             return String.class;
         }
 
-        public void setValueAt(Object obj, int row, int column)
-        {
+        public void setValueAt(Object obj, int row, int column) {
             Watchpoint wp = watchpoints.get(row);
 
-            if (column == 0)
-            {
-                try
-                {
-                    int addr = (int) Long.parseLong(obj.toString().toLowerCase(), 16);
+            if (column == 0) {
+                try {
+                    int addr = (int)Long.parseLong(obj.toString().toLowerCase(), 16);
                     wp.address = addr;
+                } catch (Exception e) {
                 }
-                catch (Exception e) {}
-            }
-            else if (column == 2)
-                wp.isPrimary = ((Boolean) obj).booleanValue();
+            } else if (column == 2)
+                wp.isPrimary = ((Boolean)obj).booleanValue();
             else if (column == 1)
                 wp.name = obj.toString();
             else if (column == 3)
                 wp.watchValue = (byte)Integer.parseInt(obj.toString(), 16);
             else if (column == 4)
-                wp.watchForValue = ((Boolean) obj).booleanValue();
+                wp.watchForValue = ((Boolean)obj).booleanValue();
 
             int selected = sortWatchpoints(row);
             JPC.getInstance().refresh();
 
-            if (selected >= 0)
-            {
+            if (selected >= 0) {
                 wpTable.setRowSelectionInterval(selected, selected);
                 Rectangle rect = wpTable.getCellRect(selected, 0, true);
                 wpTable.scrollRectToVisible(rect);
@@ -449,12 +395,10 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
             edited = true;
         }
 
-        public Object getValueAt(int row, int column)
-        {
+        public Object getValueAt(int row, int column) {
             Watchpoint wp = watchpoints.get(row);
 
-            switch (column)
-            {
+            switch (column) {
             case 0:
                 return MemoryViewPanel.zeroPadHex(wp.address, 8);
             case 1:
@@ -471,8 +415,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         }
     }
 
-    private int sortWatchpoints(int selectedRow)
-    {
+    private int sortWatchpoints(int selectedRow) {
         Watchpoint selected = null;
         if (selectedRow >= 0)
             selected = watchpoints.get(selectedRow);
@@ -481,17 +424,16 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
 
         if (selected == null)
             return 0;
-        
+
         for (int i = 0; i < watchpoints.size(); i++) {
             if (watchpoints.get(i) == selected)
                 return i;
         }
-        
+
         return 0;
     }
 
-    public boolean importWatchpoints(String fileName, boolean ignoreDots)
-    {
+    public boolean importWatchpoints(String fileName, boolean ignoreDots) {
         List<Watchpoint> loaded = new ArrayList<Watchpoint>();
 
         File f = new File(fileName);
@@ -514,13 +456,12 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
                     String name = elements[1];
                     if (name.startsWith(".") && ignoreDots)
                         continue;
-                    
+
                     int addr = Integer.parseInt(elements[0], 16);
-                    byte watchValue = (byte) 0;
+                    byte watchValue = (byte)0;
                     boolean watchForValue = false;
-                    if (elements.length > 2)
-                    {
-                        watchValue = (byte) Integer.parseInt(elements[2], 16);
+                    if (elements.length > 2) {
+                        watchValue = (byte)Integer.parseInt(elements[2], 16);
                         watchForValue = true;
                     }
 
@@ -545,25 +486,22 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
         return true;
     }
 
-    public void loadWatchpoints()
-    {
+    public void loadWatchpoints() {
         FileInputStream fin = null;
         watchpoints.clear();
 
-        try
-        {
+        try {
             File f = new File(watchpointFileName);
             if (!f.exists())
                 return;
 
             fin = new FileInputStream(f);
             DataInputStream din = new DataInputStream(fin);
-            
+
             if (din.readLong() != WATCHPOINT_MAGIC)
                 throw new IOException("Magic number mismatch");
 
-            while (true)
-            {
+            while (true) {
                 int addr = din.readInt();
                 boolean primary = din.readBoolean();
                 String name = din.readUTF();
@@ -574,35 +512,26 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
                 wp.name = name;
                 watchpoints.add(wp);
             }
-        }
-        catch (EOFException e) 
-        {
-            setTitle("Watchpoints: "+watchpointFileName);
-        }
-        catch (Exception e)
-        {
+        } catch (EOFException e) {
+            setTitle("Watchpoints: " + watchpointFileName);
+        } catch (Exception e) {
             System.out.println("Warning: failed to load watchpoints");
             e.printStackTrace();
-            setTitle("Watchpoints: "+watchpointFileName+" ERROR");
-            alert("Error loading watchpoints: "+e, JOptionPane.ERROR_MESSAGE);
-        }
-        finally
-        {
-            try
-            {
+            setTitle("Watchpoints: " + watchpointFileName + " ERROR");
+            alert("Error loading watchpoints: " + e, JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
                 fin.close();
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
             sortWatchpoints(-1);
             edited = false;
-        }       
+        }
     }
 
-    public void saveWatchpoints()
-    {
+    public void saveWatchpoints() {
         FileOutputStream out = null;
-        try
-        {
+        try {
             out = new FileOutputStream(watchpointFileName);
             DataOutputStream dout = new DataOutputStream(out);
             dout.writeLong(WATCHPOINT_MAGIC);
@@ -614,37 +543,35 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener
                 dout.writeByte(wp.watchValue);
                 dout.writeBoolean(wp.watchForValue);
             }
-            
-            setTitle("Watchpoints: "+watchpointFileName);
-        }
-        catch (Exception e)
-        {
+
+            setTitle("Watchpoints: " + watchpointFileName);
+        } catch (Exception e) {
             System.out.println("Warning: failed to save watchpoints");
             e.printStackTrace();
-            setTitle("Watchpoints: "+watchpointFileName+" ERROR");
-            alert("Error saving watchpoints: "+e, JOptionPane.ERROR_MESSAGE);
-        }
-        finally
-        {
-            try
-            {
+            setTitle("Watchpoints: " + watchpointFileName + " ERROR");
+            alert("Error saving watchpoints: " + e, JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
                 out.close();
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
             edited = false;
-        } 
+        }
     }
 
-    public void pcCreated() {}
+    public void pcCreated() {
+    }
 
-    public void pcDisposed() {}
-    
-    public void executionStarted() {}
+    public void pcDisposed() {
+    }
 
-    public void executionStopped() {}
+    public void executionStarted() {
+    }
 
-    public void refreshDetails()
-    {
+    public void executionStopped() {
+    }
+
+    public void refreshDetails() {
         model.fireTableDataChanged();
     }
 }

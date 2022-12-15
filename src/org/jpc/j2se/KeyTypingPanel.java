@@ -40,22 +40,18 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 /**
- * 
  * @author Rhys Newman
  */
-public class KeyTypingPanel extends JPanel
-{
+public class KeyTypingPanel extends JPanel {
     private PCMonitor monitor;
 
-    public KeyTypingPanel(PCMonitor m)
-    {
+    public KeyTypingPanel(PCMonitor m) {
         super(new BorderLayout(10, 10));
         monitor = m;
 
         JPanel p1 = new JPanel(new GridLayout(1, 0, 10, 10));
 
-        KeyPress[] l1 = new KeyPress[]
-        {
+        KeyPress[] l1 = new KeyPress[] {
             new KeyPress(" : ", KeyEvent.VK_SEMICOLON, true),
             new KeyPress(" \\ ", KeyEvent.VK_BACK_SLASH),
             new KeyPress(" / ", KeyEvent.VK_SLASH),
@@ -68,13 +64,11 @@ public class KeyTypingPanel extends JPanel
             new KeyPress(" , ", KeyEvent.VK_COMMA),
             new KeyPress(" . ", KeyEvent.VK_PERIOD),
             new KeyPress(" ' ", KeyEvent.VK_QUOTE),
-            new KeyPress(" \" ", KeyEvent.VK_QUOTE, true)
-        };
+            new KeyPress(" \" ", KeyEvent.VK_QUOTE, true) };
 
         p1.add(new KeyPanel("Miscellaneous Keys", l1));
 
-        KeyPress[] l2 = new KeyPress[]
-        {
+        KeyPress[] l2 = new KeyPress[] {
             new KeyPress(" F1 ", KeyEvent.VK_F1),
             new KeyPress(" F2 ", KeyEvent.VK_F2),
             new KeyPress(" F3 ", KeyEvent.VK_F3),
@@ -86,8 +80,7 @@ public class KeyTypingPanel extends JPanel
             new KeyPress(" F9 ", KeyEvent.VK_F9),
             new KeyPress(" F10 ", KeyEvent.VK_F10),
             new KeyPress(" F11 ", KeyEvent.VK_F11),
-            new KeyPress(" F12 ", KeyEvent.VK_F12)
-        };
+            new KeyPress(" F12 ", KeyEvent.VK_F12) };
 
         p1.add(new KeyPanel("Function Keys", l2));
         p1.add(new MouseSensitivityPanel());
@@ -95,19 +88,18 @@ public class KeyTypingPanel extends JPanel
 
         //JLabel help = new JLabel("Non-US Keyboards: Select character from drop-down menu and press 'Type Key'");
         //if (monitor.mouseCaptureEnabled())
-        JLabel help = new JLabel("Non-US Keyboards, use overrides above. Mouse GRAB: Dbl Click left button. RELEASE: Dbl click right button");
+        JLabel help = new JLabel(
+            "Non-US Keyboards, use overrides above. Mouse GRAB: Dbl Click left button. RELEASE: Dbl click right button");
 
         help.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
         help.setForeground(Color.blue);
         add("South", help);
     }
 
-    class KeyPanel extends JPanel implements ActionListener
-    {
+    class KeyPanel extends JPanel implements ActionListener {
         JComboBox choices;
 
-        KeyPanel(String title, KeyPress[] keys)
-        {
+        KeyPanel(String title, KeyPress[] keys) {
             super(new BorderLayout(10, 10));
 
             choices = new JComboBox(keys);
@@ -122,36 +114,31 @@ public class KeyTypingPanel extends JPanel
             type.addActionListener(this);
         }
 
-        public void actionPerformed(ActionEvent evt)
-        {
-            KeyPress kp = (KeyPress) choices.getSelectedItem();
+        public void actionPerformed(ActionEvent evt) {
+            KeyPress kp = (KeyPress)choices.getSelectedItem();
             if (kp != null)
                 kp.typeKeys();
             monitor.requestFocus();
         }
     }
 
-    class KeyPress
-    {
+    class KeyPress {
         String display;
         boolean isShifted;
         int keyCode;
 
-        KeyPress(String display, int code)
-        {
+        KeyPress(String display, int code) {
             this(display, code, false);
         }
 
-        KeyPress(String display, int code, boolean shift)
-        {
+        KeyPress(String display, int code, boolean shift) {
             keyCode = 0xFF & code;
             isShifted = shift;
             this.display = display;
             setFont(new Font(Font.DIALOG, Font.BOLD, 18));
         }
 
-        void typeKeys()
-        {
+        void typeKeys() {
             if (isShifted)
                 monitor.keyPressed(KeyEvent.VK_SHIFT);
             monitor.keyPressed(keyCode);
@@ -160,18 +147,15 @@ public class KeyTypingPanel extends JPanel
                 monitor.keyReleased(KeyEvent.VK_SHIFT);
         }
 
-        public String toString()
-        {
+        public String toString() {
             return display;
         }
     }
 
-    class MouseSensitivityPanel extends JPanel implements ChangeListener
-    {
+    class MouseSensitivityPanel extends JPanel implements ChangeListener {
         JSlider slider;
 
-        MouseSensitivityPanel()
-        {
+        MouseSensitivityPanel() {
             super(new BorderLayout());
             setBorder(BorderFactory.createTitledBorder("Mouse Sensitivity"));
 
@@ -182,8 +166,7 @@ public class KeyTypingPanel extends JPanel
             add("Center", slider);
         }
 
-        public void stateChanged(ChangeEvent e)
-        {
+        public void stateChanged(ChangeEvent e) {
             double val = 1.0 * slider.getValue() / 50.0;
             if (monitor != null)
                 monitor.setMouseSensitivity(val);

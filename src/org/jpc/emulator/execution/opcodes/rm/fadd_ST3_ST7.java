@@ -33,32 +33,28 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fadd_ST3_ST7 extends Executable
-{
+public class fadd_ST3_ST7 extends Executable {
 
-    public fadd_ST3_ST7(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fadd_ST3_ST7(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(3);
         double freg1 = cpu.fpu.ST(7);
-        if ((freg0 == Double.NEGATIVE_INFINITY && freg1 == Double.POSITIVE_INFINITY) || (freg0 == Double.POSITIVE_INFINITY && freg1 == Double.NEGATIVE_INFINITY))
+        if ((freg0 == Double.NEGATIVE_INFINITY && freg1 == Double.POSITIVE_INFINITY)
+            || (freg0 == Double.POSITIVE_INFINITY && freg1 == Double.NEGATIVE_INFINITY))
             cpu.fpu.setInvalidOperation();
-        cpu.fpu.setST(3, freg0+freg1);
+        cpu.fpu.setST(3, freg0 + freg1);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

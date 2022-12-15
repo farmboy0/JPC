@@ -42,8 +42,8 @@ import java.io.*;
 
 /**
  * Emulation of an 8254 Interval Timer.
- * @see <a href="http://bochs.sourceforge.net/techspec/intel-82c54-timer.pdf.gz">
- * 82C54 - Datasheet</a>
+ * @see <a href="http://bochs.sourceforge.net/techspec/intel-82c54-timer.pdf.gz"> 82C54 -
+ * Datasheet</a>
  * @author Chris Dennis, Ian Preston
  */
 public class IntervalTimer extends AbstractHardwareComponent implements IODevice {
@@ -70,9 +70,8 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
     private int irq;
     private BochsPIT bochs;
 
-    public int[] getState()
-    {
-        int[] state = new int[3*4];
+    public int[] getState() {
+        int[] state = new int[3 * 4];
         channels[0].getState(state, 0);
         channels[1].getState(state, 4);
         channels[2].getState(state, 8);
@@ -92,9 +91,8 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
     }
 
     /**
-     * Construct a new Interval Timer which will register at ioports
-     * <code>ioPort</code> to <code>ioPort+3</code>.  Interrupt requests will be
-     * sent on the supplied channel number.
+     * Construct a new Interval Timer which will register at ioports <code>ioPort</code> to
+     * <code>ioPort+3</code>. Interrupt requests will be sent on the supplied channel number.
      * @param ioPort ioport base address.
      * @param irq interrupt channel number.
      */
@@ -125,7 +123,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
     }
 
     public int[] ioPortsRequested() {
-        return new int[]{ioPortBase, ioPortBase + 1, ioPortBase + 2, ioPortBase + 3};
+        return new int[] { ioPortBase, ioPortBase + 1, ioPortBase + 2, ioPortBase + 3 };
     }
 
     public int ioPortRead32(int address) {
@@ -203,9 +201,8 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
     /**
      * Get the gate pin state of the specified channel.
      * <p>
-     * The gate pin indicates whether the selected channel is enabled or
-     * disabled.  A logic high level indicates enabled and logic low indicates
-     * disabled.
+     * The gate pin indicates whether the selected channel is enabled or disabled. A logic high level
+     * indicates enabled and logic low indicates disabled.
      * @param channel selected channel index.
      * @return counter gate pin level.
      */
@@ -216,9 +213,8 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
     /**
      * Set the gate pin state of the specified channel.
      * <p>
-     * Broadly speaking setting the gate low will disable the timer, and setting
-     * it high will enable the timer, although exact behaviour is dependent on
-     * the current channel mode.
+     * Broadly speaking setting the gate low will disable the timer, and setting it high will enable the
+     * timer, although exact behaviour is dependent on the current channel mode.
      * @param channel selected channel index.
      * @param value required gate status.
      */
@@ -226,25 +222,23 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         channels[channel].setGate(value);
     }
 
-    private long getTime()
-    {
+    private long getTime() {
         return timingSource.getEmulatedMicros();
     }
 
-    private long getTickRate()
-    {
+    private long getTickRate() {
         return 1000000; // use micro second units
     }
 
-    private int conversionFactor()
-    {
-        return (int)(timingSource.getTickRate()/getTickRate());
+    private int conversionFactor() {
+        return (int)(timingSource.getTickRate() / getTickRate());
     }
 
-    enum RW_Status {LSByte, MSByte, LSByte_Multple, MSByte_multiple}
+    enum RW_Status {
+        LSByte, MSByte, LSByte_Multple, MSByte_multiple
+    }
 
-    public class TimerChannel extends AbstractHardwareComponent implements TimerResponsive
-    {
+    public class TimerChannel extends AbstractHardwareComponent implements TimerResponsive {
         private int countValue; // U32
         private int outputLatch; // U16
         private int inputLatch; // U16
@@ -276,12 +270,11 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             nullCount = true;
         }
 
-        private void getState(int[] buf, int start)
-        {
+        private void getState(int[] buf, int start) {
             buf[start] = getCount() % 0x10000;
-            buf[start +1] = gate?1:0;
-            buf[start +2] = getOut(getTime());
-            buf[start +3] = 0;
+            buf[start + 1] = gate ? 1 : 0;
+            buf[start + 2] = getOut(getTime());
+            buf[start + 3] = 0;
         }
 
         public void saveState(DataOutput output) throws IOException {
@@ -339,35 +332,28 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
                 return statusLatch;
             }
             // latched count read
-            if (countLatched_LSB)
-            {
+            if (countLatched_LSB) {
                 // read LSB
-                if (readState == RW_Status.LSByte_Multple)
-                {
+                if (readState == RW_Status.LSByte_Multple) {
                     readState = RW_Status.MSByte_multiple;
                 }
                 countLatched_LSB = false;
                 return outputLatch & 0xff;
             }
-            if (countLatched_MSB)
-            {
+            if (countLatched_MSB) {
                 // read MSB
-                if (readState == RW_Status.MSByte_multiple)
-                {
+                if (readState == RW_Status.MSByte_multiple) {
                     readState = RW_Status.LSByte_Multple;
                 }
                 countLatched_MSB = false;
                 return (outputLatch >> 8) & 0xff;
             }
-            if (!((readState == RW_Status.MSByte) || (readState == RW_Status.MSByte_multiple)))
-            {
+            if (!((readState == RW_Status.MSByte) || (readState == RW_Status.MSByte_multiple))) {
                 // read LSB
                 if (readState == RW_Status.LSByte_Multple)
                     readState = RW_Status.MSByte_multiple;
                 return getCount() & 0xff;
-            }
-            else
-            {
+            } else {
                 if (readState == RW_Status.MSByte_multiple)
                     readState = RW_Status.LSByte_Multple;
                 return (getCount() >> 8) & 0xff;
@@ -389,27 +375,26 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         private void latchCount() {
             // do nothing if previous latch state hasn't been read
             if (!countLatched_LSB && !countLatched_MSB) {
-                switch (readState)
-                {
-                    case MSByte:
-                        outputLatch = 0xffff & getCount();
-                        countLatched_MSB = true;
-                        break;
-                    case LSByte:
-                        outputLatch = 0xffff & getCount();
-                        countLatched_LSB = true;
-                        break;
-                    case LSByte_Multple:
-                        outputLatch = 0xffff & getCount();
-                        countLatched_LSB = true;
-                        countLatched_MSB = true;
-                        break;
-                    case MSByte_multiple:
-                        readState = RW_Status.LSByte_Multple;
-                        outputLatch = 0xffff & getCount();
-                        countLatched_LSB = true;
-                        countLatched_MSB = true;
-                        break;
+                switch (readState) {
+                case MSByte:
+                    outputLatch = 0xffff & getCount();
+                    countLatched_MSB = true;
+                    break;
+                case LSByte:
+                    outputLatch = 0xffff & getCount();
+                    countLatched_LSB = true;
+                    break;
+                case LSByte_Multple:
+                    outputLatch = 0xffff & getCount();
+                    countLatched_LSB = true;
+                    countLatched_MSB = true;
+                    break;
+                case MSByte_multiple:
+                    readState = RW_Status.LSByte_Multple;
+                    outputLatch = 0xffff & getCount();
+                    countLatched_LSB = true;
+                    countLatched_MSB = true;
+                    break;
                 }
             }
         }
@@ -417,41 +402,38 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         private void latchStatus() {
             if (!statusLatched) {
 
-                statusLatch = (getOut(getTime()) << 7)  | (nullCount ? 0x40 : 0x00) | (rwMode << 4) | (mode << 1) | (bcd ? 1 : 0);
+                statusLatch = (getOut(getTime()) << 7) | (nullCount ? 0x40 : 0x00) | (rwMode << 4) | (mode << 1) | (bcd ? 1 : 0);
                 statusLatched = true;
             }
         }
 
         public void write(int data) {
             switch (writeState) {
-                default:
-                    throw new IllegalStateException("write counter in invalid write state");
-                case LSByte:
-                    loadCount(0xff & data);
-                    break;
-                case MSByte:
-                    loadCount((0xff & data) << 8);
-                    break;
-                case LSByte_Multple:
-                    //null count setting is delayed until after second byte is written
-                    inputLatch = data;
-                    writeState = RW_Status.MSByte_multiple;
-                    break;
-                case MSByte_multiple:
-                    writeState = RW_Status.LSByte_Multple;
-                    loadCount((0xff & inputLatch) | ((0xff & data) << 8));
-                    break;
+            default:
+                throw new IllegalStateException("write counter in invalid write state");
+            case LSByte:
+                loadCount(0xff & data);
+                break;
+            case MSByte:
+                loadCount((0xff & data) << 8);
+                break;
+            case LSByte_Multple:
+                //null count setting is delayed until after second byte is written
+                inputLatch = data;
+                writeState = RW_Status.MSByte_multiple;
+                break;
+            case MSByte_multiple:
+                writeState = RW_Status.LSByte_Multple;
+                loadCount((0xff & inputLatch) | ((0xff & data) << 8));
+                break;
             }
         }
 
         public void writeControlWord(int data) {
-            int RW = (data >> 4 ) & 3;
-            if (RW == 0)
-            {
+            int RW = (data >> 4) & 3;
+            if (RW == 0) {
                 latchCount();
-            }
-            else
-            {
+            } else {
                 nullCount = true;
                 countLatched_LSB = false;
                 countLatched_MSB = false;
@@ -459,152 +441,148 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
                 inputLatch = 0;
                 rwMode = RW;
                 bcd = (data & 1) != 0;
-                mode = (data >> 1) &7;
+                mode = (data >> 1) & 7;
                 switch (RW) {
-                    case 1:
-                        // set read state to LSB
-                        readState = RW_Status.LSByte;
-                        writeState = RW_Status.LSByte;
-                        break;
-                    case 2:
-                        // set read state to MSB
-                        readState = RW_Status.MSByte;
-                        writeState = RW_Status.MSByte;
-                        break;
-                    case 3:
-                        // set read state to LSB multiple
-                        readState = RW_Status.LSByte_Multple;
-                        writeState = RW_Status.LSByte_Multple;
-                        break;
-                    default:
-                        throw new IllegalStateException("Invalid RW access field in control word write of PIT");
+                case 1:
+                    // set read state to LSB
+                    readState = RW_Status.LSByte;
+                    writeState = RW_Status.LSByte;
+                    break;
+                case 2:
+                    // set read state to MSB
+                    readState = RW_Status.MSByte;
+                    writeState = RW_Status.MSByte;
+                    break;
+                case 3:
+                    // set read state to LSB multiple
+                    readState = RW_Status.LSByte_Multple;
+                    writeState = RW_Status.LSByte_Multple;
+                    break;
+                default:
+                    throw new IllegalStateException("Invalid RW access field in control word write of PIT");
                 }
             }
         }
 
         public void setGate(boolean value) {
             switch (mode) {
-                default:
-                case MODE_INTERRUPT_ON_TERMINAL_COUNT:
-                case MODE_SOFTWARE_TRIGGERED_STROBE:
-                    /* XXX: just disable/enable counting */
-                    break;
-                case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
-                case MODE_HARDWARE_TRIGGERED_STROBE:
-                    if (!gate && value) {
-                        /* restart counting on rising edge */
-                        countStartCycles = timingSource.getEmulatedNanos();
-                        irqTimerUpdate(countStartCycles);
-                    }
-                    break;
-                case MODE_RATE_GENERATOR:
-                case MODE_SQUARE_WAVE:
-                    if (!gate && value) {
-                        /* restart counting on rising edge */
-                        countStartCycles = timingSource.getEmulatedNanos();
-                        irqTimerUpdate(countStartCycles);
-                    }
-                    /* XXX: disable/enable counting */
-                    break;
+            default:
+            case MODE_INTERRUPT_ON_TERMINAL_COUNT:
+            case MODE_SOFTWARE_TRIGGERED_STROBE:
+                /* XXX: just disable/enable counting */
+                break;
+            case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
+            case MODE_HARDWARE_TRIGGERED_STROBE:
+                if (!gate && value) {
+                    /* restart counting on rising edge */
+                    countStartCycles = timingSource.getEmulatedNanos();
+                    irqTimerUpdate(countStartCycles);
+                }
+                break;
+            case MODE_RATE_GENERATOR:
+            case MODE_SQUARE_WAVE:
+                if (!gate && value) {
+                    /* restart counting on rising edge */
+                    countStartCycles = timingSource.getEmulatedNanos();
+                    irqTimerUpdate(countStartCycles);
+                }
+                /* XXX: disable/enable counting */
+                break;
             }
             this.gate = value;
         }
 
         private int getCount() {
-            long now = scale64(timingSource.getEmulatedNanos() - countStartCycles, PIT_FREQ, (int) timingSource.getTickRate());
+            long now = scale64(timingSource.getEmulatedNanos() - countStartCycles, PIT_FREQ, (int)timingSource.getTickRate());
 
             switch (mode) {
-                case MODE_INTERRUPT_ON_TERMINAL_COUNT:
-                case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
-                case MODE_SOFTWARE_TRIGGERED_STROBE:
-                case MODE_HARDWARE_TRIGGERED_STROBE:
-                    return (int) ((countValue - now) & 0xffffl);
-                case MODE_SQUARE_WAVE:
-                    return (int) (countValue - ((2 * now) % countValue));
-                case MODE_RATE_GENERATOR:
-                default:
-                    return (int) (countValue - (now % countValue));
+            case MODE_INTERRUPT_ON_TERMINAL_COUNT:
+            case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
+            case MODE_SOFTWARE_TRIGGERED_STROBE:
+            case MODE_HARDWARE_TRIGGERED_STROBE:
+                return (int)((countValue - now) & 0xffffl);
+            case MODE_SQUARE_WAVE:
+                return (int)(countValue - ((2 * now) % countValue));
+            case MODE_RATE_GENERATOR:
+            default:
+                return (int)(countValue - (now % countValue));
             }
         }
 
         private int getOut(long now) {
             switch (mode) {
-                default:
-                case MODE_INTERRUPT_ON_TERMINAL_COUNT:
-                    if (now >= countValue) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
-                    if (now < countValue) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                case MODE_RATE_GENERATOR:
-                    if ((now % countValue) == countValue-1)
-                        return 0;
-                    else
-                        return 1;
-                case MODE_SQUARE_WAVE:
-                    if ((now % countValue) < ((countValue + 1) >>> 1)) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                case MODE_SOFTWARE_TRIGGERED_STROBE:
-                case MODE_HARDWARE_TRIGGERED_STROBE:
-                    if (now == countValue) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+            default:
+            case MODE_INTERRUPT_ON_TERMINAL_COUNT:
+                if (now >= countValue) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
+                if (now < countValue) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            case MODE_RATE_GENERATOR:
+                if ((now % countValue) == countValue - 1)
+                    return 0;
+                else
+                    return 1;
+            case MODE_SQUARE_WAVE:
+                if ((now % countValue) < ((countValue + 1) >>> 1)) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            case MODE_SOFTWARE_TRIGGERED_STROBE:
+            case MODE_HARDWARE_TRIGGERED_STROBE:
+                if (now == countValue) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
         }
 
         private long getNextTransitionTime(long currentTime) {
             switch (mode) {
-                default:
-                case MODE_INTERRUPT_ON_TERMINAL_COUNT:
-                case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
-                     {
-                        if (currentTime < countValue) {
-                           return countValue;
-                        } else {
-                            return -1;
-                        }
-                    }
-                case MODE_RATE_GENERATOR:
-                     {
-                         long base = (currentTime / countValue) * countValue;
-                         if ((currentTime == base)) {
-                             return base + countValue-1;
-                         } else {
-                             return base + countValue;
-                         }
-                    }
-                case MODE_SQUARE_WAVE:
-                     {
-                        long base = (currentTime / countValue) * countValue;
-                        long period2 = ((countValue + 1) >>> 1);
-                        if ((currentTime - base) < period2) {
-                            return base + period2;
-                        } else {
-                            return base + countValue;
-                        }
-                    }
-                case MODE_SOFTWARE_TRIGGERED_STROBE:
-                case MODE_HARDWARE_TRIGGERED_STROBE:
-                     {
-                        if (currentTime < countValue) {
-                            return countValue;
-                        } else if (currentTime == countValue) {
-                            return countValue + 1;
-                        } else {
-                            return -1;
-                        }
-                    }
+            default:
+            case MODE_INTERRUPT_ON_TERMINAL_COUNT:
+            case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT: {
+                if (currentTime < countValue) {
+                    return countValue;
+                } else {
+                    return -1;
+                }
+            }
+            case MODE_RATE_GENERATOR: {
+                long base = (currentTime / countValue) * countValue;
+                if ((currentTime == base)) {
+                    return base + countValue - 1;
+                } else {
+                    return base + countValue;
+                }
+            }
+            case MODE_SQUARE_WAVE: {
+                long base = (currentTime / countValue) * countValue;
+                long period2 = ((countValue + 1) >>> 1);
+                if ((currentTime - base) < period2) {
+                    return base + period2;
+                } else {
+                    return base + countValue;
+                }
+            }
+            case MODE_SOFTWARE_TRIGGERED_STROBE:
+            case MODE_HARDWARE_TRIGGERED_STROBE: {
+                if (currentTime < countValue) {
+                    return countValue;
+                } else if (currentTime == countValue) {
+                    return countValue + 1;
+                } else {
+                    return -1;
+                }
+            }
             }
         }
 
@@ -633,9 +611,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             {
                 irqTimer.setExpiry(nanos);
                 timingSource.updateAndProcess(0);
-            }
-            else
-            {
+            } else {
                 if (nextChangeTime != -1) {
                     irqTimer.setExpiry(nanos);
                 } else {
@@ -679,7 +655,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
 
     public void updateComponent(HardwareComponent component) {
         if (component instanceof IOPortHandler) {
-            ((IOPortHandler) component).registerIOPortCapable(this);
+            ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
         if (this.updated() && !madeNewTimer) {
@@ -690,19 +666,19 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
 
     public void acceptComponent(HardwareComponent component) {
         if ((component instanceof InterruptController) && component.initialised()) {
-            irqDevice = (InterruptController) component;
+            irqDevice = (InterruptController)component;
         }
         if ((component instanceof Clock) && component.initialised()) {
-            timingSource = (Clock) component;
+            timingSource = (Clock)component;
         }
 
         if ((component instanceof IOPortHandler) && component.initialised()) {
-            ((IOPortHandler) component).registerIOPortCapable(this);
+            ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
 
         if (component instanceof PCSpeaker) {
-            speaker = (PCSpeaker) component;
+            speaker = (PCSpeaker)component;
         }
 
         if (this.initialised() && (channels == null)) {
@@ -719,4 +695,3 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         return "Intel i8254 Interval Timer";
     }
 }
-

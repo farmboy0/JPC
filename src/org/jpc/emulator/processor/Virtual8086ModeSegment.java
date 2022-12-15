@@ -38,7 +38,6 @@ import java.io.IOException;
 import org.jpc.emulator.memory.AddressSpace;
 
 /**
- *
  * @author Ian Preston
  */
 public class Virtual8086ModeSegment extends Segment {
@@ -48,8 +47,7 @@ public class Virtual8086ModeSegment extends Segment {
     private int dpl, rpl;
     private long limit;
 
-    public Virtual8086ModeSegment(AddressSpace memory, int selector, boolean isCode)
-    {
+    public Virtual8086ModeSegment(AddressSpace memory, int selector, boolean isCode) {
         super(memory);
         this.selector = selector;
         base = selector << 4;
@@ -62,8 +60,7 @@ public class Virtual8086ModeSegment extends Segment {
             type = ProtectedModeSegment.TYPE_DATA_WRITABLE | ProtectedModeSegment.TYPE_ACCESSED;
     }
 
-    public Virtual8086ModeSegment(AddressSpace memory, Segment ancestor)
-    {
+    public Virtual8086ModeSegment(AddressSpace memory, Segment ancestor) {
         super(memory);
         selector = ancestor.getSelector();
         base = ancestor.getBase();
@@ -71,8 +68,7 @@ public class Virtual8086ModeSegment extends Segment {
         limit = 0xffffffffL & ancestor.getLimit();
     }
 
-    public void saveState(DataOutput output) throws IOException
-    {
+    public void saveState(DataOutput output) throws IOException {
         output.writeInt(1);
         output.writeInt(selector);
         if (type == (ProtectedModeSegment.TYPE_CODE | ProtectedModeSegment.TYPE_CODE_READABLE | ProtectedModeSegment.TYPE_ACCESSED))
@@ -82,84 +78,69 @@ public class Virtual8086ModeSegment extends Segment {
         output.writeInt(rpl);
     }
 
-    public boolean getDefaultSizeFlag()
-    {
+    public boolean getDefaultSizeFlag() {
         return false;
     }
 
-    public int getLimit()
-    {
+    public int getLimit() {
         return (int)limit;
     }
 
-    public int getBase()
-    {
+    public int getBase() {
         return base;
     }
 
-    public int getSelector()
-    {
+    public int getSelector() {
         return selector;
     }
 
-    public boolean setSelector(int selector)
-    {
+    public boolean setSelector(int selector) {
         this.selector = selector;
         base = selector << 4;
         type = ProtectedModeSegment.TYPE_DATA_WRITABLE | ProtectedModeSegment.TYPE_ACCESSED;
         return true;
     }
 
-    public void checkAddress(int offset)
-    {
+    public void checkAddress(int offset) {
         if ((0xffffffffL & offset) > limit)
             throw ProcessorException.GENERAL_PROTECTION_0;
     }
 
-    public int translateAddressRead(int offset)
-    {
+    public int translateAddressRead(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
-    public int translateAddressWrite(int offset)
-    {
+    public int translateAddressWrite(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
-    public int getRPL()
-    {
+    public int getRPL() {
         return rpl;
     }
 
-    public int getType()
-    {
+    public int getType() {
         return type;
     }
 
-    public boolean isPresent()
-    {
+    public boolean isPresent() {
         return true;
     }
 
-    public boolean isSystem()
-    {
+    public boolean isSystem() {
         return false;
     }
 
-    public int getDPL()
-    {
+    public int getDPL() {
         return dpl;
     }
 
-    public void setRPL(int cpl)
-    {
+    public void setRPL(int cpl) {
         rpl = cpl;
     }
 
-    public void printState()
-    {
+    public void printState() {
         System.out.println("VM86 Segment");
         System.out.println("selector: " + Integer.toHexString(selector));
         System.out.println("base: " + Integer.toHexString(base));

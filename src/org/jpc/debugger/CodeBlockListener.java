@@ -36,8 +36,7 @@ package org.jpc.debugger;
 import org.jpc.emulator.memory.AddressSpace;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
 
-public interface CodeBlockListener
-{
+public interface CodeBlockListener {
     public void codeBlockDecoded(int address, AddressSpace memory, CodeBlock block);
 
     public void codeBlockExecuted(int address, AddressSpace memory, CodeBlock block);

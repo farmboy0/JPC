@@ -39,11 +39,9 @@ import org.jpc.emulator.execution.decoder.PeekableInputStream;
  * Converts a stream of x86 bytecodes into an executable codeblock.
  * @author Chris Dennis
  */
-public interface CodeBlockFactory
-{
+public interface CodeBlockFactory {
     /**
      * Create a real-mode codeblock from the given byte source.
-     *
      * @param source bytes read from here
      * @return codeblock instance
      */
@@ -51,7 +49,6 @@ public interface CodeBlockFactory
 
     /**
      * Create a protected-mode codeblock from the given byte source.
-     *
      * @param source bytes read from here
      * @param operandSize <code>true if the default operand size is 32-bit
      * @return codeblock instance
@@ -60,7 +57,6 @@ public interface CodeBlockFactory
 
     /**
      * Create a virtual8086-mode codeblock from the given byte source.
-     *
      * @param source bytes read from here
      * @return codeblock instance
      */

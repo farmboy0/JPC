@@ -108,26 +108,29 @@ public abstract class Option {
         System.out.println("Parameters may be specified on the command line or in a file. ");
         System.out.println();
         System.out.println("-help - display this help");
-        System.out.println("-config $file - read parameters from $file, any subsequent commandline parameters override parameters in the file");
+        System.out
+            .println("-config $file - read parameters from $file, any subsequent commandline parameters override parameters in the file");
         System.out.println("-boot $device - the device to boot from out of fda (floppy), hda (hard drive 1), cdrom (CDROM drive)");
         System.out.println("-fda $file - floppy image file");
         System.out.println("-hda $file - hard disk image file");
         System.out.println("-hda dir:$dir - directory to mount as a FAT32 hard disk");
         System.out.println("-ss $file - snapshot file to load");
         System.out.println("-ram $megabytes - the amount RAM the virtual machine should have");
-        System.out.println("-ips $number - number of emulated instructions per emulated second - a larger value will cause a slower apparent time in the VM");
+        System.out.println(
+            "-ips $number - number of emulated instructions per emulated second - a larger value will cause a slower apparent time in the VM");
         System.out.println("-cpulevel $number - 4 = 486, 5 = Pentium, 6 = Pentium Pro");
         System.out.println();
         System.out.println("-sound - enable sound");
         System.out.println();
         System.out.println("Advanced Options:");
         System.out.println("-bios - specify an alternate bios image");
-        System.out.println("-max-block-size $num - maximum number of instructions per basic block (A value of 1 will still have some blocks of length 2 due to mov ss,X, pop ss and sti)");
+        System.out.println(
+            "-max-block-size $num - maximum number of instructions per basic block (A value of 1 will still have some blocks of length 2 due to mov ss,X, pop ss and sti)");
     }
 
     public static String[] parse(String[] source) {
         ArrayList<String> tmp = new ArrayList<String>();
-        for (Iterator<Option> iterator = names2options.values().iterator(); iterator.hasNext(); ) {
+        for (Iterator<Option> iterator = names2options.values().iterator(); iterator.hasNext();) {
             Option next = iterator.next();
             next.set = false;
         }
@@ -140,13 +143,11 @@ public abstract class Option {
             Option opt = names2options.get(arg);
             if (opt == null) {
                 tmp.add(source[index]);
-            } else if ((opt == config) && (config.value() != null))
-            {
+            } else if ((opt == config) && (config.value() != null)) {
                 // exit recursion
                 opt.set = false;
                 index = opt.update(source, index);
-            }
-            else {
+            } else {
                 opt.set = true;
                 index = opt.update(source, index);
             }
@@ -154,7 +155,7 @@ public abstract class Option {
         if (config.isSet())
             return loadConfig(config.value());
         if (config.value() != null)
-            ((Option) config).set = true;
+            ((Option)config).set = true;
         if (tmp.size() == source.length) {
             return source;
         } else {
@@ -162,8 +163,7 @@ public abstract class Option {
         }
     }
 
-    public static void saveConfig(File f) throws IOException
-    {
+    public static void saveConfig(File f) throws IOException {
         String conf = saveConfig();
         BufferedWriter w = new BufferedWriter(new FileWriter(f));
         w.write(conf);
@@ -171,58 +171,48 @@ public abstract class Option {
         w.close();
     }
 
-    public static String[] loadConfig(String file)
-    {
+    public static String[] loadConfig(String file) {
         try {
             return loadConfig(new File(file));
-        } catch (IOException e)
-        {
-            System.out.println("Error loading config from file "+file);
+        } catch (IOException e) {
+            System.out.println("Error loading config from file " + file);
         }
         return null;
     }
 
-    public static String[] loadConfig(File f) throws IOException
-    {
+    public static String[] loadConfig(File f) throws IOException {
         StringBuilder b = new StringBuilder();
         BufferedReader r = new BufferedReader(new FileReader(f));
         String line;
-        while ((line = r.readLine()) != null)
-        {
-            b.append(line+" ");
+        while ((line = r.readLine()) != null) {
+            b.append(line + " ");
         }
         String[] current = saveConfig().split("\n");
-        for (String s: current)
+        for (String s : current)
             b.append(s + " ");
         return parse(b.toString().split(" "));
     }
 
-    public static String saveConfig()
-    {
+    public static String saveConfig() {
         StringBuilder b = new StringBuilder();
-        for (Option opt : names2options.values())
-        {
-            if (opt instanceof Switch)
-            {
+        for (Option opt : names2options.values()) {
+            if (opt instanceof Switch) {
                 if (opt.isSet())
-                    b.append("-"+opt.getName()+"\n");
-            }
-            else if (opt instanceof Opt)
-            {
+                    b.append("-" + opt.getName() + "\n");
+            } else if (opt instanceof Opt) {
                 if (opt.isSet())
-                    b.append("-"+opt.getName()+" "+((Opt) opt).value()+"\n");
+                    b.append("-" + opt.getName() + " " + ((Opt)opt).value() + "\n");
             }
         }
         return b.toString();
     }
 
-    public static Option getParameter(String name)
-    {
+    public static Option getParameter(String name) {
         return names2options.get(name);
     }
 
     public static Switch createSwitch(String name) {
-        Switch sw = (Switch) names2options.get(name);
+        Switch sw = (Switch)names2options.get(name);
         if (sw == null) {
             sw = new Switch(name);
         }
@@ -230,30 +220,32 @@ public abstract class Option {
     }
 
     public static Opt opt(String name) {
-        Opt opt = (Opt) names2options.get(name);
+        Opt opt = (Opt)names2options.get(name);
         if (opt == null) {
             opt = new Opt(name);
         }
         return opt;
     }
+
     public static OptSet optSet(String name) {
-        OptSet opt = (OptSet) names2options.get(name);
+        OptSet opt = (OptSet)names2options.get(name);
         if (opt == null) {
             opt = new OptSet(name);
         }
         return opt;
     }
+
     public static Select select(String name) {
-        return select(name,"default");
+        return select(name, "default");
     }
-    public static Select select(String name,String defaultKey) {
-        Select opt = (Select) names2options.get(name);
+
+    public static Select select(String name, String defaultKey) {
+        Select opt = (Select)names2options.get(name);
         if (opt == null) {
-            opt = new Select(name,defaultKey);
+            opt = new Select(name, defaultKey);
         }
         return opt;
     }
-
 
     private final String name;
     private boolean set;
@@ -278,16 +270,17 @@ public abstract class Option {
     public Object getInstance() {
         return getInstance(null);
     }
+
     public Object getInstance(String defaultClass) {
         Object o = getValue();
         Class clazz = null;
         try {
             if (o instanceof Class) {
-                clazz = (Class) o;
+                clazz = (Class)o;
             } else if (o instanceof String) {
                 clazz = Class.forName(o.toString());
-            } else if (defaultClass!=null) {
-                clazz=Class.forName(defaultClass);
+            } else if (defaultClass != null) {
+                clazz = Class.forName(defaultClass);
             } else {
                 return null;
             }
@@ -315,7 +308,7 @@ public abstract class Option {
         }
 
         public String[] values() {
-            return (String[]) getValue();
+            return (String[])getValue();
         }
 
         @Override
@@ -358,12 +351,11 @@ public abstract class Option {
 
         public int intValue(int defaultValue, int radix) {
             if (value != null) {
-                return (int) Long.parseLong(value.trim(), radix);
+                return (int)Long.parseLong(value.trim(), radix);
             } else {
                 return defaultValue;
             }
         }
-
 
         public long longValue(long defaultValue, int radix) {
             if (value != null) {
@@ -394,7 +386,8 @@ public abstract class Option {
         }
 
         public Object valueOf(Class type, Object defaultValue) {
-            if (value == null) return defaultValue;
+            if (value == null)
+                return defaultValue;
             Throwable t = null;
             try {
                 try {
@@ -414,7 +407,6 @@ public abstract class Option {
             }
             throw new RuntimeException("Unable obtain value of " + type);
         }
-
 
         public Object instance(String defaultClassName) {
             if (value == null) {
@@ -471,20 +463,22 @@ public abstract class Option {
         @Override
         public Object getValue() {
             Object o = values.get(key);
-            if (o == null) return values.get(defaultValue);
+            if (o == null)
+                return values.get(defaultValue);
             return o;
         }
 
-        public Select entry(String key,Object value) {
-            values.put(key,value);
+        public Select entry(String key, Object value) {
+            values.put(key, value);
             return this;
         }
+
         public Object getInstance() {
             Object o = getValue();
             Class clazz = null;
             try {
                 if (o instanceof Class) {
-                    clazz = (Class) o;
+                    clazz = (Class)o;
                 } else if (o instanceof String) {
                     clazz = Class.forName(o.toString());
                 } else {

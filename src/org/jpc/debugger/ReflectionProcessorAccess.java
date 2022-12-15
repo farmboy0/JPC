@@ -34,17 +34,14 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ReflectionProcessorAccess extends ProcessorAccess
-{
+public class ReflectionProcessorAccess extends ProcessorAccess {
     private Processor processor;
     private Map<String, Field> lookup;
 
-    public ReflectionProcessorAccess(Processor cpu)
-    {
+    public ReflectionProcessorAccess(Processor cpu) {
         super();
         this.processor = cpu;
-        try
-        {
+        try {
             lookup = new HashMap<String, Field>();
 
             addField("r_eax");
@@ -74,26 +71,24 @@ public class ReflectionProcessorAccess extends ProcessorAccess
             addField("idtr");
             addField("gdtr");
             addField("ldtr");
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
-        catch (Throwable t) {t.printStackTrace();}
     }
 
-    private void addField(String fieldName) throws Exception
-    {
+    private void addField(String fieldName) throws Exception {
         Field targetField = Processor.class.getDeclaredField(fieldName);
         targetField.setAccessible(true);
 
         lookup.put(fieldName, targetField);
     }
 
-    public int getValue(String name, int defaultValue)
-    {
+    public int getValue(String name, int defaultValue) {
         if (name.equals("eflags"))
             return processor.getEFlags();
 
         Field f = lookup.get(name);
-        if (f == null)
-        {
+        if (f == null) {
             return defaultValue;
         }
         if (f.getType().isPrimitive())
@@ -103,11 +98,12 @@ public class ReflectionProcessorAccess extends ProcessorAccess
                 return defaultValue;
             }
         try {
-            Processor.Reg r = (Processor.Reg) f.get(processor);
+            Processor.Reg r = (Processor.Reg)f.get(processor);
             return r.get32();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         try {
-            Segment sel = (Segment) f.get(processor);
+            Segment sel = (Segment)f.get(processor);
             return sel.getBase();
         } catch (IllegalAccessException e) {
             return defaultValue;
@@ -116,16 +112,17 @@ public class ReflectionProcessorAccess extends ProcessorAccess
         }
     }
 
-    public boolean setValue(String name, int value)
-    {
+    public boolean setValue(String name, int value) {
         Field f = lookup.get(name);
         if (f == null)
             return false;
 
         try {
-            Processor.Reg r = (Processor.Reg) f.get(processor);
+            Processor.Reg r = (Processor.Reg)f.get(processor);
             r.set32(value);
-        } catch (Exception e) {e.printStackTrace();}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             f.setInt(processor, value);
             return true;
@@ -134,5 +131,6 @@ public class ReflectionProcessorAccess extends ProcessorAccess
         }
     }
 
-    public void rowChanged(int row) {}
+    public void rowChanged(int row) {
+    }
 }

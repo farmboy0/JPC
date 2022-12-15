@@ -33,23 +33,19 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fptan extends Executable
-{
+public class fptan extends Executable {
 
-    public fptan(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fptan(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(0);
-        if ((freg0 > Math.pow(2.0, 63.0)) || (freg0 < -1.0*Math.pow(2.0, 63.0))) {
+        if ((freg0 > Math.pow(2.0, 63.0)) || (freg0 < -1.0 * Math.pow(2.0, 63.0))) {
             if (Double.isInfinite(freg0))
                 cpu.fpu.setInvalidOperation();
             cpu.fpu.conditionCode |= 4;
-        } else 
-        {
+        } else {
             cpu.fpu.conditionCode &= ~4;
             cpu.fpu.setST(0, Math.tan(freg0));
             cpu.fpu.push(1.0);
@@ -57,13 +53,11 @@ public class fptan extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

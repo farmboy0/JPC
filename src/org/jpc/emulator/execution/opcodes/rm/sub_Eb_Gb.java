@@ -33,21 +33,18 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class sub_Eb_Gb extends Executable
-{
+public class sub_Eb_Gb extends Executable {
     final int op1Index;
     final int op2Index;
 
-    public sub_Eb_Gb(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public sub_Eb_Gb(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1Index = Modrm.Eb(modrm);
         op2Index = Modrm.Gb(modrm);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         Reg op2 = cpu.regs[op2Index];
         cpu.flagOp1 = (byte)op1.get8();
@@ -59,13 +56,11 @@ public class sub_Eb_Gb extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

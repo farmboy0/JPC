@@ -33,36 +33,31 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class mul_Ed extends Executable
-{
+public class mul_Ed extends Executable {
     final int op1Index;
 
-    public mul_Ed(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public mul_Ed(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1Index = Modrm.Ed(modrm);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-            cpu.af = false;
-            long res64 = (0xffffffffL & op1.get32()) * (0xffffffffL & cpu.r_eax.get32());
-            cpu.r_eax.set32((int)res64);
-            cpu.r_edx.set32((int)(res64 >> 32));
-            cpu.setOSZAPC_Logic32((int)res64);
-            cpu.cf = cpu.of = (cpu.r_edx.get32() != 0);
+        cpu.af = false;
+        long res64 = (0xffffffffL & op1.get32()) * (0xffffffffL & cpu.r_eax.get32());
+        cpu.r_eax.set32((int)res64);
+        cpu.r_edx.set32((int)(res64 >> 32));
+        cpu.setOSZAPC_Logic32((int)res64);
+        cpu.cf = cpu.of = (cpu.r_edx.get32() != 0);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

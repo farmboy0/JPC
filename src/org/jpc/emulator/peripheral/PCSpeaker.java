@@ -43,13 +43,11 @@ import java.net.URI;
 import java.util.logging.*;
 
 /**
- * 
  * @author Ian Preston
  */
-public class PCSpeaker extends AbstractHardwareComponent implements IODevice
-{
+public class PCSpeaker extends AbstractHardwareComponent implements IODevice {
     private static final Logger LOGGING = Logger.getLogger(PCSpeaker.class.getName());
-    
+
     private static final int SPEAKER_SAMPLE_RATE = 22050;
     private static final int SPEAKER_MAX_FREQ = SPEAKER_SAMPLE_RATE >> 1;
     private static final int SPEAKER_MIN_FREQ = 10;
@@ -63,34 +61,27 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice
     private Receiver receiver;
     private ShortMessage message = new ShortMessage();
     private Instrument[] instruments;
-    private MidiChannel cc;    // current channel
+    private MidiChannel cc; // current channel
 
     public int mode;
 
-    public PCSpeaker()
-    {
-	ioportRegistered = false;
-        if (enabled)
-        {
+    public PCSpeaker() {
+        ioportRegistered = false;
+        if (enabled) {
             configure();
         }
     }
 
-    public void enable(boolean value)
-    {
-        if (!value)
-        {
+    public void enable(boolean value) {
+        if (!value) {
             enabled = false;
-        }
-        else
-        {
+        } else {
             enabled = true;
             configure();
         }
     }
 
-    private void configure()
-    {
+    private void configure() {
         try {
             if (synthesizer == null) {
                 if ((synthesizer = MidiSystem.getSynthesizer()) == null) {
@@ -110,18 +101,17 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice
             enabled = false;
             return;
         }
-        
+
         Soundbank sb = synthesizer.getDefaultSoundbank();
-        if (sb == null)
-        {
+        if (sb == null) {
             System.out.println("Warning: loading remote soundbank.");
-            try
-            {
+            try {
                 sb = MidiSystem.getSoundbank(new URI("http://www.classicdosgames.com/soundbank.gm").toURL());
-            } catch (Exception e) {e.printStackTrace();}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        if (sb != null) 
-        {
+        if (sb != null) {
             instruments = sb.getInstruments();
             synthesizer.loadInstrument(instruments[0]);
         }
@@ -130,9 +120,8 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice
         programChange(80); //80 = load square wave instrument
     }
 
-    private int getNote()
-    {
-        double freq = IntervalTimer.PIT_FREQ/pit.getInitialCount(2); //actual frequency in Hz
+    private int getNote() {
+        double freq = IntervalTimer.PIT_FREQ / pit.getInitialCount(2); //actual frequency in Hz
         if (freq > SPEAKER_MAX_FREQ)
             freq = SPEAKER_MAX_FREQ;
         if (freq < SPEAKER_MIN_FREQ)
@@ -140,36 +129,35 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice
         return frequencyToNote(freq);
     }
 
-    public static int frequencyToNote(double f)
-    {
-        double ans = 12*(Math.log(f) - Math.log(440))/Math.log(2);
-        return (int) ans + 69;
+    public static int frequencyToNote(double f) {
+        double ans = 12 * (Math.log(f) - Math.log(440)) / Math.log(2);
+        return (int)ans + 69;
     }
 
-    private void playNote(int note)
-    {
+    private void playNote(int note) {
         try {
             message.setMessage(ShortMessage.NOTE_ON, 0, note, velocity);
-        } catch (InvalidMidiDataException e) {e.printStackTrace();}
+        } catch (InvalidMidiDataException e) {
+            e.printStackTrace();
+        }
         receiver.send(message, -1);
     }
 
-    private void stopNote(int note)
-    {
+    private void stopNote(int note) {
         try {
             message.setMessage(ShortMessage.NOTE_OFF, 0, note, velocity);
-        } catch (InvalidMidiDataException e) {e.printStackTrace();}
+        } catch (InvalidMidiDataException e) {
+            e.printStackTrace();
+        }
         receiver.send(message, -1);
     }
 
-    public synchronized void play()
-    {
+    public synchronized void play() {
         waitingForPit++;
-        if ((enabled) && (waitingForPit == 2))
-        {
+        if ((enabled) && (waitingForPit == 2)) {
             if (pit.getMode(2) != 3)
                 return;
-            
+
             lastNote = currentNote;
             currentNote = getNote();
 
@@ -185,66 +173,52 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice
         cc.programChange(program);
     }
 
-    public void saveState(DataOutput output) throws IOException
-    {
+    public void saveState(DataOutput output) throws IOException {
         output.writeInt(dummyRefreshClock);
         output.writeInt(speakerOn);
     }
 
-    public void loadState(DataInput input) throws IOException
-    {
+    public void loadState(DataInput input) throws IOException {
         ioportRegistered = false;
         dummyRefreshClock = input.readInt();
         speakerOn = input.readInt();
     }
 
-    public int[] ioPortsRequested()
-    {
-	return new int[]{0x61};
+    public int[] ioPortsRequested() {
+        return new int[] { 0x61 };
     }
 
-    public int ioPortRead8(int address)
-    {
-	int out = pit.getOut(2);
-	dummyRefreshClock ^= 1;
-	return (speakerOn << 1) | (pit.getGate(2) ? 1 : 0) | (out << 5) |
-	    (dummyRefreshClock << 4);
-    }
-    public int ioPortRead16(int address)
-    {
-	return (0xff & ioPortRead8(address)) |
-	    (0xff00 & (ioPortRead8(address + 1) << 8));
-    }
-    public int ioPortRead32(int address)
-    {
-	return (0xffff & ioPortRead16(address)) |
-	    (0xffff0000 & (ioPortRead16(address + 2) << 16));
+    public int ioPortRead8(int address) {
+        int out = pit.getOut(2);
+        dummyRefreshClock ^= 1;
+        return (speakerOn << 1) | (pit.getGate(2) ? 1 : 0) | (out << 5) | (dummyRefreshClock << 4);
     }
 
-    public synchronized void ioPortWrite8(int address, int data)
-    {
+    public int ioPortRead16(int address) {
+        return (0xff & ioPortRead8(address)) | (0xff00 & (ioPortRead8(address + 1) << 8));
+    }
+
+    public int ioPortRead32(int address) {
+        return (0xffff & ioPortRead16(address)) | (0xffff0000 & (ioPortRead16(address + 2) << 16));
+    }
+
+    public synchronized void ioPortWrite8(int address, int data) {
         if (!enabled)
             return;
-	speakerOn = (data >> 1) & 1;
-	pit.setGate(2, (data & 1) != 0);
-        if ((data & 1 ) == 1)
-        {
-            if (speakerOn == 1)
-            {
+        speakerOn = (data >> 1) & 1;
+        pit.setGate(2, (data & 1) != 0);
+        if ((data & 1) == 1) {
+            if (speakerOn == 1) {
                 //connect speaker to PIT
                 mode = SPEAKER_PIT_ON;
                 waitingForPit = 0;
                 //play();
-            }
-            else
-            {
+            } else {
                 //leave speaker disconnected from following PIT
                 mode = SPEAKER_PIT_OFF;
                 stopNote(currentNote);
             }
-        }
-        else 
-        {
+        } else {
             // zero bit is 0, speaker follows bit 1
             mode = SPEAKER_OFF;
             stopNote(currentNote);
@@ -252,52 +226,44 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice
                 LOGGING.log(Level.INFO, "manual speaker management not implemented");
         }
     }
-    public void ioPortWrite16(int address, int data)
-    {
-	this.ioPortWrite8(address, data);
-	this.ioPortWrite8(address + 1, data >> 8);
-    }
-    public void ioPortWrite32(int address, int data)
-    {
-	this.ioPortWrite16(address, data);
-	this.ioPortWrite16(address + 2, data >> 16);
+
+    public void ioPortWrite16(int address, int data) {
+        this.ioPortWrite8(address, data);
+        this.ioPortWrite8(address + 1, data >> 8);
     }
 
-    public boolean initialised()
-    {
-	return ioportRegistered && (pit != null);
+    public void ioPortWrite32(int address, int data) {
+        this.ioPortWrite16(address, data);
+        this.ioPortWrite16(address + 2, data >> 16);
     }
 
-    public void reset()
-    {
-	pit = null;
-	ioportRegistered = false;
+    public boolean initialised() {
+        return ioportRegistered && (pit != null);
     }
 
-    public boolean updated()
-    {
-	return ioportRegistered && pit.updated();
+    public void reset() {
+        pit = null;
+        ioportRegistered = false;
     }
 
-    public void updateComponent(HardwareComponent component)
-    {
-	if ((component instanceof IOPortHandler) && component.updated()) 
-        {
-	    ((IOPortHandler)component).registerIOPortCapable(this);
-	    ioportRegistered = true;
-	}
+    public boolean updated() {
+        return ioportRegistered && pit.updated();
     }
 
-    public void acceptComponent(HardwareComponent component)
-    {
-	if ((component instanceof IntervalTimer) &&
-	    component.initialised()) {
-	    pit = (IntervalTimer)component;
-	}
-	if ((component instanceof IOPortHandler)
-	    && component.initialised()) {
-	    ((IOPortHandler)component).registerIOPortCapable(this);
-	    ioportRegistered = true;
-	}
+    public void updateComponent(HardwareComponent component) {
+        if ((component instanceof IOPortHandler) && component.updated()) {
+            ((IOPortHandler)component).registerIOPortCapable(this);
+            ioportRegistered = true;
+        }
+    }
+
+    public void acceptComponent(HardwareComponent component) {
+        if ((component instanceof IntervalTimer) && component.initialised()) {
+            pit = (IntervalTimer)component;
+        }
+        if ((component instanceof IOPortHandler) && component.initialised()) {
+            ((IOPortHandler)component).registerIOPortCapable(this);
+            ioportRegistered = true;
+        }
     }
 }

@@ -33,31 +33,26 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fstp_Mt_mem extends Executable
-{
+public class fstp_Mt_mem extends Executable {
     final Pointer op1;
 
-    public fstp_Mt_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fstp_Mt_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         op1.setF80(cpu, cpu.fpu.ST(0));
         cpu.fpu.pop();
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

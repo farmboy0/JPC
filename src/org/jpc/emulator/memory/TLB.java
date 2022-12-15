@@ -31,35 +31,42 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public abstract class TLB
-{
+public abstract class TLB {
     public abstract void saveState(DataOutput output) throws IOException;
+
     public abstract void loadState(DataInput input) throws IOException;
 
     public abstract void setSupervisor(boolean isSupervisor);
+
     public abstract void setWriteProtectPages(boolean value);
 
     public abstract void flush();
+
     public abstract void flushNonGlobal();
 
     public abstract void setGlobalPages(boolean enabled);
+
     public abstract void addNonGlobalPage(int addr);
+
     public abstract boolean globalPagesEnabled();
 
     public abstract Memory getReadMemoryBlockAt(boolean isSupervisor, int addr);
+
     public abstract void setReadMemoryBlockAt(boolean isSupervisor, int addr, Memory m);
 
     public abstract Memory getWriteMemoryBlockAt(boolean isSupervisor, int addr);
+
     public abstract void setWriteMemoryBlockAt(boolean isSupervisor, int addr, Memory m);
 
     protected abstract void setPageSize(int addr, byte type);
+
     protected abstract void replaceBlocks(Memory oldBlock, Memory newBlock);
 
     /**
      * Invalidate any entries for this address in the translation cache.
      * <p>
-     * This will cause the next request for an address within the same page to
-     * have to walk the translation tables in memory.
+     * This will cause the next request for an address within the same page to have to walk the
+     * translation tables in memory.
      * @param addr address within the page to be invalidated.
      */
     public abstract void invalidateTLBEntry(int addr);

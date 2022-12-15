@@ -31,7 +31,6 @@
     End of licence header
 */
 
-
 package org.jpc.debugger;
 
 import java.util.*;
@@ -51,18 +50,16 @@ import javax.swing.event.*;
 
 import org.jpc.emulator.execution.codeblock.*;
 
-public class DisassemblyOverlayTable extends JTable implements ListSelectionListener
-{
+public class DisassemblyOverlayTable extends JTable implements ListSelectionListener {
     private static final Logger LOGGING = Logger.getLogger(DisassemblyOverlayTable.class.getName());
-    
+
     private Font f;
     private boolean showX86Lengths;
     private int targetColumn;
     private String[] operationNames, operandNames;
     private BlockWrapper[] allBlocks;
 
-    public DisassemblyOverlayTable(TableModel model, int codeBlockColumn, boolean showX86Lengths)
-    {
+    public DisassemblyOverlayTable(TableModel model, int codeBlockColumn, boolean showX86Lengths) {
         super(model);
         this.showX86Lengths = showX86Lengths;
         targetColumn = codeBlockColumn;
@@ -72,52 +69,45 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         getSelectionModel().addListSelectionListener(this);
     }
 
-    public Rectangle getOverlayRect(int row, int maxExtent)
-    {
+    public Rectangle getOverlayRect(int row, int maxExtent) {
         Rectangle r1 = getCellRect(row, targetColumn, true);
-        
+
         CodeBlock cb = getCodeBlockForRow(row);
         if (cb == null)
             return r1;
 
         int rows = Math.min(cb.getX86Length(), maxExtent);
         Rectangle r2 = getCellRect(row + rows - 1, targetColumn, true);
-        
+
         return r2.union(r1);
     }
 
-    public void valueChanged(ListSelectionEvent e) 
-    {
+    public void valueChanged(ListSelectionEvent e) {
         repaint();
     }
 
-    class BlockWrapper
-    {
+    class BlockWrapper {
         int address, indent;
         CodeBlock block;
 
-        BlockWrapper(int address, int indent, CodeBlock block)
-        {
+        BlockWrapper(int address, int indent, CodeBlock block) {
             this.block = block;
             this.indent = indent;
             this.address = address;
         }
     }
 
-    public void recalculateBlockPositions()
-    {
+    public void recalculateBlockPositions() {
         List<BlockWrapper> buffer = new ArrayList<BlockWrapper>();
         List<BlockWrapper> stack = new ArrayList<BlockWrapper>();
 
         int len = getModel().getRowCount();
-        for (int i=0; i<len; i++)
-        {
+        for (int i = 0; i < len; i++) {
             CodeBlock cb = getCodeBlockForRow(i);
             if (cb == null)
                 continue;
 
-            for (int j=stack.size()-1; j>=0; j--)
-            {
+            for (int j = stack.size() - 1; j >= 0; j--) {
                 BlockWrapper bw = stack.get(j);
                 if (i >= bw.block.getX86Length() + bw.address)
                     stack.remove(j);
@@ -125,7 +115,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
 
             int indent = 0;
             if (!stack.isEmpty())
-                indent = stack.get(stack.size() - 1).indent+1;
+                indent = stack.get(stack.size() - 1).indent + 1;
 
             BlockWrapper w = new BlockWrapper(i, indent, cb);
             buffer.add(w);
@@ -136,43 +126,34 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         buffer.toArray(allBlocks);
     }
 
-    protected CodeBlock getCodeBlockForRow(int row)
-    {
-        try
-        {
-            return (CodeBlock) getModel().getValueAt(convertRowIndexToModel(row), targetColumn);
-        }
-        catch (Exception e)
-        {
+    protected CodeBlock getCodeBlockForRow(int row) {
+        try {
+            return (CodeBlock)getModel().getValueAt(convertRowIndexToModel(row), targetColumn);
+        } catch (Exception e) {
             return null;
         }
     }
 
-    class OverlayLineFormat
-    {
+    class OverlayLineFormat {
         Color c;
         String text;
         int tabPosition;
 
-        OverlayLineFormat(String txt, int pos, Color c)
-        {
+        OverlayLineFormat(String txt, int pos, Color c) {
             text = txt;
             tabPosition = pos;
             this.c = c;
         }
     }
 
-    class DisamOverlayLineFormat extends OverlayLineFormat
-    {
-        DisamOverlayLineFormat(String txt, int pos)
-        {
+    class DisamOverlayLineFormat extends OverlayLineFormat {
+        DisamOverlayLineFormat(String txt, int pos) {
             super(txt, pos, Color.black);
 
         }
     }
 
-    private OverlayLineFormat[] basicLineFormat(CodeBlock block)
-    {
+    private OverlayLineFormat[] basicLineFormat(CodeBlock block) {
         List<OverlayLineFormat> lines = new ArrayList<OverlayLineFormat>();
         String details = block.getDisplayString();
         StringTokenizer tokens = new StringTokenizer(details, "\n");
@@ -181,8 +162,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         OverlayLineFormat lfirst = new OverlayLineFormat(first, 10, Color.blue);
         lines.add(lfirst);
 
-        while (tokens.hasMoreTokens())
-        {
+        while (tokens.hasMoreTokens()) {
             String l = tokens.nextToken();
             DisamOverlayLineFormat lf = new DisamOverlayLineFormat(l, 10);
             lines.add(lf);
@@ -193,27 +173,25 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         return result;
     }
 
-    private OverlayLineFormat[] exceptionLineFormat(Class cls, Exception e)
-    {
+    private OverlayLineFormat[] exceptionLineFormat(Class cls, Exception e) {
         StackTraceElement[] trace = e.getStackTrace();
-        OverlayLineFormat[] result = new OverlayLineFormat[trace.length+2];
+        OverlayLineFormat[] result = new OverlayLineFormat[trace.length + 2];
 
         result[0] = new OverlayLineFormat("Exception formatting CodeBlock", 10, Color.red);
-        result[1] = new OverlayLineFormat("Source: "+cls, 20, Color.red);
-        
+        result[1] = new OverlayLineFormat("Source: " + cls, 20, Color.red);
+
         Color rr = new Color(255, 50, 50);
-        for (int i=0; i<trace.length; i++)
-            result[i+2] = new OverlayLineFormat(trace[i].toString(), 30, rr);
+        for (int i = 0; i < trace.length; i++)
+            result[i + 2] = new OverlayLineFormat(trace[i].toString(), 30, rr);
 
         return result;
     }
 
-    private void paintCodeBlockOverlay(Graphics g, int row)
-    {
+    private void paintCodeBlockOverlay(Graphics g, int row) {
         CodeBlock cb = getCodeBlockForRow(row);
         if (cb == null)
             return;
-        
+
         Rectangle r1 = getCellRect(row, targetColumn, true);
         int rowHeight = getRowHeight();
         int h1 = r1.height;
@@ -222,19 +200,16 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         Dimension s = getSize();
 
         OverlayLineFormat[] lines = null;
-        try
-        {
-	    lines = basicLineFormat(cb);
-        }
-        catch (Exception e)
-        {
+        try {
+            lines = basicLineFormat(cb);
+        } catch (Exception e) {
             lines = exceptionLineFormat(cb.getClass(), e);
         }
-        
+
         int popupHeight = lines.length * rowHeight;
         int w1 = 330;
         int w2 = 80;
-        
+
         int x1 = r1.x;
         int y1 = r1.y;
         int x2 = r1.x + 20;
@@ -242,28 +217,27 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         int x3 = x1 + w2;
         int y3 = Math.min(y1 + rowHeight, s.height - popupHeight - 1);
         int x4 = x3;
-        int y4 = Math.min(y1 + rowHeight + popupHeight, s.height-1);
+        int y4 = Math.min(y1 + rowHeight + popupHeight, s.height - 1);
         int x5 = x1 + 20;
         int y5 = r1.y + h1 - 1;
         int x6 = x1;
         int y6 = r1.y + h1 - 1;
-        
-        Polygon p = new Polygon(new int[]{x1,x2,x3,x4,x5,x6}, new int[]{y1,y2,y3,y4,y5,y6}, 6);
+
+        Polygon p = new Polygon(new int[] { x1, x2, x3, x4, x5, x6 }, new int[] { y1, y2, y3, y4, y5, y6 }, 6);
         g.setColor(new Color(150, 150, 255, 60));
         g.fillPolygon(p);
         g.setColor(Color.blue);
         g.drawPolygon(p);
-        
+
         g.setColor(new Color(200, 200, 200));
         g.fillRect(x3, y3, w1, y4 - y3);
         g.setColor(Color.blue);
         g.drawRect(x3, y3, w1, y4 - y3);
         g.setFont(f);
         g.setColor(Color.black);
-        
+
         int ypos = 14;
-        for (int i=0; i<lines.length; i++)
-        {
+        for (int i = 0; i < lines.length; i++) {
             OverlayLineFormat l = lines[i];
             g.setColor(l.c);
             g.drawString(l.text, x3 + l.tabPosition, y3 + ypos);
@@ -271,8 +245,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         }
     }
 
-    private void drawBlocks(Graphics g)
-    {
+    private void drawBlocks(Graphics g) {
         int rowHeight = getRowHeight();
         Rectangle tgtRect = getCellRect(0, targetColumn, true);
         Rectangle r1 = new Rectangle();
@@ -282,14 +255,13 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
 
         g.setColor(new Color(0, 255, 100, 120));
 
-        for (int i=0; i<allBlocks.length; i++)
-        {
+        for (int i = 0; i < allBlocks.length; i++) {
             BlockWrapper bw = allBlocks[i];
-            int x1 = 5+tgtRect.x + bw.indent * (width + gap);
-            int y1 = bw.address * rowHeight + rowHeight/2;
+            int x1 = 5 + tgtRect.x + bw.indent * (width + gap);
+            int y1 = bw.address * rowHeight + rowHeight / 2;
             int w1 = width;
             int h1 = (bw.block.getX86Length() - 1) * rowHeight;
-            
+
             r1.setRect(x1, y1, w1, h1);
 
             if (!clip.intersects(r1))
@@ -298,22 +270,20 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         }
     }
 
-    public int getHeadRowForBlockRect(Point pt)
-    {
+    public int getHeadRowForBlockRect(Point pt) {
         int rowHeight = getRowHeight();
         Rectangle tgtRect = getCellRect(0, targetColumn, true);
         Rectangle r1 = new Rectangle();
         int width = 10;
         int gap = 3;
 
-        for (int i=0; i<allBlocks.length; i++)
-        {
+        for (int i = 0; i < allBlocks.length; i++) {
             BlockWrapper bw = allBlocks[i];
-            int x1 = 5+tgtRect.x + bw.indent * (width + gap);
-            int y1 = bw.address * rowHeight + rowHeight/2;
+            int x1 = 5 + tgtRect.x + bw.indent * (width + gap);
+            int y1 = bw.address * rowHeight + rowHeight / 2;
             int w1 = width;
             int h1 = (bw.block.getX86Length() - 1) * rowHeight;
-            
+
             r1.setRect(x1, y1, w1, h1);
             if (r1.contains(pt))
                 return bw.address;
@@ -321,9 +291,8 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
 
         return -1;
     }
-    
-    protected void paintComponent(Graphics g)
-    {
+
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawBlocks(g);
 

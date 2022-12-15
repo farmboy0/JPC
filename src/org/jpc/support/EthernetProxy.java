@@ -36,7 +36,6 @@ package org.jpc.support;
 import org.jpc.emulator.pci.peripheral.EthernetCard;
 
 /**
- *
  * @author Ian Preston <ianopolous@gmail.com>
  */
 public class EthernetProxy extends EthernetOutput {
@@ -45,25 +44,27 @@ public class EthernetProxy extends EthernetOutput {
     public void sendPacket(byte[] input, int offset, int length) {
         byte[] packet = new byte[length];
         System.arraycopy(input, offset, packet, 0, length);
-        
-        long targetMACaddr = 0L | (packet[0] << 40) | (packet [1] << 32) | (packet [2] << 24) | (packet[3] << 16) | (packet[4] << 8) | packet[5];
-        long sourceMACaddr = 0L | (packet[6] << 40) | (packet [7] << 32) | (packet [8] << 24) | (packet[9] << 16) | (packet[10] << 8) | packet[11];
+
+        long targetMACaddr = 0L | (packet[0] << 40) | (packet[1] << 32) | (packet[2] << 24) | (packet[3] << 16) | (packet[4] << 8)
+            | packet[5];
+        long sourceMACaddr = 0L | (packet[6] << 40) | (packet[7] << 32) | (packet[8] << 24) | (packet[9] << 16) | (packet[10] << 8)
+            | packet[11];
 
         //check it is an IP packet
-        if ((packet[12] != (byte)0x8) || (packet[13] != (byte) 0)) {
+        if ((packet[12] != (byte)0x8) || (packet[13] != (byte)0)) {
             System.out.println("Asked to send a non IP packet");
             printPacket(packet);
             return;
         }
 
         //Check it is IPV4
-        if ((packet[14] & (byte) 0xF0) != (byte) 0x40) {
+        if ((packet[14] & (byte)0xF0) != (byte)0x40) {
             System.out.println("Asked to send a non IPV4 packet");
             printPacket(packet);
             return;
         }
 
-        int ipHeaderlength = (packet[14] & 0xF)*32;
+        int ipHeaderlength = (packet[14] & 0xF) * 32;
         int totalLength = (packet[16] << 8) | packet[17];
         int identification = (packet[18] << 8) | packet[19];
         //flags
@@ -108,8 +109,10 @@ public class EthernetProxy extends EthernetOutput {
 
     public static void printPacket(byte[] packet) {
         System.out.println("**********************Begin eth0 packet dump");
-        long targetMACaddr = 0L | (packet[0] << 40) | (packet [1] << 32) | (packet [2] << 24) | (packet[3] << 16) | (packet[4] << 8) | packet[5];
-        long sourceMACaddr = 0L | (packet[6] << 40) | (packet [7] << 32) | (packet [8] << 24) | (packet[9] << 16) | (packet[10] << 8) | packet[11];
+        long targetMACaddr = 0L | (packet[0] << 40) | (packet[1] << 32) | (packet[2] << 24) | (packet[3] << 16) | (packet[4] << 8)
+            | packet[5];
+        long sourceMACaddr = 0L | (packet[6] << 40) | (packet[7] << 32) | (packet[8] << 24) | (packet[9] << 16) | (packet[10] << 8)
+            | packet[11];
         System.out.println("Target MAC: " + Long.toHexString(targetMACaddr));
         System.out.println("Source MAC: " + toHex(packet, 6, 6));
 
@@ -118,9 +121,9 @@ public class EthernetProxy extends EthernetOutput {
         System.out.println("Ether Type " + Integer.toHexString(type));
 
         //Check it is IPV4
-        int ipVersion = (packet[14] & (byte) 0xF0);
+        int ipVersion = (packet[14] & (byte)0xF0);
         System.out.println("IP Version: 0x" + Integer.toHexString(ipVersion));
-        int ipHeaderlength = (packet[14] & 0xF)*32;
+        int ipHeaderlength = (packet[14] & 0xF) * 32;
         System.out.println("Header Length " + ipHeaderlength);
         int totalLength = (packet[16] << 8) | packet[17];
         System.out.println("Total Length " + totalLength);

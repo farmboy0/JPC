@@ -39,19 +39,16 @@ import java.io.*;
  * An object whose state can be loaded and saved to and from persistent storage.
  * @author Ian Preston
  */
-public interface Hibernatable
-{
+public interface Hibernatable {
     /**
-     * Read this objects internal state from input in a format shared by
-     * <code>saveState</code>.
+     * Read this objects internal state from input in a format shared by <code>saveState</code>.
      * @param input
      * @throws java.io.IOException if thrown by the supplied input object
      */
     public void loadState(DataInput input) throws IOException;
 
     /**
-     * Writes this components internal state to output in a format shared by 
-     * <code>loadState</code>.
+     * Writes this components internal state to output in a format shared by <code>loadState</code>.
      * @param output
      * @throws java.io.IOException if thrown by the supplied output object.
      */

@@ -44,11 +44,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Ian Preston
  */
-public class EthernetHub extends EthernetOutput
-{
+public class EthernetHub extends EthernetOutput {
     private int errorDelay, port;
     private String serverHost;
     private volatile DataOutputStream out;
@@ -57,74 +55,60 @@ public class EthernetHub extends EthernetOutput
     private Queue<byte[]> inQueue = new ConcurrentLinkedQueue<byte[]>();
     private Queue<byte[]> outQueue = new ConcurrentLinkedQueue<byte[]>();
 
-    public EthernetHub(String host, int port)
-    {
+    public EthernetHub(String host, int port) {
         packetSize = -1;
         serverHost = host;
         this.port = port;
         errorDelay = 10000;
         System.out.println("Connecting to remote EthernetHub at: " + host + ":" + port);
-        
+
         new Thread(new Reader()).start();
         new Thread(new Writer()).start();
     }
 
-    private synchronized void reconnect()
-    {
+    private synchronized void reconnect() {
         notifyAll();
         if (in != null)
             return;
 
         in = null;
         out = null;
-        while (true)
-        {
-            try
-            {
+        while (true) {
+            try {
                 Socket server = new Socket(serverHost, port);
                 server.setTcpNoDelay(true);
                 server.setPerformancePreferences(0, 2, 1);
-                
+
                 out = new DataOutputStream(server.getOutputStream());
                 in = new DataInputStream(server.getInputStream());
                 errorDelay = 1000;
                 return;
-            }
-            catch (Exception e)
-            {
-                errorDelay = Math.min(errorDelay+2000, 30000);
-                System.out.println("Error connecting to ethernet hub: "+e);
-                try
-                {
+            } catch (Exception e) {
+                errorDelay = Math.min(errorDelay + 2000, 30000);
+                System.out.println("Error connecting to ethernet hub: " + e);
+                try {
                     wait(errorDelay);
+                } catch (Exception ee) {
                 }
-                catch (Exception ee) {}
             }
         }
     }
 
-    class Reader implements Runnable
-    {
-        public void run()
-        {
-            while (true) 
-            {
-                if (inQueue.size() > 100)
-                {
+    class Reader implements Runnable {
+        public void run() {
+            while (true) {
+                if (inQueue.size() > 100) {
                     System.out.println("Clearing ETH0 packet queue");
                     inQueue.clear();
                 }
 
-                try
-                {
+                try {
                     int size = in.readInt();
-                    System.out.println(">>> "+size);
+                    System.out.println(">>> " + size);
                     byte[] packet = new byte[size];
                     in.readFully(packet);
                     inQueue.add(packet);
-                } 
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     in = null;
                     out = null;
                     reconnect();
@@ -133,16 +117,11 @@ public class EthernetHub extends EthernetOutput
         }
     }
 
-    class Writer implements Runnable
-    {
-        public void run()
-        {
-            while (true) 
-            {
-                try
-                {
-                    synchronized (outQueue)
-                    {
+    class Writer implements Runnable {
+        public void run() {
+            while (true) {
+                try {
+                    synchronized (outQueue) {
                         while (outQueue.size() == 0)
                             outQueue.wait();
                     }
@@ -151,9 +130,7 @@ public class EthernetHub extends EthernetOutput
                     out.writeInt(packet.length);
                     out.write(packet);
                     out.flush();
-                } 
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     in = null;
                     out = null;
                     reconnect();
@@ -162,19 +139,16 @@ public class EthernetHub extends EthernetOutput
         }
     }
 
-    public byte[] getPacket()
-    {
+    public byte[] getPacket() {
         byte[] packet = inQueue.poll();
         return packet;
     }
 
-    public void sendPacket(byte[] data, int offset, int length)
-    {
+    public void sendPacket(byte[] data, int offset, int length) {
         byte[] p = new byte[length];
         System.arraycopy(data, offset, p, 0, length);
-        
-        synchronized (outQueue)
-        {
+
+        synchronized (outQueue) {
             outQueue.add(p);
             outQueue.notify();
         }

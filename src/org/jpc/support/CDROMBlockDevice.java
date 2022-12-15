@@ -34,117 +34,100 @@
 package org.jpc.support;
 
 /**
- * A <code>RawBlockDevice</code> instance representing a cdrom device.
- * Instances of this class will report cdrom-like geometries and behaviours.  In
- * particular it supports locking and ejecting of drives, and will always be
- * read-only.
+ * A <code>RawBlockDevice</code> instance representing a cdrom device. Instances of this class will
+ * report cdrom-like geometries and behaviours. In particular it supports locking and ejecting of
+ * drives, and will always be read-only.
  * @author Chris Dennis
  */
-public class CDROMBlockDevice extends RawBlockDevice
-{
+public class CDROMBlockDevice extends RawBlockDevice {
     private boolean locked;
 
     /**
      * Create a device backed by the given <code>SeekableIODevice</code> object.
      * @param data backing device
      */
-    public CDROMBlockDevice(SeekableIODevice data)
-    {
+    public CDROMBlockDevice(SeekableIODevice data) {
         super(data);
     }
 
     /**
-     * Create a device with no backing storage.  This is the equivalent of a
-     * cdrom drive with no disc inserted.
+     * Create a device with no backing storage. This is the equivalent of a cdrom drive with no disc
+     * inserted.
      */
-    public CDROMBlockDevice()
-    {
+    public CDROMBlockDevice() {
         this(null);
     }
 
-    public void close()
-    {
+    public void close() {
         super.close();
-	eject();
+        eject();
     }
 
-    public boolean isLocked()
-    {
-	return locked;
+    public boolean isLocked() {
+        return locked;
     }
 
-    public boolean isReadOnly()
-    {
-	return true;
+    public boolean isReadOnly() {
+        return true;
     }
 
     /**
-     * Locks or unlocks the drive to prevents or allow the ejection or insertion
-     * of discs.
+     * Locks or unlocks the drive to prevents or allow the ejection or insertion of discs.
      * @param locked <code>true</code> to lock the device
      */
-    public void setLock(boolean locked)
-    {
-	this.locked = locked;
+    public void setLock(boolean locked) {
+        this.locked = locked;
     }
 
     /**
-     * Inserts the given media into this device.  If the drive contains a disc
-     * then this is first ejected.  If the drive is locked then insertion will
-     * fail.
+     * Inserts the given media into this device. If the drive contains a disc then this is first
+     * ejected. If the drive is locked then insertion will fail.
      * @param media disc to insert
      * @return <code>true</code> if insertion was successful
      */
-    public boolean insert(SeekableIODevice media)
-    {
+    public boolean insert(SeekableIODevice media) {
         if (!eject())
             return false;
 
         setData(media);
 
-	return true;
+        return true;
     }
 
     /**
-     * Ejects the current disc (if any).  If the drive is locked then ejection
-     * will fail regardless of whether there is a disc in the drive.
+     * Ejects the current disc (if any). If the drive is locked then ejection will fail regardless of
+     * whether there is a disc in the drive.
      * @return <code>true</code> if ejection was successful
      */
-    public boolean eject()
-    {
-	if (isLocked())
-	    return false;
+    public boolean eject() {
+        if (isLocked())
+            return false;
 
         setData(null);
-	return true;
+        return true;
     }
 
     /**
      * Hard coded to return the type constant for a cdrom device.
      * @return <code>TYPE_CDROM</code>
      */
-    public Type getType()
-    {
-	return Type.CDROM;
+    public Type getType() {
+        return Type.CDROM;
     }
-    
-    public int getCylinders()
-    {
+
+    public int getCylinders() {
         return 2;
     }
 
-    public int getHeads()
-    {
+    public int getHeads() {
         return 16;
     }
 
-    public int getSectors()
-    {
+    public int getSectors() {
         return 63;
     }
-    
-    public String toString()
-    {
+
+    public String toString() {
         return "CDROM: " + super.toString();
     }
 }

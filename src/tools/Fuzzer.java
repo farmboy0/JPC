@@ -36,25 +36,23 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class Fuzzer
-{
+public class Fuzzer {
     static String newJar = "JPCApplication.jar";
     static String oldJar = "OldJPCApplication.jar";
     public static final boolean compareFlags = true;
 
-    public static void main(String[] args) throws Exception
-    {
-        URL[] urls = new URL[]{new File(newJar).toURL()};
+    public static void main(String[] args) throws Exception {
+        URL[] urls = new URL[] { new File(newJar).toURL() };
         ClassLoader cl1 = new URLClassLoader(urls, tools.Fuzzer.class.getClassLoader());
         Class opts = cl1.loadClass("org.jpc.j2se.Option");
         Method parse = opts.getMethod("parse", String[].class);
         args = (String[])parse.invoke(opts, (Object)args);
         PCHandle pc1 = new PCHandle(cl1, true, args);
 
-        URL[] urls2 = new URL[]{new File(oldJar).toURL()};
+        URL[] urls2 = new URL[] { new File(oldJar).toURL() };
         ClassLoader cl2 = new URLClassLoader(urls2, tools.Fuzzer.class.getClassLoader());
         PCHandle pc2 = new PCHandle(cl2, false, args);
-     
+
         // will succeed
         //byte[] add_ah_al = new byte[] {(byte)0, (byte)0xc4};
         //int[] input = new int[16];
@@ -83,8 +81,8 @@ public class Fuzzer
         saxParser.parse("tests/pm.tests", pmhandler);
     }
 
-    public static boolean executeCase(String opclass, String disam, byte[] code, int[] initialState, PCHandle pc1, PCHandle pc2, boolean mem, boolean flags, BufferedWriter log) throws Exception
-    {
+    public static boolean executeCase(String opclass, String disam, byte[] code, int[] initialState, PCHandle pc1, PCHandle pc2,
+        boolean mem, boolean flags, BufferedWriter log) throws Exception {
         pc1.setState(initialState);
         pc2.setState(initialState);
         // load code at eip
@@ -94,7 +92,7 @@ public class Fuzzer
         try {
             pc1.executeBlock();
         } catch (InvocationTargetException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return false;
         }
         pc2.executeBlock();
@@ -102,15 +100,14 @@ public class Fuzzer
         return true;
     }
 
-    public static void doCompare(boolean mem, boolean compareFlags, PCHandle newpc, PCHandle oldpc, int[] input, String opclass, String disam, byte[] code, BufferedWriter log) throws Exception
-    {
+    public static void doCompare(boolean mem, boolean compareFlags, PCHandle newpc, PCHandle oldpc, int[] input, String opclass,
+        String disam, byte[] code, BufferedWriter log) throws Exception {
         compareStates(input, opclass, disam, code, newpc.getState(), oldpc.getState(), compareFlags);
         if (!mem)
             return;
         byte[] data1 = new byte[4096];
         byte[] data2 = new byte[4096];
-        for (int i=0; i < 1024*1024; i++)
-        {
+        for (int i = 0; i < 1024 * 1024; i++) {
             Integer l1 = newpc.savePage(new Integer(i), data1);
             Integer l2 = oldpc.savePage(new Integer(i), data2);
             if (l2 > 0)
@@ -119,15 +116,13 @@ public class Fuzzer
         }
     }
 
-    public static boolean comparePage(int index, byte[] fast, byte[] old, BufferedWriter log) throws IOException
-    {
+    public static boolean comparePage(int index, byte[] fast, byte[] old, BufferedWriter log) throws IOException {
         if (fast.length != old.length)
             throw new IllegalStateException(String.format("different page data lengths %d != %d", fast.length, old.length));
-        for (int i=0; i < fast.length; i++)
-            if (fast[i] != old[i])
-            {
-                log.write(String.format("Difference in memory state: %08x=> %02x - %02x\n", index*4096+i, fast[i], old[i]));
-                
+        for (int i = 0; i < fast.length; i++)
+            if (fast[i] != old[i]) {
+                log.write(String.format("Difference in memory state: %08x=> %02x - %02x\n", index * 4096 + i, fast[i], old[i]));
+
                 return false;
             }
         return true;
@@ -135,10 +130,9 @@ public class Fuzzer
 
     public static String[] names = EmulatorControl.names;
 
-    public static void printState(int[] state, BufferedWriter out) throws IOException
-    {
+    public static void printState(int[] state, BufferedWriter out) throws IOException {
         StringBuilder builder = new StringBuilder(4096);
-        Formatter formatter=new Formatter(builder);
+        Formatter formatter = new Formatter(builder);
         arrayImpl(names, state, formatter, 0, 10);
         arrayImpl(names, state, formatter, 10, 17);
         arrayImpl(names, state, formatter, 17, 24);
@@ -152,10 +146,9 @@ public class Fuzzer
         out.newLine();
     }
 
-    public static void printState(int[] state)
-    {
+    public static void printState(int[] state) {
         StringBuilder builder = new StringBuilder(4096);
-        Formatter formatter=new Formatter(builder);
+        Formatter formatter = new Formatter(builder);
         arrayImpl(names, state, formatter, 0, 10);
         arrayImpl(names, state, formatter, 10, 17);
         arrayImpl(names, state, formatter, 17, 24);
@@ -163,15 +156,14 @@ public class Fuzzer
         arrayImpl(names, state, formatter, 30, 37);
         arrayImpl(names, state, formatter, 37, 45);
         arrayImpl(names, state, formatter, 45, names.length);
-        doubleImpl(names, state, formatter, 37, 37+16);
+        doubleImpl(names, state, formatter, 37, 37 + 16);
         System.out.flush();
         System.out.println(builder);
     }
 
-    public static void printAllStates(byte[] code, int[] input, int[] fast, int[] old, String opclass, String disam)
-    {
+    public static void printAllStates(byte[] code, int[] input, int[] fast, int[] old, String opclass, String disam) {
         System.out.print("**" + disam + " == " + opclass + " =: ");
-        for (int i=0; i < code.length; i++)
+        for (int i = 0; i < code.length; i++)
             System.out.printf("%02x ", code[i]);
         System.out.println();
         System.out.println("Input state:");
@@ -182,69 +174,58 @@ public class Fuzzer
         printState(old);
     }
 
-    public static void doubleImpl(String[] names, int[] vals, Formatter f, int start, int end)
-    {
-        for (int i=start; i < end; i+=2)
-            f.format("[%8s] ", "ST"+(i-start)/2);
+    public static void doubleImpl(String[] names, int[] vals, Formatter f, int start, int end) {
+        for (int i = start; i < end; i += 2)
+            f.format("[%8s] ", "ST" + (i - start) / 2);
         f.format("\n");
-        for (int i=start; i < end; i+=2)
-            f.format("[%f] ", Double.longBitsToDouble((vals[i]&0xffffffffL) << 32 | (vals[i+1]&0xffffffffL)));
+        for (int i = start; i < end; i += 2)
+            f.format("[%f] ", Double.longBitsToDouble((vals[i] & 0xffffffffL) << 32 | (vals[i + 1] & 0xffffffffL)));
         f.format("\n");
     }
 
-    public static void arrayImpl(String[] names, int[] vals, Formatter f, int start, int end)
-    {
-        for (int i=start; i < end; i++)
+    public static void arrayImpl(String[] names, int[] vals, Formatter f, int start, int end) {
+        for (int i = start; i < end; i++)
             f.format("[%8s] ", names[i]);
         f.format("\n");
-        for (int i=start; i < end; i++)
+        for (int i = start; i < end; i++)
             f.format("[%8X] ", vals[i]);
         f.format("\n");
     }
 
-    public static void compareStates(int[] input, String opclass, String disam, byte[] code, int[] fast, int[] old, boolean compareFlags) throws Exception
-    {
+    public static void compareStates(int[] input, String opclass, String disam, byte[] code, int[] fast, int[] old, boolean compareFlags)
+        throws Exception {
         if (old.length != fast.length)
-            throw new IllegalArgumentException("old state length = "+old.length+", new state length = "+fast.length);
+            throw new IllegalArgumentException("old state length = " + old.length + ", new state length = " + fast.length);
         StringBuilder b = new StringBuilder();
-        for (int i=0; i < fast.length; i++)
-            if (i != 9)
-            {
-                if (fast[i] != old[i])
-                {
+        for (int i = 0; i < fast.length; i++)
+            if (i != 9) {
+                if (fast[i] != old[i]) {
+                    b.append(String.format("Difference: %d=%s %08x - %08x\n", i, names[i], fast[i], old[i]));
+                    //continueExecution();
+                }
+            } else {
+                if (compareFlags && ((fast[i] & FLAG_MASK) != (old[i] & FLAG_MASK))) {
                     b.append(String.format("Difference: %d=%s %08x - %08x\n", i, names[i], fast[i], old[i]));
                     //continueExecution();
                 }
             }
-            else
-            {
-                if (compareFlags && ((fast[i] & FLAG_MASK) != (old[i] & FLAG_MASK)))
-                {
-                    b.append(String.format("Difference: %d=%s %08x - %08x\n", i, names[i], fast[i], old[i]));
-                    //continueExecution();
-                }
-            }
-        if (b.length() > 0)
-        {
+        if (b.length() > 0) {
             printAllStates(code, input, fast, old, opclass, disam);
             System.out.println(b.toString());
         }
     }
 
-    public static void continueExecution()
-    {
+    public static void continueExecution() {
         System.out.println("Ignore difference? (y/n)");
         String line = null;
         try {
             line = new BufferedReader(new InputStreamReader(System.in)).readLine();
-        } catch (IOException f)
-        {
+        } catch (IOException f) {
             f.printStackTrace();
             System.exit(0);
         }
-        if (line.equals("y"))
-        {}
-        else
+        if (line.equals("y")) {
+        } else
             System.exit(0);
     }
 
@@ -252,34 +233,66 @@ public class Fuzzer
 
     public static final int gdtBase = 0xfb632;
     public static byte[] gdt = new byte[] {
-                    (byte)0x0, (byte)0x0, (byte)0x0, (byte)0x0,
-                    (byte)0x0, (byte)0x0, (byte)0x0, (byte)0x0,
-                    (byte)0x0, (byte)0x0, (byte)0x0, (byte)0x0,
-                    (byte)0x0, (byte)0x0, (byte)0x0, (byte)0x0,
-                    (byte)0xff, (byte)0xff, (byte)0x0, (byte)0x0,
-                    (byte)0x0, (byte)0x9b, (byte)0xcf, (byte)0x0,
-                    (byte)0xff, (byte)0xff, (byte)0x0, (byte)0x0,
-                    (byte)0x0, (byte)0x93, (byte)0xcf, (byte)0x0,
-                    (byte)0xff, (byte)0xff, (byte)0x0, (byte)0x0,
-                    (byte)0x0f, (byte)0x9b, (byte)0x0, (byte)0x0,
-                    (byte)0xff, (byte)0xff, (byte)0x0, (byte)0x0,
-                    (byte)0x0, (byte)0x93, (byte)0x0, (byte)0x0
-            };
-    public static byte[] lgdt = new byte[]{(byte)0x2e, (byte)0x0f, (byte)0x01, (byte)0x16, (byte)0x2c, (byte)0xb6};
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0xff,
+        (byte)0xff,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x9b,
+        (byte)0xcf,
+        (byte)0x0,
+        (byte)0xff,
+        (byte)0xff,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x93,
+        (byte)0xcf,
+        (byte)0x0,
+        (byte)0xff,
+        (byte)0xff,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0f,
+        (byte)0x9b,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0xff,
+        (byte)0xff,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x0,
+        (byte)0x93,
+        (byte)0x0,
+        (byte)0x0 };
+    public static byte[] lgdt = new byte[] { (byte)0x2e, (byte)0x0f, (byte)0x01, (byte)0x16, (byte)0x2c, (byte)0xb6 };
     public static int testEip = 0;
     public static int testCS = 0;
 
     public static Calendar start = Calendar.getInstance();
 
-    public static class PCHandle
-    {
+    public static class PCHandle {
         final Object pc;
         final Method state, setState, executeBlock, savePage, setCode;
 
-        public PCHandle(ClassLoader cl1, boolean isNew, String[] args) throws Exception
-        {
+        public PCHandle(ClassLoader cl1, boolean isNew, String[] args) throws Exception {
             Class c1 = cl1.loadClass("org.jpc.emulator.PC");
-
 
             Constructor ctor = c1.getConstructor(String[].class, Calendar.class);
             pc = ctor.newInstance((Object)args, start);
@@ -294,11 +307,9 @@ public class Fuzzer
             setCode = c1.getMethod("setCode", byte[].class);
         }
 
-        public void setPM(boolean pm) throws Exception
-        {
-            byte[] setcr0 = new byte[] {(byte)0x0f, (byte)0x22, (byte)0xc0};
-            if (pm)
-            {
+        public void setPM(boolean pm) throws Exception {
+            byte[] setcr0 = new byte[] { (byte)0x0f, (byte)0x22, (byte)0xc0 };
+            if (pm) {
                 // setup gdt data
                 /*int[] regs0 = new int[16];
                 regs0[10] = 0xf000;// set cs
@@ -336,9 +347,7 @@ public class Fuzzer
                 setState.invoke(pc, regs);
                 setCode(setcr0);
                 executeBlock();*/
-            }
-            else
-            {
+            } else {
                 int[] regs = new int[16];
                 regs[0] = 0x60000010;
                 setState.invoke(pc, regs);
@@ -347,34 +356,28 @@ public class Fuzzer
             }
         }
 
-        public void setCode(byte[] code) throws Exception
-        {
+        public void setCode(byte[] code) throws Exception {
             setCode.invoke(pc, (Object)code);
         }
 
-        public int[] getState() throws Exception
-        {
-            return (int[]) state.invoke(pc);
+        public int[] getState() throws Exception {
+            return (int[])state.invoke(pc);
         }
 
-        public void setState(int[] s) throws Exception
-        {
+        public void setState(int[] s) throws Exception {
             setState.invoke(pc, s);
         }
 
-        public void executeBlock() throws Exception
-        {
+        public void executeBlock() throws Exception {
             executeBlock.invoke(pc);
         }
 
-        public Integer savePage(Integer page, byte[] buf) throws Exception
-        {
-            return (Integer)savePage.invoke(pc, page, (Object) buf);
+        public Integer savePage(Integer page, byte[] buf) throws Exception {
+            return (Integer)savePage.invoke(pc, page, (Object)buf);
         }
     }
 
-    public static class TestParser extends DefaultHandler
-    {
+    public static class TestParser extends DefaultHandler {
         final String mode;
         final PCHandle pc1, pc2;
         final boolean mem, flags;
@@ -382,13 +385,16 @@ public class Fuzzer
         byte[] currentCode;
         String currentClass;
         String currentDisam;
-        enum Type {None, Class, Code, Disam, Input}
+
+        enum Type {
+            None, Class, Code, Disam, Input
+        }
+
         Type type;
-        int opcodeCount=0, testCount=0;
+        int opcodeCount = 0, testCount = 0;
         BufferedWriter log;
 
-        public TestParser(String mode, PCHandle pc1, PCHandle pc2, boolean mem, boolean flags)
-        {
+        public TestParser(String mode, PCHandle pc1, PCHandle pc2, boolean mem, boolean flags) {
             this.mode = mode;
             this.pc1 = pc1;
             this.pc2 = pc2;
@@ -401,8 +407,7 @@ public class Fuzzer
             }
         }
 
-        public void startElement(String uri, String localName,String qName, Attributes attributes) throws SAXException
-        {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             if (qName.equals("class"))
                 type = Type.Class;
             else if (qName.equals("disam"))
@@ -413,29 +418,23 @@ public class Fuzzer
                 type = Type.Input;
         }
 
-        public void characters(char ch[], int start, int length) throws SAXException
-        {
+        public void characters(char ch[], int start, int length) throws SAXException {
             if (type == Type.Class)
                 currentClass = new String(ch, start, length);
-            else if (type == Type.Disam)
-            {
+            else if (type == Type.Disam) {
                 currentDisam = new String(ch, start, length);
-                System.out.println("Starting fuzz of "+currentDisam);
-            }
-            else if (type == Type.Code)
-            {
+                System.out.println("Starting fuzz of " + currentDisam);
+            } else if (type == Type.Code) {
                 String[] codeArr = new String(ch, start, length).trim().split(" ");
                 currentCode = new byte[codeArr.length];
-                for (int i=0; i < codeArr.length; i++)
+                for (int i = 0; i < codeArr.length; i++)
                     currentCode[i] = (byte)Integer.parseInt(codeArr[i], 16);
-            }
-            else if (type == Type.Input)
-            {
+            } else if (type == Type.Input) {
                 if (unimplemented.contains(currentClass))
                     return;
                 String[] inputArr = new String(ch, start, length).trim().split(" ");
                 int[] input = new int[names.length];
-                for (int i=0; i < inputArr.length; i++)
+                for (int i = 0; i < inputArr.length; i++)
                     input[i] = Integer.parseInt(inputArr[i], 16);
                 // set eip
                 // eip will be 0 which is fine
@@ -448,15 +447,16 @@ public class Fuzzer
                 try {
                     if (!executeCase(currentClass, currentDisam, currentCode, input, pc1, pc2, mem, flags, log))
                         unimplemented.add(currentClass);
-                } catch (Exception e) {e.printStackTrace();}
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 testCount++;
                 if (testCount % 10000 == 0)
                     System.out.printf("Completed %d test cases from %d opcodes in %s\n", testCount, opcodeCount, mode);
             }
         }
 
-        public void endElement(String uri, String localName, String qName) throws SAXException
-        {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             type = Type.None;
         }
     }

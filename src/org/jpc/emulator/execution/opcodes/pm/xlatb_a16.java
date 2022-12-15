@@ -33,30 +33,25 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class xlatb_a16 extends Executable
-{
+public class xlatb_a16 extends Executable {
     final int segIndex;
 
-    public xlatb_a16(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public xlatb_a16(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         segIndex = Prefices.getSegment(prefices, Processor.DS_INDEX);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Segment seg = cpu.segs[segIndex];
-        cpu.r_al.set8(seg.getByte((0xffff&cpu.r_bx.get16()) + (0xff & cpu.r_al.get8())));
+        cpu.r_al.set8(seg.getByte((0xffff & cpu.r_bx.get16()) + (0xff & cpu.r_al.get8())));
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

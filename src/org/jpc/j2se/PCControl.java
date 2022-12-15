@@ -28,7 +28,6 @@
 package org.jpc.j2se;
 
 /**
- *
  * @author ian
  */
 public interface PCControl {

@@ -37,12 +37,11 @@ import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.Processor;
 
-public interface CodeBlock
-{
+public interface CodeBlock {
     public int getX86Length();
 
     public int getX86Count();
-    
+
     public Executable.Branch execute(Processor cpu);
 
     public String getDisplayString();

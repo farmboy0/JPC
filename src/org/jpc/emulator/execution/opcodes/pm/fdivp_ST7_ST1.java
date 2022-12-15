@@ -33,35 +33,30 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fdivp_ST7_ST1 extends Executable
-{
+public class fdivp_ST7_ST1 extends Executable {
 
-    public fdivp_ST7_ST1(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fdivp_ST7_ST1(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(7);
         double freg1 = cpu.fpu.ST(1);
         if (((freg0 == 0.0) && (freg1 == 0.0)) || (Double.isInfinite(freg0) && Double.isInfinite(freg1)))
             cpu.fpu.setInvalidOperation();
-	if ((freg1 == 0.0) && !Double.isNaN(freg0) && !Double.isInfinite(freg0))
+        if ((freg1 == 0.0) && !Double.isNaN(freg0) && !Double.isInfinite(freg0))
             cpu.fpu.setZeroDivide();
-        cpu.fpu.setST(7, freg0/freg1);
+        cpu.fpu.setST(7, freg0 / freg1);
         cpu.fpu.pop();
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

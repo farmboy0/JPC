@@ -38,35 +38,32 @@ import java.net.*;
 import java.util.logging.*;
 
 /**
- * 
  * @author Ian Preston
  */
-public class RemoteBlockDeviceServer 
-{
+public class RemoteBlockDeviceServer {
     private static final Logger LOGGING = Logger.getLogger(RemoteBlockDeviceServer.class.getName());
-    
-    public static void main(String[] args) throws Exception
-    {
+
+    public static void main(String[] args) throws Exception {
         DriveSet set = DriveSet.buildFromArgs(args);
-        
+
         int port = 6666;
-        try
-        {
+        try {
             port = Integer.parseInt(ArgProcessor.findVariable(args, "port", "6666"));
+        } catch (NumberFormatException e) {
         }
-        catch (NumberFormatException e) {}
 
         ServerSocket inputsock = new ServerSocket(port);
         Socket ss = inputsock.accept();
         InputStream in = ss.getInputStream();
 
         OutputStream out = ss.getOutputStream();
-        
+
         RemoteBlockDeviceImpl impl = new RemoteBlockDeviceImpl(in, out, set.getBootDevice());
-        
-        LOGGING.log(Level.INFO, "Server accepted connection to {0} on port {1,number,integer}", new Object[]{set.getBootDevice(), Integer.valueOf(port)});
+
+        LOGGING.log(Level.INFO, "Server accepted connection to {0} on port {1,number,integer}",
+            new Object[] { set.getBootDevice(), Integer.valueOf(port) });
     }
-    private RemoteBlockDeviceServer()
-    {
+
+    private RemoteBlockDeviceServer() {
     }
 }

@@ -33,29 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fstp_ST1 extends Executable
-{
+public class fstp_ST1 extends Executable {
 
-    public fstp_ST1(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fstp_ST1(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.fpu.setST(1, cpu.fpu.ST(0));
         cpu.fpu.pop();
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

@@ -40,10 +40,9 @@ import java.util.logging.*;
  * A generic block device backed by a <code>SeekableIODevice</code> instance.
  * @author Chris Dennis
  */
-public abstract class RawBlockDevice implements BlockDevice
-{
+public abstract class RawBlockDevice implements BlockDevice {
     private static final Logger LOGGING = Logger.getLogger(RawBlockDevice.class.getName());
-    
+
     private SeekableIODevice data;
     private long totalSectors;
 
@@ -51,16 +50,14 @@ public abstract class RawBlockDevice implements BlockDevice
      * Constructs an instance backed by the given <code>SeekableIODevice</code>.
      * @param data device backing
      */
-    protected RawBlockDevice(SeekableIODevice data)
-    {
+    protected RawBlockDevice(SeekableIODevice data) {
         setData(data);
     }
 
-    public int read(long sectorNumber, byte[] buffer, int size)
-    {
+    public int read(long sectorNumber, byte[] buffer, int size) {
         Integer t;
         try {
-            
+
             data.seek(sectorNumber * SECTOR_SIZE);
             int pos = 0;
             int toRead = Math.min(buffer.length, SECTOR_SIZE * size);
@@ -74,13 +71,12 @@ public abstract class RawBlockDevice implements BlockDevice
                 pos += read;
             }
         } catch (IOException e) {
-            LOGGING.log(Level.WARNING, "error reading sector " + sectorNumber + ", size = " +size, e);
+            LOGGING.log(Level.WARNING, "error reading sector " + sectorNumber + ", size = " + size, e);
             return -1;
         }
     }
 
-    public int write(long sectorNumber, byte[] buffer, int size)
-    {
+    public int write(long sectorNumber, byte[] buffer, int size) {
         try {
             data.seek(sectorNumber * SECTOR_SIZE);
             data.write(buffer, 0, size * SECTOR_SIZE);
@@ -91,23 +87,19 @@ public abstract class RawBlockDevice implements BlockDevice
         return 0;
     }
 
-    public long getTotalSectors()
-    {
+    public long getTotalSectors() {
         return totalSectors;
     }
 
-    public boolean isInserted()
-    {
+    public boolean isInserted() {
         return (data != null);
     }
 
-    public boolean isReadOnly()
-    {
+    public boolean isReadOnly() {
         return data.readOnly();
     }
-    
-    public void close()
-    {
+
+    public void close() {
         try {
             if (data != null)
                 data.close();
@@ -115,9 +107,8 @@ public abstract class RawBlockDevice implements BlockDevice
             LOGGING.log(Level.INFO, "Couldn't close device", e);
         }
     }
-    
-    public void configure(String specs) throws IOException
-    {
+
+    public void configure(String specs) throws IOException {
         data.configure(specs);
     }
 
@@ -125,17 +116,15 @@ public abstract class RawBlockDevice implements BlockDevice
      * Changes the backing for this device.
      * @param data new backing device
      */
-    protected final void setData(SeekableIODevice data)
-    {
+    protected final void setData(SeekableIODevice data) {
         this.data = data;
         if (data == null)
             totalSectors = 0;
         else
             totalSectors = data.length() / SECTOR_SIZE;
     }
-    
-    public String toString()
-    {
+
+    public String toString() {
         if (data == null)
             return "<empty>";
         else

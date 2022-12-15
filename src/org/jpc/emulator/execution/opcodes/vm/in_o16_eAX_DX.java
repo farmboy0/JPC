@@ -33,30 +33,25 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class in_o16_eAX_DX extends Executable
-{
+public class in_o16_eAX_DX extends Executable {
 
-    public in_o16_eAX_DX(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public in_o16_eAX_DX(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        if (cpu.checkIOPermissions16(0xFFFF&cpu.r_dx.get16()))
-            cpu.r_eax.set16(cpu.ioports.ioPortRead16(0xFFFF&cpu.r_dx.get16()));
+    public Branch execute(Processor cpu) {
+        if (cpu.checkIOPermissions16(0xFFFF & cpu.r_dx.get16()))
+            cpu.r_eax.set16(cpu.ioports.ioPortRead16(0xFFFF & cpu.r_dx.get16()));
         else
             throw ProcessorException.GENERAL_PROTECTION_0;
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

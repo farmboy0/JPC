@@ -40,11 +40,9 @@ import org.jpc.emulator.execution.decoder.PeekableInputStream;
  * Converts a stream of x86 bytes into a basic block
  * @author Ian Preston
  */
-public interface Decoder
-{
+public interface Decoder {
     /**
      * Decodes a sequence of real-mode x86 bytes into an instruction stream.
-     *
      * @param source sequence of x86 bytes to decode.
      * @param limit max x86 instructions to decode.
      * @return decoded instruction stream
@@ -54,9 +52,7 @@ public interface Decoder
     /**
      * Decodes a sequence of protected-mode x86 bytes into an instruction stream.
      * <p>
-     * If the default operand size is 32-bit then the operandSize flag should be
-     * set.
-     *
+     * If the default operand size is 32-bit then the operandSize flag should be set.
      * @param source sequence of x86 bytes to decode
      * @param operandSize <code>true</code> true if the default operand size is 32-bit
      * @param limit max x86 instructions to decode.
@@ -66,7 +62,6 @@ public interface Decoder
 
     /**
      * Decodes a sequence of virtual8086-mode x86 bytes into an instruction stream.
-     *
      * @param source sequence of x86 bytes to decode.
      * @param limit max x86 instructions to decode.
      * @return decoded instruction stream

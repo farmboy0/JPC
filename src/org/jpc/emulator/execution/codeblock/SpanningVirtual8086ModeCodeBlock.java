@@ -37,38 +37,34 @@ import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.memory.AddressSpace;
 
 /**
- * 
  * @author Chris Dennis
  */
-class SpanningVirtual8086ModeCodeBlock extends SpanningCodeBlock implements Virtual8086ModeCodeBlock
-{
+class SpanningVirtual8086ModeCodeBlock extends SpanningCodeBlock implements Virtual8086ModeCodeBlock {
     private PeekableMemoryStream byteSourceStream = new PeekableMemoryStream();
 
     private CodeBlockFactory[] factories;
 
-    public SpanningVirtual8086ModeCodeBlock(CodeBlockFactory[] factories)
-    {
-	this.factories = factories;
+    public SpanningVirtual8086ModeCodeBlock(CodeBlockFactory[] factories) {
+        this.factories = factories;
     }
 
-    public CodeBlock decode(Processor cpu)
-    {
-	Virtual8086ModeCodeBlock block = null;
-	AddressSpace memory = cpu.linearMemory;
-	int address = cpu.getInstructionPointer();
-	for (int i = 0; (i < factories.length) && (block == null); i++) {
-	    try {
-		byteSourceStream.set(memory, address);
-		block = factories[i].getVirtual8086ModeCodeBlock(byteSourceStream);
-	    } catch (IllegalStateException e) {}
-	}
-	
+    public CodeBlock decode(Processor cpu) {
+        Virtual8086ModeCodeBlock block = null;
+        AddressSpace memory = cpu.linearMemory;
+        int address = cpu.getInstructionPointer();
+        for (int i = 0; (i < factories.length) && (block == null); i++) {
+            try {
+                byteSourceStream.set(memory, address);
+                block = factories[i].getVirtual8086ModeCodeBlock(byteSourceStream);
+            } catch (IllegalStateException e) {
+            }
+        }
+
         byteSourceStream.set(null, 0);
-	return block;
+        return block;
     }
-    
-    public String toString()
-    {
-	return "Spanning Virtual8086 Mode CodeBlock";
+
+    public String toString() {
+        return "Spanning Virtual8086 Mode CodeBlock";
     }
 }

@@ -33,32 +33,28 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class ud2 extends Executable
-{
+public class ud2 extends Executable {
     final int blockLength;
     final int instructionLength;
 
-    public ud2(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public ud2(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
-        instructionLength = (int)input.getAddress()-eip;
-        blockLength = eip-blockStart+instructionLength;
+        instructionLength = (int)input.getAddress() - eip;
+        blockLength = eip - blockStart + instructionLength;
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.eip += blockLength;
-        if (true) throw ProcessorException.UNDEFINED;
+        if (true)
+            throw ProcessorException.UNDEFINED;
         return Branch.Exception;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return true;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

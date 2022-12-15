@@ -39,19 +39,16 @@ import java.io.*;
  * IO device used for backing subclasses of {@link RawBlockDevice}.
  * @author Chris Dennis
  */
-public interface SeekableIODevice
-{
+public interface SeekableIODevice {
     /**
-     * Move read/write offset to given location (in bytes) from the start of the
-     * device.
+     * Move read/write offset to given location (in bytes) from the start of the device.
      * @param offset location to seek to
      * @throws java.io.IOException if <code>offset</code> is invalid
      */
     public void seek(long offset) throws IOException;
 
     /**
-     * Writes <code>length</code> bytes from <code>data</code> starting at
-     * offset into the device.
+     * Writes <code>length</code> bytes from <code>data</code> starting at offset into the device.
      * @param data buffer to read data from
      * @param offset start offset in <code>data<code>
      * @param length number of bytes to write
@@ -61,8 +58,8 @@ public interface SeekableIODevice
     public int write(byte[] data, int offset, int length) throws IOException;
 
     /**
-     * Reads <code>length</code> bytes from the device, writing into 
-     * <code>data</code> at <code>offset</code>.
+     * Reads <code>length</code> bytes from the device, writing into <code>data</code> at
+     * <code>offset</code>.
      * @param data buffer to write data into
      * @param offset start offset in <code>data</code>
      * @param length number of bytes to read
@@ -87,11 +84,10 @@ public interface SeekableIODevice
      * Closes and releases the resources associated with this instance.
      */
     public void close() throws IOException;
-    
+
     /**
-     * Configure device using the given <code>String</code>.  What this object
-     * chooses to do with the given <code>String</code> is implementation
-     * dependant.
+     * Configure device using the given <code>String</code>. What this object chooses to do with the
+     * given <code>String</code> is implementation dependant.
      * @param opts configuration string
      * @throws java.io.IOException on an I/O error configuring the device
      * @throws java.lang.IllegalArgumentException if the configuration string is invalid.

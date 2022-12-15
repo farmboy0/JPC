@@ -1,7 +1,6 @@
 package org.jpc.emulator.motherboard;
 
-public interface IODevice
-{
+public interface IODevice {
 
     public void ioPortWrite8(int address, int data);
 

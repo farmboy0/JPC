@@ -31,14 +31,12 @@
     End of licence header
 */
 
-
 package org.jpc.emulator.processor.fpu64;
 
 import org.jpc.emulator.processor.*;
 import org.jpc.emulator.*;
 
-public abstract class FpuState implements Hibernatable
-{
+public abstract class FpuState implements Hibernatable {
     // stack depth (common to all x87 FPU's)
     public final static int STACK_DEPTH = 8;
 
@@ -61,50 +59,92 @@ public abstract class FpuState implements Hibernatable
     // accessors to flag an exception - these will set the bit,
     // check the mask, and throw a ProcessorException if unmasked
     public abstract void setC0(boolean val);
+
     public abstract void setC1(boolean val);
+
     public abstract void setC2(boolean val);
+
     public abstract void setC3(boolean val);
+
     public abstract void setInvalidOperation();
+
     public abstract void setDenormalizedOperand();
+
     public abstract void setZeroDivide();
+
     public abstract void setOverflow();
+
     public abstract void setUnderflow();
+
     public abstract void setPrecision();
+
     public abstract void setStackFault();
+
     public abstract void setTagEmpty(int index);
+
     public abstract void clearExceptions();
+
     public abstract void checkExceptions() throws ProcessorException;
+
     // read accessors
     public abstract boolean getInvalidOperation();
+
     public abstract boolean getDenormalizedOperand();
+
     public abstract boolean getZeroDivide();
+
     public abstract boolean getOverflow();
+
     public abstract boolean getUnderflow();
+
     public abstract boolean getPrecision();
+
     public abstract boolean getStackFault();
+
     public abstract boolean getErrorSummaryStatus(); // derived from other bits
+
     public abstract boolean getBusy();//same as fpuErrorSummaryStatus() (legacy)
+
     public int conditionCode; // 4 bits
     public int top; // top of stack pointer (3 bits)
     // control word
+
     public abstract boolean getInvalidOperationMask();
+
     public abstract boolean getDenormalizedOperandMask();
+
     public abstract boolean getZeroDivideMask();
+
     public abstract boolean getOverflowMask();
+
     public abstract boolean getUnderflowMask();
+
     public abstract boolean getPrecisionMask();
+
     public boolean infinityControl; // legacy:  not really used anymore
-    public abstract int getPrecisionControl();  // 2 bits
-    public abstract int getRoundingControl();   // 2 bits
+
+    public abstract int getPrecisionControl(); // 2 bits
+
+    public abstract int getRoundingControl(); // 2 bits
+
     public abstract void setInvalidOperationMask(boolean value);
+
     public abstract void setDenormalizedOperandMask(boolean value);
+
     public abstract void setZeroDivideMask(boolean value);
+
     public abstract void setOverflowMask(boolean value);
+
     public abstract void setUnderflowMask(boolean value);
+
     public abstract void setPrecisionMask(boolean value);
+
     public abstract void setPrecisionControl(int value);
+
     public abstract void setRoundingControl(int value);
+
     public abstract void setAllMasks(boolean value);
+
     // other registers
     public long lastIP; // last instruction pointer
     public long lastData; // last data (operand) pointer
@@ -112,28 +152,42 @@ public abstract class FpuState implements Hibernatable
 
     // x87 access
     public abstract void prepareFPU(Processor cpu, boolean checkExceptions);
+
     public abstract void init();
+
     public abstract void push(double x) throws ProcessorException;
+
     public abstract double pop() throws ProcessorException;
+
     public abstract double[] getStack();
+
     public abstract void setStack(double[] s);
+
     public abstract double round(double in);
+
     public abstract double ST(int index) throws ProcessorException;
+
     public abstract void setST(int index, double value);
+
 //     public abstract void pushBig(BigDecimal x) throws ProcessorException;
 //     public abstract BigDecimal popBig() throws ProcessorException;
 //     public abstract BigDecimal bigST(int index) throws ProcessorException;
 //     public abstract void setBigST(int index, BigDecimal value);
     public abstract int getStatus();
+
     public abstract void setStatus(int w);
+
     public abstract int getControl();
+
     public abstract void setControl(int w);
+
     public abstract int getTagWord();
+
     public abstract void setTagWord(int w);
+
     public abstract int getTag(int index);
 
-    public void copyStateInto(FpuState copy)
-    {
+    public void copyStateInto(FpuState copy) {
         copy.conditionCode = conditionCode;
         copy.top = top;
         copy.infinityControl = infinityControl;
@@ -142,12 +196,12 @@ public abstract class FpuState implements Hibernatable
         copy.lastOpcode = lastOpcode;
     }
 
-    public boolean equals(Object another)
-    {
+    public boolean equals(Object another) {
         if (!(another instanceof FpuState))
             return false;
-        FpuState s = (FpuState) another;
-        if ((s.conditionCode != conditionCode) || (s.top != top) || (s.infinityControl != infinityControl) || (s.lastIP != lastIP) || (s.lastData != lastData) || (s.lastOpcode != lastOpcode))
+        FpuState s = (FpuState)another;
+        if ((s.conditionCode != conditionCode) || (s.top != top) || (s.infinityControl != infinityControl) || (s.lastIP != lastIP)
+            || (s.lastData != lastData) || (s.lastOpcode != lastOpcode))
             return false;
 
         return true;

@@ -33,21 +33,18 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class enter_o32_Iw_Ib extends Executable
-{
+public class enter_o32_Iw_Ib extends Executable {
     final int immw;
     final int immb;
 
-    public enter_o32_Iw_Ib(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public enter_o32_Iw_Ib(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         immw = Modrm.Iw(input);
         immb = Modrm.Ib(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
-            int frameSize = 0xffff & immw;
+    public Branch execute(Processor cpu) {
+        int frameSize = 0xffff & immw;
         int nestingLevel = immb;
         nestingLevel &= 0x1f;
         if (cpu.ss.getDefaultSizeFlag())
@@ -57,13 +54,11 @@ public class enter_o32_Iw_Ib extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

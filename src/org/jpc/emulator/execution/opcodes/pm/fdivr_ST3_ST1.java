@@ -33,34 +33,29 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fdivr_ST3_ST1 extends Executable
-{
+public class fdivr_ST3_ST1 extends Executable {
 
-    public fdivr_ST3_ST1(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fdivr_ST3_ST1(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(3);
         double freg1 = cpu.fpu.ST(1);
         if (((freg0 == 0.0) && (freg1 == 0.0)) || (Double.isInfinite(freg0) && Double.isInfinite(freg1)))
             cpu.fpu.setInvalidOperation();
-	if ((freg0 == 0.0) && !Double.isNaN(freg1) && !Double.isInfinite(freg1))
+        if ((freg0 == 0.0) && !Double.isNaN(freg1) && !Double.isInfinite(freg1))
             cpu.fpu.setZeroDivide();
-        cpu.fpu.setST(3,  freg1/freg0);
+        cpu.fpu.setST(3, freg1 / freg0);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

@@ -36,22 +36,19 @@ package org.jpc.support;
 import org.jpc.j2se.Option;
 
 /**
- * Provides simple command line parsing for the various frontends to the
- * emulator.
+ * Provides simple command line parsing for the various frontends to the emulator.
  * @author Rhys Newman
  */
-public class ArgProcessor
-{
+public class ArgProcessor {
     /**
-     * Finds the value of the variable <code>key</code>.  Searches the given
-     * commandline for <code>-key value</code>
+     * Finds the value of the variable <code>key</code>. Searches the given commandline for
+     * <code>-key value</code>
      * @param args array of strings to search
      * @param key key to search for
      * @param defaultValue value returned on failure
      * @return result, or <code>defaultValue</code> on failure
      */
-    public static String findVariable(String[] args, String key, String defaultValue)
-    {
+    public static String findVariable(String[] args, String key, String defaultValue) {
         Option opt = Option.getParameter(key.substring(1));
         if (opt == null)
             opt = Option.getParameter(key);
@@ -60,7 +57,7 @@ public class ArgProcessor
         int keyIndex = findKey(args, key);
         if (keyIndex < 0)
             return defaultValue;
-        
+
         if ((keyIndex + 1) < args.length)
             return args[keyIndex + 1];
         else
@@ -68,35 +65,30 @@ public class ArgProcessor
     }
 
     /**
-     * Searches for the presence of the given flag on the command line as 
-     * <code>-flag</code>
+     * Searches for the presence of the given flag on the command line as <code>-flag</code>
      * @param args array of strings to search
      * @param flag parameter to search for
      * @return true if flag is found
      */
-    public static boolean findFlag(String[] args, String flag)
-    {
+    public static boolean findFlag(String[] args, String flag) {
         return findKey(args, flag) >= 0;
     }
 
-    private static int findKey(String[] args, String key)
-    {
+    private static int findKey(String[] args, String key) {
         if (key.startsWith("-"))
             key = key.substring(1);
-        
-        for (int i=0; i<args.length; i++)
-        {
+
+        for (int i = 0; i < args.length; i++) {
             if (!args[i].startsWith("-"))
                 continue;
-            
+
             if (args[i].substring(1).equalsIgnoreCase(key))
                 return i;
         }
-        
+
         return -1;
     }
-    
-    private ArgProcessor()
-    {
+
+    private ArgProcessor() {
     }
 }

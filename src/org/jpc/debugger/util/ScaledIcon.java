@@ -37,50 +37,43 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import javax.swing.Icon;
 
-public class ScaledIcon implements Icon
-{
+public class ScaledIcon implements Icon {
     Icon source;
     int width, height;
     double scaleX, scaleY;
 
-    public ScaledIcon(Icon source, int width, int height)
-    {
+    public ScaledIcon(Icon source, int width, int height) {
         this.source = source;
         this.height = height;
         this.width = width;
         scaleX = scaleY = 0;
 
-        if (source != null)
-        {
+        if (source != null) {
             int w = source.getIconWidth();
             int h = source.getIconHeight();
             if ((w == 0) || (h == 0))
                 return;
-            scaleX = width*1.0/w;
-            scaleY = height*1.0/h;
-        }
-        else
+            scaleX = width * 1.0 / w;
+            scaleY = height * 1.0 / h;
+        } else
             height = width = 0;
     }
 
-    public int getIconHeight() 
-    {
+    public int getIconHeight() {
         return height;
     }
 
-    public int getIconWidth() 
-    {
+    public int getIconWidth() {
         return width;
     }
 
-    public void paintIcon(Component c, Graphics g, int x, int y) 
-    {
+    public void paintIcon(Component c, Graphics g, int x, int y) {
         if ((scaleX == 0) || (scaleY == 0) || (source == null))
             return;
-        Graphics2D g2 = (Graphics2D) g;
-        AffineTransform original  = g2.getTransform();
+        Graphics2D g2 = (Graphics2D)g;
+        AffineTransform original = g2.getTransform();
         g2.transform(AffineTransform.getScaleInstance(scaleX, scaleY));
-        source.paintIcon(c, g2, (int) (x/scaleX), (int) (y/scaleY));
+        source.paintIcon(c, g2, (int)(x / scaleX), (int)(y / scaleY));
         g2.setTransform(original);
     }
 }

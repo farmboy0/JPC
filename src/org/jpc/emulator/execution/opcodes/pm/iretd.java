@@ -33,20 +33,17 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class iretd extends Executable
-{
+public class iretd extends Executable {
     final int blockLength;
     final int instructionLength;
 
-    public iretd(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public iretd(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
-        instructionLength = (int)input.getAddress()-eip;
-        blockLength = eip-blockStart+instructionLength;
+        instructionLength = (int)input.getAddress() - eip;
+        blockLength = eip - blockStart + instructionLength;
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         if (cpu.ss.getDefaultSizeFlag())
             cpu.iret_pm_o32_a32();
         else
@@ -54,13 +51,11 @@ public class iretd extends Executable
         return Branch.Ret;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return true;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

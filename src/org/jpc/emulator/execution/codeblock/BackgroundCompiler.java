@@ -40,7 +40,6 @@ import org.jpc.emulator.execution.decoder.BasicBlock;
 import org.jpc.emulator.processor.*;
 
 /**
- * 
  * @author Rhys Newman
  * @author Chris Dennis
  * @author Ian Preston
@@ -51,7 +50,7 @@ class BackgroundCompiler implements CodeBlockCompiler {
     private static final int COMPILER_QUEUE_SIZE = 256;
     private static final int COMPILE_REQUEST_THRESHOLD = 1024;
 //    private static final int MAX_COMPILER_THREADS = 10;
-    private CodeBlockCompiler immediate,  delayed;
+    private CodeBlockCompiler immediate, delayed;
     private CompilerQueue compilerQueue;
 
     public BackgroundCompiler(CodeBlockCompiler immediate, CodeBlockCompiler delayed) {
@@ -80,8 +79,7 @@ class BackgroundCompiler implements CodeBlockCompiler {
 
     private class Compiler implements Runnable {
 
-        public void run() 
-        {
+        public void run() {
             while (true) {
                 ExecuteCountingCodeBlockWrapper target = compilerQueue.getBlock();
                 if (target == null) {
@@ -101,9 +99,9 @@ class BackgroundCompiler implements CodeBlockCompiler {
                 if (src instanceof ReplacementBlockTrigger) {
                     continue;
                 } else if (src instanceof RealModeCodeBlock) {
-                    result = delayed.getRealModeCodeBlock((BasicBlock) src);
+                    result = delayed.getRealModeCodeBlock((BasicBlock)src);
                 } else if (src instanceof ProtectedModeCodeBlock) {
-                    result = delayed.getProtectedModeCodeBlock((BasicBlock) src);
+                    result = delayed.getProtectedModeCodeBlock((BasicBlock)src);
                 }
 
                 if (result == null) {
@@ -195,14 +193,11 @@ class BackgroundCompiler implements CodeBlockCompiler {
             return false;
         }
 
-        ExecuteCountingCodeBlockWrapper getBlock() 
-        {
+        ExecuteCountingCodeBlockWrapper getBlock() {
             int index = 0;
             int maxCount = 0;
-            for (int i = 0; i < queue.length; i++) 
-            {
-                if ((queue[i] != null) && (queue[i].executeCount > maxCount)) 
-                {
+            for (int i = 0; i < queue.length; i++) {
+                if ((queue[i] != null) && (queue[i].executeCount > maxCount)) {
                     maxCount = queue[i].executeCount;
                     index = i;
                 }
@@ -211,8 +206,7 @@ class BackgroundCompiler implements CodeBlockCompiler {
             queue[index] = null;
 
             maxCount /= 2;
-            for (int i = 0; i < queue.length; i++)
-            {
+            for (int i = 0; i < queue.length; i++) {
                 if (queue[i] == null)
                     continue;
                 if (queue[i].executeCount < maxCount)

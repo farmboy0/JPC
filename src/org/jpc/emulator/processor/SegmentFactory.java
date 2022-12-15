@@ -39,237 +39,208 @@ import java.io.*;
 import static org.jpc.emulator.processor.ProtectedModeSegment.*;
 
 /**
- * 
  * @author Chris Dennis
  */
-public class SegmentFactory
-{
+public class SegmentFactory {
     private static final long DESCRIPTOR_TYPE = 0x100000000000L;
     private static final long SEGMENT_TYPE = 0xf0000000000L;
-    
+
     public static final Segment NULL_SEGMENT = new NullSegment();
-    
-    private SegmentFactory()
-    {
+
+    private SegmentFactory() {
     }
 
-    public static Segment createRealModeSegment(AddressSpace memory, int selector)
-    {
+    public static Segment createRealModeSegment(AddressSpace memory, int selector) {
         if (memory == null)
             throw new NullPointerException("Null reference to memory");
 
         return new RealModeSegment(memory, selector);
     }
 
-    public static Segment createRealModeSegment(AddressSpace memory, Segment ancestor)
-    {
+    public static Segment createRealModeSegment(AddressSpace memory, Segment ancestor) {
         if (memory == null)
             throw new NullPointerException("Null reference to memory");
 
         return new RealModeSegment(memory, ancestor);
     }
 
-    public static Segment createVirtual8086ModeSegment(AddressSpace memory, int selector, boolean isCode)
-    {
+    public static Segment createVirtual8086ModeSegment(AddressSpace memory, int selector, boolean isCode) {
         if (memory == null)
             throw new NullPointerException("Null reference to memory");
 
         return new Virtual8086ModeSegment(memory, selector, isCode);
     }
-    
-    public static Segment createDescriptorTableSegment(AddressSpace memory, int base, int limit)
-    {
+
+    public static Segment createDescriptorTableSegment(AddressSpace memory, int base, int limit) {
         if (memory == null)
             throw new NullPointerException("Null reference to memory");
 
         return new DescriptorTableSegment(memory, base, limit);
     }
 
-    public static Segment createProtectedModeSegment(AddressSpace memory, int selector, long descriptor)
-    {
+    public static Segment createProtectedModeSegment(AddressSpace memory, int selector, long descriptor) {
         return createProtectedModeSegment(memory, selector, descriptor, false);
     }
 
-    public static Segment createProtectedModeSegment(AddressSpace memory, int selector, long descriptor, boolean isStack)
-    {
-        switch ((int) ((descriptor & (DESCRIPTOR_TYPE | SEGMENT_TYPE)) >>> 40)) {
+    public static Segment createProtectedModeSegment(AddressSpace memory, int selector, long descriptor, boolean isStack) {
+        switch ((int)((descriptor & (DESCRIPTOR_TYPE | SEGMENT_TYPE)) >>> 40)) {
 
-            // System Segments 
-            default:
-            case 0x00: //Reserved
-            case 0x08: //Reserved
-            case 0x0a: //Reserved
-            case 0x0d: //Reserved
-                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
-            case 0x01: //System Segment: 16-bit TSS (Available)
-                return new ProtectedModeSegment.Available16BitTSS(memory, selector, descriptor);
-            case 0x02: //System Segment: LDT
-                return new ProtectedModeSegment.LDT(memory, selector, descriptor);
-            case 0x03: //System Segment: 16-bit TSS (Busy)
-                return new ProtectedModeSegment.Busy16BitTSS(memory, selector, descriptor);
-            case 0x04: //System Segment: 16-bit Call Gate
-                return new ProtectedModeSegment.CallGate16Bit(memory, selector, descriptor);
-            case 0x05: //System Segment: Task Gate
-                return new ProtectedModeSegment.TaskGate(memory, selector, descriptor);
-            case 0x06: //System Segment: 16-bit Interrupt Gate
-                return new ProtectedModeSegment.InterruptGate16Bit(memory, selector, descriptor);
-            case 0x07: //System Segment: 16-bit Trap Gate
-                return new ProtectedModeSegment.TrapGate16Bit(memory, selector, descriptor);
-            case TYPE_AVAILABLE_32_TSS: //System Segment: 32-bit TSS (Available)
-                return new ProtectedModeSegment.Available32BitTSS(memory, selector, descriptor);
-            case TYPE_BUSY_32_TSS: //System Segment: 32-bit TSS (Busy)
-                return new ProtectedModeSegment.Busy32BitTSS(memory, selector, descriptor);
-            case 0x0c: //System Segment: 32-bit Call Gate
-                return new ProtectedModeSegment.CallGate32Bit(memory, selector, descriptor);
-            case 0x0e: //System Segment: 32-bit Interrupt Gate
-                return new ProtectedModeSegment.InterruptGate32Bit(memory, selector, descriptor);
-            case 0x0f: //System Segment: 32-bit Trap Gate
-                return new ProtectedModeSegment.TrapGate32Bit(memory, selector, descriptor);
+        // System Segments 
+        default:
+        case 0x00: //Reserved
+        case 0x08: //Reserved
+        case 0x0a: //Reserved
+        case 0x0d: //Reserved
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+        case 0x01: //System Segment: 16-bit TSS (Available)
+            return new ProtectedModeSegment.Available16BitTSS(memory, selector, descriptor);
+        case 0x02: //System Segment: LDT
+            return new ProtectedModeSegment.LDT(memory, selector, descriptor);
+        case 0x03: //System Segment: 16-bit TSS (Busy)
+            return new ProtectedModeSegment.Busy16BitTSS(memory, selector, descriptor);
+        case 0x04: //System Segment: 16-bit Call Gate
+            return new ProtectedModeSegment.CallGate16Bit(memory, selector, descriptor);
+        case 0x05: //System Segment: Task Gate
+            return new ProtectedModeSegment.TaskGate(memory, selector, descriptor);
+        case 0x06: //System Segment: 16-bit Interrupt Gate
+            return new ProtectedModeSegment.InterruptGate16Bit(memory, selector, descriptor);
+        case 0x07: //System Segment: 16-bit Trap Gate
+            return new ProtectedModeSegment.TrapGate16Bit(memory, selector, descriptor);
+        case TYPE_AVAILABLE_32_TSS: //System Segment: 32-bit TSS (Available)
+            return new ProtectedModeSegment.Available32BitTSS(memory, selector, descriptor);
+        case TYPE_BUSY_32_TSS: //System Segment: 32-bit TSS (Busy)
+            return new ProtectedModeSegment.Busy32BitTSS(memory, selector, descriptor);
+        case 0x0c: //System Segment: 32-bit Call Gate
+            return new ProtectedModeSegment.CallGate32Bit(memory, selector, descriptor);
+        case 0x0e: //System Segment: 32-bit Interrupt Gate
+            return new ProtectedModeSegment.InterruptGate32Bit(memory, selector, descriptor);
+        case 0x0f: //System Segment: 32-bit Trap Gate
+            return new ProtectedModeSegment.TrapGate32Bit(memory, selector, descriptor);
 
-            // Data Segments
-            case 0x10: //Data Segment: Read-Only
-                if (isStack)
-                    return new ProtectedModeSegment.ReadOnlyDataStackSegment(memory, selector, descriptor);
-                else
-                    return new ProtectedModeSegment.ReadOnlyDataSegment(memory, selector, descriptor);
-            case 0x11: //Data Segment: Read-Only, Accessed
-                if (isStack)
-                    return new ProtectedModeSegment.ReadOnlyAccessedStackSegment(memory, selector, descriptor);
-                else
-                    return new ProtectedModeSegment.ReadOnlyAccessedDataSegment(memory, selector, descriptor);
-            case 0x12: //Data Segment: Read/Write
-                if (isStack)
-                    return new ProtectedModeSegment.ReadWriteStackSegment(memory, selector, descriptor);
-                else
-                    return new ProtectedModeSegment.ReadWriteDataSegment(memory, selector, descriptor);
-            case 0x13: //Data Segment: Read/Write, Accessed
-                if (isStack)
-                    return new ProtectedModeSegment.ReadWriteAccessedStackSegment(memory, selector, descriptor);
-                else
-                    return new ProtectedModeSegment.ReadWriteAccessedDataSegment(memory, selector, descriptor);
-            case 0x14: //Data Segment: Read-Only, Expand-Down
-                throw new IllegalStateException("Unimplemented Data Segment: Read-Only, Expand-Down");
-            case 0x15: //Data Segment: Read-Only, Expand-Down, Accessed
-                throw new IllegalStateException("Unimplemented Data Segment: Read-Only, Expand-Down, Accessed");
-            case 0x16: //Data Segment: Read/Write, Expand-Down
-                return new ProtectedModeExpandDownSegment.ReadWriteDataSegment(memory, selector, descriptor);
-            case 0x17: //Data Segment: Read/Write, Expand-Down, Accessed
-                throw new IllegalStateException("Unimplemented Data Segment: Read/Write, Expand-Down, Accessed");
+        // Data Segments
+        case 0x10: //Data Segment: Read-Only
+            if (isStack)
+                return new ProtectedModeSegment.ReadOnlyDataStackSegment(memory, selector, descriptor);
+            else
+                return new ProtectedModeSegment.ReadOnlyDataSegment(memory, selector, descriptor);
+        case 0x11: //Data Segment: Read-Only, Accessed
+            if (isStack)
+                return new ProtectedModeSegment.ReadOnlyAccessedStackSegment(memory, selector, descriptor);
+            else
+                return new ProtectedModeSegment.ReadOnlyAccessedDataSegment(memory, selector, descriptor);
+        case 0x12: //Data Segment: Read/Write
+            if (isStack)
+                return new ProtectedModeSegment.ReadWriteStackSegment(memory, selector, descriptor);
+            else
+                return new ProtectedModeSegment.ReadWriteDataSegment(memory, selector, descriptor);
+        case 0x13: //Data Segment: Read/Write, Accessed
+            if (isStack)
+                return new ProtectedModeSegment.ReadWriteAccessedStackSegment(memory, selector, descriptor);
+            else
+                return new ProtectedModeSegment.ReadWriteAccessedDataSegment(memory, selector, descriptor);
+        case 0x14: //Data Segment: Read-Only, Expand-Down
+            throw new IllegalStateException("Unimplemented Data Segment: Read-Only, Expand-Down");
+        case 0x15: //Data Segment: Read-Only, Expand-Down, Accessed
+            throw new IllegalStateException("Unimplemented Data Segment: Read-Only, Expand-Down, Accessed");
+        case 0x16: //Data Segment: Read/Write, Expand-Down
+            return new ProtectedModeExpandDownSegment.ReadWriteDataSegment(memory, selector, descriptor);
+        case 0x17: //Data Segment: Read/Write, Expand-Down, Accessed
+            throw new IllegalStateException("Unimplemented Data Segment: Read/Write, Expand-Down, Accessed");
 
-            // Code Segments
-            case 0x18: //Code, Execute-Only
-                return new ProtectedModeSegment.ExecuteOnlyCodeSegment(memory, selector, descriptor);
-            case 0x19: //Code, Execute-Only, Accessed
-                throw new IllegalStateException("Unimplemented Code Segment: Execute-Only, Accessed");
-            case 0x1a: //Code, Execute/Read
-                return new ProtectedModeSegment.ExecuteReadCodeSegment(memory, selector, descriptor);
-            case 0x1b: //Code, Execute/Read, Accessed
-                return new ProtectedModeSegment.ExecuteReadAccessedCodeSegment(memory, selector, descriptor);
-            case 0x1c: //Code: Execute-Only, Conforming
-                throw new IllegalStateException("Unimplemented Code Segment: Execute-Only, Conforming");
-            case 0x1d: //Code: Execute-Only, Conforming, Accessed
-                return new ProtectedModeSegment.ExecuteOnlyConformingAccessedCodeSegment(memory, selector, descriptor);
-            case 0x1e: //Code: Execute/Read, Conforming
-                return new ProtectedModeSegment.ExecuteReadConformingCodeSegment(memory, selector, descriptor);
-            case 0x1f: //Code: Execute/Read, Conforming, Accessed
-                return new ProtectedModeSegment.ExecuteReadConformingAccessedCodeSegment(memory, selector, descriptor);
+        // Code Segments
+        case 0x18: //Code, Execute-Only
+            return new ProtectedModeSegment.ExecuteOnlyCodeSegment(memory, selector, descriptor);
+        case 0x19: //Code, Execute-Only, Accessed
+            throw new IllegalStateException("Unimplemented Code Segment: Execute-Only, Accessed");
+        case 0x1a: //Code, Execute/Read
+            return new ProtectedModeSegment.ExecuteReadCodeSegment(memory, selector, descriptor);
+        case 0x1b: //Code, Execute/Read, Accessed
+            return new ProtectedModeSegment.ExecuteReadAccessedCodeSegment(memory, selector, descriptor);
+        case 0x1c: //Code: Execute-Only, Conforming
+            throw new IllegalStateException("Unimplemented Code Segment: Execute-Only, Conforming");
+        case 0x1d: //Code: Execute-Only, Conforming, Accessed
+            return new ProtectedModeSegment.ExecuteOnlyConformingAccessedCodeSegment(memory, selector, descriptor);
+        case 0x1e: //Code: Execute/Read, Conforming
+            return new ProtectedModeSegment.ExecuteReadConformingCodeSegment(memory, selector, descriptor);
+        case 0x1f: //Code: Execute/Read, Conforming, Accessed
+            return new ProtectedModeSegment.ExecuteReadConformingAccessedCodeSegment(memory, selector, descriptor);
         }
     }
 
-    public static final class NullSegment extends Segment
-    {
-        public NullSegment()
-        {
+    public static final class NullSegment extends Segment {
+        public NullSegment() {
             super(null);
         }
 
-        public void printState()
-        {
+        public void printState() {
             System.out.println("Null Segment");
         }
 
-        public void saveState(DataOutput output) throws IOException
-        {
+        public void saveState(DataOutput output) throws IOException {
             output.writeInt(4);
         }
 
-        public int getType()
-        {
+        public int getType() {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
-        public int getSelector()
-        {
+        public int getSelector() {
             return 0;
         }
 
-        public void checkAddress(int offset)
-        {
+        public void checkAddress(int offset) {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
-        public int translateAddressRead(int offset)
-        {
+        public int translateAddressRead(int offset) {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
-        public int translateAddressWrite(int offset)
-        {
+        public int translateAddressWrite(int offset) {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
-        public void invalidateAddress(int offset)
-        {
+        public void invalidateAddress(int offset) {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
-        public int getBase()
-        {
+        public int getBase() {
             throw new IllegalStateException(getClass().toString());
         }
 
-        public int getLimit()
-        {
-            throw new IllegalStateException(getClass().toString());
-        }
-        
-        public int getRawLimit()
-        {
+        public int getLimit() {
             throw new IllegalStateException(getClass().toString());
         }
 
-        public boolean setSelector(int selector)
-        {
+        public int getRawLimit() {
             throw new IllegalStateException(getClass().toString());
         }
 
-        public int getDPL()
-        {
+        public boolean setSelector(int selector) {
             throw new IllegalStateException(getClass().toString());
         }
 
-        public int getRPL()
-        {
+        public int getDPL() {
             throw new IllegalStateException(getClass().toString());
         }
 
-        public void setRPL(int cpl)
-        {
+        public int getRPL() {
             throw new IllegalStateException(getClass().toString());
         }
 
-        public boolean getDefaultSizeFlag()
-        {
+        public void setRPL(int cpl) {
             throw new IllegalStateException(getClass().toString());
         }
 
-        public boolean isPresent()
-        {
+        public boolean getDefaultSizeFlag() {
+            throw new IllegalStateException(getClass().toString());
+        }
+
+        public boolean isPresent() {
             return true;
         }
 
-        public boolean isSystem()
-        {
+        public boolean isSystem() {
             return false;
         }
     }

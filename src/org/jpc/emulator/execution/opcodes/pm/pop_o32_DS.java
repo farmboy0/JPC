@@ -33,29 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class pop_o32_DS extends Executable
-{
+public class pop_o32_DS extends Executable {
 
-    public pop_o32_DS(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public pop_o32_DS(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         int tmp = cpu.stack32(0);
         cpu.ds(tmp);
         cpu.incrementStack(4);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

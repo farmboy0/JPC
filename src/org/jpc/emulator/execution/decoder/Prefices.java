@@ -29,10 +29,8 @@ package org.jpc.emulator.execution.decoder;
 
 import org.jpc.emulator.processor.Processor;
 
-public class Prefices
-{
-    public static int encodePrefix(int prefices, int b)
-    {
+public class Prefices {
+    public static int encodePrefix(int prefices, int b) {
         if (b == 0x66) // Op size
             return prefices ^ 1;
         if (b == 0x67) // addr size
@@ -58,36 +56,30 @@ public class Prefices
         return 0;
     }
 
-    public static boolean isAddr16(int prefices)
-    {
+    public static boolean isAddr16(int prefices) {
         return (prefices & 2) == 0;
     }
 
-    public static int getSegment(int prefices, int def)
-    {
+    public static int getSegment(int prefices, int def) {
         int seg = ((prefices >> 2) & 7);
         if (seg == 7) // no override
             return def;
         return seg;
     }
 
-    public static boolean isLock(int prefices)
-    {
+    public static boolean isLock(int prefices) {
         return (prefices & (1 << 5)) != 0;
     }
 
-    public static boolean isRep(int prefices)
-    {
+    public static boolean isRep(int prefices) {
         return (prefices & (1 << 7)) != 0;
     }
 
-    public static boolean isRepne(int prefices)
-    {
+    public static boolean isRepne(int prefices) {
         return (prefices & (1 << 6)) != 0;
     }
 
-    public static boolean isPrefix(int b)
-    {
+    public static boolean isPrefix(int b) {
         if (b == 0x66) // Op size
             return true;
         if (b == 0x67) // addr size

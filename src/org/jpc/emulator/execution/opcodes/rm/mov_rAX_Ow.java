@@ -33,29 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class mov_rAX_Ow extends Executable
-{
+public class mov_rAX_Ow extends Executable {
     final Pointer op2;
 
-    public mov_rAX_Ow(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public mov_rAX_Ow(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         op2 = Modrm.Ow(prefices, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.r_eax.set16((short)op2.get16(cpu));
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

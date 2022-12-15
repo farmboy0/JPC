@@ -34,8 +34,8 @@
 /**
  * Memory sub-system specific classes and interfaces.
  * <p>
- * This includes three different kinds of memory blocks, and various different
- * address space classes.
+ * This includes three different kinds of memory blocks, and various different address space
+ * classes.
  * @author Chris Dennis
  * @author Rhys Newman
  */

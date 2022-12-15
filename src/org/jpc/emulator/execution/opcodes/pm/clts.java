@@ -33,28 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class clts extends Executable
-{
+public class clts extends Executable {
 
-    public clts(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public clts(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        if (cpu.getCPL() != 0) throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
-		    cpu.setCR0(cpu.getCR0() & ~0x8);
+    public Branch execute(Processor cpu) {
+        if (cpu.getCPL() != 0)
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+        cpu.setCR0(cpu.getCR0() & ~0x8);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

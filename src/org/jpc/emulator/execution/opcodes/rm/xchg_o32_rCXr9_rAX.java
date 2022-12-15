@@ -33,30 +33,25 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class xchg_o32_rCXr9_rAX extends Executable
-{
+public class xchg_o32_rCXr9_rAX extends Executable {
 
-    public xchg_o32_rCXr9_rAX(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public xchg_o32_rCXr9_rAX(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-            int tmp2 = cpu.r_eax.get32();
+    public Branch execute(Processor cpu) {
+        int tmp2 = cpu.r_eax.get32();
         int tmp1 = cpu.r_ecx.get32();
         cpu.r_ecx.set32(tmp2);
         cpu.r_eax.set32(tmp1);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

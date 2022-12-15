@@ -27,8 +27,7 @@
 
 package org.jpc.emulator.execution;
 
-public class UCodes
-{
+public class UCodes {
     //Lazy flag operations
     public static final int SHR8 = 125;
     public static final int SHR16 = 126;

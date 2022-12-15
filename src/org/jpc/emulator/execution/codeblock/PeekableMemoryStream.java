@@ -31,33 +31,27 @@ import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.memory.Memory;
 
 /**
- * 
  * @author Ian Preston
  */
-public class PeekableMemoryStream implements PeekableInputStream
-{
+public class PeekableMemoryStream implements PeekableInputStream {
     private Memory memory;
     private int position, start;
 
-    public void set(Memory source, int offset)
-    {
-	    memory = source;
-	    position = offset;
+    public void set(Memory source, int offset) {
+        memory = source;
+        position = offset;
         start = offset;
     }
 
-    public void seek(int delta)
-    {
+    public void seek(int delta) {
         position += delta;
     }
 
-    public int peek()
-    {
-        return 0xFF & memory.getByte((int) (position));
+    public int peek() {
+        return 0xFF & memory.getByte((int)(position));
     }
 
-    public void forward()
-    {
+    public void forward() {
         position++;
     }
 
@@ -65,10 +59,9 @@ public class PeekableMemoryStream implements PeekableInputStream
         return position;
     }
 
-    public long readU(long bits)
-    {
+    public long readU(long bits) {
         if (bits == 8)
-            return 0xFF & memory.getByte((int) (position++));
+            return 0xFF & memory.getByte((int)(position++));
         if (bits == 16)
             return read16();
         if (bits == 32)
@@ -78,53 +71,43 @@ public class PeekableMemoryStream implements PeekableInputStream
         throw new IllegalStateException("unimplemented read amount " + bits);
     }
 
-    public byte read8()
-    {
+    public byte read8() {
         return memory.getByte((position++));
     }
 
-    public short read16()
-    {
+    public short read16() {
         return (short)(readU8() | (read8() << 8));
     }
 
-    public int read32()
-    {
+    public int read32() {
         return (readU16() | (read16() << 16));
     }
 
-    public int readU8()
-    {
-        return 0xFF & memory.getByte((int) (position++));
+    public int readU8() {
+        return 0xFF & memory.getByte((int)(position++));
     }
 
-    public int readU16()
-    {
-        return (0xFF & memory.getByte((int) (position++))) | ((0xFF & memory.getByte((int) (position++))) << 8);
+    public int readU16() {
+        return (0xFF & memory.getByte((int)(position++))) | ((0xFF & memory.getByte((int)(position++))) << 8);
     }
 
-    public long readU32()
-    {
+    public long readU32() {
         return readU16() | (readU16() << 16);
     }
 
-    public long getAddress()
-    {
+    public long getAddress() {
         return position;
     }
 
-    public int getCounter()
-    {
-        return (int)(position-start);
+    public int getCounter() {
+        return (int)(position - start);
     }
 
-    public void resetCounter()
-    {
+    public void resetCounter() {
         start = position;
     }
-    
-    public String toString()
-    {
+
+    public String toString() {
         return "PeekableMemoryStream: [" + memory + "] @ 0x" + Integer.toHexString(start);
     }
 }

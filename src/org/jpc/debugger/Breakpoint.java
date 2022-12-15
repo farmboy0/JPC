@@ -36,7 +36,6 @@ package org.jpc.debugger;
 import org.jpc.emulator.processor.Processor;
 
 /**
- *
  * @author Ian Preston
  */
 public abstract class Breakpoint implements Comparable<Breakpoint> {
@@ -45,20 +44,19 @@ public abstract class Breakpoint implements Comparable<Breakpoint> {
     private boolean isPrimary;
     private String name;
 
-    public Breakpoint(String name, int address, boolean primary)
-    {
+    public Breakpoint(String name, int address, boolean primary) {
         this.name = name;
         this.address = address;
         this.isPrimary = primary;
     }
-    
+
     public abstract boolean satisfied(Processor cpu);
 
     public boolean equals(Object another) {
         if (!(another instanceof Breakpoint)) {
             return false;
         }
-        return address == ((Breakpoint) another).address;
+        return address == ((Breakpoint)another).address;
     }
 
     public int compareTo(Breakpoint bp) {

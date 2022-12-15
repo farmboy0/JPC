@@ -33,22 +33,18 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class sar_Ed_I1 extends Executable
-{
+public class sar_Ed_I1 extends Executable {
     final int op1Index;
 
-    public sar_Ed_I1(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public sar_Ed_I1(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1Index = Modrm.Ed(modrm);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-        if(1 != 0)
-        {
+        if (1 != 0) {
             cpu.flagOp1 = op1.get32();
             cpu.flagOp2 = 1;
             int res = (cpu.flagOp1 >> cpu.flagOp2);
@@ -60,13 +56,11 @@ public class sar_Ed_I1 extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

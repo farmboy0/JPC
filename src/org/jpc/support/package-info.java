@@ -34,7 +34,7 @@
 /**
  * Various supporting classes for the emulation.
  * <p>
- * Mainly consists of various external facing interfaces and their non platform
- * specific implementations.
+ * Mainly consists of various external facing interfaces and their non platform specific
+ * implementations.
  */
 package org.jpc.support;

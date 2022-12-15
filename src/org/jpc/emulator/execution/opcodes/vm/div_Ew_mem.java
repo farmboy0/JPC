@@ -33,37 +33,32 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class div_Ew_mem extends Executable
-{
+public class div_Ew_mem extends Executable {
     final Pointer op1;
 
-    public div_Ew_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public div_Ew_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         if (op1.get16(cpu) == 0)
             throw ProcessorException.DIVIDE_ERROR;
-        long ldiv = ((0xffffL & cpu.r_edx.get16()) << 16 ) | (0xFFFF& cpu.r_eax.get16());
-        int quot32 = (int)(ldiv / (0xFFFF& op1.get16(cpu)));
+        long ldiv = ((0xffffL & cpu.r_edx.get16()) << 16) | (0xFFFF & cpu.r_eax.get16());
+        int quot32 = (int)(ldiv / (0xFFFF & op1.get16(cpu)));
         if (quot32 != (quot32 & 0xffff))
             throw ProcessorException.DIVIDE_ERROR;
-        cpu.r_eax.set16((short) quot32);
-        cpu.r_edx.set16((short) (ldiv % (0xFFFF& op1.get16(cpu))));
+        cpu.r_eax.set16((short)quot32);
+        cpu.r_edx.set16((short)(ldiv % (0xFFFF & op1.get16(cpu))));
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

@@ -36,55 +36,46 @@ package org.jpc.debugger.util;
 import javax.swing.JTextField;
 import javax.swing.text.*;
 
-public class ValidatingTextField extends JTextField
-{
+public class ValidatingTextField extends JTextField {
     private int lengthLimit;
     private String allowedChars;
     private char replacementChar;
-    
-    public ValidatingTextField(String allowedChars, int lengthLimit)
-    {
-        this(allowedChars, (char) 0, lengthLimit);
+
+    public ValidatingTextField(String allowedChars, int lengthLimit) {
+        this(allowedChars, (char)0, lengthLimit);
     }
-    
-    public ValidatingTextField(String allowedChars, char replacementChar, int lengthLimit)
-    {
+
+    public ValidatingTextField(String allowedChars, char replacementChar, int lengthLimit) {
         this.allowedChars = allowedChars;
         this.lengthLimit = lengthLimit;
         this.replacementChar = replacementChar;
-        
-        ((AbstractDocument) getDocument()).setDocumentFilter(new CharFilter());
+
+        ((AbstractDocument)getDocument()).setDocumentFilter(new CharFilter());
     }
 
-    class CharFilter extends DocumentFilter 
-    {
-        String validate(String text)
-        {
+    class CharFilter extends DocumentFilter {
+        String validate(String text) {
             StringBuffer buf = new StringBuffer();
-            for (int i=0; i<text.length(); i++)
-                if (allowedChars.indexOf(text.charAt(i)) < 0)
-                {
+            for (int i = 0; i < text.length(); i++)
+                if (allowedChars.indexOf(text.charAt(i)) < 0) {
                     if (replacementChar > 0)
                         buf.append(replacementChar);
-                }
-                else
+                } else
                     buf.append(text.charAt(i));
-            
+
             return buf.toString();
         }
-        
-        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
-        {
+
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException {
             if ((lengthLimit >= 0) && (getText().length() >= lengthLimit))
                 text = "";
             text = validate(text);
             super.insertString(fb, offset, text, attrs);
         }
-        
-        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
-        {
-            if (lengthLimit >= 0)
-            {
+
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+            throws BadLocationException {
+            if (lengthLimit >= 0) {
                 int max = Math.min(text.length(), lengthLimit - getText().length() + length);
                 text = text.substring(0, max);
             }

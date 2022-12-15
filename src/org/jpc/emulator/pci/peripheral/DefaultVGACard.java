@@ -44,18 +44,16 @@ import javax.imageio.ImageIO;
 import org.jpc.j2se.PCMonitor;
 
 /**
- *
  * @author Ian Preston
  */
 public final class DefaultVGACard extends VGACard {
 
     private int[] rawImageData;
-    private int xmin,  xmax,  ymin,  ymax,  width,  height;
+    private int xmin, xmax, ymin, ymax, width, height;
     private BufferedImage buffer;
     PCMonitor monitor;
 
-    public DefaultVGACard() 
-    {
+    public DefaultVGACard() {
     }
 
     public int getXMin() {
@@ -78,8 +76,7 @@ public final class DefaultVGACard extends VGACard {
         return ((0xFF & red) << 16) | ((0xFF & green) << 8) | (0xFF & blue);
     }
 
-    public void resizeDisplay(int width, int height) 
-    {
+    public void resizeDisplay(int width, int height) {
         if ((width == 0) || (height == 0))
             return;
         this.width = width;
@@ -87,20 +84,16 @@ public final class DefaultVGACard extends VGACard {
 
         buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         buffer.setAccelerationPriority(1);
-        DataBufferInt buf = (DataBufferInt) buffer.getRaster().getDataBuffer();
+        DataBufferInt buf = (DataBufferInt)buffer.getRaster().getDataBuffer();
         rawImageData = buf.getData();
         monitor.resizeDisplay(width, height);
     }
 
-    public void saveScreenshot()
-    {
+    public void saveScreenshot() {
         File out = new File("Screenshot.png");
-        try
-        {
+        try {
             ImageIO.write(buffer, "png", out);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -109,34 +102,29 @@ public final class DefaultVGACard extends VGACard {
         this.monitor = mon;
     }
 
-    public Dimension getDisplaySize()
-    {
+    public Dimension getDisplaySize() {
         return new Dimension(width, height);
     }
 
-    public int[] getDisplayBuffer() 
-    {
+    public int[] getDisplayBuffer() {
         return rawImageData;
     }
 
-    protected void dirtyDisplayRegion(int x, int y, int w, int h) 
-    {
+    protected void dirtyDisplayRegion(int x, int y, int w, int h) {
         xmin = Math.min(x, xmin);
         xmax = Math.max(x + w, xmax);
         ymin = Math.min(y, ymin);
         ymax = Math.max(y + h, ymax);
     }
 
-    public void paintPCMonitor(Graphics2D g, PCMonitor monitor)
-    {
+    public void paintPCMonitor(Graphics2D g, PCMonitor monitor) {
         Dimension s = monitor.getSize();
-        
+
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g.drawImage(buffer, 0, 0, s.width,  s.height, 0, 0, width, height, null);
+        g.drawImage(buffer, 0, 0, s.width, s.height, 0, 0, width, height, null);
     }
 
-    public final void prepareUpdate() 
-    {
+    public final void prepareUpdate() {
         xmin = width;
         xmax = 0;
         ymin = height;

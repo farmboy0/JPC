@@ -33,29 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class mov_rBXr11_Id extends Executable
-{
+public class mov_rBXr11_Id extends Executable {
     final int immd;
 
-    public mov_rBXr11_Id(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public mov_rBXr11_Id(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         immd = Modrm.Id(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.r_ebx.set32(immd);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

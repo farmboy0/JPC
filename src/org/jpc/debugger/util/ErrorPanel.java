@@ -37,30 +37,25 @@ import java.awt.BorderLayout;
 import javax.swing.*;
 import javax.swing.tree.*;
 
-public class ErrorPanel extends JPanel 
-{
-    public ErrorPanel(Throwable error)
-    {
+public class ErrorPanel extends JPanel {
+    public ErrorPanel(Throwable error) {
         this(error.getMessage(), error);
     }
 
-    public ErrorPanel(String message, Throwable error)
-    {
+    public ErrorPanel(String message, Throwable error) {
         super(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+
         if (message == null)
             message = "";
         setError(message, error);
     }
 
-    public void setError(Throwable t)
-    {
+    public void setError(Throwable t) {
         setError(t.getMessage(), t);
     }
 
-    public void setError(String message, Throwable t)
-    {
+    public void setError(String message, Throwable t) {
         removeAll();
         if (t == null)
             return;
@@ -73,29 +68,26 @@ public class ErrorPanel extends JPanel
         JTree tree = new JTree(new DefaultTreeModel(root));
         add("Center", new JScrollPane(tree));
 
-        for (int i=0; i<root.getChildCount(); i++)
+        for (int i = 0; i < root.getChildCount(); i++)
             tree.expandRow(i);
     }
 
-    public boolean refreshDisplay(Object src)
-    {
-        if ((src != null) && (src instanceof Throwable))
-        {
-            setError((Throwable) src);
+    public boolean refreshDisplay(Object src) {
+        if ((src != null) && (src instanceof Throwable)) {
+            setError((Throwable)src);
             return true;
         }
 
         return false;
     }
 
-    public static MutableTreeNode buildErrorTraceTree(String message, Throwable err)
-    {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(message+": "+err);
+    public static MutableTreeNode buildErrorTraceTree(String message, Throwable err) {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(message + ": " + err);
 
         StackTraceElement[] trace = err.getStackTrace();
-        for (int i=0; i<trace.length; i++)
+        for (int i = 0; i < trace.length; i++)
             root.add(new DefaultMutableTreeNode(String.valueOf(trace[i])));
-        
+
         Throwable cause = err.getCause();
         if (cause != null)
             root.add(buildErrorTraceTree("Caused by", cause));
@@ -103,10 +95,9 @@ public class ErrorPanel extends JPanel
         return root;
     }
 
-    public static ErrorPanel createDisplayable(Object data)
-    {
+    public static ErrorPanel createDisplayable(Object data) {
         if ((data == null) || !(data instanceof Throwable))
             return null;
-        return new ErrorPanel((Throwable) data);
+        return new ErrorPanel((Throwable)data);
     }
 }

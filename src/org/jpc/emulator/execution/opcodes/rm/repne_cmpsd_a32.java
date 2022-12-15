@@ -33,30 +33,25 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class repne_cmpsd_a32 extends Executable
-{
+public class repne_cmpsd_a32 extends Executable {
     final int segIndex;
 
-    public repne_cmpsd_a32(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public repne_cmpsd_a32(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         segIndex = Prefices.getSegment(prefices, Processor.DS_INDEX);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Segment seg = cpu.segs[segIndex];
         StaticOpcodes.repne_cmpsd_a32(cpu, seg);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

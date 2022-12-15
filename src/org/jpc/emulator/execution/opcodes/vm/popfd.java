@@ -33,16 +33,13 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class popfd extends Executable
-{
+public class popfd extends Executable {
 
-    public popfd(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public popfd(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         if (cpu.eflagsIOPrivilegeLevel < 3)
             throw ProcessorException.GENERAL_PROTECTION_0;
         int flags = cpu.getEFlags() & ~0x24cfff;
@@ -51,13 +48,11 @@ public class popfd extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

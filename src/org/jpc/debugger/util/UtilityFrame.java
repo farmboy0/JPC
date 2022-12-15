@@ -39,116 +39,98 @@ import java.beans.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
-public class UtilityFrame extends JInternalFrame implements PropertyChangeListener, InternalFrameListener
-{
+public class UtilityFrame extends JInternalFrame implements PropertyChangeListener, InternalFrameListener {
     private ReportPanel reportPanel;
 
-    public UtilityFrame(String title)
-    {
+    public UtilityFrame(String title) {
         this(title, true, true, true, true);
     }
 
-    public UtilityFrame(String title, boolean resizable, boolean closable, boolean maximizable,  boolean iconifiable)
-    {
-        super(title, resizable, closable, maximizable, iconifiable); 
+    public UtilityFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable) {
+        super(title, resizable, closable, maximizable, iconifiable);
         setPreferredSize(new Dimension(750, 550));
 
         reportPanel = new ReportPanel();
         addInternalFrameListener(this);
     }
 
-    protected void installReportPanel()
-    {
+    protected void installReportPanel() {
         getContentPane().add("South", reportPanel);
     }
 
-    public void propertyChange(PropertyChangeEvent evt)
-    {
+    public void propertyChange(PropertyChangeEvent evt) {
         propertyChanged(evt.getPropertyName(), evt.getNewValue());
     }
 
-    protected void propertyChanged(String propertyName, Object newValue)
-    {
+    protected void propertyChanged(String propertyName, Object newValue) {
     }
 
-    public ReportPanel getReportPanel()
-    {
+    public ReportPanel getReportPanel() {
         return reportPanel;
     }
 
-    public void setInfoString(String info)
-    {
+    public void setInfoString(String info) {
         reportPanel.setInfo(info);
     }
 
-    public void alert(String message)
-    {
+    public void alert(String message) {
         alert(message, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public void alert(String message, int type)
-    {
+    public void alert(String message, int type) {
         alert(message, getTitle(), type);
     }
 
-    public void alert(String message, String title, int type)    
-    {
+    public void alert(String message, String title, int type) {
         Component parent = this;
         if (isClosed())
             parent = getApplicationFrame(this);
         JOptionPane.showInternalMessageDialog(parent, message, title, type);
     }
 
-    public String getUserInput(String message, String title)    
-    {
+    public String getUserInput(String message, String title) {
         Component parent = this;
         if (isClosed())
             parent = getApplicationFrame(this);
         return JOptionPane.showInternalInputDialog(parent, message, title, JOptionPane.QUESTION_MESSAGE);
     }
 
-    public void showError(String message, Throwable err)
-    {
+    public void showError(String message, Throwable err) {
         reportPanel.showError(message, err);
     }
 
-    public void setError(String message, Throwable err)
-    {
+    public void setError(String message, Throwable err) {
         reportPanel.setError(message, err);
     }
 
-    protected int confirm(String message, String title, int optionType)
-    {
+    protected int confirm(String message, String title, int optionType) {
         Component parent = this;
         if (isClosed())
             parent = getApplicationFrame(parent);
         return JOptionPane.showInternalConfirmDialog(parent, message, title, optionType);
     }
 
-    public static Component getSuitableDialogParent(JComponent comp)
-    {
-        Component p1 = (Component) SwingUtilities.getAncestorOfClass(JInternalFrame.class, comp);
+    public static Component getSuitableDialogParent(JComponent comp) {
+        Component p1 = (Component)SwingUtilities.getAncestorOfClass(JInternalFrame.class, comp);
         if (p1 == null)
-            p1 = (Component) SwingUtilities.getAncestorOfClass(JDialog.class, comp);
+            p1 = (Component)SwingUtilities.getAncestorOfClass(JDialog.class, comp);
         if (p1 == null)
-            p1 = (Component) SwingUtilities.getAncestorOfClass(JFrame.class, comp);
+            p1 = (Component)SwingUtilities.getAncestorOfClass(JFrame.class, comp);
         if (p1 == null)
             p1 = comp;
 
         return p1;
     }
-   
-    public static Frame getApplicationFrame(Component child)
-    {
+
+    public static Frame getApplicationFrame(Component child) {
         for (Component c = child; c != null; c = c.getParent())
             if (c instanceof Frame)
-                return (Frame) c;
+                return (Frame)c;
 
         return null;
     }
 
-    public static Rectangle getCentredDialogBounds(JDialog dialog, Component parent, int defaultWidth, int defaultHeight)
-    {
+    public static Rectangle getCentredDialogBounds(JDialog dialog, Component parent, int defaultWidth, int defaultHeight) {
         Dimension pref = dialog.getPreferredSize();
         int w = pref.width;
         int h = pref.height;
@@ -160,55 +142,56 @@ public class UtilityFrame extends JInternalFrame implements PropertyChangeListen
 
         Rectangle parentBounds = parent.getBounds();
         Dimension size = new Dimension(defaultWidth, defaultHeight);
-        int x = parentBounds.x + (parentBounds.width - size.width)/2;
-        int y = parentBounds.y + (parentBounds.height - size.height)/2;
+        int x = parentBounds.x + (parentBounds.width - size.width) / 2;
+        int y = parentBounds.y + (parentBounds.height - size.height) / 2;
         Point pt = new Point(x, y);
         SwingUtilities.convertPointToScreen(pt, getApplicationFrame(dialog));
         x = Math.max(0, pt.x);
         y = Math.max(0, pt.y);
-        
+
         return new Rectangle(x, y, size.width, size.height);
     }
 
-    public void frameClosed()
-    {
+    public void frameClosed() {
     }
 
-    public void dispose()
-    {
+    public void dispose() {
         super.dispose();
         frameClosed();
     }
 
-    public void internalFrameActivated(InternalFrameEvent e) {}
+    public void internalFrameActivated(InternalFrameEvent e) {
+    }
 
-    public void internalFrameClosed(InternalFrameEvent e) {}
+    public void internalFrameClosed(InternalFrameEvent e) {
+    }
 
-    public void internalFrameClosing(InternalFrameEvent e) 
-    {
+    public void internalFrameClosing(InternalFrameEvent e) {
         frameClosed();
     }
-    
-    public void internalFrameDeactivated(InternalFrameEvent e) {}
 
-    public void internalFrameDeiconified(InternalFrameEvent e) {}
+    public void internalFrameDeactivated(InternalFrameEvent e) {
+    }
 
-    public void internalFrameIconified(InternalFrameEvent e) {}
+    public void internalFrameDeiconified(InternalFrameEvent e) {
+    }
 
-    public void internalFrameOpened(InternalFrameEvent e) {}
+    public void internalFrameIconified(InternalFrameEvent e) {
+    }
 
-    public static ImageIcon readIcon(String path, String title, int size)
-    {
-        try
-        {
+    public void internalFrameOpened(InternalFrameEvent e) {
+    }
+
+    public static ImageIcon readIcon(String path, String title, int size) {
+        try {
             BufferedImage img = IconUtils.getImageFromResource(path);
             img = IconUtils.createScaledImage(img, size);
             img = IconUtils.makeTransparentEdges(img);
-          
+
             return new ImageIcon(img, title);
+        } catch (Exception e) {
         }
-        catch (Exception e) {}
-        
-            return new ImageIcon();
+
+        return new ImageIcon();
     }
 }

@@ -32,8 +32,8 @@
 */
 
 /**
- * Top level JPC emulation classes, including the most basic of interfaces and
- * the <code>PC</code> class which represents the complete emulation.
+ * Top level JPC emulation classes, including the most basic of interfaces and the <code>PC</code>
+ * class which represents the complete emulation.
  * @author Chris Dennis
  */
 package org.jpc.emulator;

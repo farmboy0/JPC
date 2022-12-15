@@ -33,33 +33,29 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class sahf extends Executable
-{
+public class sahf extends Executable {
 
-    public sahf(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public sahf(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        byte fx  = (byte)(cpu.r_ah.get8());
+    public Branch execute(Processor cpu) {
+        byte fx = (byte)(cpu.r_ah.get8());
         cpu.flagStatus &= OF;
-        cpu.sf = (fx & (1<<7)) != 0;
-        cpu.zf = (fx & (1<<6)) != 0;
-        cpu.af = (fx & (1<<4)) != 0;
-        cpu.pf = (fx & (1<<2)) != 0;
-        cpu.cf = (fx & 1) != 0;;
+        cpu.sf = (fx & (1 << 7)) != 0;
+        cpu.zf = (fx & (1 << 6)) != 0;
+        cpu.af = (fx & (1 << 4)) != 0;
+        cpu.pf = (fx & (1 << 2)) != 0;
+        cpu.cf = (fx & 1) != 0;
+        ;
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

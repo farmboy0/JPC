@@ -42,9 +42,8 @@ import java.net.*;
 import java.util.logging.*;
 
 import javax.swing.border.*;
- 
-public class LinkBorder extends LineBorder implements MouseListener, MouseMotionListener
-{
+
+public class LinkBorder extends LineBorder implements MouseListener, MouseMotionListener {
     private static final Logger LOGGING = Logger.getLogger(LinkBorder.class.getName());
     private static final URI JPC_WEBSITE = URI.create("http://jpc.sourceforge.net/");
 
@@ -54,9 +53,8 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
 
     private boolean highlight;
     private Rectangle targetBounds;
-    
-    public LinkBorder(Component component, AppletContext context, String text, Color c, int thickness)
-    {
+
+    public LinkBorder(Component component, AppletContext context, String text, Color c, int thickness) {
         super(c, thickness);
         this.text = text;
         targetComponent = component;
@@ -68,30 +66,27 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
         targetBounds = new Rectangle();
     }
 
-    public boolean isBorderOpaque()
-    {
+    public boolean isBorderOpaque() {
         return true;
     }
-    
-    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
-    {
+
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
         super.paintBorder(c, g, x, y, width, height);
         if (highlight)
             g.setColor(Color.cyan);
         else
             g.setColor(Color.white);
-        
+
         Rectangle2D bounds = g.getFontMetrics().getStringBounds(text, g);
-        int stringWidth = (int) bounds.getWidth();
-        
-        g.drawString(text, (width - stringWidth)/2, height - 5);
-        targetBounds = new Rectangle((width - stringWidth)/2, height - getThickness(), stringWidth, getThickness());
+        int stringWidth = (int)bounds.getWidth();
+
+        g.drawString(text, (width - stringWidth) / 2, height - 5);
+        targetBounds = new Rectangle((width - stringWidth) / 2, height - getThickness(), stringWidth, getThickness());
     }
-    
-    private void detectMouseHighlight(Point pt)
-    {
+
+    private void detectMouseHighlight(Point pt) {
         boolean inside = targetBounds.contains(pt);
-        
+
         if (!highlight && inside) {
             highlight = true;
             targetComponent.repaint();
@@ -100,19 +95,16 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
             targetComponent.repaint();
         }
     }
-    
-    public void mouseDragged(MouseEvent e) 
-    {
+
+    public void mouseDragged(MouseEvent e) {
         detectMouseHighlight(e.getPoint());
     }
-    
-    public void mouseMoved(MouseEvent e) 
-    {
+
+    public void mouseMoved(MouseEvent e) {
         detectMouseHighlight(e.getPoint());
     }
-    
-    public void mouseClicked(MouseEvent evt) 
-    {
+
+    public void mouseClicked(MouseEvent evt) {
         if (!highlight)
             return;
 
@@ -123,7 +115,7 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
                 Desktop.getDesktop().browse(JPC_WEBSITE);
         } catch (MalformedURLException e) {
             LOGGING.log(Level.INFO, "Couldn't open JPC website.", e);
-        } catch (IOException e) {            
+        } catch (IOException e) {
             LOGGING.log(Level.INFO, "Couldn't open JPC website.", e);
         } catch (IllegalArgumentException e) {
             LOGGING.log(Level.INFO, "Couldn't open JPC website.", e);
@@ -133,14 +125,18 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
             LOGGING.log(Level.INFO, "Couldn't open JPC website.", e);
         }
     }
-    
-    public void mouseExited(MouseEvent e) 
-    {
+
+    public void mouseExited(MouseEvent e) {
         highlight = false;
         targetComponent.repaint();
     }
-    
-    public void mouseEntered(MouseEvent e) {}
-    public void mousePressed(MouseEvent e) {}
-    public void mouseReleased(MouseEvent e) {}
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mousePressed(MouseEvent e) {
+    }
+
+    public void mouseReleased(MouseEvent e) {
+    }
 }

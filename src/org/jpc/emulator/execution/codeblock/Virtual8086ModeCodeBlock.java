@@ -37,6 +37,5 @@ package org.jpc.emulator.execution.codeblock;
  * A single chunk of Virtual-8086 mode executable code.
  * @author Chris Dennis
  */
-public interface Virtual8086ModeCodeBlock extends CodeBlock
-{
+public interface Virtual8086ModeCodeBlock extends CodeBlock {
 }

@@ -33,6 +33,5 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-public interface ProtectedModeCodeBlock extends CodeBlock
-{
+public interface ProtectedModeCodeBlock extends CodeBlock {
 }

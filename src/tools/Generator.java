@@ -33,10 +33,8 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
-public class Generator
-{
-    public static void main(String[] cmd)
-    {
+public class Generator {
+    public static void main(String[] cmd) {
         int rm = opcodeParse(parseXML("RMPMVM"), "rm", new OpcodeWriter());
         rm += opcodeParse(parseXML("RMVM"), "rm", new OpcodeWriter());
         rm += opcodeParse(parseXML("RM"), "rm", new OpcodeWriter());
@@ -48,22 +46,18 @@ public class Generator
         System.out.printf("Generated %d RM opcodes, %d VM opcodes and %d PM opcodes\n", rm, vm, pm);
     }
 
-    public static class OpcodeWriter implements Callable
-    {
-        public void call(Opcode op, String mode)
-        {
+    public static class OpcodeWriter implements Callable {
+        public void call(Opcode op, String mode) {
             System.out.println(op.getName());
             op.writeToFile(mode);
         }
     }
 
-    public static int opcodeParse(Document dom, String mode, Callable call)
-    {
-        int count=0;
+    public static int opcodeParse(Document dom, String mode, Callable call) {
+        int count = 0;
         NodeList properties = dom.getElementsByTagName("jcc");
         String jcc = null;
-        for (int i=0; i < properties.getLength(); i++)
-        {
+        for (int i = 0; i < properties.getLength(); i++) {
             Node n = properties.item(i);
             String content = n.getTextContent();
             if (content.trim().length() > 0)
@@ -71,8 +65,7 @@ public class Generator
         }
 
         NodeList list = dom.getElementsByTagName("opcode");
-        for (int i=0; i < list.getLength(); i++)
-        {
+        for (int i = 0; i < list.getLength(); i++) {
             Node n = list.item(i);
             String mnemonic = n.getAttributes().getNamedItem("mnemonic").getNodeValue();
             Node seg = n.getAttributes().getNamedItem("segment");
@@ -81,10 +74,9 @@ public class Generator
             boolean singleType = (memNode != null);
             boolean mem = (memNode != null) && memNode.getNodeValue().equals("true");
             NodeList children = n.getChildNodes();
-            String ret=null, snippet=null;
+            String ret = null, snippet = null;
             // get return and snippet
-            for (int j=0; j < children.getLength(); j++)
-            {
+            for (int j = 0; j < children.getLength(); j++) {
                 Node c = children.item(j);
                 if (c.getNodeName().equals("return"))
                     ret = c.getTextContent().trim();
@@ -94,14 +86,13 @@ public class Generator
                     snippet += jcc;
             }
             if (ret == null)
-                throw new IllegalStateException("No return value for "+mnemonic);
+                throw new IllegalStateException("No return value for " + mnemonic);
             if (snippet == null)
-                throw new IllegalStateException("No snippet for "+mnemonic);
+                throw new IllegalStateException("No snippet for " + mnemonic);
 
             // get each opcode definition
-            for (int j=0; j < children.getLength(); j++)
-            {
-                Node c = children.item(j);                
+            for (int j = 0; j < children.getLength(); j++) {
+                Node c = children.item(j);
                 if (!c.getNodeName().equals("args"))
                     continue;
                 String argsText = c.getTextContent();
@@ -110,8 +101,7 @@ public class Generator
                 if (argsText.length() == 0)
                     args = new String[0];
                 List<Opcode> ops = Opcode.get(mnemonic, args, size, snippet, ret, segment, singleType, mem);
-                for (Opcode op: ops)
-                {
+                for (Opcode op : ops) {
                     call.call(op, mode);
                     count++;
                 }
@@ -120,17 +110,16 @@ public class Generator
         return count;
     }
 
-    public static Document parseXML(String mode)
-    {
+    public static Document parseXML(String mode) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
-            return db.parse("src/tools/Opcodes_"+mode+".xml");
-        }catch(ParserConfigurationException pce) {
+            return db.parse("src/tools/Opcodes_" + mode + ".xml");
+        } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
-        }catch(SAXException se) {
+        } catch (SAXException se) {
             se.printStackTrace();
-        }catch(IOException ioe) {
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
         return null;

@@ -31,24 +31,20 @@
     End of licence header
 */
 
-
 package org.jpc.debugger.util;
 
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
-public class FileExtensionFilter extends FileFilter
-{
+public class FileExtensionFilter extends FileFilter {
     private String extension, description, lowerExtension;
     private boolean acceptDirectories, caseSensitive;
 
-    public FileExtensionFilter(String extension, String description)
-    {
+    public FileExtensionFilter(String extension, String description) {
         this(extension, description, true, false);
     }
 
-    public FileExtensionFilter(String extension, String description, boolean acceptDirectories, boolean caseSensitive)
-    {
+    public FileExtensionFilter(String extension, String description, boolean acceptDirectories, boolean caseSensitive) {
         this.extension = extension;
         lowerExtension = extension.toLowerCase();
 
@@ -56,9 +52,8 @@ public class FileExtensionFilter extends FileFilter
         this.acceptDirectories = acceptDirectories;
         this.caseSensitive = caseSensitive;
     }
-    
-    public boolean accept(File f) 
-    {
+
+    public boolean accept(File f) {
         if (f.isDirectory())
             return acceptDirectories;
 
@@ -69,8 +64,7 @@ public class FileExtensionFilter extends FileFilter
             return name.endsWith(extension);
     }
 
-    public String getDescription() 
-    {
+    public String getDescription() {
         return description;
     }
 }

@@ -31,7 +31,6 @@
     End of licence header
 */
 
-
 package org.jpc.debugger;
 
 import java.io.*;
@@ -46,14 +45,12 @@ import org.jpc.emulator.PC;
 import org.jpc.j2se.PCMonitor;
 import org.jpc.emulator.pci.peripheral.VGACard;
 
-public class PCMonitorFrame extends UtilityFrame implements PCListener
-{
+public class PCMonitorFrame extends UtilityFrame implements PCListener {
     private PC currentPC;
     private PCMonitor monitor;
     private JScrollPane main;
 
-    public PCMonitorFrame()
-    {
+    public PCMonitorFrame() {
         super("PC Monitor");
 
         currentPC = null;
@@ -66,49 +63,44 @@ public class PCMonitorFrame extends UtilityFrame implements PCListener
 
     public void setSize(Dimension d) {
         java.awt.Insets borders = this.getBorder().getBorderInsets(this);
-        super.setSize(new Dimension(d.width + borders.bottom + borders.top +10, d.height + borders.left + borders.right+25));
+        super.setSize(new Dimension(d.width + borders.bottom + borders.top + 10, d.height + borders.left + borders.right + 25));
     }
-    
-    public void loadMonitorState(InputStream in) throws IOException
-    {
+
+    public void loadMonitorState(InputStream in) throws IOException {
         monitor.loadState(in);
     }
 
-    public void resizeDisplay()
-    {
+    public void resizeDisplay() {
         ((VGACard)currentPC.getComponent(VGACard.class)).setOriginalDisplaySize();
     }
-    
-    public void saveState(OutputStream out) throws IOException
-    {
+
+    public void saveState(OutputStream out) throws IOException {
         monitor.saveState(out);
     }
 
-    public void frameClosed()
-    {
+    public void frameClosed() {
         if (monitor != null)
             monitor.stopUpdateThread();
         JPC.getInstance().objects().removeObject(this);
     }
 
-    public void pcCreated() {}
+    public void pcCreated() {
+    }
 
-    public void pcDisposed()
-    {
+    public void pcDisposed() {
         dispose();
     }
-    
-    public void executionStarted() {}
 
-    public void executionStopped() {}
+    public void executionStarted() {
+    }
 
-    public void refreshDetails() 
-    {
-        PC pc = (PC) JPC.getObject(PC.class);
-        if (pc != currentPC)
-        {
-            if (monitor != null)
-            {
+    public void executionStopped() {
+    }
+
+    public void refreshDetails() {
+        PC pc = (PC)JPC.getObject(PC.class);
+        if (pc != currentPC) {
+            if (monitor != null) {
                 monitor.stopUpdateThread();
                 main.setViewportView(new JPanel());
                 monitor.setFrame(this);
@@ -116,8 +108,7 @@ public class PCMonitorFrame extends UtilityFrame implements PCListener
             }
 
             currentPC = pc;
-            if (pc != null)
-            {
+            if (pc != null) {
                 monitor = new PCMonitor(pc);
                 monitor.setFrame(this);
                 setPreferredSize(monitor.getPreferredSize());

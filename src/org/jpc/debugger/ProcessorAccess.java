@@ -29,23 +29,21 @@ package org.jpc.debugger;
 
 import org.jpc.emulator.processor.*;
 
-public abstract class ProcessorAccess
-{
-    public static ProcessorAccess create(boolean timetravel, Processor cpu)
-    {
+public abstract class ProcessorAccess {
+    public static ProcessorAccess create(boolean timetravel, Processor cpu) {
         if (!timetravel)
             return new ReflectionProcessorAccess(cpu);
         return new TimeTravelProcessorAccess();
     }
 
-    public ProcessorAccess() {}
+    public ProcessorAccess() {
+    }
 
     public abstract void rowChanged(int row);
 
     public abstract int getValue(String name, int defaultValue);
 
-    public boolean setValue(String name, int value)
-    {
+    public boolean setValue(String name, int value) {
         return false;
     }
 }

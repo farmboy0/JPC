@@ -31,7 +31,6 @@
     End of licence header
 */
 
-
 package org.jpc.emulator.processor;
 
 import java.io.DataInput;
@@ -40,20 +39,16 @@ import org.jpc.emulator.memory.AddressSpace;
 import org.jpc.emulator.Hibernatable;
 
 /**
- * 
  * @author Chris Dennis
  */
-public abstract class Segment implements Hibernatable
-{
+public abstract class Segment implements Hibernatable {
     protected AddressSpace memory;
 
-    public Segment(AddressSpace memory)
-    {
+    public Segment(AddressSpace memory) {
         this.memory = memory;
     }
 
-    public final void setAddressSpace(AddressSpace memory)
-    {
+    public final void setAddressSpace(AddressSpace memory) {
         this.memory = memory;
     }
 
@@ -70,13 +65,13 @@ public abstract class Segment implements Hibernatable
     public abstract int getBase();
 
     public abstract boolean getDefaultSizeFlag();
-    
+
     public abstract int getRPL();
 
     public abstract void setRPL(int cpl);
-    
+
     public abstract int getDPL();
-    
+
     public abstract boolean setSelector(int selector);
 
     public abstract void checkAddress(int offset) throws ProcessorException;
@@ -87,61 +82,51 @@ public abstract class Segment implements Hibernatable
 
     public abstract void printState();
 
-    public byte getByte(int offset)
-    {
+    public byte getByte(int offset) {
         return memory.getByte(translateAddressRead(offset));
     }
 
-    public short getWord(int offset)
-    {
+    public short getWord(int offset) {
         return memory.getWord(translateAddressRead(offset));
     }
 
-    public int getDoubleWord(int offset)
-    {
+    public int getDoubleWord(int offset) {
         return memory.getDoubleWord(translateAddressRead(offset));
     }
 
-    public long getQuadWord(int offset)
-    {
+    public long getQuadWord(int offset) {
         int off = translateAddressRead(offset);
         long result = 0xFFFFFFFFl & memory.getDoubleWord(off);
         off = translateAddressRead(offset + 4);
-        result |= (((long) memory.getDoubleWord(off)) << 32);
+        result |= (((long)memory.getDoubleWord(off)) << 32);
         return result;
     }
 
     // used by JPC for VM specific things
-    public void VMsetByte(int offset, byte data)
-    {
+    public void VMsetByte(int offset, byte data) {
         memory.setByte(translateAddressWrite(offset), data);
     }
 
-    public void setByte(int offset, byte data)
-    {
+    public void setByte(int offset, byte data) {
         memory.setByte(translateAddressWrite(offset), data);
     }
 
-    public void setWord(int offset, short data)
-    {
+    public void setWord(int offset, short data) {
         memory.setWord(translateAddressWrite(offset), data);
     }
 
-    public void setDoubleWord(int offset, int data)
-    {
+    public void setDoubleWord(int offset, int data) {
         memory.setDoubleWord(translateAddressWrite(offset), data);
     }
 
-    public void setQuadWord(int offset, long data)
-    {
+    public void setQuadWord(int offset, long data) {
         int off = translateAddressWrite(offset);
-        memory.setDoubleWord(off, (int) data);
+        memory.setDoubleWord(off, (int)data);
         off = translateAddressWrite(offset + 4);
-        memory.setDoubleWord(off, (int) (data >>> 32));
+        memory.setDoubleWord(off, (int)(data >>> 32));
     }
-    
-    public void loadState(DataInput input) throws IOException
-    {
+
+    public void loadState(DataInput input) throws IOException {
         throw new UnsupportedOperationException();
     }
 }

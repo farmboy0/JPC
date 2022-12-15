@@ -37,14 +37,12 @@ package org.jpc.support;
  * A <code>RawBlockDevice</code> subclass for floppy disk drives.
  * @author Chris Dennis
  */
-public class FloppyBlockDevice extends RawBlockDevice
-{
+public class FloppyBlockDevice extends RawBlockDevice {
     /**
      * Constructs an instance backed by the given device.
      * @param data backing device
      */
-    public FloppyBlockDevice(SeekableIODevice data)
-    {
+    public FloppyBlockDevice(SeekableIODevice data) {
         super(data);
     }
 
@@ -52,8 +50,7 @@ public class FloppyBlockDevice extends RawBlockDevice
      * Returns <code>false</code> as a floppy drive cannot be locked
      * @return <code>false</code>
      */
-    public boolean isLocked()
-    {
+    public boolean isLocked() {
         return false;
     }
 
@@ -61,32 +58,26 @@ public class FloppyBlockDevice extends RawBlockDevice
      * Does nothing, a floppy drive cannot be locked
      * @param locked dummy
      */
-    public void setLock(boolean locked)
-    {
+    public void setLock(boolean locked) {
     }
 
-    public int getCylinders()
-    {
+    public int getCylinders() {
         return -1;
     }
 
-    public int getHeads()
-    {
+    public int getHeads() {
         return -1;
     }
 
-    public int getSectors()
-    {
+    public int getSectors() {
         return -1;
     }
 
-    public Type getType()
-    {
+    public Type getType() {
         return Type.FLOPPY;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "Floppy: " + super.toString();
     }
 }

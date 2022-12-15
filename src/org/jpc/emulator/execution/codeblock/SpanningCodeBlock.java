@@ -36,33 +36,28 @@ import org.jpc.emulator.processor.Processor;
  * about caching the decode result.
  * @author Ian Preston
  */
-public abstract class SpanningCodeBlock implements CodeBlock
-{
+public abstract class SpanningCodeBlock implements CodeBlock {
     private CodeBlock lastBlock = null;
 
-    public int getX86Length()
-    {
+    public int getX86Length() {
         return 0;
     }
 
-    public int getX86Count()
-    {
-	try {
-	    return lastBlock.getX86Count();
-	} catch (NullPointerException e) {
-	    return 0;
-	}
+    public int getX86Count() {
+        try {
+            return lastBlock.getX86Count();
+        } catch (NullPointerException e) {
+            return 0;
+        }
     }
-    
-    public Executable.Branch execute(Processor cpu)
-    {
+
+    public Executable.Branch execute(Processor cpu) {
         if (lastBlock == null)
             lastBlock = decode(cpu);
         return lastBlock.execute(cpu);
     }
 
-    public void invalidate()
-    {
+    public void invalidate() {
         lastBlock = null;
     }
 
@@ -73,21 +68,18 @@ public abstract class SpanningCodeBlock implements CodeBlock
      */
     public abstract CodeBlock decode(Processor cpu);
 
-    public boolean handleMemoryRegionChange(int startAddress, int endAddress)
-    {
+    public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         return false;
     }
 
-    public String getDisplayString()
-    {
+    public String getDisplayString() {
         if (lastBlock != null)
             return lastBlock.getDisplayString();
         else
             return "Undecoded Spanning Block";
     }
 
-    public Instruction getInstructions()
-    {
+    public Instruction getInstructions() {
         if (lastBlock != null)
             return lastBlock.getInstructions();
         return null;

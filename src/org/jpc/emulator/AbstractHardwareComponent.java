@@ -36,39 +36,31 @@ package org.jpc.emulator;
 import java.io.*;
 
 /**
- * This class provides default implementations of the <code>HardwareComponent</code>
- * methods.  The default implementations are all empty.
+ * This class provides default implementations of the <code>HardwareComponent</code> methods. The
+ * default implementations are all empty.
  * @author Chris Dennis
  */
-public abstract class AbstractHardwareComponent implements HardwareComponent
-{
-    public boolean initialised()
-    {
+public abstract class AbstractHardwareComponent implements HardwareComponent {
+    public boolean initialised() {
         return true;
     }
 
-    public void acceptComponent(HardwareComponent component)
-    {
+    public void acceptComponent(HardwareComponent component) {
     }
 
-    public boolean updated()
-    {
+    public boolean updated() {
         return true;
     }
 
-    public void updateComponent(HardwareComponent component)
-    {
+    public void updateComponent(HardwareComponent component) {
     }
 
-    public void reset()
-    {
+    public void reset() {
     }
 
-    public void saveState(DataOutput output) throws IOException
-    {
+    public void saveState(DataOutput output) throws IOException {
     }
 
-    public void loadState(DataInput input) throws IOException
-    {
+    public void loadState(DataInput input) throws IOException {
     }
 }

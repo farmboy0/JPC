@@ -31,7 +31,6 @@
     End of licence header
 */
 
-
 package org.jpc.debugger;
 
 import java.awt.Dimension;
@@ -43,16 +42,14 @@ import org.jpc.debugger.util.*;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
 import org.jpc.emulator.memory.*;
 
-public class ExecutionTraceFrame extends UtilityFrame implements PCListener, ListSelectionListener
-{
+public class ExecutionTraceFrame extends UtilityFrame implements PCListener, ListSelectionListener {
     private DisassemblyOverlayTable trace;
     private TraceModel model;
-    
+
     private CodeBlockRecord codeBlocks;
     private long selectedBlock;
 
-    public ExecutionTraceFrame()
-    {
+    public ExecutionTraceFrame() {
         super("Execution Trace Frame");
         codeBlocks = null;
         selectedBlock = -1;
@@ -70,8 +67,7 @@ public class ExecutionTraceFrame extends UtilityFrame implements PCListener, Lis
         JPC.getInstance().refresh();
     }
 
-    public void valueChanged(ListSelectionEvent e)
-    {
+    public void valueChanged(ListSelectionEvent e) {
         if (codeBlocks == null)
             return;
 
@@ -82,67 +78,59 @@ public class ExecutionTraceFrame extends UtilityFrame implements PCListener, Lis
         ((ProcessorFrame)JPC.getObject(ProcessorFrame.class)).refreshDetails();
     }
 
-    public void pcCreated() {}
+    public void pcCreated() {
+    }
 
-    public void frameClosed()
-    {
+    public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
 
-    public void pcDisposed() 
-    {
+    public void pcDisposed() {
         codeBlocks = null;
         model.fireTableDataChanged();
     }
-    
-    public void executionStarted() {}
 
-    public void executionStopped()
-    {
+    public void executionStarted() {
+    }
+
+    public void executionStopped() {
         refreshDetails();
     }
 
-    public void refreshDetails() 
-    {
-        codeBlocks = (CodeBlockRecord) JPC.getObject(CodeBlockRecord.class);
+    public void refreshDetails() {
+        codeBlocks = (CodeBlockRecord)JPC.getObject(CodeBlockRecord.class);
         if (codeBlocks == null)
             return;
 
         model.fireTableDataChanged();
         if (selectedBlock < 0)
             return;
-        
+
         int r2 = codeBlocks.getRowForIndex(selectedBlock);
-        try
-        {
+        try {
             trace.setRowSelectionInterval(r2, r2);
+        } catch (Exception e) {
         }
-        catch (Exception e) {}
     }
 
-    class TraceModel extends BasicTableModel
-    {
-        TraceModel()
-        {
-            super(new String[]{"Index", "Code Block", "Address", "SS:(E)SP", "ESP", "EBP", "X86 Length", "X86 Count", "raw x86"},
-                    new int[]{100, 400, 80, 80, 80, 80, 50, 50, 400});
+    class TraceModel extends BasicTableModel {
+        TraceModel() {
+            super(new String[] { "Index", "Code Block", "Address", "SS:(E)SP", "ESP", "EBP", "X86 Length", "X86 Count", "raw x86" },
+                new int[] { 100, 400, 80, 80, 80, 80, 50, 50, 400 });
         }
 
-        public int getRowCount()
-        {
+        public int getRowCount() {
             if (codeBlocks == null)
                 return 0;
             return codeBlocks.getMaximumTrace();
         }
 
-        public Object getValueAt(int row, int column)
-        {
+        public Object getValueAt(int row, int column) {
             if (row >= codeBlocks.getTraceLength())
                 return null;
 
             CodeBlock block = codeBlocks.getTraceBlockAt(row);
-            switch (column)
-            {
+            switch (column) {
             case 0:
                 return Long.valueOf(codeBlocks.getIndexNumberForRow(row));
             case 1:
@@ -168,27 +156,24 @@ public class ExecutionTraceFrame extends UtilityFrame implements PCListener, Lis
                     return "Page Fault";
                 if ((address & AddressSpace.BLOCK_MASK) + len <= AddressSpace.BLOCK_SIZE)
                     m.copyContentsIntoArray(address & AddressSpace.BLOCK_MASK, buf, 0, len);
-                else
-                {
+                else {
                     int first = AddressSpace.BLOCK_SIZE - (address & AddressSpace.BLOCK_MASK);
                     m.copyContentsIntoArray(address & AddressSpace.BLOCK_MASK, buf, 0, first);
                     Memory m2 = codeBlocks.getMemory(address + AddressSpace.BLOCK_SIZE);
-                    m2.copyContentsIntoArray(0, buf, first, len-first);
+                    m2.copyContentsIntoArray(0, buf, first, len - first);
                 }
-                return toHexString(buf);                
-                    
+                return toHexString(buf);
+
             default:
                 return "";
             }
         }
     }
 
-    public static String toHexString(byte[] b)
-    {
+    public static String toHexString(byte[] b) {
         StringBuffer sb = new StringBuffer();
-        for (int i=0; i< b.length; i++)
+        for (int i = 0; i < b.length; i++)
             sb.append(Integer.toHexString(b[i] & 0xFF) + " ");
         return sb.toString();
     }
 }
-

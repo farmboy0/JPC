@@ -40,123 +40,107 @@ import java.util.logging.*;
 import org.jpc.emulator.*;
 
 /**
- * This class provides a <code>Bios</code> implementation for the VGA Bios.  The
- * VGA Bios is loaded at address <code>0xc0000</code>.
+ * This class provides a <code>Bios</code> implementation for the VGA Bios. The VGA Bios is loaded
+ * at address <code>0xc0000</code>.
  * <p>
- * IO ports <code>0x500-0x503</code> are registered for debugging output.  Byte
- * writes cause ASCII characters to be written to standard output, and word
- * writes indicate a BIOS panic at the written value line number.
+ * IO ports <code>0x500-0x503</code> are registered for debugging output. Byte writes cause ASCII
+ * characters to be written to standard output, and word writes indicate a BIOS panic at the written
+ * value line number.
  * @author Chris Dennis
  */
-public class VGABIOS extends Bios implements IODevice
-{
+public class VGABIOS extends Bios implements IODevice {
     private static final Logger LOGGING = Logger.getLogger(VGABIOS.class.getName());
 
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
-    
+
     private boolean ioportRegistered;
 
     /**
-     * Loads the vga bios from the resource <code>image</code>. 
+     * Loads the vga bios from the resource <code>image</code>.
      * @param image vga bios resource name.
      * @throws java.io.IOException propogated from the resource load.
      * @throws java.util.MissingResourceException propogated from the resource load
      */
-    public VGABIOS(String image) throws IOException
-    {
+    public VGABIOS(String image) throws IOException {
         super(image);
         ioportRegistered = false;
     }
 
-    public void loadState(DataInput input) throws IOException
-    {
+    public void loadState(DataInput input) throws IOException {
         super.loadState(input);
         ioportRegistered = false;
     }
 
-    public int[] ioPortsRequested()
-    {
-        return new int[]{0x500, 0x501, 0x502, 0x503};
+    public int[] ioPortsRequested() {
+        return new int[] { 0x500, 0x501, 0x502, 0x503 };
     }
 
-    public void ioPortWrite8(int address, int data)
-    {
+    public void ioPortWrite8(int address, int data) {
         switch (address) {
-            /* LGPL VGA-BIOS Messages */
-            case 0x500:
-            case 0x503:
-                print(new String(new byte[]{(byte) data}, US_ASCII));
-                break;
-            default:
+        /* LGPL VGA-BIOS Messages */
+        case 0x500:
+        case 0x503:
+            print(new String(new byte[] { (byte)data }, US_ASCII));
+            break;
+        default:
         }
     }
 
-    public void ioPortWrite16(int address, int data)
-    {
+    public void ioPortWrite16(int address, int data) {
         switch (address) {
-            /* Bochs BIOS Messages */
-            case 0x501:
-            case 0x502:
-                LOGGING.log(Level.SEVERE, "panic in vgabios at line {0,number,integer}", Integer.valueOf(data));
+        /* Bochs BIOS Messages */
+        case 0x501:
+        case 0x502:
+            LOGGING.log(Level.SEVERE, "panic in vgabios at line {0,number,integer}", Integer.valueOf(data));
         }
     }
 
-    public int ioPortRead8(int address)
-    {
+    public int ioPortRead8(int address) {
         return 0xff;
     }
 
-    public int ioPortRead16(int address)
-    {
+    public int ioPortRead16(int address) {
         return 0xffff;
     }
 
-    public int ioPortRead32(int address)
-    {
+    public int ioPortRead32(int address) {
         return 0xffffffff;
     }
 
-    public void ioPortWrite32(int address, int data)
-    {
+    public void ioPortWrite32(int address, int data) {
     }
 
-    protected int loadAddress()
-    {
+    protected int loadAddress() {
         return 0xc0000;
     }
 
-    public boolean updated()
-    {
+    public boolean updated() {
         return super.updated() && ioportRegistered;
     }
 
-    public void updateComponent(HardwareComponent component)
-    {
+    public void updateComponent(HardwareComponent component) {
         super.updateComponent(component);
 
         if ((component instanceof IOPortHandler) && component.updated()) {
-            ((IOPortHandler) component).registerIOPortCapable(this);
+            ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
-    public boolean initialised()
-    {
+    public boolean initialised() {
         return super.initialised() && ioportRegistered;
     }
 
-    public void acceptComponent(HardwareComponent component)
-    {
+    public void acceptComponent(HardwareComponent component) {
         super.acceptComponent(component);
 
         if ((component instanceof IOPortHandler) && component.initialised()) {
-            ((IOPortHandler) component).registerIOPortCapable(this);
+            ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
-    public void reset()
-    {
+    public void reset() {
         super.reset();
         ioportRegistered = false;
     }

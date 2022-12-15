@@ -36,10 +36,9 @@ package org.jpc.emulator.pci;
 import org.jpc.emulator.memory.AbstractMemory;
 
 /**
- * A PCI device compatible <code>IORegion</code> that is mapped into the
- * physical address space of the emulated system.
+ * A PCI device compatible <code>IORegion</code> that is mapped into the physical address space of
+ * the emulated system.
  * @author Chris Dennis
  */
-public abstract class MemoryMappedIORegion extends AbstractMemory implements IORegion
-{
+public abstract class MemoryMappedIORegion extends AbstractMemory implements IORegion {
 }

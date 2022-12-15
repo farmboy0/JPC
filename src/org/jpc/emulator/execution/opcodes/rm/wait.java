@@ -33,27 +33,22 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class wait extends Executable
-{
+public class wait extends Executable {
 
-    public wait(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public wait(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-            cpu.fpu.checkExceptions();
+    public Branch execute(Processor cpu) {
+        cpu.fpu.checkExceptions();
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

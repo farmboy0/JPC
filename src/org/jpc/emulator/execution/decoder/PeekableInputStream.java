@@ -27,8 +27,7 @@
 
 package org.jpc.emulator.execution.decoder;
 
-public interface PeekableInputStream
-{
+public interface PeekableInputStream {
     public void seek(int delta);
 
     public int peek();

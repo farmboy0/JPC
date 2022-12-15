@@ -33,40 +33,31 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class cli extends Executable
-{
+public class cli extends Executable {
 
-    public cli(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public cli(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        if (cpu.eflagsIOPrivilegeLevel == 3)
-        {
+    public Branch execute(Processor cpu) {
+        if (cpu.eflagsIOPrivilegeLevel == 3) {
             cpu.eflagsInterruptEnable = false;
-        }
-        else
-        {
+        } else {
             if (Processor.cpuLevel >= 5)
-                if ((cpu.getCR4() & Processor.CR4_VIRTUAL8086_MODE_EXTENSIONS) != 0)
-                {
+                if ((cpu.getCR4() & Processor.CR4_VIRTUAL8086_MODE_EXTENSIONS) != 0) {
                     cpu.eflagsVirtualInterrupt = false;
                     return Branch.None;
                 }
-	        throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION,0,true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

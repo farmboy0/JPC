@@ -33,23 +33,20 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class idiv_Ew extends Executable
-{
+public class idiv_Ew extends Executable {
     final int op1Index;
 
-    public idiv_Ew(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public idiv_Ew(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1Index = Modrm.Ew(modrm);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         if (op1.get16() == 0)
             throw ProcessorException.DIVIDE_ERROR;
-        int ldiv = (((int)cpu.r_edx.get16()) << 16 ) | (0xFFFF&cpu.r_eax.get16());
+        int ldiv = (((int)cpu.r_edx.get16()) << 16) | (0xFFFF & cpu.r_eax.get16());
         int quot32 = ldiv / op1.get16();
         if (quot32 != (short)quot32)
             throw ProcessorException.DIVIDE_ERROR;
@@ -58,13 +55,11 @@ public class idiv_Ew extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

@@ -30,8 +30,7 @@ package org.jpc.debugger;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TimeTravelProcessorAccess extends ProcessorAccess
-{
+public class TimeTravelProcessorAccess extends ProcessorAccess {
     private static final Map<String, Integer> indices = new HashMap();
     static {
         indices.put("r_eax", ProcessorState.EAX);
@@ -73,17 +72,15 @@ public class TimeTravelProcessorAccess extends ProcessorAccess
     private CodeBlockRecord history;
     private int[] currentState;
 
-    public TimeTravelProcessorAccess()
-    {
-        this.history = (CodeBlockRecord) JPC.getObject(CodeBlockRecord.class);
+    public TimeTravelProcessorAccess() {
+        this.history = (CodeBlockRecord)JPC.getObject(CodeBlockRecord.class);
     }
-    
+
     @Override
-    public int getValue(String name, int defaultValue)
-    {
+    public int getValue(String name, int defaultValue) {
         if (currentState == null)
             return defaultValue;
-        
+
         return currentState[indices.get(name)];
     }
 

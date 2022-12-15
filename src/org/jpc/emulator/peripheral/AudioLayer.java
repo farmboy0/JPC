@@ -8,12 +8,10 @@ import javax.sound.sampled.SourceDataLine;
 /*
  * Handle the Music output, i.e. Midi Sound
  */
-public class AudioLayer
-{
+public class AudioLayer {
     static private byte[] audioBuffer;
     static public SourceDataLine line;
     static private boolean audioThreadExit = false;
-
 
     static private Thread audioThread;
 
@@ -21,7 +19,7 @@ public class AudioLayer
         AudioFormat format = new AudioFormat(freq, 16, 2, true, false);
         try {
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-            line = (SourceDataLine) AudioSystem.getLine(info);
+            line = (SourceDataLine)AudioSystem.getLine(info);
             line.open(format, bufferSize);
             line.start();
             audioThreadExit = false;
@@ -35,7 +33,10 @@ public class AudioLayer
                         if (result)
                             line.write(audioBuffer, 0, audioBuffer.length);
                         else {
-                            try {Thread.sleep(20);} catch (Exception e){}
+                            try {
+                                Thread.sleep(20);
+                            } catch (Exception e) {
+                            }
                         }
                     }
                 }
@@ -51,7 +52,10 @@ public class AudioLayer
 
     public static void stop() {
         audioThreadExit = true;
-        try {audioThread.join(2000);} catch (Exception e){}
+        try {
+            audioThread.join(2000);
+        } catch (Exception e) {
+        }
         line.drain();
         line.stop();
     }

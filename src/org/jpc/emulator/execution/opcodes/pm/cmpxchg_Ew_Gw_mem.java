@@ -33,47 +33,39 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class cmpxchg_Ew_Gw_mem extends Executable
-{
+public class cmpxchg_Ew_Gw_mem extends Executable {
     final Pointer op1;
     final int op2Index;
 
-    public cmpxchg_Ew_Gw_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public cmpxchg_Ew_Gw_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
         op2Index = Modrm.Gw(modrm);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
         cpu.flagOp1 = cpu.r_eax.get16();
         cpu.flagOp2 = op1.get16(cpu);
         cpu.flagResult = (short)(cpu.flagOp1 - cpu.flagOp2);
         cpu.flagIns = UCodes.SUB16;
         cpu.flagStatus = OSZAPC;
-        if (cpu.flagOp1 == cpu.flagOp2)
-        {
+        if (cpu.flagOp1 == cpu.flagOp2) {
             cpu.zf(true);
             op1.set16(cpu, (short)op2.get16());
-        }
-        else
-        {
+        } else {
             cpu.zf(false);
             cpu.r_eax.set16(op1.get16(cpu));
         }
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

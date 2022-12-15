@@ -31,8 +31,7 @@ import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Segment;
 import org.jpc.emulator.processor.SegmentFactory;
 
-public class ProcessorState
-{
+public class ProcessorState {
     public static final int EAX = 0;
     public static final int ECX = 1;
     public static final int EDX = 2;
@@ -68,8 +67,7 @@ public class ProcessorState
     public static final int GDTR = 28;
     public static final int LDTR = 29;
 
-    public static int[] extract(Processor cpu)
-    {
+    public static int[] extract(Processor cpu) {
         int[] regs = new int[30];
         regs[EAX] = cpu.r_eax.get32();
         regs[ECX] = cpu.r_ecx.get32();
@@ -104,15 +102,13 @@ public class ProcessorState
         return regs;
     }
 
-    private static int getLimit(Segment s)
-    {
+    private static int getLimit(Segment s) {
         if (s instanceof SegmentFactory.NullSegment)
             return 0;
         return s.getLimit();
     }
 
-    private static int getBase(Segment s)
-    {
+    private static int getBase(Segment s) {
         if (s instanceof SegmentFactory.NullSegment)
             return 0;
         return s.getBase();

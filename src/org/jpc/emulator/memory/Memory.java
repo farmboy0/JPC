@@ -37,13 +37,11 @@ import org.jpc.emulator.execution.codeblock.SpanningCodeBlock;
 import org.jpc.emulator.processor.Processor;
 
 /**
- * A region of memory that can be read from and written to in all sizes from byte to
- * quad-word.  Also supports execution from an arbitrary point on a given processor state.
- * 
+ * A region of memory that can be read from and written to in all sizes from byte to quad-word. Also
+ * supports execution from an arbitrary point on a given processor state.
  * @author Chris Dennis
  */
-public interface Memory
-{
+public interface Memory {
 
     public void lock(int addr);
 
@@ -52,11 +50,10 @@ public interface Memory
     public void addSpanningBlock(SpanningCodeBlock span, int lengthRemaining);
 
     /**
-     * Returns true if this <code>Memory</code> object has had heap allocated for
-     * it.
+     * Returns true if this <code>Memory</code> object has had heap allocated for it.
      * <p>
-     * For most memory objects a <code>true</code> return implies that there are
-     * some non-zero values stored.
+     * For most memory objects a <code>true</code> return implies that there are some non-zero values
+     * stored.
      * @return <code>true</code> if heap is allocated for this object.
      */
     public boolean isAllocated();
@@ -67,8 +64,8 @@ public interface Memory
     public void clear();
 
     /**
-     * Sets <code>length</code> bytes to zero from <code>start</code> (inclusive)
-     * to <code>(start + length)</code> (exclusive).
+     * Sets <code>length</code> bytes to zero from <code>start</code> (inclusive) to
+     * <code>(start + length)</code> (exclusive).
      * @param start index of first byte to be cleared.
      * @param length number of bytes to clear.
      */
@@ -109,14 +106,16 @@ public interface Memory
     public long getQuadWord(int offset);
 
     /**
-     * Gets the least significant 64bits of an octa-word value starting at <code>offset</code> in little endian format.
+     * Gets the least significant 64bits of an octa-word value starting at <code>offset</code> in little
+     * endian format.
      * @param offset index of the first byte
      * @return lowest 64bits of the octaword value starting at <code>offset</code>
      */
     public long getLowerDoubleQuadWord(int offset);
 
     /**
-     * Gets the most significant 64bits of an octa-word value starting at <code>offset</code> in little endian format.
+     * Gets the most significant 64bits of an octa-word value starting at <code>offset</code> in little
+     * endian format.
      * @param offset index of the first byte
      * @return highest 64bits of the octaword value starting at <code>offset</code>
      */
@@ -151,24 +150,24 @@ public interface Memory
     public void setQuadWord(int offset, long data);
 
     /**
-     * Sets the least significant 64bits of an octa-word value starting at <code>index</code>
-     * in little-endian format.
+     * Sets the least significant 64bits of an octa-word value starting at <code>index</code> in
+     * little-endian format.
      * @param offset index of the first byte.
      * @param data lowest 64bits of the octa-word value as a long.
      */
     public void setLowerDoubleQuadWord(int offset, long data);
 
     /**
-     * Sets the most significant 64bits of an octa-word value starting at
-     * <code>index</code> in little-endian format.
+     * Sets the most significant 64bits of an octa-word value starting at <code>index</code> in
+     * little-endian format.
      * @param offset index of the first byte.
      * @param data highest 64bits of the octa-word value as a long.
      */
     public void setUpperDoubleQuadWord(int offset, long data);
 
     /**
-     * Copies <code>len</code> bytes starting at <code>address</code> from this
-     * memory object into <code>buffer</code>.
+     * Copies <code>len</code> bytes starting at <code>address</code> from this memory object into
+     * <code>buffer</code>.
      * @param address start address to copy from.
      * @param buffer array to copy data into.
      * @param off start address to copy to.
@@ -177,8 +176,8 @@ public interface Memory
     public void copyContentsIntoArray(int address, byte[] buffer, int off, int len);
 
     /**
-     * Copies <code>len</code> bytes starting at <code>off</code> from
-     * <code>buffer</code> into this memory object at <code>address</code>.
+     * Copies <code>len</code> bytes starting at <code>off</code> from <code>buffer</code> into this
+     * memory object at <code>address</code>.
      * @param address start address to copy to.
      * @param buffer array to copy data from.
      * @param off start address to copy from.
@@ -187,19 +186,17 @@ public interface Memory
     public void copyArrayIntoContents(int address, byte[] buffer, int off, int len);
 
     /**
-     * Copies <code>len</code> bytes starting at <code>off</code> from
-     * <code>buffer</code> into this memory object at <code>address</code>, but does
-     * not initialise code block arrays.
+     * Copies <code>len</code> bytes starting at <code>off</code> from <code>buffer</code> into this
+     * memory object at <code>address</code>, but does not initialise code block arrays.
      * @param address start address to copy to.
      * @param buf array to copy data from.
      * @param off start address to copy from.
      * @param len number of bytes to copy.
      */
     public void loadInitialContents(int address, byte[] buf, int off, int len);
-    
+
     /**
-     * Execute the x86 instructions starting at <code>address</code> on the
-     * specified processor context.
+     * Execute the x86 instructions starting at <code>address</code> on the specified processor context.
      * @param cpu processor on which to operate.
      * @param address start address to execute from.
      * @return number of x86 instructions executed.
@@ -207,8 +204,7 @@ public interface Memory
     public int executeReal(Processor cpu, int address);
 
     /**
-     * Execute the x86 instructions starting at <code>address</code> on the
-     * specified processor context.
+     * Execute the x86 instructions starting at <code>address</code> on the specified processor context.
      * @param cpu processor on which to operate.
      * @param address start address to execute from.
      * @return number of x86 instructions executed.
@@ -216,8 +212,7 @@ public interface Memory
     public int executeProtected(Processor cpu, int address);
 
     /**
-     * Execute the x86 instructions starting at <code>address</code> on the
-     * specified processor context.
+     * Execute the x86 instructions starting at <code>address</code> on the specified processor context.
      * @param cpu processor on which to operate.
      * @param address start address to execute from.
      * @return number of x86 instructions executed.

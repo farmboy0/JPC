@@ -31,15 +31,13 @@
     End of licence header
 */
 
-
 package org.jpc.debugger;
 
-public interface PCListener
-{
+public interface PCListener {
     public void pcCreated();
 
     public void pcDisposed();
-    
+
     public void executionStarted();
 
     public void executionStopped();

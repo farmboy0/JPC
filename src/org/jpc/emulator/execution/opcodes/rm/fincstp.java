@@ -33,27 +33,23 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fincstp extends Executable
-{
+public class fincstp extends Executable {
 
-    public fincstp(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fincstp(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        cpu.fpu.top += 1; cpu.fpu.top &= 7;
+    public Branch execute(Processor cpu) {
+        cpu.fpu.top += 1;
+        cpu.fpu.top &= 7;
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

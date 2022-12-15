@@ -31,7 +31,6 @@
     End of licence header
 */
 
-
 package org.jpc.debugger;
 
 import java.awt.*;
@@ -42,24 +41,22 @@ import javax.swing.table.*;
 import org.jpc.debugger.util.*;
 import org.jpc.emulator.processor.Processor;
 
-public class ProcessorFrame extends UtilityFrame implements PCListener
-{
+public class ProcessorFrame extends UtilityFrame implements PCListener {
     private ProcessorAccess access;
     private ProcessorModel model;
     private JTable registerTable;
     private Font f = new Font("Monospaced", Font.BOLD, 12);
 
-    public ProcessorFrame()
-    {
+    public ProcessorFrame() {
         super("Processor Registers");
         model = new ProcessorModel();
-        
+
         registerTable = new JTable(model);
         registerTable.setRowHeight(18);
         model.setupColumnWidths(registerTable);
         registerTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         registerTable.setDefaultRenderer(Object.class, new CellRenderer());
-        
+
         ValidatingTextField binary = new ValidatingTextField("01", '0', 8);
         ValidatingTextField hex = new ValidatingTextField("0123456789abcdefABCDEF", '0', 8);
         binary.setFont(f);
@@ -78,83 +75,69 @@ public class ProcessorFrame extends UtilityFrame implements PCListener
         pcCreated();
     }
 
-    public void refreshAccess()
-    {
-        access = (ProcessorAccess) JPC.getObject(ProcessorAccess.class);
+    public void refreshAccess() {
+        access = (ProcessorAccess)JPC.getObject(ProcessorAccess.class);
     }
 
-    public void frameClosed()
-    {
+    public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
 
-    public void pcCreated()
-    {
-        access = (ProcessorAccess) JPC.getObject(ProcessorAccess.class);
+    public void pcCreated() {
+        access = (ProcessorAccess)JPC.getObject(ProcessorAccess.class);
 
         model.recreateWrappers();
         refreshDetails();
     }
 
-    public void pcDisposed()
-    {
+    public void pcDisposed() {
         access = null;
         model.recreateWrappers();
         refreshDetails();
     }
-    
-    public void executionStarted() 
-    {
+
+    public void executionStarted() {
     }
 
-    public void executionStopped() 
-    {
+    public void executionStopped() {
         refreshDetails();
     }
 
-    public void refreshDetails()
-    {
+    public void refreshDetails() {
         model.fireTableDataChanged();
     }
 
-    class FieldWrapper
-    {
+    class FieldWrapper {
         String title, fieldName;
 
-        FieldWrapper(String title, String fieldName)
-        {
+        FieldWrapper(String title, String fieldName) {
             this.title = title;
             this.fieldName = fieldName;
         }
 
-        int getValue()
-        {
+        int getValue() {
             if (access == null)
                 return -1;
             return access.getValue(fieldName, -1);
         }
 
-        void setValue(int val)
-        {
+        void setValue(int val) {
             if (access != null)
                 access.setValue(fieldName, val);
         }
     }
 
-    class ProcessorModel extends BasicTableModel
-    {
+    class ProcessorModel extends BasicTableModel {
         FieldWrapper[] registers;
 
-        ProcessorModel()
-        {
-            super(new String[]{"Register", "B0", "B1", "B2", "B3", "Hex"}, new int[]{50, 80, 80, 80, 80, 80});
+        ProcessorModel() {
+            super(new String[] { "Register", "B0", "B1", "B2", "B3", "Hex" }, new int[] { 50, 80, 80, 80, 80, 80 });
             recreateWrappers();
         }
-        
-        public void recreateWrappers()
-        {
+
+        public void recreateWrappers() {
             registers = new FieldWrapper[24];
-            
+
             registers[0] = new FieldWrapper("EAX", "r_eax");
             registers[1] = new FieldWrapper("ECX", "r_ecx");
             registers[2] = new FieldWrapper("EDX", "r_edx");
@@ -163,7 +146,7 @@ public class ProcessorFrame extends UtilityFrame implements PCListener
             registers[5] = new FieldWrapper("EBP", "r_ebp");
             registers[6] = new FieldWrapper("ESI", "r_esi");
             registers[7] = new FieldWrapper("EDI", "r_edi");
-            
+
             registers[8] = new FieldWrapper("CS", "cs");
             registers[9] = new FieldWrapper("DS", "ds");
             registers[10] = new FieldWrapper("SS", "ss");
@@ -184,41 +167,35 @@ public class ProcessorFrame extends UtilityFrame implements PCListener
             registers[23] = new FieldWrapper("IDTR", "idtr");
         }
 
-        public int getRowCount()
-        {
+        public int getRowCount() {
             return registers.length;
         }
 
-        public boolean isCellEditable(int rowIndex, int columnIndex)
-        {
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
             if (rowIndex >= 8)
                 return columnIndex > 2;
             else
                 return columnIndex > 0;
         }
 
-        private String getZeroExtendedBinaryString(int value)
-        {
+        private String getZeroExtendedBinaryString(int value) {
             StringBuffer buf = new StringBuffer(Integer.toBinaryString(value));
             while (buf.length() < 8)
                 buf.insert(0, "0");
             return buf.toString();
         }
-        
-        private String getZeroExtendedHexString(int value)
-        {
+
+        private String getZeroExtendedHexString(int value) {
             StringBuffer buf = new StringBuffer(Integer.toHexString(value).toUpperCase());
             while (buf.length() < 8)
                 buf.insert(0, "0");
             return buf.toString();
         }
 
-        public Object getValueAt(int row, int column)
-        {
+        public Object getValueAt(int row, int column) {
             int value = registers[row].getValue();
 
-            switch (column)
-            {
+            switch (column) {
             case 0:
                 return registers[row].title;
             case 1:
@@ -236,21 +213,16 @@ public class ProcessorFrame extends UtilityFrame implements PCListener
             }
         }
 
-        public void setValueAt(Object obj, int row, int column)
-        {
-            try
-            {
-                if (column == 5)
-                {
+        public void setValueAt(Object obj, int row, int column) {
+            try {
+                if (column == 5) {
                     long value = Long.parseLong(obj.toString(), 16);
-                    registers[row].setValue((int) value);
-                }
-                else if (column > 0)
-                {
+                    registers[row].setValue((int)value);
+                } else if (column > 0) {
                     int value = Integer.parseInt(obj.toString(), 2);
                     long current = registers[row].getValue();
-                    
-                    int shift = 8*(4 - column);
+
+                    int shift = 8 * (4 - column);
                     long mask = 0xFF << shift;
                     current &= (0xFFFFFFFF ^ mask);
                     current |= value << shift;
@@ -258,36 +230,32 @@ public class ProcessorFrame extends UtilityFrame implements PCListener
                     if ((row >= 8) && (row < 14))
                         current = 0xFFFF & current;
 
-                    registers[row].setValue((int) current);
+                    registers[row].setValue((int)current);
                 }
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
 
             JPC.getInstance().refresh();
         }
-    } 
+    }
 
-    class CellRenderer extends DefaultTableCellRenderer
-    {
+    class CellRenderer extends DefaultTableCellRenderer {
         Color bg = new Color(0xFFF0F0);
 
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-        {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
+            int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             setFont(f);
-            
+
             setBackground(Color.white);
             setForeground(Color.black);
             setHorizontalAlignment(JLabel.RIGHT);
-            
-            if (column == 0)
-            {
+
+            if (column == 0) {
                 setBackground(Color.blue);
                 setForeground(Color.white);
                 setHorizontalAlignment(JLabel.CENTER);
-            }
-            else 
-            {
+            } else {
                 if (row < 8)
                     setBackground(bg);
 
@@ -297,28 +265,20 @@ public class ProcessorFrame extends UtilityFrame implements PCListener
                     setForeground(Color.magenta);
             }
 
-            if ((row >= 8) && (row < 14) && ((column == 1) || (column == 2)))
-            {
+            if ((row >= 8) && (row < 14) && ((column == 1) || (column == 2))) {
                 setBackground(Color.lightGray);
                 setForeground(Color.blue);
-            }
-            else if (row == 14)
-            {
-                if (column > 0)
-                {
+            } else if (row == 14) {
+                if (column > 0) {
                     setBackground(Color.red);
                     setForeground(Color.white);
                 }
-            }
-            else if (row == 15)
+            } else if (row == 15)
                 setBackground(Color.cyan);
-            else if ((row > 15) && (row < 21))
-            {
+            else if ((row > 15) && (row < 21)) {
                 setBackground(Color.green);
                 setForeground(Color.black);
-            }
-            else if (row >= 21)
-            {
+            } else if (row >= 21) {
                 setBackground(Color.white);
                 setForeground(Color.blue);
             }

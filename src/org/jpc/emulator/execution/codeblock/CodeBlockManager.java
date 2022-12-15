@@ -47,13 +47,12 @@ public class CodeBlockManager {
 
     private static final Logger LOGGING = Logger.getLogger(CodeBlockManager.class.getName());
     public static volatile int BLOCK_LIMIT = 1000;
-    private CodeBlockFactory realModeChain,  protectedModeChain,  virtual8086ModeChain;
-    private CodeBlockFactory compilingRealModeChain,  compilingProtectedModeChain,  compilingVirtual8086ModeChain;
+    private CodeBlockFactory realModeChain, protectedModeChain, virtual8086ModeChain;
+    private CodeBlockFactory compilingRealModeChain, compilingProtectedModeChain, compilingVirtual8086ModeChain;
     private PeekableMemoryStream byteSourceStream;
     private BackgroundCompiler bgc;
 
-    public CodeBlockManager()
-    {
+    public CodeBlockManager() {
         byteSourceStream = new PeekableMemoryStream();
 
         realModeChain = new DefaultCodeBlockFactory(new OptimisedCompiler(), BLOCK_LIMIT);
@@ -65,34 +64,31 @@ public class CodeBlockManager {
         compilingProtectedModeChain = new DefaultCodeBlockFactory(bgc, BLOCK_LIMIT);//protectedModeChain;
         compilingVirtual8086ModeChain = virtual8086ModeChain;
     }
-    
-    private RealModeCodeBlock tryRealModeFactory(CodeBlockFactory ff, Memory memory, int offset)
-    {
+
+    private RealModeCodeBlock tryRealModeFactory(CodeBlockFactory ff, Memory memory, int offset) {
         try {
             byteSourceStream.set(memory, offset);
             return ff.getRealModeCodeBlock(byteSourceStream);
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new SpanningDecodeException(new SpanningRealModeCodeBlock(new CodeBlockFactory[]{realModeChain}));
+            throw new SpanningDecodeException(new SpanningRealModeCodeBlock(new CodeBlockFactory[] { realModeChain }));
         }
     }
 
-    private ProtectedModeCodeBlock tryProtectedModeFactory(CodeBlockFactory ff, Memory memory, int offset, boolean operandSizeFlag)
-    {
+    private ProtectedModeCodeBlock tryProtectedModeFactory(CodeBlockFactory ff, Memory memory, int offset, boolean operandSizeFlag) {
         try {
             byteSourceStream.set(memory, offset);
             return ff.getProtectedModeCodeBlock(byteSourceStream, operandSizeFlag);
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new SpanningDecodeException(new SpanningProtectedModeCodeBlock(new CodeBlockFactory[]{protectedModeChain}));
+            throw new SpanningDecodeException(new SpanningProtectedModeCodeBlock(new CodeBlockFactory[] { protectedModeChain }));
         }
     }
 
-    private Virtual8086ModeCodeBlock tryVirtual8086ModeFactory(CodeBlockFactory ff, Memory memory, int offset)
-    {
+    private Virtual8086ModeCodeBlock tryVirtual8086ModeFactory(CodeBlockFactory ff, Memory memory, int offset) {
         try {
             byteSourceStream.set(memory, offset);
             return ff.getVirtual8086ModeCodeBlock(byteSourceStream);
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new SpanningDecodeException(new SpanningVirtual8086ModeCodeBlock(new CodeBlockFactory[]{virtual8086ModeChain}));
+            throw new SpanningDecodeException(new SpanningVirtual8086ModeCodeBlock(new CodeBlockFactory[] { virtual8086ModeChain }));
         }
     }
 

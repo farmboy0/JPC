@@ -33,31 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class shl_Ew_Gb_mem extends Executable
-{
+public class shl_Ew_Gb_mem extends Executable {
     final Pointer op1;
     final int op2Index;
 
-    public shl_Ew_Gb_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public shl_Ew_Gb_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
         op2Index = Modrm.Gb(modrm);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
         int shift = op2.get8() & 0x1f;
-        if(shift != 0)
-        {
-            if (shift <= 16)
-            {
+        if (shift != 0) {
+            if (shift <= 16) {
                 cpu.flagStatus = OSZPC;
-            }
-            else
-            {
+            } else {
                 cpu.flagStatus = SZP;
                 cpu.of = false;
                 cpu.cf = false;
@@ -72,13 +65,11 @@ public class shl_Ew_Gb_mem extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

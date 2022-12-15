@@ -33,27 +33,22 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fnstsw_AX extends Executable
-{
+public class fnstsw_AX extends Executable {
 
-    public fnstsw_AX(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fnstsw_AX(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.r_ax.set16((short)cpu.fpu.getStatus());
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

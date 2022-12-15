@@ -33,21 +33,18 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class sub_Ed_Id_mem extends Executable
-{
+public class sub_Ed_Id_mem extends Executable {
     final Pointer op1;
     final int immd;
 
-    public sub_Ed_Id_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public sub_Ed_Id_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
         immd = Modrm.Id(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         cpu.flagOp1 = op1.get32(cpu);
         cpu.flagOp2 = immd;
         cpu.flagResult = (cpu.flagOp1 - cpu.flagOp2);
@@ -57,13 +54,11 @@ public class sub_Ed_Id_mem extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

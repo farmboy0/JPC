@@ -33,19 +33,16 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class sbb_AL_Ib extends Executable
-{
+public class sbb_AL_Ib extends Executable {
     final int immb;
 
-    public sbb_AL_Ib(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public sbb_AL_Ib(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         immb = Modrm.Ib(input);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        int add = (cpu.cf()? 1: 0);
+    public Branch execute(Processor cpu) {
+        int add = (cpu.cf() ? 1 : 0);
         cpu.flagOp1 = cpu.r_al.get8();
         cpu.flagOp2 = immb;
         cpu.flagResult = (byte)(cpu.flagOp1 - (cpu.flagOp2 + add));
@@ -55,13 +52,11 @@ public class sbb_AL_Ib extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

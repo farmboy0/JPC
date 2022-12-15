@@ -28,7 +28,6 @@
 package org.jpc.emulator.execution.codeblock;
 
 /**
- *
  * @author Ian Preston
  */
 public class OptimisedCompiler implements CodeBlockCompiler {
@@ -37,20 +36,17 @@ public class OptimisedCompiler implements CodeBlockCompiler {
 
     }
 
-    public RealModeCodeBlock getRealModeCodeBlock(CodeBlock source)
-    {
-        return (RealModeCodeBlock) source;
+    public RealModeCodeBlock getRealModeCodeBlock(CodeBlock source) {
+        return (RealModeCodeBlock)source;
     }
 
-    public ProtectedModeCodeBlock getProtectedModeCodeBlock(CodeBlock block)
-    {
+    public ProtectedModeCodeBlock getProtectedModeCodeBlock(CodeBlock block) {
 
-        return (ProtectedModeCodeBlock) block;
+        return (ProtectedModeCodeBlock)block;
     }
 
-    public Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(CodeBlock block)
-    {
+    public Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(CodeBlock block) {
 
-        return (Virtual8086ModeCodeBlock) block;
+        return (Virtual8086ModeCodeBlock)block;
     }
 }

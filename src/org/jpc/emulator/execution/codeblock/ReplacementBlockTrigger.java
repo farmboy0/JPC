@@ -38,47 +38,38 @@ import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.Processor;
 
 /**
- * 
  * @author Rhys Newman
  * @author Chris Dennis
  */
 
-class ReplacementBlockTrigger implements CodeBlock
-{
+class ReplacementBlockTrigger implements CodeBlock {
     private final CodeBlock replacement;
 
-    public ReplacementBlockTrigger(CodeBlock block)
-    {
+    public ReplacementBlockTrigger(CodeBlock block) {
         replacement = block;
     }
 
-    public int getX86Length()
-    {
+    public int getX86Length() {
         return replacement.getX86Length();
     }
 
-    public int getX86Count()
-    {
+    public int getX86Count() {
         return replacement.getX86Count();
     }
 
-    public Executable.Branch execute(Processor cpu)
-    {
+    public Executable.Branch execute(Processor cpu) {
         throw new CodeBlockReplacementException(replacement);
     }
 
-    public String getDisplayString()
-    {
+    public String getDisplayString() {
         return replacement.getDisplayString();
     }
 
-    public boolean handleMemoryRegionChange(int startAddress, int endAddress)
-    {
+    public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         return false;
     }
 
-    public Instruction getInstructions()
-    {
+    public Instruction getInstructions() {
         return replacement.getInstructions();
     }
 }

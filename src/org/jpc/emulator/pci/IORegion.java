@@ -34,12 +34,11 @@
 package org.jpc.emulator.pci;
 
 /**
- * A region provided by a PCI device that can at runtime be mapped into one of
- * the emulated machines address spaces.
+ * A region provided by a PCI device that can at runtime be mapped into one of the emulated machines
+ * address spaces.
  * @author Chris Dennis
  */
-public interface IORegion
-{
+public interface IORegion {
     public static final int PCI_ADDRESS_SPACE_MEM = 0x00;
     public static final int PCI_ADDRESS_SPACE_IO = 0x01;
     public static final int PCI_ADDRESS_SPACE_MEM_PREFETCH = 0x08;
@@ -65,15 +64,14 @@ public interface IORegion
     /**
      * Returns the region number or index of this region.
      * <p>
-     * In any given PCI device, <code>IORegion</code>s are not required to be
-     * contiguous.
+     * In any given PCI device, <code>IORegion</code>s are not required to be contiguous.
      * @return region number.
      */
     public int getRegionNumber();
 
     /**
-     * Tells this region that it has been mapped into it's associated address 
-     * space at the given address.
+     * Tells this region that it has been mapped into it's associated address space at the given
+     * address.
      * @param address start address of the mapping.
      */
     public void setAddress(int address);

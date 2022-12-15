@@ -31,7 +31,6 @@
     End of licence header
 */
 
-
 package org.jpc.debugger;
 
 import java.lang.reflect.*;
@@ -47,10 +46,9 @@ import org.jpc.debugger.util.*;
 import org.jpc.emulator.processor.*;
 import org.jpc.emulator.memory.*;
 
-public class MemoryViewer extends UtilityFrame implements PCListener
-{
+public class MemoryViewer extends UtilityFrame implements PCListener {
     private static final Logger LOGGING = Logger.getLogger(MemoryViewer.class.getName());
-    
+
     protected Processor processor;
     private ProcessorAccess access;
     protected AddressSpace memory;
@@ -59,8 +57,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener
     private MemoryViewPanel cs, ds, ss, es, fs, gs;
     protected ControllableView controllable;
 
-    public MemoryViewer(String title)
-    {
+    public MemoryViewer(String title) {
         super(title);
 
         getAddressSpace();
@@ -71,7 +68,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener
         es = createMemoryViewPanel();
         fs = createMemoryViewPanel();
         gs = createMemoryViewPanel();
-        
+
         ss.setRowReversed(true);
 
         segmentViews = new JTabbedPane();
@@ -91,128 +88,109 @@ public class MemoryViewer extends UtilityFrame implements PCListener
         JPC.getInstance().refresh();
     }
 
-    public void frameClosed()
-    {
+    public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
 
-    protected void getAddressSpace()
-    {
-        memory = (AddressSpace) JPC.getObject(PhysicalAddressSpace.class);
+    protected void getAddressSpace() {
+        memory = (AddressSpace)JPC.getObject(PhysicalAddressSpace.class);
     }
 
-    protected MemoryViewPanel createMemoryViewPanel()
-    {
+    protected MemoryViewPanel createMemoryViewPanel() {
         return new MemoryViewPanel();
     }
 
-    public void pcCreated()
-    {
-        processor = (Processor) JPC.getObject(Processor.class);
-        access = (ProcessorAccess) JPC.getObject(ProcessorAccess.class);
+    public void pcCreated() {
+        processor = (Processor)JPC.getObject(Processor.class);
+        access = (ProcessorAccess)JPC.getObject(ProcessorAccess.class);
         refreshDetails();
     }
 
-    public void pcDisposed()
-    {
+    public void pcDisposed() {
         processor = null;
         memory = null;
         access = null;
         refreshDetails();
     }
-    
-    public void executionStarted() {}
 
-    public void executionStopped() 
-    {
+    public void executionStarted() {
+    }
+
+    public void executionStopped() {
         refreshDetails();
     }
 
-    private static class HexModel extends AbstractSpinnerModel
-    {
+    private static class HexModel extends AbstractSpinnerModel {
         private long value;
         private long ceiling;
-        
-        public HexModel(long max)
-        {
+
+        public HexModel(long max) {
             ceiling = max;
         }
-        
-        public Object getNextValue()
-        {
+
+        public Object getNextValue() {
             value = Math.min(value + 1, ceiling);
             return getValue();
         }
 
-        public Object getPreviousValue() 
-        {
-            value = Math.max(0, value-1);
+        public Object getPreviousValue() {
+            value = Math.max(0, value - 1);
             return getValue();
         }
 
-        public Object getValue() 
-        {
+        public Object getValue() {
             return Long.toHexString(value).toUpperCase();
         }
- 
-        public void setValue(Object val) 
-        {
+
+        public void setValue(Object val) {
             try {
                 value = Long.parseLong(val.toString().toLowerCase().trim(), 16);
             } catch (NumberFormatException e) {
-                
+
             }
             fireStateChanged();
         }
     }
 
-    class ASCIIView extends JPanel
-    {
+    class ASCIIView extends JPanel {
         private JScrollPane scroll;
         private JTextArea text;
         private long offset;
         private int textCols, textRows;
 
-        ASCIIView()
-        {
+        ASCIIView() {
             super(new BorderLayout());
 
             text = new JTextArea();
             text.setFont(new Font("Monospaced", Font.PLAIN, 12));
             text.setEditable(false);
             text.setLineWrap(false);
-            
+
             scroll = new JScrollPane(text);
             add("Center", scroll);
         }
 
-        void setParameters(long offset, int textCols, int textRows)
-        {
+        void setParameters(long offset, int textCols, int textRows) {
             this.offset = offset;
             this.textCols = textCols;
             this.textRows = textRows;
         }
 
-        void setAddressOffset(int offset)
-        {
+        void setAddressOffset(int offset) {
             setParameters(offset, textCols, textRows);
         }
 
-        void refresh()
-        {
+        void refresh() {
             text.setColumns(textCols);
-            StringBuffer buffer = new StringBuffer(textCols*textRows+textRows+100);
+            StringBuffer buffer = new StringBuffer(textCols * textRows + textRows + 100);
 
-            if (memory != null)
-            {
-                for (int i=0; i<textRows; i++)
-                {
-                    for (int j=0; j<textCols; j++)
-                    {
-                        byte code = memory.getByte((int) (offset + i*textCols + j));
+            if (memory != null) {
+                for (int i = 0; i < textRows; i++) {
+                    for (int j = 0; j < textCols; j++) {
+                        byte code = memory.getByte((int)(offset + i * textCols + j));
                         buffer.append(MemoryViewPanel.getASCII(code));
                     }
-                    
+
                     buffer.append('\n');
                 }
             }
@@ -223,8 +201,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener
         }
     }
 
-    class ControllableView extends JPanel implements ChangeListener, ActionListener
-    {
+    class ControllableView extends JPanel implements ChangeListener, ActionListener {
         private JCheckBox asciiOnly;
         private JTextField textRows, textColumns;
         private JSpinner memoryPage;
@@ -234,15 +211,14 @@ public class MemoryViewer extends UtilityFrame implements PCListener
         private JPanel wrapper;
         protected JPanel lower;
 
-        ControllableView()
-        {
+        ControllableView() {
             super(new BorderLayout());
-        
+
             model = new HexModel(memory.getSize());
             memoryPage = new JSpinner(model);
             memoryPage.addChangeListener(this);
 
-            JTextComponent ed = ((JSpinner.DefaultEditor) memoryPage.getEditor()).getTextField();
+            JTextComponent ed = ((JSpinner.DefaultEditor)memoryPage.getEditor()).getTextField();
             ed.setEditable(true);
             ed.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
@@ -263,7 +239,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener
             lower.add(textRows);
             lower.add(new JLabel("Text Columns"));
             lower.add(textColumns);
-            
+
             memoryView = createMemoryViewPanel();
             asciiView = new ASCIIView();
             wrapper = new JPanel(new BorderLayout());
@@ -272,21 +248,18 @@ public class MemoryViewer extends UtilityFrame implements PCListener
             add("Center", wrapper);
             add("South", lower);
         }
-        
-        public long getMemoryOffset()
-        {
+
+        public long getMemoryOffset() {
             return model.value;
         }
 
-        public void actionPerformed(ActionEvent evt)
-        {
-            try
-            {
+        public void actionPerformed(ActionEvent evt) {
+            try {
                 int rows = Integer.parseInt(textRows.getText().trim());
                 int cols = Integer.parseInt(textColumns.getText().trim());
                 asciiView.setParameters(getMemoryOffset(), cols, rows);
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
 
             wrapper.removeAll();
             if (asciiOnly.isSelected())
@@ -298,15 +271,13 @@ public class MemoryViewer extends UtilityFrame implements PCListener
             refresh();
         }
 
-        public void stateChanged(ChangeEvent e) 
-        {
-            memoryView.setCurrentAddress(memory, (int) getMemoryOffset());
-            asciiView.setAddressOffset((int) getMemoryOffset());
+        public void stateChanged(ChangeEvent e) {
+            memoryView.setCurrentAddress(memory, (int)getMemoryOffset());
+            asciiView.setAddressOffset((int)getMemoryOffset());
             refresh();
         }
-        
-        void refresh()
-        {
+
+        void refresh() {
             if (asciiOnly.isSelected())
                 asciiView.refresh();
             else
@@ -314,47 +285,43 @@ public class MemoryViewer extends UtilityFrame implements PCListener
         }
     }
 
-    private int getSegmentBase(String name)
-    {
+    private int getSegmentBase(String name) {
         if (access == null)
             return 0;
         return access.getValue(name, 0);
     }
 
-    private int getSegmentLimit(String name)
-    {
+    private int getSegmentLimit(String name) {
         if (access == null)
             return 0;
-        return access.getValue(name+"L", 0);
+        return access.getValue(name + "L", 0);
     }
 
-    public void refreshDetails()
-    {
+    public void refreshDetails() {
         controllable.refresh();
 
-        ds.setViewLimits(memory, getSegmentBase("ds"), getSegmentLimit("ds")+1);
-        cs.setViewLimits(memory, getSegmentBase("cs"), getSegmentLimit("cs")+1);
-        ss.setViewLimits(memory, getSegmentBase("ss"), getSegmentLimit("ss")+1);
-        es.setViewLimits(memory, getSegmentBase("es"), getSegmentLimit("es")+1);
-        fs.setViewLimits(memory, getSegmentBase("fs"), getSegmentLimit("fs")+1);
-        gs.setViewLimits(memory, getSegmentBase("gs"), getSegmentLimit("gs")+1);
+        ds.setViewLimits(memory, getSegmentBase("ds"), getSegmentLimit("ds") + 1);
+        cs.setViewLimits(memory, getSegmentBase("cs"), getSegmentLimit("cs") + 1);
+        ss.setViewLimits(memory, getSegmentBase("ss"), getSegmentLimit("ss") + 1);
+        es.setViewLimits(memory, getSegmentBase("es"), getSegmentLimit("es") + 1);
+        fs.setViewLimits(memory, getSegmentBase("fs"), getSegmentLimit("fs") + 1);
+        gs.setViewLimits(memory, getSegmentBase("gs"), getSegmentLimit("gs") + 1);
     }
 
     private static final Method getMemoryBlock;
     static {
         try {
-            getMemoryBlock = AddressSpace.class.getDeclaredMethod("getReadMemoryBlockAt", new Class[]{int.class});
+            getMemoryBlock = AddressSpace.class.getDeclaredMethod("getReadMemoryBlockAt", new Class[] { int.class });
             getMemoryBlock.setAccessible(true);
         } catch (NoSuchMethodException e) {
             LOGGING.log(Level.SEVERE, "method does not exist", e);
             throw new IllegalStateException(e);
         }
     }
-    
-    public static Memory getReadMemoryBlockAt(AddressSpace addr, int offset)
-    {
+
+    public static Memory getReadMemoryBlockAt(AddressSpace addr, int offset) {
         try {
-            return (Memory) getMemoryBlock.invoke(addr, new Object[]{Integer.valueOf(offset)});
+            return (Memory)getMemoryBlock.invoke(addr, new Object[] { Integer.valueOf(offset) });
         } catch (InvocationTargetException e) {
             LOGGING.log(Level.WARNING, "failed to get memory block", e);
             return null;

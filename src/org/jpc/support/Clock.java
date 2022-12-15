@@ -36,12 +36,10 @@ package org.jpc.support;
 import org.jpc.emulator.*;
 
 /**
- * Interface providing an external time source to the emulator for the provision
- * of timed callbacks.
+ * Interface providing an external time source to the emulator for the provision of timed callbacks.
  * @author Ian Preston
  */
-public interface Clock extends HardwareComponent
-{
+public interface Clock extends HardwareComponent {
     public void update(int instructions);
 
     public void updateAndProcess(int instructions);
@@ -64,27 +62,27 @@ public interface Clock extends HardwareComponent
     public long getIPS();
 
     /**
-     * Constructs a new <code>Timer</code> which will fire <code>callback</code>
-     * on the given object when the timer expires.
+     * Constructs a new <code>Timer</code> which will fire <code>callback</code> on the given object
+     * when the timer expires.
      * @param object callback object
      * @return <code>Timer</code> instance
      */
     public Timer newTimer(TimerResponsive object);
 
     /**
-     * Update the internal state of this clock to account for the change in
-     * state of the supplied child <code>Timer</code>.
+     * Update the internal state of this clock to account for the change in state of the supplied child
+     * <code>Timer</code>.
      * @param object timer whose state has changed
      */
     void update(Timer object);
 
     /**
-     * Pauses this clock instance.  Does nothing if this clock is already paused.
+     * Pauses this clock instance. Does nothing if this clock is already paused.
      */
     public void pause();
-    
+
     /**
-     * Resumes this clock instance.  Does nothing if this clock is already running.
+     * Resumes this clock instance. Does nothing if this clock is already running.
      */
     public void resume();
 }

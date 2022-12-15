@@ -36,8 +36,7 @@ import org.jpc.j2se.Option;
 import java.util.HashSet;
 import java.util.Set;
 
-public class FastDecoder
-{
+public class FastDecoder {
     public static final boolean PRINT_DISAM = Option.log_disam.value();
     public static final int MAX_INSTRUCTIONS_PER_BLOCK = Option.max_instructions_per_block.intValue(10000);
     public static final boolean DEBUG_BLOCKS = Option.debug_blocks.value();
@@ -69,13 +68,12 @@ public class FastDecoder
         maybeDelayInts.add(org.jpc.emulator.execution.opcodes.vm.mov_S_Ew_mem.class);
     }
 
-    static int decodeCount=0;
+    static int decodeCount = 0;
 
-    public static BasicBlock decodeBlock(PeekableInputStream input, int operand_size, int mode)
-    {
+    public static BasicBlock decodeBlock(PeekableInputStream input, int operand_size, int mode) {
         decodeCount++;
         if (decodeCount % 1000 == 0)
-            System.out.println("Decoded "+decodeCount + " blocks...");
+            System.out.println("Decoded " + decodeCount + " blocks...");
         int startAddr = (int)input.getAddress();
         boolean debug = false;
         int beginCount = input.getCounter();
@@ -84,36 +82,32 @@ public class FastDecoder
         if (debug)
             System.out.printf("Block decode started at %x\n", input.getAddress());
         Executable start = decodeOpcode(startAddr, input, mode, is32Bit);
-        if (PRINT_DISAM)
-        {
+        if (PRINT_DISAM) {
             System.out.printf("%d;%s;", operand_size, start.getClass().getName());
             System.out.println(Disassembler.getRawBytes(input, beginCount));
         }
         if (debug)
-                System.out.printf("Disassembled instruction (%d): %s at %x\n", 0, start, input.getAddress());
+            System.out.printf("Disassembled instruction (%d): %s at %x\n", 0, start, input.getAddress());
         Executable current = start;
         int count = 1;
         boolean delayInterrupts = false;
-        while (!current.isBranch())
-        {
-            if (((delayInterrupts) || (count >= MAX_INSTRUCTIONS_PER_BLOCK)) && !delayInterrupts(current))
-            {
+        while (!current.isBranch()) {
+            if (((delayInterrupts) || (count >= MAX_INSTRUCTIONS_PER_BLOCK)) && !delayInterrupts(current)) {
                 Executable eip;
                 if (mode == 1)
-                    eip = new org.jpc.emulator.execution.opcodes.rm.eip_update(startAddr, (int)input.getAddress(), 0,input);
+                    eip = new org.jpc.emulator.execution.opcodes.rm.eip_update(startAddr, (int)input.getAddress(), 0, input);
                 else if (mode == 2)
-                    eip = new org.jpc.emulator.execution.opcodes.pm.eip_update(startAddr, (int)input.getAddress(), 0,input);
+                    eip = new org.jpc.emulator.execution.opcodes.pm.eip_update(startAddr, (int)input.getAddress(), 0, input);
                 else
-                    eip = new org.jpc.emulator.execution.opcodes.vm.eip_update(startAddr, (int)input.getAddress(), 0,input);
+                    eip = new org.jpc.emulator.execution.opcodes.vm.eip_update(startAddr, (int)input.getAddress(), 0, input);
                 current.next = eip;
                 if (!delayInterrupts && (MAX_INSTRUCTIONS_PER_BLOCK > 10))
                     System.out.println((String.format("Exceeded maximum number of instructions in a block at %x", startAddr)));
-                return constructBlock(start, (int)input.getAddress()-startAddr, count, input, operand_size);
+                return constructBlock(start, (int)input.getAddress() - startAddr, count, input, operand_size);
             }
             beginCount = input.getCounter();
             Executable next = decodeOpcode(startAddr, input, mode, is32Bit);
-            if (PRINT_DISAM)
-            {
+            if (PRINT_DISAM) {
                 System.out.printf("%d;%s;", operand_size, next.getClass().getName());
                 System.out.println(Disassembler.getRawBytes(input, beginCount));
             }
@@ -128,18 +122,15 @@ public class FastDecoder
             current = next;
         }
 
-        return constructBlock(start, (int)input.getAddress()-startAddr, count, input, operand_size);
+        return constructBlock(start, (int)input.getAddress() - startAddr, count, input, operand_size);
     }
 
-    private static BasicBlock constructBlock(Executable start, int x86Length, int x86Count, PeekableInputStream input, int mode)
-    {
-        if (DEBUG_BLOCKS)
-        {
+    private static BasicBlock constructBlock(Executable start, int x86Length, int x86Count, PeekableInputStream input, int mode) {
+        if (DEBUG_BLOCKS) {
             input.seek(-x86Length);
             Instruction startin = Disassembler.disassemble(input, mode);
             Instruction prev = startin;
-            for (int i=1; i < x86Count; i++)
-            {
+            for (int i = 1; i < x86Count; i++) {
                 Instruction next = Disassembler.disassemble(input, mode);
                 prev.next = next;
                 prev = next;
@@ -149,13 +140,11 @@ public class FastDecoder
         return new BasicBlock(start, x86Length, x86Count);
     }
 
-    public static boolean delayInterrupts(Executable opcode)
-    {
+    public static boolean delayInterrupts(Executable opcode) {
         // sti, pop ss, mov ss
         if (delayInts.contains(opcode.getClass()))
             return true;
-        if (maybeDelayInts.contains(opcode.getClass()))
-        {
+        if (maybeDelayInts.contains(opcode.getClass())) {
             if (opcode instanceof org.jpc.emulator.execution.opcodes.rm.mov_S_Ew)
                 return ((org.jpc.emulator.execution.opcodes.rm.mov_S_Ew)opcode).segIndex == Processor.SS_INDEX;
             if (opcode instanceof org.jpc.emulator.execution.opcodes.rm.mov_S_Ew_mem)
@@ -176,8 +165,7 @@ public class FastDecoder
         return false;
     }
 
-    public static Executable decodeOpcode(int blockStart, PeekableInputStream input, int mode, boolean is32Bit)
-    {
+    public static Executable decodeOpcode(int blockStart, PeekableInputStream input, int mode, boolean is32Bit) {
         if (mode == 1)
             return decodeRMOpcode(blockStart, input);
         if (mode == 2)
@@ -185,15 +173,13 @@ public class FastDecoder
         return decodeVMOpcode(blockStart, input);
     }
 
-    public static Executable decodePMOpcode(int blockStart, PeekableInputStream input, boolean is32BitSeg)
-    {
-        int opStart = (int) input.getAddress();
+    public static Executable decodePMOpcode(int blockStart, PeekableInputStream input, boolean is32BitSeg) {
+        int opStart = (int)input.getAddress();
         int prefices = 0x1C;
         int b = input.readU8();
         boolean addrSize = is32BitSeg;
         boolean is32Bit = is32BitSeg;
-        while (Prefices.isPrefix(b))
-        {
+        while (Prefices.isPrefix(b)) {
             if (b == 0x66)
                 is32Bit = !is32BitSeg;
             else if (b == 0x67)
@@ -203,18 +189,15 @@ public class FastDecoder
             b = input.readU8();
         }
         int opcode = 0;
-        if (is32Bit)
-        {
+        if (is32Bit) {
             opcode += 0x200;
             prefices = Prefices.encodePrefix(prefices, 0x66);
         }
-        if (addrSize)
-        {
+        if (addrSize) {
             opcode += 0x400;
             prefices = Prefices.encodePrefix(prefices, 0x67);
         }
-        if (b == 0x0F)
-        {
+        if (b == 0x0F) {
             opcode += 0x100;
             b = input.readU8();
         }
@@ -222,14 +205,12 @@ public class FastDecoder
         return pmOps[opcode].decodeOpcode(blockStart, opStart, prefices, input);
     }
 
-    public static Executable decodeRMOpcode(int blockStart, PeekableInputStream input)
-    {
-        int opStart = (int) input.getAddress();
+    public static Executable decodeRMOpcode(int blockStart, PeekableInputStream input) {
+        int opStart = (int)input.getAddress();
         int prefices = 0x1C;
         int b = input.readU8();
         boolean addrSize = false, is32Bit = false;
-        while (Prefices.isPrefix(b))
-        {
+        while (Prefices.isPrefix(b)) {
             if (b == 0x66)
                 is32Bit = true;
             else if (b == 0x67)
@@ -239,18 +220,15 @@ public class FastDecoder
             b = input.readU8();
         }
         int opcode = 0;
-        if (is32Bit)
-        {
+        if (is32Bit) {
             opcode += 0x200;
             prefices = Prefices.encodePrefix(prefices, 0x66);
         }
-        if (addrSize)
-        {
+        if (addrSize) {
             opcode += 0x400;
             prefices = Prefices.encodePrefix(prefices, 0x67);
         }
-        if (b == 0x0F)
-        {
+        if (b == 0x0F) {
             opcode += 0x100;
             b = input.readU8();
         }
@@ -258,14 +236,12 @@ public class FastDecoder
         return rmOps[opcode].decodeOpcode(blockStart, opStart, prefices, input);
     }
 
-    public static Executable decodeVMOpcode(int blockStart, PeekableInputStream input)
-    {
-        int opStart = (int) input.getAddress();
+    public static Executable decodeVMOpcode(int blockStart, PeekableInputStream input) {
+        int opStart = (int)input.getAddress();
         int prefices = 0x1C;
         int b = input.readU8();
         boolean addrSize = false, is32Bit = false;
-        while (Prefices.isPrefix(b))
-        {
+        while (Prefices.isPrefix(b)) {
             if (b == 0x66)
                 is32Bit = true;
             else if (b == 0x67)
@@ -275,18 +251,15 @@ public class FastDecoder
             b = input.readU8();
         }
         int opcode = 0;
-        if (is32Bit)
-        {
+        if (is32Bit) {
             opcode += 0x200;
             prefices = Prefices.encodePrefix(prefices, 0x66);
         }
-        if (addrSize)
-        {
+        if (addrSize) {
             opcode += 0x400;
             prefices = Prefices.encodePrefix(prefices, 0x67);
         }
-        if (b == 0x0F)
-        {
+        if (b == 0x0F) {
             opcode += 0x100;
             b = input.readU8();
         }

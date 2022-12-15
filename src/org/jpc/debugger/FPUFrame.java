@@ -36,8 +36,7 @@ import org.jpc.debugger.util.*;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.fpu64.FpuState64;
 
-public class FPUFrame extends UtilityFrame implements PCListener
-{
+public class FPUFrame extends UtilityFrame implements PCListener {
     private FpuState64 fpu;
     private FPUAccess access;
 
@@ -46,19 +45,18 @@ public class FPUFrame extends UtilityFrame implements PCListener
     private JTable registerTable;
     private Font f = new Font("Monospaced", Font.BOLD, 12);
 
-    public FPUFrame()
-    {
+    public FPUFrame() {
         super("FPU State");
         editableModel = false;
         fpu = null;
         model = new FPUModel();
-        
+
         registerTable = new JTable(model);
         registerTable.setRowHeight(18);
         model.setupColumnWidths(registerTable);
         registerTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         registerTable.setDefaultRenderer(Object.class, new CellRenderer());
-        
+
         ValidatingTextField binary = new ValidatingTextField("01", '0', 8);
         ValidatingTextField hex = new ValidatingTextField("0123456789abcdefABCDEF", '0', 8);
         binary.setFont(f);
@@ -77,15 +75,13 @@ public class FPUFrame extends UtilityFrame implements PCListener
         pcCreated();
     }
 
-    public void frameClosed()
-    {
+    public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
 
-    public void pcCreated()
-    {
-        fpu = (FpuState64)((Processor) JPC.getObject(Processor.class)).fpu;
-        access = (FPUAccess) JPC.getObject(FPUAccess.class);
+    public void pcCreated() {
+        fpu = (FpuState64)((Processor)JPC.getObject(Processor.class)).fpu;
+        access = (FPUAccess)JPC.getObject(FPUAccess.class);
 
         if (fpu != null)
             editableModel = true;
@@ -93,69 +89,58 @@ public class FPUFrame extends UtilityFrame implements PCListener
         refreshDetails();
     }
 
-    public void pcDisposed()
-    {
+    public void pcDisposed() {
         fpu = null;
         access = null;
         editableModel = false;
         model.recreateWrappers();
         refreshDetails();
     }
-    
-    public void executionStarted() 
-    {
+
+    public void executionStarted() {
         editableModel = false;
     }
 
-    public void executionStopped() 
-    {
+    public void executionStopped() {
         editableModel = true;
         refreshDetails();
     }
 
-    public void refreshDetails()
-    {
+    public void refreshDetails() {
         model.fireTableDataChanged();
     }
 
-    class FieldWrapper
-    {
+    class FieldWrapper {
         String title, fieldName;
 
-        FieldWrapper(String title, String fieldName)
-        {
+        FieldWrapper(String title, String fieldName) {
             this.title = title;
             this.fieldName = fieldName;
         }
 
-        long getLongValue()
-        {
+        long getLongValue() {
             if (access == null)
                 return -1;
             return access.getLongValue(fieldName, -1);
         }
 
-        void setLongValue(long val)
-        {
+        void setLongValue(long val) {
             if (access != null)
                 access.setLongValue(fieldName, val);
         }
     }
 
-    class FPUModel extends BasicTableModel
-    {
+    class FPUModel extends BasicTableModel {
         FieldWrapper[] registers;
 
-        FPUModel()
-        {
-            super(new String[]{"Register", "High", "Low", "double"}, new int[]{50, 40, 40, 40});
+        FPUModel() {
+            super(new String[] { "Register", "High", "Low", "double" }, new int[] { 50, 40, 40, 40 });
             recreateWrappers();
         }
-        
-        public void recreateWrappers()
-        {
+
+        public void recreateWrappers() {
             registers = new FieldWrapper[9];
-            
+
             registers[0] = new FieldWrapper("ST0", "ST0");
             registers[1] = new FieldWrapper("ST1", "ST1");
             registers[2] = new FieldWrapper("ST2", "ST2");
@@ -164,63 +149,53 @@ public class FPUFrame extends UtilityFrame implements PCListener
             registers[5] = new FieldWrapper("ST5", "ST5");
             registers[6] = new FieldWrapper("ST6", "ST6");
             registers[7] = new FieldWrapper("ST7", "ST7");
-            
+
             registers[8] = new FieldWrapper("status", "statusWord");
         }
 
-        public int getRowCount()
-        {
+        public int getRowCount() {
             return registers.length;
         }
 
-        public boolean isCellEditable(int rowIndex, int columnIndex)
-        {
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
             return columnIndex > 0;
         }
 
-        private String getZeroExtendedHexString(int value)
-        {
+        private String getZeroExtendedHexString(int value) {
             StringBuffer buf = new StringBuffer(Integer.toHexString(value).toUpperCase());
             while (buf.length() < 8)
                 buf.insert(0, "0");
             return buf.toString();
         }
 
-        public Object getValueAt(int row, int column)
-        {
+        public Object getValueAt(int row, int column) {
             long value = registers[row].getLongValue();
 
-            switch (column)
-            {
+            switch (column) {
             case 0:
                 return registers[row].title;
             case 1:
-                return getZeroExtendedHexString((int) (value >> 32));
+                return getZeroExtendedHexString((int)(value >> 32));
             case 2:
-                return getZeroExtendedHexString((int) value);
+                return getZeroExtendedHexString((int)value);
             case 3:
                 if (row < 8)
-                    return ""+Double.longBitsToDouble(value);
+                    return "" + Double.longBitsToDouble(value);
             default:
                 return "";
             }
         }
 
-        public void setValueAt(Object obj, int row, int column)
-        {
-            try
-            {
-                if (column == 5)
-                {
+        public void setValueAt(Object obj, int row, int column) {
+            try {
+                if (column == 5) {
                     long value = Long.parseLong(obj.toString(), 16);
                     registers[row].setLongValue(value);
-                }
-                else if (column > 0)
-                {
+                } else if (column > 0) {
                     int value = Integer.parseInt(obj.toString(), 2);
                     long current = registers[row].getLongValue();
-                    
-                    int shift = 32*(4 - column);
+
+                    int shift = 32 * (4 - column);
                     long mask = 0xFFFFFFFFL << shift;
                     current &= (0xFFFFFFFF ^ mask);
                     current |= value << shift;
@@ -230,34 +205,30 @@ public class FPUFrame extends UtilityFrame implements PCListener
 
                     registers[row].setLongValue(current);
                 }
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
 
             JPC.getInstance().refresh();
         }
-    } 
+    }
 
-    class CellRenderer extends DefaultTableCellRenderer
-    {
+    class CellRenderer extends DefaultTableCellRenderer {
         Color bg = new Color(0xFFF0F0);
 
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-        {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
+            int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             setFont(f);
-            
+
             setBackground(Color.white);
             setForeground(Color.black);
             setHorizontalAlignment(JLabel.RIGHT);
-            
-            if (column == 0)
-            {
+
+            if (column == 0) {
                 setBackground(Color.blue);
                 setForeground(Color.white);
                 setHorizontalAlignment(JLabel.CENTER);
-            }
-            else 
-            {
+            } else {
                 if (row < 8)
                     setBackground(bg);
 
@@ -267,28 +238,20 @@ public class FPUFrame extends UtilityFrame implements PCListener
                     setForeground(Color.magenta);
             }
 
-            if ((row >= 8) && (row < 14) && ((column == 1) || (column == 2)))
-            {
+            if ((row >= 8) && (row < 14) && ((column == 1) || (column == 2))) {
                 setBackground(Color.lightGray);
                 setForeground(Color.blue);
-            }
-            else if (row == 14)
-            {
-                if (column > 0)
-                {
+            } else if (row == 14) {
+                if (column > 0) {
                     setBackground(Color.red);
                     setForeground(Color.white);
                 }
-            }
-            else if (row == 15)
+            } else if (row == 15)
                 setBackground(Color.cyan);
-            else if ((row > 15) && (row < 21))
-            {
+            else if ((row > 15) && (row < 21)) {
                 setBackground(Color.green);
                 setForeground(Color.black);
-            }
-            else if (row >= 21)
-            {
+            } else if (row >= 21) {
                 setBackground(Color.white);
                 setForeground(Color.blue);
             }

@@ -45,18 +45,16 @@ import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.memory.AddressSpace;
 import org.jpc.emulator.execution.codeblock.*;
 
-public class OpcodeFrequencyFrame extends UtilityFrame implements PCListener, ActionListener, CodeBlockListener, Comparator
-{
+public class OpcodeFrequencyFrame extends UtilityFrame implements PCListener, ActionListener, CodeBlockListener, Comparator {
     private static final Logger LOGGING = Logger.getLogger(CodeBlockFrequencyFrame.class.getName());
-    
+
     private CodeBlockRecord record;
     private Map<String, OpcodeEntry> frequencies;
 
     private OpcodeEntry[] frequentCodes;
     private FrequencyModel model;
 
-    public OpcodeFrequencyFrame() 
-    {
+    public OpcodeFrequencyFrame() {
         super("Opcode Frequencies");
         frequencies = new HashMap<String, OpcodeEntry>();
         record = null;
@@ -72,116 +70,98 @@ public class OpcodeFrequencyFrame extends UtilityFrame implements PCListener, Ac
         add("Center", new JScrollPane(table));
     }
 
-    class OpcodeEntry
-    {
+    class OpcodeEntry {
         int frequency;
         String opName;
 
-        OpcodeEntry(String name, CodeBlock b)
-        { 
+        OpcodeEntry(String name, CodeBlock b) {
             frequency = 0;
             opName = name;
         }
-        
-        public int hashCode()
-        {
+
+        public int hashCode() {
             return opName.hashCode();
         }
 
-        public boolean equals(Object obj)
-        {
-            OpcodeEntry e = (OpcodeEntry) obj;
+        public boolean equals(Object obj) {
+            OpcodeEntry e = (OpcodeEntry)obj;
             if (!e.opName.equals(opName))
                 return false;
 
             return true;
         }
-        
 
-        public String toString()
-        {
+        public String toString() {
             return opName;
         }
     }
 
-    public void actionPerformed(ActionEvent evt) {}
+    public void actionPerformed(ActionEvent evt) {
+    }
 
-    public void codeBlockDecoded(int address, AddressSpace memory, CodeBlock block) {}
+    public void codeBlockDecoded(int address, AddressSpace memory, CodeBlock block) {
+    }
 
-    public synchronized void codeBlockExecuted(int address, AddressSpace memory, CodeBlock block)
-    {
-	while (block instanceof AbstractCodeBlockWrapper)
-	    block = ((AbstractCodeBlockWrapper)block).getTargetBlock();
+    public synchronized void codeBlockExecuted(int address, AddressSpace memory, CodeBlock block) {
+        while (block instanceof AbstractCodeBlockWrapper)
+            block = ((AbstractCodeBlockWrapper)block).getTargetBlock();
 
-        try
-        {
+        try {
             Instruction current = block.getInstructions();
-            for (; current != null; current = current.next)
-            {
+            for (; current != null; current = current.next) {
                 String name = current.getGeneralClassName(true, true);
                 OpcodeEntry e = frequencies.get(name);
-                if (e == null)
-                {
+                if (e == null) {
                     e = new OpcodeEntry(name, block);
                     frequencies.put(name, e);
                 }
                 e.frequency++;
             }
-        }
-        catch (Exception e)
-        {
-            LOGGING.log(Level.WARNING, "Error calculating freuqency of block: " + block,e);
+        } catch (Exception e) {
+            LOGGING.log(Level.WARNING, "Error calculating freuqency of block: " + block, e);
         }
     }
 
-    public synchronized void frameClosed()
-    {
+    public synchronized void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
         if (record != null)
             record.setCodeBlockListener(null);
     }
 
-    public void pcCreated()
-    {
+    public void pcCreated() {
         refreshDetails();
     }
 
-    public void pcDisposed()
-    {
+    public void pcDisposed() {
         record = null;
         model.fireTableDataChanged();
     }
-    
-    public void executionStarted() {}
 
-    public void executionStopped() 
-    {
+    public void executionStarted() {
+    }
+
+    public void executionStopped() {
         refreshDetails();
     }
 
-    public int compare(Object o1, Object o2)
-    {
-        if (o1 == null)
-        {
+    public int compare(Object o1, Object o2) {
+        if (o1 == null) {
             if (o2 == null)
                 return 0;
-            else 
+            else
                 return 1;
-        }
-        else if (o2 == null)
+        } else if (o2 == null)
             return -1;
 
-        OpcodeEntry e1 = (OpcodeEntry) o1;
-        OpcodeEntry e2 = (OpcodeEntry) o2;
-        
+        OpcodeEntry e1 = (OpcodeEntry)o1;
+        OpcodeEntry e2 = (OpcodeEntry)o2;
+
         return e2.frequency - e1.frequency;
     }
 
-    public synchronized void refreshDetails()
-    {
-        CodeBlockRecord r = (CodeBlockRecord) JPC.getObject(CodeBlockRecord.class);
-        if (r != record)
-        {
+    public synchronized void refreshDetails() {
+        CodeBlockRecord r = (CodeBlockRecord)JPC.getObject(CodeBlockRecord.class);
+        if (r != record) {
             if (record != null)
                 record.setCodeBlockListener(null);
             record = r;
@@ -198,28 +178,23 @@ public class OpcodeFrequencyFrame extends UtilityFrame implements PCListener, Ac
         model.fireTableDataChanged();
     }
 
-    class FrequencyModel extends BasicTableModel
-    {
-        FrequencyModel()
-        {
-            super(new String[]{"Rank", "Opcode", "Frequency"}, new int[]{80, 200, 80});
+    class FrequencyModel extends BasicTableModel {
+        FrequencyModel() {
+            super(new String[] { "Rank", "Opcode", "Frequency" }, new int[] { 80, 200, 80 });
         }
 
-        public int getRowCount()
-        {
+        public int getRowCount() {
             return frequentCodes.length;
         }
 
-        public Object getValueAt(int row, int column)
-        {
+        public Object getValueAt(int row, int column) {
             OpcodeEntry e = frequentCodes[row];
             if (e == null)
                 return null;
 
-            switch (column)
-            {
-	    case 0:
-		return Integer.valueOf(row);
+            switch (column) {
+            case 0:
+                return Integer.valueOf(row);
             case 1:
                 return e.toString();
             case 2:

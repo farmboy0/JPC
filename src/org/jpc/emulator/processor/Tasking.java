@@ -27,12 +27,12 @@
 
 package org.jpc.emulator.processor;
 
-public class Tasking
-{
-    public static enum Source {CALL, INT, IRET, JUMP}
+public class Tasking {
+    public static enum Source {
+        CALL, INT, IRET, JUMP
+    }
 
-    public static void task_switch(Processor cpu, Source source, ProtectedModeSegment tss, boolean hasErrorCode, int errorCode)
-    {
+    public static void task_switch(Processor cpu, Source source, ProtectedModeSegment tss, boolean hasErrorCode, int errorCode) {
         // STEP 1: The following checks are made before calling task_switch(),
         //         for JUMP & CALL only. These checks are NOT made for exceptions,
         //         interrupts & IRET.
@@ -57,7 +57,6 @@ public class Tasking
         if (newTSSLimit < newTssMax)
             throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, tss.getSelector() & 0xfffc, true);
 
-
         // TODO support SVM
 
         // TODO support VMX
@@ -77,15 +76,13 @@ public class Tasking
             System.out.println("TSS: Switching to the same Task!");
 
         // ensure old and new TSS are in the TLB
-        if (cpu.pagingEnabled())
-        {
+        if (cpu.pagingEnabled()) {
 
         }
 
         // Step 3: If JMP or IRET, clear busy bit in old task TSS descriptor, otherwise leave set.
-        if (source == Source.JUMP || source == Source.IRET)
-        {
-            int addr = cpu.gdtr.getBase() + 8*(cpu.tss.getSelector() & 0xfffc) + 4;
+        if (source == Source.JUMP || source == Source.IRET) {
+            int addr = cpu.gdtr.getBase() + 8 * (cpu.tss.getSelector() & 0xfffc) + 4;
             int tmp = cpu.linearMemory.getDoubleWord(addr);
             tmp &= ~0x200;
             cpu.linearMemory.setDoubleWord(addr, tmp);
@@ -104,11 +101,9 @@ public class Tasking
         //         changing the processor state.
 
         // save current machine state in old task's TSS
-        if (cpu.tss.getType() <= 3)
-        {
+        if (cpu.tss.getType() <= 3) {
             // check that we won't page fault while writing
-            if (cpu.pagingEnabled())
-            {
+            if (cpu.pagingEnabled()) {
                 int start = oldBase32 + 14;
                 int end = oldBase32 + 41;
                 cpu.linearMemory.setByte(start, cpu.linearMemory.getByte(start));
@@ -117,8 +112,8 @@ public class Tasking
             boolean isSup = cpu.linearMemory.isSupervisor();
             try {
                 cpu.linearMemory.setSupervisor(true);
-                cpu.linearMemory.setWord(oldBase32 + 14, (short) cpu.eip);
-                cpu.linearMemory.setWord(oldBase32 + 16, (short) oldEFlags);
+                cpu.linearMemory.setWord(oldBase32 + 14, (short)cpu.eip);
+                cpu.linearMemory.setWord(oldBase32 + 16, (short)oldEFlags);
                 cpu.linearMemory.setWord(oldBase32 + 18, cpu.r_ax.get16());
                 cpu.linearMemory.setWord(oldBase32 + 20, cpu.r_cx.get16());
                 cpu.linearMemory.setWord(oldBase32 + 22, cpu.r_dx.get16());
@@ -127,17 +122,16 @@ public class Tasking
                 cpu.linearMemory.setWord(oldBase32 + 28, cpu.r_bp.get16());
                 cpu.linearMemory.setWord(oldBase32 + 30, cpu.r_si.get16());
                 cpu.linearMemory.setWord(oldBase32 + 32, cpu.r_di.get16());
-                cpu.linearMemory.setWord(oldBase32 + 34, (short) cpu.es());
-                cpu.linearMemory.setWord(oldBase32 + 36, (short) cpu.cs());
-                cpu.linearMemory.setWord(oldBase32 + 38, (short) cpu.ss());
-                cpu.linearMemory.setWord(oldBase32 + 40, (short) cpu.ds());
+                cpu.linearMemory.setWord(oldBase32 + 34, (short)cpu.es());
+                cpu.linearMemory.setWord(oldBase32 + 36, (short)cpu.cs());
+                cpu.linearMemory.setWord(oldBase32 + 38, (short)cpu.ss());
+                cpu.linearMemory.setWord(oldBase32 + 40, (short)cpu.ds());
             } finally {
                 cpu.linearMemory.setSupervisor(isSup);
             }
         } else {
             // check that we won't page fault while writing
-            if (cpu.pagingEnabled())
-            {
+            if (cpu.pagingEnabled()) {
                 int start = oldBase32 + 0x20;
                 int end = oldBase32 + 0x5d;
                 cpu.linearMemory.setByte(start, cpu.linearMemory.getByte(start));
@@ -156,24 +150,23 @@ public class Tasking
                 cpu.linearMemory.setDoubleWord(oldBase32 + 0x3c, cpu.r_ebp.get32());
                 cpu.linearMemory.setDoubleWord(oldBase32 + 0x40, cpu.r_esi.get32());
                 cpu.linearMemory.setDoubleWord(oldBase32 + 0x44, cpu.r_edi.get32());
-                cpu.linearMemory.setWord(oldBase32 + 0x48, (short) cpu.es());
-                cpu.linearMemory.setWord(oldBase32 + 0x4c, (short) cpu.cs());
-                cpu.linearMemory.setWord(oldBase32 + 0x50, (short) cpu.ss());
-                cpu.linearMemory.setWord(oldBase32 + 0x54, (short) cpu.ds());
-                cpu.linearMemory.setWord(oldBase32 + 0x58, (short) cpu.fs());
-                cpu.linearMemory.setWord(oldBase32 + 0x5c, (short) cpu.gs());
+                cpu.linearMemory.setWord(oldBase32 + 0x48, (short)cpu.es());
+                cpu.linearMemory.setWord(oldBase32 + 0x4c, (short)cpu.cs());
+                cpu.linearMemory.setWord(oldBase32 + 0x50, (short)cpu.ss());
+                cpu.linearMemory.setWord(oldBase32 + 0x54, (short)cpu.ds());
+                cpu.linearMemory.setWord(oldBase32 + 0x58, (short)cpu.fs());
+                cpu.linearMemory.setWord(oldBase32 + 0x5c, (short)cpu.gs());
             } finally {
                 cpu.linearMemory.setSupervisor(isSup);
             }
         }
 
         // effect on link field of new task
-        if ((source == Source.CALL) || (source == Source.INT))
-        {
+        if ((source == Source.CALL) || (source == Source.INT)) {
             boolean isSup = cpu.linearMemory.isSupervisor();
             try {
                 cpu.linearMemory.setSupervisor(true);
-                cpu.linearMemory.setWord(newBase32, (short) cpu.tss.getSelector());
+                cpu.linearMemory.setWord(newBase32, (short)cpu.tss.getSelector());
             } finally {
                 cpu.linearMemory.setSupervisor(isSup);
             }
@@ -182,8 +175,7 @@ public class Tasking
         // STEP 6: The new-task state is loaded from the TSS
         int newEip, newEflags, newEax, newEcx, newEdx, newEbx, newEsp, newEbp, newEsi, newEdi;
         int newEs, newCs, newSs, newDs, newFs, newGs, newLdt, newCR3, trap_word;
-        if (cpu.tss.getType() <= 3)
-        {
+        if (cpu.tss.getType() <= 3) {
             boolean isSup = cpu.linearMemory.isSupervisor();
             try {
                 cpu.linearMemory.setSupervisor(true);
@@ -217,7 +209,7 @@ public class Tasking
                 if (cpu.pagingEnabled())
                     newCR3 = cpu.linearMemory.getDoubleWord(newBase32 + 0x1c);
                 else
-                newCR3 = 0;
+                    newCR3 = 0;
 
                 newEip = cpu.linearMemory.getDoubleWord(newBase32 + 0x20);
                 newEflags = cpu.linearMemory.getDoubleWord(newBase32 + 0x24);
@@ -244,14 +236,13 @@ public class Tasking
         }
 
         // Step 7: If CALL, interrupt, or JMP, set busy flag in new task's TSS descriptor. If IRET, leave set.
-        if (source != Source.IRET)
-        {
+        if (source != Source.IRET) {
             // set the new task's busy bit
-            int addr = cpu.gdtr.getBase() + 8*(cpu.tss.getSelector() & 0xfffc) + 4;
+            int addr = cpu.gdtr.getBase() + 8 * (cpu.tss.getSelector() & 0xfffc) + 4;
             int tmp = cpu.linearMemory.getDoubleWord(addr);
             tmp |= 0x200;
             cpu.linearMemory.setDoubleWord(addr, tmp);
-            tss = (ProtectedModeSegment) cpu.getSegment(tss.getSelector());
+            tss = (ProtectedModeSegment)cpu.getSegment(tss.getSelector());
         }
 
         // Commit point.  At this point, we commit to the new
@@ -303,27 +294,20 @@ public class Tasking
 //        cpu.fs(newFs);
 //        cpu.gs(newGs);
 
-        if (newLdt == 0)
-        {
+        if (newLdt == 0) {
             cpu.ldtr = SegmentFactory.NULL_SEGMENT;
-        }
-        else
-        {
+        } else {
             Segment newSegment = cpu.getSegment(newLdt & ~0x4);
             cpu.ldtr = newSegment;
         }
 
-        if ((tss.getType() >= 9) && (cpu.pagingEnabled()))
-        {
+        if ((tss.getType() >= 9) && (cpu.pagingEnabled())) {
             // change CR3 only if it actually modified
-            if (newCR3 != cpu.getCR3())
-            {
+            if (newCR3 != cpu.getCR3()) {
                 cpu.setCR3(newCR3);
 
-                if (Processor.cpuLevel >= 6)
-                {
-                    if (cpu.pagingEnabled() && cpu.physicalAddressExtension())
-                    {
+                if (Processor.cpuLevel >= 6) {
+                    if (cpu.pagingEnabled() && cpu.physicalAddressExtension()) {
                         // TODO
                         // clear PDPTRs before raising task switch exception
 
@@ -339,16 +323,14 @@ public class Tasking
         if ((newLdt & 4) != 0)
             throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newLdt & 0xfffc, true);
 
-        if ((newLdt & 0xfffc) != 0)
-        {
+        if ((newLdt & 0xfffc) != 0) {
             if (!cpu.ldtr.isPresent() || !cpu.ldtr.isSystem() || !(cpu.ldtr instanceof ProtectedModeSegment.LDT))
                 throw new ProcessorException(ProcessorException.Type.NOT_PRESENT, newLdt & 0xfffc, true);
         } else {
             // OK
         }
 
-        if (cpu.isVirtual8086Mode())
-        {
+        if (cpu.isVirtual8086Mode()) {
             cpu.ss(newSs);
             cpu.ds(newDs);
             cpu.es(newEs);
@@ -399,10 +381,10 @@ public class Tasking
             if (((ProtectedModeSegment)cs).isDataWritable())
                 throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newCs & 0xfffc, true);
 
-            if (!((ProtectedModeSegment) cs).isConforming() && cs.getDPL() != cs.getRPL())
+            if (!((ProtectedModeSegment)cs).isConforming() && cs.getDPL() != cs.getRPL())
                 throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newCs & 0xfffc, true);
 
-            if (((ProtectedModeSegment) cs).isConforming() && cs.getDPL() > cs.getRPL())
+            if (((ProtectedModeSegment)cs).isConforming() && cs.getDPL() > cs.getRPL())
                 throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newCs & 0xfffc, true);
 
             if (touch_segment((ProtectedModeSegment)cs, cpu))
@@ -410,30 +392,27 @@ public class Tasking
             // TODO support cs limit demotion
             cpu.cs(cs);
 
-            if (Processor.cpuLevel >= 4)
-            {
+            if (Processor.cpuLevel >= 4) {
                 cpu.checkAlignmentChecking();
             }
 
             if ((tss.getType() >= 9) && ((trap_word & 1) != 0))
                 // TODO debug trap
 
-            if (Processor.cpuLevel >= 6)
-            {
-                // TODO handle SSE mode change
+                if (Processor.cpuLevel >= 6) {
+                    // TODO handle SSE mode change
 
-                // TODO if support AVX, handleAVXmodeChange()
-            }
+                    // TODO if support AVX, handleAVXmodeChange()
+                }
 
-            if (hasErrorCode)
-            {
+            if (hasErrorCode) {
                 boolean isSup = cpu.linearMemory.isSupervisor();
                 try {
                     cpu.linearMemory.setSupervisor(true);
                     if (tss.getType() >= 9)
                         cpu.push32(errorCode);
                     else
-                        cpu.push16((short) errorCode);
+                        cpu.push16((short)errorCode);
                 } finally {
                     cpu.linearMemory.setSupervisor(isSup);
                 }
@@ -444,12 +423,11 @@ public class Tasking
         }
     }
 
-    private static boolean checkSegment(Segment seg, int cs_rpl, Processor cpu)
-    {
+    private static boolean checkSegment(Segment seg, int cs_rpl, Processor cpu) {
         if (seg instanceof SegmentFactory.NullSegment)
             return false;
 
-        ProtectedModeSegment s = (ProtectedModeSegment) seg;
+        ProtectedModeSegment s = (ProtectedModeSegment)seg;
         if (s.isSystem() || (s.isCode() && !s.isCodeReadable()))
             throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, s.getSelector() & 0xfffc, true);
 
@@ -460,18 +438,16 @@ public class Tasking
         return touch_segment(s, cpu);
     }
 
-    public static boolean touch_segment(ProtectedModeSegment s, Processor cpu)
-    {
+    public static boolean touch_segment(ProtectedModeSegment s, Processor cpu) {
         // set accessed bit
-        if (!s.isAccessed())
-        {
+        if (!s.isAccessed()) {
             boolean isSup = cpu.linearMemory.isSupervisor();
             try {
                 cpu.linearMemory.setSupervisor(true);
                 if ((s.getSelector() & 0x4) != 0)
-                    cpu.ldtr.VMsetByte((s.getSelector() & 0xfff8) + 5, (byte) (cpu.ldtr.getByte((s.getSelector() & 0xfff8) + 5) | 1));
+                    cpu.ldtr.VMsetByte((s.getSelector() & 0xfff8) + 5, (byte)(cpu.ldtr.getByte((s.getSelector() & 0xfff8) + 5) | 1));
                 else
-                    cpu.gdtr.VMsetByte((s.getSelector() & 0xfff8) + 5, (byte) (cpu.gdtr.getByte((s.getSelector() & 0xfff8) + 5) | 1));
+                    cpu.gdtr.VMsetByte((s.getSelector() & 0xfff8) + 5, (byte)(cpu.gdtr.getByte((s.getSelector() & 0xfff8) + 5) | 1));
             } finally {
                 cpu.linearMemory.setSupervisor(isSup);
             }

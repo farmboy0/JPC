@@ -33,29 +33,24 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class mov_Ob_AL extends Executable
-{
+public class mov_Ob_AL extends Executable {
     final Pointer op1;
 
-    public mov_Ob_AL(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public mov_Ob_AL(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         op1 = Modrm.Ob(prefices, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         op1.set8(cpu, (byte)cpu.r_al.get8());
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

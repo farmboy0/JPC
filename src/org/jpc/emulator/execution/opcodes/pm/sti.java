@@ -33,22 +33,17 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class sti extends Executable
-{
+public class sti extends Executable {
 
-    public sti(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public sti(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-        if (Processor.cpuLevel >= 5)
-        {
+    public Branch execute(Processor cpu) {
+        if (Processor.cpuLevel >= 5) {
             if ((cpu.getCR4() & 2) != 0) // Protected mode Virtual Interrupts enabled
             {
-                if ((cpu.getCPL() == 3) && (cpu.getIOPrivilegeLevel() < 3))
-                {
+                if ((cpu.getCPL() == 3) && (cpu.getIOPrivilegeLevel() < 3)) {
                     if (cpu.getVIP())
                         throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
                     cpu.eflagsVirtualInterrupt = true;
@@ -62,13 +57,11 @@ public class sti extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

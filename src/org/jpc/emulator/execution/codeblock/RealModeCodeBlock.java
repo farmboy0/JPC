@@ -33,8 +33,5 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-
-public interface RealModeCodeBlock extends CodeBlock
-{
+public interface RealModeCodeBlock extends CodeBlock {
 }
-

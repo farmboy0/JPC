@@ -33,37 +33,32 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class idiv_Eb_mem extends Executable
-{
+public class idiv_Eb_mem extends Executable {
     final Pointer op1;
 
-    public idiv_Eb_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public idiv_Eb_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         if (op1.get8(cpu) == 0)
             throw ProcessorException.DIVIDE_ERROR;
         short ldiv = (short)cpu.r_ax.get16();
         short quot16 = (short)(ldiv / op1.get8(cpu));
-        if (quot16 != (byte) quot16)
+        if (quot16 != (byte)quot16)
             throw ProcessorException.DIVIDE_ERROR;
         cpu.r_al.set8((byte)quot16);
         cpu.r_ah.set8((byte)(ldiv % (byte)op1.get8(cpu)));
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

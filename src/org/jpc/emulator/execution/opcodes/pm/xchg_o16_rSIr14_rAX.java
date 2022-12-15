@@ -33,30 +33,25 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class xchg_o16_rSIr14_rAX extends Executable
-{
+public class xchg_o16_rSIr14_rAX extends Executable {
 
-    public xchg_o16_rSIr14_rAX(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public xchg_o16_rSIr14_rAX(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
-            int tmp2 = cpu.r_eax.get16();
+    public Branch execute(Processor cpu) {
+        int tmp2 = cpu.r_eax.get16();
         int tmp1 = cpu.r_esi.get16();
         cpu.r_esi.set16((short)tmp2);
         cpu.r_eax.set16(tmp1);
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

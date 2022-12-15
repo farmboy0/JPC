@@ -36,55 +36,46 @@ package org.jpc.debugger.util;
 import javax.swing.JTable;
 import javax.swing.table.*;
 
-public abstract class BasicTableModel extends AbstractTableModel
-{
+public abstract class BasicTableModel extends AbstractTableModel {
     private String[] titles;
     private int[] widths;
     private boolean isEditable;
 
-    public BasicTableModel(String[] columnTitles, int[] columnWidths)
-    {
+    public BasicTableModel(String[] columnTitles, int[] columnWidths) {
         this(columnTitles, columnWidths, false);
     }
 
-    public BasicTableModel(String[] columnTitles, int[] columnWidths, boolean isEditable)
-    {
+    public BasicTableModel(String[] columnTitles, int[] columnWidths, boolean isEditable) {
         this.titles = columnTitles;
         this.widths = columnWidths;
         this.isEditable = isEditable;
     }
 
-    public int getColumnCount()
-    {
+    public int getColumnCount() {
         return titles.length;
     }
-    
-    public String getColumnName(int col)
-    {
+
+    public String getColumnName(int col) {
         return titles[col];
     }
-    
-    public boolean isCellEditable(int r, int c)
-    {
+
+    public boolean isCellEditable(int r, int c) {
         return isEditable;
     }
 
-    public void setupColumnWidths(JTable parent)
-    {
+    public void setupColumnWidths(JTable parent) {
         if (widths == null)
             return;
 
         parent.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         TableColumnModel colModel = parent.getColumnModel();
-        for (int i=0; i<colModel.getColumnCount(); i++)
-        {
+        for (int i = 0; i < colModel.getColumnCount(); i++) {
             TableColumn col = colModel.getColumn(i);
             col.setPreferredWidth(widths[i]);
         }
     }
 
-    public void fireTableDataChanged()
-    {
+    public void fireTableDataChanged() {
         super.fireTableDataChanged();
     }
 }

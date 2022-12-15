@@ -31,23 +31,19 @@
     End of licence header
 */
 
-
 package org.jpc.debugger.util;
 
 import java.util.*;
 import java.util.ArrayList;
 
-public class ObjectDatabase
-{
+public class ObjectDatabase {
     private Map<Class, Object> table;
 
-    public ObjectDatabase()
-    {
+    public ObjectDatabase() {
         table = new HashMap<Class, Object>();
     }
 
-    public synchronized boolean addObject(Class cls, Object value)
-    {
+    public synchronized boolean addObject(Class cls, Object value) {
         if (value == null)
             return false;
 
@@ -58,39 +54,34 @@ public class ObjectDatabase
         return true;
     }
 
-    public synchronized boolean addObject(Object value)
-    {
+    public synchronized boolean addObject(Object value) {
         if (value == null)
             return false;
 
-        Class cls = (Class) value.getClass();
+        Class cls = (Class)value.getClass();
 
         return addObject(cls, value);
     }
 
-    public synchronized Object getObject(Class cls)
-    {
+    public synchronized Object getObject(Class cls) {
         return table.get(cls);
     }
 
-    public synchronized Object removeObject(Object obj)
-    {
+    public synchronized Object removeObject(Object obj) {
         if (obj == null)
             return null;
-        
+
         return removeObject(obj.getClass());
     }
 
-    public synchronized Object removeObject(Class cls)
-    {
+    public synchronized Object removeObject(Class cls) {
         if (cls == null)
             return null;
 
         return table.remove(cls);
     }
 
-    public synchronized List<Object> entries()
-    {
+    public synchronized List<Object> entries() {
         return new ArrayList<Object>(table.values());
     }
 }

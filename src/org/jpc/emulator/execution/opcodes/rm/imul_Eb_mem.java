@@ -33,39 +33,33 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class imul_Eb_mem extends Executable
-{
+public class imul_Eb_mem extends Executable {
     final Pointer op1;
 
-    public imul_Eb_mem(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public imul_Eb_mem(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
         int modrm = input.readU8();
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
-    public Branch execute(Processor cpu)
-    {
-            int iop1 = (byte)op1.get8(cpu);
-            int iop2 = (byte)cpu.r_eax.get8();
-            short res16 = (short) (iop1 * iop2);
-            cpu.r_eax.set16(res16);
-            cpu.setOSZAPC_Logic8(res16);
-            if (res16 != (byte) res16)
-            {
-               cpu.of(true);
-               cpu.cf(true);
-            }
+    public Branch execute(Processor cpu) {
+        int iop1 = (byte)op1.get8(cpu);
+        int iop2 = (byte)cpu.r_eax.get8();
+        short res16 = (short)(iop1 * iop2);
+        cpu.r_eax.set16(res16);
+        cpu.setOSZAPC_Logic8(res16);
+        if (res16 != (byte)res16) {
+            cpu.of(true);
+            cpu.cf(true);
+        }
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

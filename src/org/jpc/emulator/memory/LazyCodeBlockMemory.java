@@ -11,16 +11,15 @@ import org.jpc.emulator.processor.Processor;
 import org.jpc.j2se.Option;
 
 /**
- * <code>Memory</code> object with simple execute capabilities.  Uses a
+ * <code>Memory</code> object with simple execute capabilities. Uses a
  * {@link org.jpc.emulator.execution.codeblock.CodeBlockManager} instance to generate
- * {@link org.jpc.emulator.execution.codeblock.CodeBlock} objects which are then
- * stored in mirror arrays of the memory structure.
+ * {@link org.jpc.emulator.execution.codeblock.CodeBlock} objects which are then stored in mirror
+ * arrays of the memory structure.
  * @author Chris Dennis
  * @author Rhys Newman
  * @author Ian Preston
  */
-public class LazyCodeBlockMemory extends AbstractMemory
-{
+public class LazyCodeBlockMemory extends AbstractMemory {
     public static final boolean LOG_DISAM_ADDRESSES = Option.log_disam_addresses.value();
     private CodeBlockManager codeBlockManager;
     private static final BlankCodeBlock PLACEHOLDER = new BlankCodeBlock();
@@ -43,21 +42,21 @@ public class LazyCodeBlockMemory extends AbstractMemory
     }
 
     protected void constructCodeBlocksArray() {
-        realCodeBuffer = new RealModeCodeBlock[(int) getSize()];
-        protectedCodeBuffer = new ProtectedModeCodeBlock[(int) getSize()];
-        virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int) getSize()];
+        realCodeBuffer = new RealModeCodeBlock[(int)getSize()];
+        protectedCodeBuffer = new ProtectedModeCodeBlock[(int)getSize()];
+        virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int)getSize()];
     }
 
     private void constructRealCodeBlocksArray() {
-        realCodeBuffer = new RealModeCodeBlock[(int) getSize()];
+        realCodeBuffer = new RealModeCodeBlock[(int)getSize()];
     }
 
     private void constructVirtual8086CodeBlocksArray() {
-        virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int) getSize()];
+        virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int)getSize()];
     }
 
     private void constructProtectedCodeBlocksArray() {
-        protectedCodeBuffer = new ProtectedModeCodeBlock[(int) getSize()];
+        protectedCodeBuffer = new ProtectedModeCodeBlock[(int)getSize()];
     }
 
     public int executeProtected(Processor cpu, int offset) {
@@ -66,22 +65,18 @@ public class LazyCodeBlockMemory extends AbstractMemory
 
         offset = ip & AddressSpace.BLOCK_MASK;
         ProtectedModeCodeBlock block = getProtectedModeCodeBlockAt(offset);
-        try
-        {
-            try
-            {
+        try {
+            try {
                 block.execute(cpu);
                 x86Count += block.getX86Count();
-            }
-            catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 if (LOG_DISAM_ADDRESSES)
-                    System.out.printf("Disassembling PM from %08x with opsize=%s\n", cpu.getInstructionPointer(), cpu.cs.getDefaultSizeFlag());
+                    System.out.printf("Disassembling PM from %08x with opsize=%s\n", cpu.getInstructionPointer(),
+                        cpu.cs.getDefaultSizeFlag());
                 try {
                     block = codeBlockManager.getProtectedModeCodeBlockAt(this, offset, cpu.cs.getDefaultSizeFlag());
-                }catch (SpanningDecodeException s)
-                {
-                    setProtectedCodeBlockAt(offset, (ProtectedModeCodeBlock) s.getBlock());
+                } catch (SpanningDecodeException s) {
+                    setProtectedCodeBlockAt(offset, (ProtectedModeCodeBlock)s.getBlock());
                     throw s;
                 }
 
@@ -89,10 +84,8 @@ public class LazyCodeBlockMemory extends AbstractMemory
                 block.execute(cpu);
                 x86Count += block.getX86Count();
             }
-        }
-        catch (CodeBlockReplacementException e)
-        {
-            block = (ProtectedModeCodeBlock) e.getReplacement();
+        } catch (CodeBlockReplacementException e) {
+            block = (ProtectedModeCodeBlock)e.getReplacement();
             protectedCodeBuffer[offset] = block;
             block.execute(cpu);
             x86Count += block.getX86Count();
@@ -107,32 +100,25 @@ public class LazyCodeBlockMemory extends AbstractMemory
 
         offset = ip & AddressSpace.BLOCK_MASK;
         RealModeCodeBlock block = getRealModeCodeBlockAt(offset);
-        try
-        {
-            try
-            {
+        try {
+            try {
                 block.execute(cpu);
                 x86Count += block.getX86Count();
-            }
-            catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 if (LOG_DISAM_ADDRESSES)
                     System.out.printf("Disassembling RM from %08x\n", cpu.getInstructionPointer());
                 try {
                     block = codeBlockManager.getRealModeCodeBlockAt(this, offset);
-                } catch (SpanningDecodeException s)
-                {
-                    setRealCodeBlockAt(offset, (RealModeCodeBlock) s.getBlock());
+                } catch (SpanningDecodeException s) {
+                    setRealCodeBlockAt(offset, (RealModeCodeBlock)s.getBlock());
                     throw s;
                 }
                 setRealCodeBlockAt(offset, block);
                 block.execute(cpu);
                 x86Count += block.getX86Count();
             }
-        }
-        catch (CodeBlockReplacementException e)
-        {
-            block = (RealModeCodeBlock) e.getReplacement();
+        } catch (CodeBlockReplacementException e) {
+            block = (RealModeCodeBlock)e.getReplacement();
             realCodeBuffer[offset] = block;
             block.execute(cpu);
             x86Count += block.getX86Count();
@@ -147,32 +133,25 @@ public class LazyCodeBlockMemory extends AbstractMemory
 
         offset = ip & AddressSpace.BLOCK_MASK;
         Virtual8086ModeCodeBlock block = getVirtual8086ModeCodeBlockAt(offset);
-        try
-        {
-            try
-            {
+        try {
+            try {
                 block.execute(cpu);
                 x86Count += block.getX86Count();
-            }
-            catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 if (LOG_DISAM_ADDRESSES)
                     System.out.printf("Disassembling VM86 from %08x\n", cpu.getInstructionPointer());
                 try {
                     block = codeBlockManager.getVirtual8086ModeCodeBlockAt(this, offset);
-                } catch (SpanningDecodeException s)
-                {
-                    setVirtual8086CodeBlockAt(offset, (Virtual8086ModeCodeBlock) s.getBlock());
+                } catch (SpanningDecodeException s) {
+                    setVirtual8086CodeBlockAt(offset, (Virtual8086ModeCodeBlock)s.getBlock());
                     throw s;
                 }
                 setVirtual8086CodeBlockAt(offset, block);
                 block.execute(cpu);
                 x86Count += block.getX86Count();
             }
-        }
-        catch (CodeBlockReplacementException e)
-        {
-            block = (Virtual8086ModeCodeBlock) e.getReplacement();
+        } catch (CodeBlockReplacementException e) {
+            block = (Virtual8086ModeCodeBlock)e.getReplacement();
             virtual8086CodeBuffer[offset] = block;
             block.execute(cpu);
             x86Count += block.getX86Count();
@@ -208,39 +187,33 @@ public class LazyCodeBlockMemory extends AbstractMemory
         }
     }
 
-    public void addSpanningBlock(SpanningCodeBlock b, int remainingLength)
-    {
+    public void addSpanningBlock(SpanningCodeBlock b, int remainingLength) {
         spanning.add(b);
         // add markers up to the codeblock's length
         if (remainingLength > 4096)
             remainingLength = 4096;
-        if (b instanceof RealModeCodeBlock)
-        {
+        if (b instanceof RealModeCodeBlock) {
             if (realCodeBuffer == null) {
                 allocateBuffer();
-                realCodeBuffer = new RealModeCodeBlock[(int) getSize()];
+                realCodeBuffer = new RealModeCodeBlock[(int)getSize()];
             }
-            for (int i=0; i < remainingLength; i++)
+            for (int i = 0; i < remainingLength; i++)
                 if (realCodeBuffer[i] == null)
                     realCodeBuffer[i] = PLACEHOLDER;
-        }
-        else if (b instanceof ProtectedModeCodeBlock)
-        {
+        } else if (b instanceof ProtectedModeCodeBlock) {
             if (protectedCodeBuffer == null) {
                 allocateBuffer();
-                protectedCodeBuffer = new ProtectedModeCodeBlock[(int) getSize()];
+                protectedCodeBuffer = new ProtectedModeCodeBlock[(int)getSize()];
             }
-            for (int i=0; i < remainingLength; i++)
+            for (int i = 0; i < remainingLength; i++)
                 if (protectedCodeBuffer[i] == null)
                     protectedCodeBuffer[i] = PLACEHOLDER;
-        }
-        else if (b instanceof Virtual8086ModeCodeBlock)
-        {
+        } else if (b instanceof Virtual8086ModeCodeBlock) {
             if (virtual8086CodeBuffer == null) {
                 allocateBuffer();
-                virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int) getSize()];
+                virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int)getSize()];
             }
-            for (int i=0; i < remainingLength; i++)
+            for (int i = 0; i < remainingLength; i++)
                 if (virtual8086CodeBuffer[i] == null)
                     virtual8086CodeBuffer[i] = PLACEHOLDER;
         }
@@ -405,8 +378,7 @@ public class LazyCodeBlockMemory extends AbstractMemory
     private void regionAltered(int start, int end) {
         if (realCodeBuffer != null) {
             for (int i = end; i >= 0; i--) {
-                if (i == 0)
-                {
+                if (i == 0) {
                     for (SpanningCodeBlock b : spanning)
                         b.invalidate();
                 }
@@ -431,8 +403,7 @@ public class LazyCodeBlockMemory extends AbstractMemory
 
         if (protectedCodeBuffer != null) {
             for (int i = end; i >= 0; i--) {
-                if (i == 0)
-                {
+                if (i == 0) {
                     for (SpanningCodeBlock b : spanning)
                         b.invalidate();
                 }
@@ -457,8 +428,7 @@ public class LazyCodeBlockMemory extends AbstractMemory
 
         if (virtual8086CodeBuffer != null) {
             for (int i = end; i >= 0; i--) {
-                if (i == 0)
-                {
+                if (i == 0) {
                     for (SpanningCodeBlock b : spanning)
                         b.invalidate();
                 }
@@ -521,8 +491,7 @@ public class LazyCodeBlockMemory extends AbstractMemory
             return " -- Blank --\n";
         }
 
-        public Instruction getInstructions()
-        {
+        public Instruction getInstructions() {
             return null;
         }
     }
@@ -530,7 +499,7 @@ public class LazyCodeBlockMemory extends AbstractMemory
     public ProtectedModeCodeBlock getProtectedBlock(int offset, boolean size) {
         if (protectedCodeBuffer == null) {
             allocateBuffer();
-            protectedCodeBuffer = new ProtectedModeCodeBlock[(int) getSize()];
+            protectedCodeBuffer = new ProtectedModeCodeBlock[(int)getSize()];
         }
         ProtectedModeCodeBlock block = protectedCodeBuffer[offset];
         if ((block != null) && (block != PLACEHOLDER)) {
@@ -545,7 +514,7 @@ public class LazyCodeBlockMemory extends AbstractMemory
     public Virtual8086ModeCodeBlock getVirtual8086Block(int offset) {
         if (virtual8086CodeBuffer == null) {
             allocateBuffer();
-            virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int) getSize()];
+            virtual8086CodeBuffer = new Virtual8086ModeCodeBlock[(int)getSize()];
         }
         Virtual8086ModeCodeBlock block = virtual8086CodeBuffer[offset];
         if ((block != null) && (block != PLACEHOLDER)) {
@@ -560,7 +529,7 @@ public class LazyCodeBlockMemory extends AbstractMemory
     public RealModeCodeBlock getRealBlock(int offset) {
         if (realCodeBuffer == null) {
             allocateBuffer();
-            realCodeBuffer = new RealModeCodeBlock[(int) getSize()];
+            realCodeBuffer = new RealModeCodeBlock[(int)getSize()];
         }
         RealModeCodeBlock block = realCodeBuffer[offset];
         if ((block != null) && (block != PLACEHOLDER)) {
@@ -587,11 +556,11 @@ public class LazyCodeBlockMemory extends AbstractMemory
                 allocateBuffer();
                 System.arraycopy(buffer, address, buf, off, len);
             } else {
-                Arrays.fill(buf, off, off + len, (byte) 0);
+                Arrays.fill(buf, off, off + len, (byte)0);
             }
-        } catch (ArrayIndexOutOfBoundsException e)
-        {
-            System.out.println("Array bounds exception reading from lazycodeblockmemory: address=0x" + Integer.toHexString(address) + ", off="+Integer.toHexString(off)  + ", len="+len);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Array bounds exception reading from lazycodeblockmemory: address=0x" + Integer.toHexString(address)
+                + ", off=" + Integer.toHexString(off) + ", len=" + len);
         }
     }
 
@@ -653,14 +622,14 @@ public class LazyCodeBlockMemory extends AbstractMemory
             int result = 0xFF & buffer[offset];
             offset++;
             result |= buffer[offset] << 8;
-            return (short) result;
+            return (short)result;
         } catch (NullPointerException e) {
             if (++nullReadCount == ALLOCATION_THRESHOLD) {
                 allocateBuffer();
                 int result = 0xFF & buffer[offset];
                 offset++;
                 result |= buffer[offset] << 8;
-                return (short) result;
+                return (short)result;
             } else {
                 return 0;
             }
@@ -699,14 +668,14 @@ public class LazyCodeBlockMemory extends AbstractMemory
             return;
         }
         try {
-            buffer[offset] = (byte) data;
+            buffer[offset] = (byte)data;
             offset++;
-            buffer[offset] = (byte) (data >> 8);
+            buffer[offset] = (byte)(data >> 8);
         } catch (NullPointerException e) {
             allocateBuffer();
-            buffer[offset] = (byte) data;
+            buffer[offset] = (byte)data;
             offset++;
-            buffer[offset] = (byte) (data >> 8);
+            buffer[offset] = (byte)(data >> 8);
         }
         regionAltered(offset, offset + 1);
     }
@@ -716,28 +685,28 @@ public class LazyCodeBlockMemory extends AbstractMemory
             return;
         }
         try {
-            buffer[offset] = (byte) data;
+            buffer[offset] = (byte)data;
             offset++;
             data >>= 8;
-            buffer[offset] = (byte) (data);
+            buffer[offset] = (byte)(data);
             offset++;
             data >>= 8;
-            buffer[offset] = (byte) (data);
+            buffer[offset] = (byte)(data);
             offset++;
             data >>= 8;
-            buffer[offset] = (byte) (data);
+            buffer[offset] = (byte)(data);
         } catch (NullPointerException e) {
             allocateBuffer();
-            buffer[offset] = (byte) data;
+            buffer[offset] = (byte)data;
             offset++;
             data >>= 8;
-            buffer[offset] = (byte) (data);
+            buffer[offset] = (byte)(data);
             offset++;
             data >>= 8;
-            buffer[offset] = (byte) (data);
+            buffer[offset] = (byte)(data);
             offset++;
             data >>= 8;
-            buffer[offset] = (byte) (data);
+            buffer[offset] = (byte)(data);
         }
         regionAltered(offset, offset + 3);
     }

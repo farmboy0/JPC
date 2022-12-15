@@ -36,26 +36,23 @@ package org.jpc.emulator;
 /**
  * An object which can form part of a PC.
  * <p>
- * Usually but not always, objects that implement <code>HardwareComponent</code> have
- * a physical counterpart in a real computer.
+ * Usually but not always, objects that implement <code>HardwareComponent</code> have a physical
+ * counterpart in a real computer.
  * @author Chris Dennis
  */
-public interface HardwareComponent extends Hibernatable
-{
+public interface HardwareComponent extends Hibernatable {
     /**
-     * Returns true when a object need be offered no more 
-     * <code>HardwareComponent</code> instances through the
-     * <code>acceptComponent</code> method.
+     * Returns true when a object need be offered no more <code>HardwareComponent</code> instances
+     * through the <code>acceptComponent</code> method.
      * @return true when this component is fully initialised.
      */
     public boolean initialised();
 
     /**
-     * Offers a <code>Hardware Component</code> as possible configuration
-     * information for this object.
+     * Offers a <code>Hardware Component</code> as possible configuration information for this object.
      * <p>
-     * Implementations of this method may or may not maintain a reference to
-     * <code>component</code> depending on its type and value.
+     * Implementations of this method may or may not maintain a reference to <code>component</code>
+     * depending on its type and value.
      * @param component <code>HardwareComponent</code> being offered.
      */
     public void acceptComponent(HardwareComponent component);
@@ -63,21 +60,19 @@ public interface HardwareComponent extends Hibernatable
     /**
      * Resets this component to its default initial state
      * <p>
-     * Implementations of this method should not erase any configuration
-     * information.
+     * Implementations of this method should not erase any configuration information.
      */
     public void reset();
 
     /**
-     * Returns true when all references have been received following a call of 
-     * <code>loadState</code>.
+     * Returns true when all references have been received following a call of <code>loadState</code>.
      * @return true on a set of complete external references
      */
     public boolean updated();
 
     /**
-     * Offers this object a component as a possible required external reference
-     * following a call of <code>loadState</code>.
+     * Offers this object a component as a possible required external reference following a call of
+     * <code>loadState</code>.
      * @param component
      */
     public void updateComponent(HardwareComponent component);

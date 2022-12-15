@@ -32,13 +32,11 @@ import org.jpc.emulator.execution.*;
 import org.jpc.emulator.processor.*;
 import static org.jpc.emulator.execution.Executable.*;
 
-public class InterpretedVM86ModeBlock implements Virtual8086ModeCodeBlock
-{
+public class InterpretedVM86ModeBlock implements Virtual8086ModeCodeBlock {
     private final BasicBlock b;
     private boolean valid = true;
 
-    public InterpretedVM86ModeBlock(BasicBlock b)
-    {
+    public InterpretedVM86ModeBlock(BasicBlock b) {
         this.b = b;
     }
 
@@ -50,16 +48,13 @@ public class InterpretedVM86ModeBlock implements Virtual8086ModeCodeBlock
         return b.getX86Count();
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         Executable current = b.start;
         Executable.Branch ret;
 
         b.preBlock(cpu);
-        try
-        {
-            while ((ret = current.execute(cpu)) == Executable.Branch.None)
-            {
+        try {
+            while ((ret = current.execute(cpu)) == Executable.Branch.None) {
                 b.postInstruction(cpu, current);
                 if (!valid)
                     throw new SelfModifyingCodeException("Block modified itself!");
@@ -67,13 +62,11 @@ public class InterpretedVM86ModeBlock implements Virtual8086ModeCodeBlock
             }
             b.postInstruction(cpu, current);
             return ret;
-        } catch (ProcessorException e)
-        {
+        } catch (ProcessorException e) {
             cpu.eip += current.delta;
             if (current.next == null) // branches have already updated eip
                 cpu.eip -= getX86Length(); // so eip points at the branch that barfed
-            if (!e.pointsToSelf())
-            {
+            if (!e.pointsToSelf()) {
                 if (current.next == null)
                     cpu.eip += getX86Length() - current.delta;
                 else
@@ -82,32 +75,25 @@ public class InterpretedVM86ModeBlock implements Virtual8086ModeCodeBlock
 
             cpu.handleVirtual8086ModeException(e);
             return Branch.Exception;
-        }
-        catch (ModeSwitchException e)
-        {
+        } catch (ModeSwitchException e) {
             int count = 1;
             Executable p = b.start;
-            while (p != current)
-            {
+            while (p != current) {
                 count++;
                 p = p.next;
             }
             e.setX86Count(count);
             throw e;
-        }
-        catch (SelfModifyingCodeException e)
-        {
+        } catch (SelfModifyingCodeException e) {
             cpu.eip += current.next.delta;
             return Branch.Exception;
-        }
-        finally
-        {
+        } finally {
             b.postBlock(cpu);
         }
     }
 
     public String getDisplayString() {
-        return "Interpreted Virtual 8086 Mode Block:\n"+b.getDisplayString();
+        return "Interpreted Virtual 8086 Mode Block:\n" + b.getDisplayString();
     }
 
     public Instruction getInstructions() {
@@ -115,9 +101,8 @@ public class InterpretedVM86ModeBlock implements Virtual8086ModeCodeBlock
     }
 
     public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
-        valid =  b.handleMemoryRegionChange(startAddress, endAddress);
+        valid = b.handleMemoryRegionChange(startAddress, endAddress);
         return valid;
     }
-
 
 }

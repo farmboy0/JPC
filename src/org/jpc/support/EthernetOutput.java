@@ -36,11 +36,10 @@ package org.jpc.support;
 import org.jpc.emulator.pci.peripheral.EthernetCard;
 
 /**
- * 
  * @author Ian Preston
  */
-public abstract class EthernetOutput
-{
+public abstract class EthernetOutput {
     public abstract void sendPacket(byte[] data, int offset, int length);
+
     public abstract byte[] getPacket();
 }

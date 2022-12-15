@@ -36,13 +36,12 @@ package org.jpc.emulator.pci;
 /**
  * A object that allows a PCI device to raise an interrupt on the processor.
  * <p>
- * Instances of this class are handed out to PCI devices by the PCI-ISA bridge
- * so that interrupt request can be directed straight to the ISA bridge, and
- * therefore removing the indirection of access through the PCI bus itself.
+ * Instances of this class are handed out to PCI devices by the PCI-ISA bridge so that interrupt
+ * request can be directed straight to the ISA bridge, and therefore removing the indirection of
+ * access through the PCI bus itself.
  * @author Chris Dennis
  */
-public interface IRQBouncer
-{
+public interface IRQBouncer {
     /**
      * Raise or lower the given interrupt on the processor.
      * @param device source of the request

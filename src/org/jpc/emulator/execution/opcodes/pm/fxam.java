@@ -33,35 +33,28 @@ import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.*;
 import static org.jpc.emulator.processor.Processor.*;
 
-public class fxam extends Executable
-{
+public class fxam extends Executable {
 
-    public fxam(int blockStart, int eip, int prefices, PeekableInputStream input)
-    {
+    public fxam(int blockStart, int eip, int prefices, PeekableInputStream input) {
         super(blockStart, eip);
     }
 
-    public Branch execute(Processor cpu)
-    {
+    public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(0);
         cpu.fpu.setC1(freg0 < 0.0);
-        if (Double.isInfinite(freg0))
-        {
+        if (Double.isInfinite(freg0)) {
             cpu.fpu.setC0(true);
             cpu.fpu.setC2(true);
             cpu.fpu.setC3(false);
-        } else if(Double.isNaN(freg0))
-        {
+        } else if (Double.isNaN(freg0)) {
             cpu.fpu.setC0(true);
             cpu.fpu.setC2(false);
             cpu.fpu.setC3(false);
-        } else if(freg0 == 0.0)
-        {
+        } else if (freg0 == 0.0) {
             cpu.fpu.setC0(false);
             cpu.fpu.setC2(false);
             cpu.fpu.setC3(true);
-        } else
-        {
+        } else {
             cpu.fpu.setC0(false);
             cpu.fpu.setC2(true);
             cpu.fpu.setC3(false);
@@ -69,13 +62,11 @@ public class fxam extends Executable
         return Branch.None;
     }
 
-    public boolean isBranch()
-    {
+    public boolean isBranch() {
         return false;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return this.getClass().getName();
     }
 }

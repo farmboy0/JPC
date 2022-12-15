@@ -39,54 +39,47 @@ import java.util.logging.*;
 import static org.jpc.support.RemoteBlockDevice.Protocol;
 
 /**
- * 
  * @author Ian Preston
  */
-public class RemoteBlockDeviceImpl implements Runnable
-{
+public class RemoteBlockDeviceImpl implements Runnable {
     private static final Logger LOGGING = Logger.getLogger(RemoteBlockDeviceImpl.class.getName());
     private DataInputStream in;
     private DataOutputStream out;
     private BlockDevice target;
 
     private byte[] buffer;
-    
-    public RemoteBlockDeviceImpl(InputStream in, OutputStream out, BlockDevice target)
-    {
+
+    public RemoteBlockDeviceImpl(InputStream in, OutputStream out, BlockDevice target) {
         this.target = target;
         this.in = new DataInputStream(in);
-        this.out = new  DataOutputStream(out);
+        this.out = new DataOutputStream(out);
         buffer = new byte[1024];
 
         new Thread(this).start();
     }
 
-    public void run()
-    {
-        while (true)
-        {
-            try
-            {
+    public void run() {
+        while (true) {
+            try {
                 int methodType = in.read();
 
-                switch (Protocol.values()[methodType])
-                {
+                switch (Protocol.values()[methodType]) {
                 case READ:
                     long sectorNumber = in.readLong();
-                    int toRead = Math.min(in.readInt(), buffer.length/512);
+                    int toRead = Math.min(in.readInt(), buffer.length / 512);
                     int result = target.read(sectorNumber, buffer, toRead);
-                    
+
                     out.writeByte(0);
                     out.writeInt(result);
-                    out.writeInt(toRead*512);
-                    out.write(buffer, 0, toRead*512);
+                    out.writeInt(toRead * 512);
+                    out.write(buffer, 0, toRead * 512);
                     break;
                 case WRITE:
                     long writesectorNumber = in.readLong();
                     int toWrite = Math.min(in.readInt(), buffer.length);
                     in.read(buffer, 0, toWrite);
                     int writeresult = target.write(writesectorNumber, buffer, toWrite);
-                    
+
                     out.writeByte(0);
                     out.writeInt(writeresult);
                     break;
@@ -133,11 +126,9 @@ public class RemoteBlockDeviceImpl implements Runnable
                     LOGGING.log(Level.WARNING, "socket closed due to protocol error");
                     return;
                 }
-                
+
                 out.flush();
-            }
-            catch (Exception e) 
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
 
                 System.exit(0);
@@ -145,5 +136,3 @@ public class RemoteBlockDeviceImpl implements Runnable
         }
     }
 }
-    
-    
