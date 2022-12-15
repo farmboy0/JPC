@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,14 +33,21 @@
 
 package org.jpc.debugger;
 
-import java.lang.reflect.*;
 import java.awt.GridLayout;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Field;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.memory.*;
+import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.memory.LinearAddressSpace;
+import org.jpc.emulator.memory.Memory;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
+import org.jpc.emulator.processor.Processor;
 
 public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
     private PhysicalAddressSpace physicalMemory;
@@ -79,11 +86,13 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
         //add("South", controlPanel);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
         refreshDetails();
 
     }
 
+    @Override
     protected MemoryViewPanel createMemoryViewPanel() {
         return new LinearMemoryViewPanel();
     }
@@ -94,6 +103,7 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
         return (Memory[])f.get(linearMemory);
     }
 
+    @Override
     protected void getAddressSpace() {
         physicalMemory = (PhysicalAddressSpace)JPC.getObject(PhysicalAddressSpace.class);
         linearMemory = (LinearAddressSpace)JPC.getObject(LinearAddressSpace.class);
@@ -110,16 +120,17 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
     }
 
     class LinearMemoryViewPanel extends MemoryViewPanel {
+        @Override
         protected Object formatMemoryDisplay(int address) {
             controllable.lower.setBorder(BorderFactory.createTitledBorder("View Parameters : Physical address = "
                 + Integer.toHexString(translateLinearAddressToInt(physicalMemory, processor, startAddress))));
-            StringBuffer buf = new StringBuffer("<HTML>");
+            StringBuilder buf = new StringBuilder("<HTML>");
             for (int i = 0; i < 4; i++, address++) {
                 Memory mem = translateLinearAddress(physicalMemory, processor, address);
                 int index = address >>> AddressSpace.INDEX_SHIFT;
                 String colourString = "009900";
-                if (((rs != null) && (rs[index] != null)) || ((ru != null) && (ru[index] != null)) || ((ws != null) && (ws[index] != null))
-                    || ((wu != null) && (wu[index] != null)))
+                if (rs != null && rs[index] != null || ru != null && ru[index] != null || ws != null && ws[index] != null
+                    || wu != null && wu[index] != null)
                     colourString = "090290";
 
                 if (mem == null)
@@ -133,8 +144,9 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
             return buf;
         }
 
+        @Override
         protected Object formatAsciiDisplay(int address) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for (int i = 0; i < 16; i++, address++) {
                 Memory mem = translateLinearAddress(physicalMemory, processor, address);
                 if (mem == null)
@@ -153,7 +165,7 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
 
         int baseAddress = proc.getCR3() & 0xFFFFF000;
         int idx = offset >>> AddressSpace.INDEX_SHIFT;
-        int directoryAddress = baseAddress | (0xFFC & (offset >>> 20)); // This should be (offset >>> 22) << 2.
+        int directoryAddress = baseAddress | 0xFFC & offset >>> 20; // This should be (offset >>> 22) << 2.
         int directoryRawBits = physical.getDoubleWord(directoryAddress);
 
         boolean directoryPresent = (0x1 & directoryRawBits) != 0;
@@ -161,23 +173,22 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
             return -1;
 
         int tableIndex = (0xFFC00000 & offset) >>> 12;
-        boolean directoryIs4MegPage = ((0x80 & directoryRawBits) != 0) && ((proc.getCR4() & 0x10) != 0);
+        boolean directoryIs4MegPage = (0x80 & directoryRawBits) != 0 && (proc.getCR4() & 0x10) != 0;
 
         if (directoryIs4MegPage) {
             int fourMegPageStartAddress = 0xFFC00000 & directoryRawBits;
-            return fourMegPageStartAddress | (offset & 0x3FFFFF);
+            return fourMegPageStartAddress | offset & 0x3FFFFF;
         } else {
             tableIndex = (0xFFFFF000 & offset) >>> 12;
             int directoryBaseAddress = directoryRawBits & 0xFFFFF000;
-            int tableAddress = directoryBaseAddress | ((offset >>> 10) & 0xFFC);
+            int tableAddress = directoryBaseAddress | offset >>> 10 & 0xFFC;
             int tableRawBits = physical.getDoubleWord(tableAddress);
 
             boolean tablePresent = (0x1 & tableRawBits) != 0;
             if (!tablePresent)
                 return -1;
 
-            int fourKStartAddress = tableRawBits & 0xFFFFF000;
-            return fourKStartAddress;
+            return tableRawBits & 0xFFFFF000;
         }
     }
 
@@ -187,7 +198,7 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
 
         int baseAddress = proc.getCR3() & 0xFFFFF000;
         int idx = offset >>> AddressSpace.INDEX_SHIFT;
-        int directoryAddress = baseAddress | (0xFFC & (offset >>> 20)); // This should be (offset >>> 22) << 2.
+        int directoryAddress = baseAddress | 0xFFC & offset >>> 20; // This should be (offset >>> 22) << 2.
         int directoryRawBits = physical.getDoubleWord(directoryAddress);
 
         boolean directoryPresent = (0x1 & directoryRawBits) != 0;
@@ -195,15 +206,15 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
             return null;
 
         int tableIndex = (0xFFC00000 & offset) >>> 12;
-        boolean directoryIs4MegPage = ((0x80 & directoryRawBits) != 0) && ((proc.getCR4() & 0x10) != 0);
+        boolean directoryIs4MegPage = (0x80 & directoryRawBits) != 0 && (proc.getCR4() & 0x10) != 0;
 
         if (directoryIs4MegPage) {
             int fourMegPageStartAddress = 0xFFC00000 & directoryRawBits;
-            return MemoryViewer.getReadMemoryBlockAt(physical, fourMegPageStartAddress | (offset & 0x3FFFFF));
+            return MemoryViewer.getReadMemoryBlockAt(physical, fourMegPageStartAddress | offset & 0x3FFFFF);
         } else {
             tableIndex = (0xFFFFF000 & offset) >>> 12;
             int directoryBaseAddress = directoryRawBits & 0xFFFFF000;
-            int tableAddress = directoryBaseAddress | ((offset >>> 10) & 0xFFC);
+            int tableAddress = directoryBaseAddress | offset >>> 10 & 0xFFC;
             int tableRawBits = physical.getDoubleWord(tableAddress);
 
             boolean tablePresent = (0x1 & tableRawBits) != 0;

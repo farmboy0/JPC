@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,6 @@
 
 package org.jpc.debugger;
 
-import java.util.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -42,13 +41,16 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.logging.*;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
-import javax.swing.*;
-import javax.swing.table.*;
-import javax.swing.event.*;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableModel;
 
-import org.jpc.emulator.execution.codeblock.*;
+import org.jpc.emulator.execution.codeblock.CodeBlock;
 
 public class DisassemblyOverlayTable extends JTable implements ListSelectionListener {
     private static final Logger LOGGING = Logger.getLogger(DisassemblyOverlayTable.class.getName());
@@ -82,6 +84,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         return r2.union(r1);
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         repaint();
     }
@@ -237,8 +240,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         g.setColor(Color.black);
 
         int ypos = 14;
-        for (int i = 0; i < lines.length; i++) {
-            OverlayLineFormat l = lines[i];
+        for (OverlayLineFormat l : lines) {
             g.setColor(l.c);
             g.drawString(l.text, x3 + l.tabPosition, y3 + ypos);
             ypos += rowHeight;
@@ -255,8 +257,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
 
         g.setColor(new Color(0, 255, 100, 120));
 
-        for (int i = 0; i < allBlocks.length; i++) {
-            BlockWrapper bw = allBlocks[i];
+        for (BlockWrapper bw : allBlocks) {
             int x1 = 5 + tgtRect.x + bw.indent * (width + gap);
             int y1 = bw.address * rowHeight + rowHeight / 2;
             int w1 = width;
@@ -277,8 +278,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         int width = 10;
         int gap = 3;
 
-        for (int i = 0; i < allBlocks.length; i++) {
-            BlockWrapper bw = allBlocks[i];
+        for (BlockWrapper bw : allBlocks) {
             int x1 = 5 + tgtRect.x + bw.indent * (width + gap);
             int y1 = bw.address * rowHeight + rowHeight / 2;
             int w1 = width;
@@ -292,6 +292,7 @@ public class DisassemblyOverlayTable extends JTable implements ListSelectionList
         return -1;
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawBlocks(g);

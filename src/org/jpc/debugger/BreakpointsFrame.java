@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -35,18 +35,45 @@ package org.jpc.debugger;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
 
-import org.jpc.debugger.util.*;
+import org.jpc.debugger.util.BasicTableModel;
+import org.jpc.debugger.util.UtilityFrame;
 import org.jpc.emulator.processor.Processor;
 
 public class BreakpointsFrame extends UtilityFrame implements PCListener {
     public static final String BREAKPOINT_FILE = "breakpoints.jpc";
-    public static final long BREAKPOINT_MAGIC = 0x81057FAB7272F10l;
+    public static final long BREAKPOINT_MAGIC = 0x81057FAB7272F10L;
 
     private boolean edited;
     private List<Breakpoint> breakpoints;
@@ -81,6 +108,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
 
         JMenu options = new JMenu("Options");
         options.add("Set Breakpoint").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 try {
                     String input = JOptionPane.showInputDialog(BreakpointsFrame.this, "Enter the address (in Hex) for the breakpoint: ",
@@ -93,6 +121,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
         });
         options.addSeparator();
         options.add("Remove All Breakpoints").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 removeAllBreakpoints();
             }
@@ -126,6 +155,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
         return edited;
     }
 
+    @Override
     public void frameClosed() {
         if (edited) {
             if (JOptionPane.showConfirmDialog(this, "Do you want to save the changes to the breakpoints?", "Save Breakpoints",
@@ -166,6 +196,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
             return name.substring(0, dot) + ".jpc";
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             JFileChooser chooser = (JFileChooser)JPC.getObject(JFileChooser.class);
             if (evt.getSource() == load) {
@@ -195,6 +226,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
     }
 
     class Deleter extends AbstractAction {
+        @Override
         public void actionPerformed(ActionEvent evt) {
             deleteBreakpoint(bpTable.getSelectedRow());
         }
@@ -248,7 +280,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
             return null;
 
         for (Breakpoint bp : breakpoints) {
-            if ((bp.getAddress() == start) || ((bp.getAddress() >= start) && (bp.getAddress() < end))) {
+            if (bp.getAddress() == start || bp.getAddress() >= start && bp.getAddress() < end) {
                 if (isPrimary && !bp.isPrimary())
                     continue;
 
@@ -273,7 +305,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
 //    {
 //        BreakCondition()
 //        {
-//            
+//
 //        }
 //    }
 
@@ -291,6 +323,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
             super("", addr, primary);
         }
 
+        @Override
         public boolean satisfied(Processor cpu) {
             return false;
         }
@@ -301,20 +334,24 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
             super(new String[] { "Address", "Name", "Primary" }, new int[] { 100, 250, 100 });
         }
 
+        @Override
         public int getRowCount() {
             return breakpoints.size();
         }
 
+        @Override
         public boolean isCellEditable(int row, int column) {
             return true;
         }
 
+        @Override
         public Class getColumnClass(int col) {
             if (col == 2)
                 return Boolean.class;
             return String.class;
         }
 
+        @Override
         public void setValueAt(Object obj, int row, int column) {
             Breakpoint bp = breakpoints.get(row);
 
@@ -340,6 +377,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
             edited = true;
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             Breakpoint bp = breakpoints.get(row);
 
@@ -349,7 +387,7 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
             case 1:
                 return bp.getName();
             case 2:
-                return new Boolean(bp.isPrimary());
+                return Boolean.valueOf(bp.isPrimary());
             default:
                 return "";
             }
@@ -490,18 +528,23 @@ public class BreakpointsFrame extends UtilityFrame implements PCListener {
         }
     }
 
+    @Override
     public void pcCreated() {
     }
 
+    @Override
     public void pcDisposed() {
     }
 
+    @Override
     public void executionStarted() {
     }
 
+    @Override
     public void executionStopped() {
     }
 
+    @Override
     public void refreshDetails() {
         model.fireTableDataChanged();
     }

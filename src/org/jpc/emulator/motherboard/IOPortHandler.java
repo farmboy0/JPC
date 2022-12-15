@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -56,30 +56,37 @@ public class IOPortHandler extends AbstractHardwareComponent implements IODevice
             ioPortDevice[i] = defaultDevice;
     }
 
+    @Override
     public int ioPortRead8(int address) {
         return ioPortDevice[address].ioPortRead8(address);
     }
 
+    @Override
     public int ioPortRead16(int address) {
         return ioPortDevice[address].ioPortRead16(address);
     }
 
+    @Override
     public int ioPortRead32(int address) {
         return ioPortDevice[address].ioPortRead32(address);
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         ioPortDevice[address].ioPortWrite8(address, data);
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         ioPortDevice[address].ioPortWrite16(address, data);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         ioPortDevice[address].ioPortWrite32(address, data);
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return null;
     }
@@ -116,39 +123,48 @@ public class IOPortHandler extends AbstractHardwareComponent implements IODevice
         }
     }
 
+    @Override
     public void reset() {
         ioPortDevice = new IODevice[MAX_IOPORTS];
         for (int i = 0; i < ioPortDevice.length; i++)
             ioPortDevice[i] = defaultDevice;
     }
 
+    @Override
     public String toString() {
         return "IOPort Bus";
     }
 
     private static class UnconnectedIOPort implements IODevice {
 
+        @Override
         public int ioPortRead8(int address) {
             return 0xff;
         }
 
+        @Override
         public int ioPortRead16(int address) {
             return 0xffff;
         }
 
+        @Override
         public int ioPortRead32(int address) {
             return 0xffffffff;
         }
 
+        @Override
         public void ioPortWrite8(int address, int data) {
         }
 
+        @Override
         public void ioPortWrite16(int address, int data) {
         }
 
+        @Override
         public void ioPortWrite32(int address, int data) {
         }
 
+        @Override
         public int[] ioPortsRequested() {
             return null;
         }

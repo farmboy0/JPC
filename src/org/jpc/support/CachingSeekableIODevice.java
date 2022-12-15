@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,7 @@
 
 package org.jpc.support;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,10 +53,12 @@ public class CachingSeekableIODevice implements SeekableIODevice {
         this.parent = parent;
     }
 
+    @Override
     public void seek(long offset) throws IOException {
         byteOffset = offset;
     }
 
+    @Override
     public int write(byte[] data, int offset, int length) throws IOException {
         if (byteOffset % BlockDevice.SECTOR_SIZE != 0) {
             LOGGING.log(Level.WARNING, "Trying to write off a sector boundary.");
@@ -75,7 +77,7 @@ public class CachingSeekableIODevice implements SeekableIODevice {
     private void readFully(byte[] data, int dataOffset, int readOffset, int length) throws IOException {
         int pos = 0;
         if (readOffset > 0)
-            parent.seek(byteOffset + (long)readOffset);
+            parent.seek(byteOffset + readOffset);
         while (true) {
             if (pos >= length)
                 break;
@@ -89,10 +91,11 @@ public class CachingSeekableIODevice implements SeekableIODevice {
                 } catch (InterruptedException ex) {
                     Logger.getLogger(CachingSeekableIODevice.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            parent.seek(byteOffset + (long)(pos + readOffset));
+            parent.seek(byteOffset + pos + readOffset);
         }
     }
 
+    @Override
     public int read(byte[] data, int offset, int length) throws IOException {
         if (byteOffset % BlockDevice.SECTOR_SIZE != 0) {
             System.out.println("Trying to read off a sector boundary.");
@@ -134,7 +137,7 @@ public class CachingSeekableIODevice implements SeekableIODevice {
                     int toRead = lastReadSize;
                     while (true) {
                         int read = parent.read(data, offset + length - lastReadSize + pos, toRead - pos);
-                        if ((read < 0) || (pos >= toRead))
+                        if (read < 0 || pos >= toRead)
                             break;
                         pos += read;
                     }
@@ -143,22 +146,27 @@ public class CachingSeekableIODevice implements SeekableIODevice {
         }
     }
 
+    @Override
     public long length() {
         return parent.length();
     }
 
+    @Override
     public boolean readOnly() {
         return parent.readOnly();
     }
 
+    @Override
     public void close() throws IOException {
         parent.close();
     }
 
+    @Override
     public void configure(String opts) throws IOException, IllegalArgumentException {
         parent.configure(opts);
     }
 
+    @Override
     public String toString() {
         if (parent == null)
             return "caching:null";

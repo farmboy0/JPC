@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -35,8 +35,9 @@ package org.jpc.emulator.processor;
 
 import java.io.DataInput;
 import java.io.IOException;
-import org.jpc.emulator.memory.AddressSpace;
+
 import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.memory.AddressSpace;
 
 /**
  * @author Chris Dennis
@@ -96,9 +97,9 @@ public abstract class Segment implements Hibernatable {
 
     public long getQuadWord(int offset) {
         int off = translateAddressRead(offset);
-        long result = 0xFFFFFFFFl & memory.getDoubleWord(off);
+        long result = 0xFFFFFFFFL & memory.getDoubleWord(off);
         off = translateAddressRead(offset + 4);
-        result |= (((long)memory.getDoubleWord(off)) << 32);
+        result |= (long)memory.getDoubleWord(off) << 32;
         return result;
     }
 
@@ -126,6 +127,7 @@ public abstract class Segment implements Hibernatable {
         memory.setDoubleWord(off, (int)(data >>> 32));
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         throw new UnsupportedOperationException();
     }

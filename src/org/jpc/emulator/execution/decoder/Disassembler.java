@@ -27,19 +27,107 @@
 
 package org.jpc.emulator.execution.decoder;
 
-import org.jpc.emulator.execution.Executable;
-import org.jpc.j2se.Option;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__0F;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__1BYTE;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__3DNOW;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__MODE_INDX__16;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__MODE_INDX__32;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__MODE_INDX__64;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__MOD_INDX__11;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__MOD_INDX__NOT_11;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__PFX_SSE66__0F;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__PFX_SSEF2__0F;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__PFX_SSEF3__0F;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__VENDOR_INDX__AMD;
+import static org.jpc.emulator.execution.decoder.Table.ITAB__VENDOR_INDX__INTEL;
+import static org.jpc.emulator.execution.decoder.Table.operator;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.GPR;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.MAX_INSTRUCTION_LENGTH;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.MODRM_MOD;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.MODRM_REG;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.MODRM_RM;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_A;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_AL;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_ALr8b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_AX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_C;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_CL;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_D;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_DX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_E;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_ES;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_FS;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_G;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_GS;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_I;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_I1;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_I3;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_J;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_M;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_NONE;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_O;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_P;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_PR;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_Q;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_R;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_S;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_ST0;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_V;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_VR;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_W;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_eAX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_rAX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_rAXr8;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.OP_rDIr15;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_NONE;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_C0;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_C1;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_C2;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_DEF64;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_INV64;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_none;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.REX_B;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.REX_PFX_MASK;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.REX_R;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.REX_W;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.REX_X;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SIB_B;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SIB_I;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SIB_S;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SZ_DP;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SZ_MDQ;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SZ_P;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SZ_RDQ;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SZ_V;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SZ_WP;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.SZ_Z;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.VENDOR_AMD;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.VENDOR_INTEL;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.ops2;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.ops3;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.ops32;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.ops64;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.ops8;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.ops_segs;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.ops_st;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.zip.*;
-import java.net.*;
-import static org.jpc.emulator.execution.decoder.ZygoteOperand.*;
-import static org.jpc.emulator.execution.decoder.Table.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import org.jpc.emulator.execution.Executable;
+import org.jpc.j2se.Option;
 
 public class Disassembler {
     public static final boolean PRINT_DISAM = Option.log_disam.value();
@@ -146,7 +234,7 @@ public class Disassembler {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-        throw new IllegalStateException("Unimplemented opcode: " + ((mode == 2) ? "PM:" : (mode == 1) ? "RM:" : "VM:") + in.toString()
+        throw new IllegalStateException("Unimplemented opcode: " + (mode == 2 ? "PM:" : mode == 1 ? "RM:" : "VM:") + in.toString()
             + ", general pattern: " + in.getGeneralClassName(true, true) + ".");
     }
 
@@ -278,7 +366,7 @@ public class Disassembler {
         int startAddr = (int)input.getAddress();
         boolean debug = false;
         int beginCount = input.getCounter();
-        Instruction startin = (operand_size == 32) ? disassemble32(input) : disassemble16(input);
+        Instruction startin = operand_size == 32 ? disassemble32(input) : disassemble16(input);
         Instruction currentInsn = startin;
 
         Executable start = getExecutable(mode, startAddr, currentInsn);
@@ -293,15 +381,15 @@ public class Disassembler {
         int count = 1;
         boolean delayInterrupts = false;
         while (!currentInsn.isBranch()) {
-            if (((delayInterrupts) || (count >= MAX_INSTRUCTIONS_PER_BLOCK)) && !delayInterrupts(currentInsn)) {
+            if ((delayInterrupts || count >= MAX_INSTRUCTIONS_PER_BLOCK) && !delayInterrupts(currentInsn)) {
                 Executable eip = getEipUpdate(mode, startAddr, currentInsn);
                 current.next = eip;
-                if (!delayInterrupts && (MAX_INSTRUCTIONS_PER_BLOCK > 10))
-                    System.out.println((String.format("Exceeded maximum number of instructions in a block at %x", startAddr)));
+                if (!delayInterrupts && MAX_INSTRUCTIONS_PER_BLOCK > 10)
+                    System.out.println(String.format("Exceeded maximum number of instructions in a block at %x", startAddr));
                 return constructBlock(startin, start, x86Length, count);
             }
             beginCount = input.getCounter();
-            Instruction nextInsn = (operand_size == 32) ? disassemble32(input) : disassemble16(input);
+            Instruction nextInsn = operand_size == 32 ? disassemble32(input) : disassemble16(input);
             if (PRINT_DISAM) {
                 System.out.printf("%d;%s;%s;", operand_size, nextInsn.getGeneralClassName(false, false), nextInsn);
                 System.out.println(getRawBytes(input, beginCount));
@@ -325,11 +413,7 @@ public class Disassembler {
 
     public static boolean delayInterrupts(Instruction in) {
         String name = in.toString();
-        if (name.equals("sti")) // to delay checking interrupts until 1 instruction after sti
-            return true;
-        if (name.startsWith("pop ss"))
-            return true;
-        if (name.startsWith("mov ss"))
+        if (name.equals("sti") || name.startsWith("pop ss") || name.startsWith("mov ss"))
             return true;
         return false;
     }
@@ -360,34 +444,42 @@ public class Disassembler {
             this.data = data;
         }
 
+        @Override
         public void seek(int delta) {
             index += delta;
         }
 
+        @Override
         public void resetCounter() {
             index = 0;
         }
 
+        @Override
         public long getAddress() {
             return getCounter();
         }
 
+        @Override
         public int getCounter() {
             return index;
         }
 
+        @Override
         public byte read8() {
             return data[index++];
         }
 
+        @Override
         public short read16() {
             return (short)readU16();
         }
 
+        @Override
         public int read32() {
             return (int)readU32();
         }
 
+        @Override
         public long readU(long bits) {
             if (bits == 8)
                 return data[index++] & 0xFF;
@@ -396,26 +488,31 @@ public class Disassembler {
             if (bits == 32)
                 return readU32();
             if (bits == 64)
-                return (0xffffffffL & read32()) | (((long)read32()) << 32);
+                return 0xffffffffL & read32() | (long)read32() << 32;
             throw new IllegalStateException("unimplemented read amount " + bits);
         }
 
+        @Override
         public int readU8() {
-            return (data[index++] & 0xFF);
+            return data[index++] & 0xFF;
         }
 
+        @Override
         public int readU16() {
-            return (data[index++] & 0xFF) | ((data[index++] & 0xFF) << 8);
+            return data[index++] & 0xFF | (data[index++] & 0xFF) << 8;
         }
 
+        @Override
         public long readU32() {
-            return (data[index++] & 0xFF) | ((data[index++] & 0xFF) << 8) | ((data[index++] & 0xFF) << 16) | ((data[index++] & 0xFF) << 24);
+            return data[index++] & 0xFF | (data[index++] & 0xFF) << 8 | (data[index++] & 0xFF) << 16 | (data[index++] & 0xFF) << 24;
         }
 
+        @Override
         public int peek() {
             return data[index] & 0xFF;
         }
 
+        @Override
         public void forward() {
             index++;
         }
@@ -427,7 +524,7 @@ public class Disassembler {
         while (true) {
             curr = input.peek();
 
-            if ((mode == 64) && ((curr & 0xF0) == 0x40))
+            if (mode == 64 && (curr & 0xF0) == 0x40)
                 inst.pfx.rex = curr;
             else {
                 if (curr == 0x2E) {
@@ -530,7 +627,7 @@ public class Disassembler {
 
         // resolve xchg, nop, pause crazyness
         if (0x90 == curr) {
-            if (!((mode == 64) && (REX_B(inst.pfx.rex) != 0))) {
+            if (!(mode == 64 && REX_B(inst.pfx.rex) != 0)) {
                 if (inst.pfx.rep != 0) {
                     inst.pfx.rep = 0;
                     e = ie_pause;
@@ -644,19 +741,19 @@ public class Disassembler {
     }
 
     public static void do_mode(int mode, Instruction inst) {
-        // propagate prefix effects 
+        // propagate prefix effects
         if (mode == 64) // set 64bit-mode flags
         {
-            // Check validity of  instruction m64 
-            if ((P_INV64(inst.zygote.prefix) != 0))
+            // Check validity of  instruction m64
+            if (P_INV64(inst.zygote.prefix) != 0)
                 throw new IllegalStateException("Invalid instruction");
 
-            // effective rex prefix is the  effective mask for the 
+            // effective rex prefix is the  effective mask for the
             // instruction hard-coded in the opcode map.
-            inst.pfx.rex = ((inst.pfx.rex & 0x40) | (inst.pfx.rex & REX_PFX_MASK(inst.zygote.prefix)));
+            inst.pfx.rex = inst.pfx.rex & 0x40 | inst.pfx.rex & REX_PFX_MASK(inst.zygote.prefix);
 
-            // calculate effective operand size 
-            if ((REX_W(inst.pfx.rex) != 0) || (P_DEF64(inst.zygote.prefix) != 0))
+            // calculate effective operand size
+            if (REX_W(inst.pfx.rex) != 0 || P_DEF64(inst.zygote.prefix) != 0)
                 inst.opr_mode = 64;
             else if (inst.pfx.opr != 0)
                 inst.opr_mode = 16;
@@ -692,12 +789,12 @@ public class Disassembler {
     }
 
     public static void resolve_operator(int mode, PeekableInputStream input, Instruction inst) {
-        // far/near flags 
+        // far/near flags
         inst.branch_dist = null;
         // readjust operand sizes for call/jmp instructions
         if (inst.operator.equals("call") || inst.operator.equals("jmp")) {
             if (inst.operand[0].size == SZ_WP) {
-                // WP: 16bit pointer 
+                // WP: 16bit pointer
                 inst.operand[0].size = 16;
                 inst.branch_dist = "far";
             } else if (inst.operand[0].size == SZ_DP) {
@@ -707,11 +804,11 @@ public class Disassembler {
             } else if (inst.operand[0].size == 8)
                 inst.branch_dist = "near";
         } else if (inst.operator.equals("3dnow")) {
-            // resolve 3dnow weirdness 
+            // resolve 3dnow weirdness
             inst.operator = itab[ITAB__3DNOW][input.peek()].operator;
         }
         // SWAPGS is only valid in 64bits mode
-        if ((inst.operator.equals("swapgs")) && (mode != 64))
+        if (inst.operator.equals("swapgs") && mode != 64)
             throw new IllegalStateException("SWAPGS only valid in 64 bit mode");
     }
 
@@ -741,15 +838,15 @@ public class Disassembler {
         if (inst.operand.length > 2)
             inst.operand[2].cast = P_C2(inst.zygote.prefix);
 
-        // iop = instruction operand 
+        // iop = instruction operand
         //iop = inst.operand
 
         if (mopt[0] == OP_A)
             decode_a(mode, inst, input, inst.operand[0]);
-        // M[b] ... 
-        // E, G/P/V/I/CL/1/S 
-        else if ((mopt[0] == OP_M) || (mopt[0] == OP_E)) {
-            if ((mopt[0] == OP_M) && (MODRM_MOD(input.peek()) == 3))
+        // M[b] ...
+        // E, G/P/V/I/CL/1/S
+        else if (mopt[0] == OP_M || mopt[0] == OP_E) {
+            if (mopt[0] == OP_M && MODRM_MOD(input.peek()) == 3)
                 throw new IllegalStateException("");
             if (mopt[1] == OP_G) {
                 decode_modrm(mode, inst, input, inst.operand[0], mops[0], "T_GPR", inst.operand[1], mops[1], "T_GPR");
@@ -779,7 +876,7 @@ public class Disassembler {
                     decode_imm(mode, inst, input, mops[1], inst.operand[1]);
             }
         }
-        // G, E/PR[,I]/VR 
+        // G, E/PR[,I]/VR
         else if (mopt[0] == OP_G) {
             if (mopt[1] == OP_M) {
                 if (MODRM_MOD(input.peek()) == 3)
@@ -800,7 +897,7 @@ public class Disassembler {
             } else if (mopt[1] == OP_W)
                 decode_modrm(mode, inst, input, inst.operand[1], mops[1], "T_XMM", inst.operand[0], mops[0], "T_GPR");
         }
-        // AL..BH, I/O/DX 
+        // AL..BH, I/O/DX
         else if (ops8.contains(mopt[0])) {
             inst.operand[0].type = "OP_REG";
             inst.operand[0].base = GPR.get("8").get(mopt[0] - OP_AL);
@@ -830,19 +927,19 @@ public class Disassembler {
                 inst.operand[0].size = resolve_operand_size(mode, inst, mops[1]);
             }
         } else if (ops3.contains(mopt[0])) {
-            int gpr = (mopt[0] - OP_ALr8b + (REX_B(inst.pfx.rex) << 3));
+            int gpr = mopt[0] - OP_ALr8b + (REX_B(inst.pfx.rex) << 3);
             /*if ((gpr in ["ah",	"ch",	"dh",	"bh",
               "spl",	"bpl",	"sil",	"dil",
               "r8b",	"r9b",	"r10b",	"r11b",
               "r12b",	"r13b",	"r14b",	"r15b",
-                         ]) && (inst.pfx.rex != 0)) 
+                         ]) && (inst.pfx.rex != 0))
                          gpr = gpr + 4;*/
             inst.operand[0].type = "OP_REG";
             inst.operand[0].base = GPR.get("8").get(gpr);
             if (mopt[1] == OP_I)
                 decode_imm(mode, inst, input, mops[1], inst.operand[1]);
         }
-        // eAX..eDX, DX/I 
+        // eAX..eDX, DX/I
         else if (ops32.contains(mopt[0])) {
             inst.operand[0].type = "OP_REG";
             inst.operand[0].base = resolve_gpr32(inst, mopt[0]);
@@ -853,26 +950,26 @@ public class Disassembler {
             } else if (mopt[1] == OP_I)
                 decode_imm(mode, inst, input, mops[1], inst.operand[1]);
         }
-        // ES..GS 
+        // ES..GS
         else if (ops_segs.contains(mopt[0])) {
-            // in 64bits mode, only fs and gs are allowed 
+            // in 64bits mode, only fs and gs are allowed
             if (mode == 64)
-                if ((mopt[0] != OP_FS) && (mopt[0] != OP_GS))
+                if (mopt[0] != OP_FS && mopt[0] != OP_GS)
                     throw new IllegalStateException("only fs and gs allowed in 64 bit mode");
             inst.operand[0].type = "OP_REG";
             inst.operand[0].base = GPR.get("T_SEG").get(mopt[0] - OP_ES);
             inst.operand[0].size = 16;
         }
-        // J 
+        // J
         else if (mopt[0] == OP_J) {
             decode_imm(mode, inst, input, mops[0], inst.operand[0]);
             // MK take care of signs
-            long bound = 1L << (inst.operand[0].size - 1);
+            long bound = 1L << inst.operand[0].size - 1;
             if (inst.operand[0].lval > bound)
-                inst.operand[0].lval = -(((2 * bound) - inst.operand[0].lval) % bound);
+                inst.operand[0].lval = -((2 * bound - inst.operand[0].lval) % bound);
             inst.operand[0].type = "OP_JIMM";
         }
-        // PR, I 
+        // PR, I
         else if (mopt[0] == OP_PR) {
             if (MODRM_MOD(input.peek()) != 3)
                 throw new IllegalStateException("Invalid instruction");
@@ -880,7 +977,7 @@ public class Disassembler {
             if (mopt[1] == OP_I)
                 decode_imm(mode, inst, input, mops[1], inst.operand[1]);
         }
-        // VR, I 
+        // VR, I
         else if (mopt[0] == OP_VR) {
             if (MODRM_MOD(input.peek()) != 3)
                 throw new IllegalStateException("Invalid instruction");
@@ -888,7 +985,7 @@ public class Disassembler {
             if (mopt[1] == OP_I)
                 decode_imm(mode, inst, input, mops[1], inst.operand[1]);
         }
-        // P, Q[,I]/W/E[,I],VR 
+        // P, Q[,I]/W/E[,I],VR
         else if (mopt[0] == OP_P) {
             if (mopt[1] == OP_Q) {
                 decode_modrm(mode, inst, input, inst.operand[1], mops[1], "T_MMX", inst.operand[0], mops[0], "T_MMX");
@@ -906,32 +1003,32 @@ public class Disassembler {
                     decode_imm(mode, inst, input, mops[2], inst.operand[2]);
             }
         }
-        // R, C/D 
+        // R, C/D
         else if (mopt[0] == OP_R) {
             if (mopt[1] == OP_C)
                 decode_modrm(mode, inst, input, inst.operand[0], mops[0], "T_GPR", inst.operand[1], mops[1], "T_CRG");
             else if (mopt[1] == OP_D)
                 decode_modrm(mode, inst, input, inst.operand[0], mops[0], "T_GPR", inst.operand[1], mops[1], "T_DBG");
         }
-        // C, R 
+        // C, R
         else if (mopt[0] == OP_C)
             decode_modrm(mode, inst, input, inst.operand[1], mops[1], "T_GPR", inst.operand[0], mops[0], "T_CRG");
-        // D, R 
+        // D, R
         else if (mopt[0] == OP_D)
             decode_modrm(mode, inst, input, inst.operand[1], mops[1], "T_GPR", inst.operand[0], mops[0], "T_DBG");
-        // Q, P 
+        // Q, P
         else if (mopt[0] == OP_Q)
             decode_modrm(mode, inst, input, inst.operand[0], mops[0], "T_MMX", inst.operand[1], mops[1], "T_MMX");
-        // S, E 
+        // S, E
         else if (mopt[0] == OP_S)
             decode_modrm(mode, inst, input, inst.operand[1], mops[1], "T_GPR", inst.operand[0], mops[0], "T_SEG");
-        // W, V 
+        // W, V
         else if (mopt[0] == OP_W)
             decode_modrm(mode, inst, input, inst.operand[0], mops[0], "T_XMM", inst.operand[1], mops[1], "T_XMM");
-        // V, W[,I]/Q/M/E 
+        // V, W[,I]/Q/M/E
         else if (mopt[0] == OP_V) {
             if (mopt[1] == OP_W) {
-                // special cases for movlps and movhps 
+                // special cases for movlps and movhps
                 if (MODRM_MOD(input.peek()) == 3) {
                     if (inst.operator.equals("movlps"))
                         inst.operator = "movhlps";
@@ -998,7 +1095,7 @@ public class Disassembler {
             inst.operand[0].type = "OP_IMM";
             inst.operand[0].lval = 3;
         }
-        // ST(n), ST(n) 
+        // ST(n), ST(n)
         else if (ops_st.contains(mopt[0])) {
             inst.operand[0].type = "OP_REG";
             inst.operand[0].base = GPR.get("T_ST").get(mopt[0] - OP_ST0);
@@ -1010,13 +1107,13 @@ public class Disassembler {
                 inst.operand[1].size = 0;
             }
         }
-        // AX 
+        // AX
         else if (mopt[0] == OP_AX) {
             inst.operand[0].type = "OP_REG";
             inst.operand[0].base = "ax";
             inst.operand[0].size = 16;
         }
-        // none 
+        // none
         else
             for (int i = 0; i < inst.operand.length; i++)
                 inst.operand[i].type = null;
@@ -1025,13 +1122,13 @@ public class Disassembler {
     private static void decode_a(int mode, Instruction inst, PeekableInputStream input, Instruction.Operand op) {
         //Decodes operands of the type seg:offset.
         if (inst.opr_mode == 16) {
-            // seg16:off16 
+            // seg16:off16
             op.type = "OP_PTR";
             op.size = 32;
             op.dis_start = input.getCounter();
             op.ptr = new Instruction.Ptr(input.readU16(), input.readU16());
         } else {
-            // seg16:off32 
+            // seg16:off32
             op.type = "OP_PTR";
             op.size = 48;
             op.dis_start = input.getCounter();
@@ -1043,26 +1140,26 @@ public class Disassembler {
         Instruction.Operand opreg, int reg_size, String reg_type) {
         // get mod, r/m and reg fields
         int mod = MODRM_MOD(input.peek());
-        int rm = (REX_B(inst.pfx.rex) << 3) | MODRM_RM(input.peek());
-        int reg = (REX_R(inst.pfx.rex) << 3) | MODRM_REG(input.peek());
+        int rm = REX_B(inst.pfx.rex) << 3 | MODRM_RM(input.peek());
+        int reg = REX_R(inst.pfx.rex) << 3 | MODRM_REG(input.peek());
 
         op.size = resolve_operand_size(mode, inst, s);
         if (reg_type.equals("T_DBG") || reg_type.equals("T_CRG"))
             mod = 3; // force to a register if mov R,D or mov R, C
 
-        // if mod is 11b, then the m specifies a gpr/mmx/sse/control/debug 
+        // if mod is 11b, then the m specifies a gpr/mmx/sse/control/debug
         if (mod == 3) {
             op.type = "OP_REG";
             if (rm_type == "T_GPR")
                 op.base = decode_gpr(mode, inst, op.size, rm);
             else
-                op.base = resolve_reg(rm_type, (REX_B(inst.pfx.rex) << 3) | (rm & 7));
+                op.base = resolve_reg(rm_type, REX_B(inst.pfx.rex) << 3 | rm & 7);
         }
-        // else its memory addressing 
+        // else its memory addressing
         else {
             op.type = "OP_MEM";
             op.seg = inst.pfx.seg;
-            // 64bit addressing 
+            // 64bit addressing
             if (inst.adr_mode == 64) {
                 op.base = GPR.get("64").get(rm);
 
@@ -1071,7 +1168,7 @@ public class Disassembler {
                     op.offset = 8;
                 else if (mod == 2)
                     op.offset = 32;
-                else if ((mod == 0) && ((rm & 7) == 5)) {
+                else if (mod == 0 && (rm & 7) == 5) {
                     op.base = "rip";
                     op.offset = 32;
                 } else
@@ -1081,9 +1178,9 @@ public class Disassembler {
                 if ((rm & 7) == 4) {
                     input.forward();
 
-                    op.scale = (1 << SIB_S(input.peek())) & ~1;
-                    op.index = GPR.get("64").get((SIB_I(input.peek()) | (REX_X(inst.pfx.rex) << 3)));
-                    op.base = GPR.get("64").get((SIB_B(input.peek()) | (REX_B(inst.pfx.rex) << 3)));
+                    op.scale = 1 << SIB_S(input.peek()) & ~1;
+                    op.index = GPR.get("64").get(SIB_I(input.peek()) | REX_X(inst.pfx.rex) << 3);
+                    op.base = GPR.get("64").get(SIB_B(input.peek()) | REX_B(inst.pfx.rex) << 3);
 
                     // special conditions for base reference
                     if (op.index.equals("rsp")) {
@@ -1091,7 +1188,7 @@ public class Disassembler {
                         op.scale = 0;
                     }
 
-                    if ((op.base.equals("rbp")) || (op.base.equals("r13"))) {
+                    if (op.base.equals("rbp") || op.base.equals("r13")) {
                         if (mod == 0)
                             op.base = null;
                         if (mod == 1)
@@ -1101,17 +1198,17 @@ public class Disassembler {
                     }
                 }
             }
-            // 32-Bit addressing mode 
+            // 32-Bit addressing mode
             else if (inst.adr_mode == 32) {
-                // get base 
+                // get base
                 op.base = GPR.get("32").get(rm);
 
-                // get offset type 
+                // get offset type
                 if (mod == 1)
                     op.offset = 8;
                 else if (mod == 2)
                     op.offset = 32;
-                else if ((mod == 0) && (rm == 5)) {
+                else if (mod == 0 && rm == 5) {
                     op.base = null;
                     op.offset = 32;
                 } else
@@ -1121,16 +1218,16 @@ public class Disassembler {
                 if ((rm & 7) == 4) {
                     input.forward();
 
-                    op.scale = (1 << SIB_S(input.peek())) & ~1;
-                    op.index = GPR.get("32").get(SIB_I(input.peek()) | (REX_X(inst.pfx.rex) << 3));
-                    op.base = GPR.get("32").get(SIB_B(input.peek()) | (REX_B(inst.pfx.rex) << 3));
+                    op.scale = 1 << SIB_S(input.peek()) & ~1;
+                    op.index = GPR.get("32").get(SIB_I(input.peek()) | REX_X(inst.pfx.rex) << 3);
+                    op.base = GPR.get("32").get(SIB_B(input.peek()) | REX_B(inst.pfx.rex) << 3);
 
                     if (op.index.equals("esp")) {
                         op.index = null;
                         op.scale = 0;
                     }
 
-                    // special condition for base reference 
+                    // special condition for base reference
                     if (op.base.equals("ebp")) {
                         if (mod == 0)
                             op.base = null;
@@ -1141,7 +1238,7 @@ public class Disassembler {
                     }
                 }
             }
-            // 16bit addressing mode 
+            // 16bit addressing mode
             else {
                 if (rm == 0) {
                     op.base = "bx";
@@ -1164,7 +1261,7 @@ public class Disassembler {
                 else if (rm == 7)
                     op.base = "bx";
 
-                if ((mod == 0) && (rm == 6)) {
+                if (mod == 0 && rm == 6) {
                     op.offset = 16;
                     op.base = null;
                 } else if (mod == 1)
@@ -1174,13 +1271,13 @@ public class Disassembler {
             }
         }
         input.forward();
-        // extract offset, if any 
-        if ((op.offset == 8) || (op.offset == 16) || (op.offset == 32) || (op.offset == 64)) {
+        // extract offset, if any
+        if (op.offset == 8 || op.offset == 16 || op.offset == 32 || op.offset == 64) {
             op.dis_start = input.getCounter();
             op.lval = input.readU(op.offset);
-            long bound = 1L << (op.offset - 1);
+            long bound = 1L << op.offset - 1;
             if (op.lval > bound)
-                op.lval = -(((2 * bound) - op.lval) % bound);
+                op.lval = -((2 * bound - op.lval) % bound);
         }
 
         // resolve register encoded in reg field
@@ -1224,13 +1321,13 @@ public class Disassembler {
 
     private static String resolve_gpr64(int mode, Instruction inst, int gpr_op) {
         int index = 0;
-        if ((OP_rAXr8 <= gpr_op) && (OP_rDIr15 >= gpr_op))
-            index = (gpr_op - OP_rAXr8) | (REX_B(inst.pfx.rex) << 3);
+        if (OP_rAXr8 <= gpr_op && OP_rDIr15 >= gpr_op)
+            index = gpr_op - OP_rAXr8 | REX_B(inst.pfx.rex) << 3;
         else
             index = gpr_op - OP_rAX;
         if (inst.opr_mode == 16)
             return GPR.get("16").get(index);
-        else if ((mode == 32) || !((inst.opr_mode == 32) && (REX_W(inst.pfx.rex) == 0)))
+        else if (mode == 32 || !(inst.opr_mode == 32 && REX_W(inst.pfx.rex) == 0))
             return GPR.get("32").get(index);
         return GPR.get("64").get(index);
     }
@@ -1267,12 +1364,12 @@ public class Disassembler {
 
         if (s == 64)
             return GPR.get("64").get(rm);
-        else if ((s == SZ_DP) || (s == 32))
+        else if (s == SZ_DP || s == 32)
             return GPR.get("32").get(rm);
-        else if ((s == SZ_WP) || (s == 16))
+        else if (s == SZ_WP || s == 16)
             return GPR.get("16").get(rm);
         else if (s == 8) {
-            if ((mode == 64) && (inst.pfx.rex != 0)) {
+            if (mode == 64 && inst.pfx.rex != 0) {
                 if (rm >= 4)
                     return GPR.get("8").get(rm + 4);
                 return GPR.get("8").get(rm);

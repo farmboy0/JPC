@@ -24,6 +24,7 @@ public class AudioLayer {
             line.start();
             audioThreadExit = false;
             audioThread = new Thread() {
+                @Override
                 public void run() {
                     while (!audioThreadExit) {
                         boolean result;

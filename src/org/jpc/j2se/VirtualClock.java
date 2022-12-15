@@ -27,14 +27,21 @@
 
 package org.jpc.j2se;
 
-import org.jpc.emulator.*;
-import org.jpc.emulator.motherboard.*;
-import org.jpc.support.Clock;
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.PC;
+import org.jpc.emulator.Timer;
+import org.jpc.emulator.TimerResponsive;
+import org.jpc.emulator.motherboard.IntervalTimer;
+import org.jpc.support.Clock;
 
 public class VirtualClock extends AbstractHardwareComponent implements Clock {
     public static long IPS = Option.ips.intValue(25000000);
@@ -64,6 +71,7 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
         ticksStatic = 0;
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeBoolean(ticksEnabled);
         output.writeLong(ticksOffset);
@@ -76,20 +84,21 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
         ticksStatic = input.readLong();
     }
 
+    @Override
     public synchronized Timer newTimer(TimerResponsive object) {
-        Timer tempTimer = new Timer(object, this);
-        return tempTimer;
+        return new Timer(object, this);
     }
 
     private boolean process() {
         Timer tempTimer;
         tempTimer = timers.peek();
-        if ((tempTimer == null) || !tempTimer.check(getTime()))
+        if (tempTimer == null || !tempTimer.check(getTime()))
             return false;
         else
             return true;
     }
 
+    @Override
     public synchronized void update(Timer object) {
         timers.remove(object);
         if (object.enabled()) {
@@ -105,6 +114,7 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
         }
     }
 
+    @Override
     public long getIPS() {
         return IPS;
     }
@@ -113,28 +123,34 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
         return getEmulatedNanos();
     }
 
+    @Override
     public long getRealMillis() {
         return getEmulatedNanos() / 1000000;
     }
 
+    @Override
     public long getEmulatedMicros() {
         return getEmulatedNanos() / 1000;
     }
 
+    @Override
     public long getEmulatedNanos() {
         if (REAL_TIME)
             return totalEmulatedNanos + convertTicksToNanos(totalTicks - lastTotalTicks);
-        return (long)(((double)totalTicks) * 1000000000 / IPS);
+        return (long)((double)totalTicks * 1000000000 / IPS);
     }
 
+    @Override
     public long getTickRate() {
         return 1000000000L; // nano seconds
     }
 
+    @Override
     public long getTicks() {
         return totalTicks;
     }
 
+    @Override
     public void pause() {
         if (ticksEnabled) {
             ticksStatic = getTime();
@@ -142,6 +158,7 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
         }
     }
 
+    @Override
     public void resume() {
         if (!ticksEnabled) {
             ticksOffset = ticksStatic - getRealTime();
@@ -152,16 +169,19 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
         }
     }
 
+    @Override
     public void reset() {
         this.pause();
         ticksOffset = 0;
         ticksStatic = 0;
     }
 
+    @Override
     public String toString() {
         return "Virtual Clock";
     }
 
+    @Override
     public void updateNowAndProcess(boolean sleep) {
         if (REAL_TIME) {
             Timer tempTimer;
@@ -177,7 +197,7 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
                 {
                     try {
                         if (DEBUG)
-                            System.out.printf("Halt: sleep for %d millis %d nanos...\n", (nanosToSleep) / 1000000L, nanosToSleep % 1000000);
+                            System.out.printf("Halt: sleep for %d millis %d nanos...\n", nanosToSleep / 1000000L, nanosToSleep % 1000000);
                         if (nanosToSleep > 100000000)
                             nanosToSleep = 100000000L;
                         Thread.sleep(nanosToSleep / 1000000L, (int)(nanosToSleep % 1000000));
@@ -212,31 +232,33 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
                 throw new IllegalStateException(
                     "Time cannot be negative! expiry=" + expiry + ", tick rate=" + getTickRate() + ", IPS=" + IPS);
             }
-            if ((expiry * IPS) % getTickRate() != 0)
+            if (expiry * IPS % getTickRate() != 0)
                 totalTicks++;
             if (!tempTimer.check(getTime()))
                 throw new IllegalStateException("Should have forced interrupt!");
         }
     }
 
+    @Override
     public void updateAndProcess(int instructions) {
         update(instructions);
         process();
     }
 
     public long convertNanosToTicks(long nanos) {
-        return (long)(((double)nanos) * IPS / 1000000000);
+        return (long)((double)nanos * IPS / 1000000000);
 //        return nanos * IPS / 1000000000L;
     }
 
     public long convertTicksToNanos(long ticks) {
-        return (long)(((double)ticks) * 1000000000 / IPS);
+        return (long)((double)ticks * 1000000000 / IPS);
 //        return ticks * 1000000000L / IPS;
     }
 
+    @Override
     public void update(int instructions) {
         totalTicks += instructions;
-        if ((REAL_TIME) && (totalTicks > nextRateCheckTicks)) {
+        if (REAL_TIME && totalTicks > nextRateCheckTicks) {
             long realNanosDelta = System.nanoTime() - lastRealNanos;
             long emulatedNanosDelta = convertTicksToNanos(totalTicks - lastTotalTicks);
             nextRateCheckTicks += RATE_CHECK_INTERVAL;
@@ -244,21 +266,21 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
                 totalEmulatedNanos += emulatedNanosDelta;
                 lastRealNanos += realNanosDelta;
                 lastTotalTicks = totalTicks;
-                changeTimeRate(((double)realNanosDelta / emulatedNanosDelta));
+                changeTimeRate((double)realNanosDelta / emulatedNanosDelta);
             }
         }
     }
 
     private void changeTimeRate(double factor) {
         if (DEBUG)
-            System.out.printf("Changing speed from %.1fMHz to ", ((float)(IPS / 100000)) / 10);
+            System.out.printf("Changing speed from %.1fMHz to ", (float)(IPS / 100000) / 10);
         if (factor > 1.02)
             factor = 1.02;
         else if (factor < 0.98)
             factor = 0.98;
         IPS /= factor;
         if (DEBUG) {
-            System.out.printf("%.1fMHz.\n", ((float)(IPS / 100000)) / 10);
+            System.out.printf("%.1fMHz.\n", (float)(IPS / 100000) / 10);
             System.out.printf("Clock: IPS:%d time:%d next Exp:%d\n", IPS, getEmulatedNanos(), nextExpiry());
             System.out.println(printTimerQueue());
         }

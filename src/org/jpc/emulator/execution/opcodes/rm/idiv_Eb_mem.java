@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,12 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
 
 public class idiv_Eb_mem extends Executable {
     final Pointer op1;
@@ -42,22 +43,25 @@ public class idiv_Eb_mem extends Executable {
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         if (op1.get8(cpu) == 0)
             throw ProcessorException.DIVIDE_ERROR;
-        short ldiv = (short)cpu.r_ax.get16();
+        short ldiv = cpu.r_ax.get16();
         short quot16 = (short)(ldiv / op1.get8(cpu));
         if (quot16 != (byte)quot16)
             throw ProcessorException.DIVIDE_ERROR;
         cpu.r_al.set8((byte)quot16);
-        cpu.r_ah.set8((byte)(ldiv % (byte)op1.get8(cpu)));
+        cpu.r_ah.set8((byte)(ldiv % op1.get8(cpu)));
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

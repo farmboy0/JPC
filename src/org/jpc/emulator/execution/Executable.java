@@ -28,8 +28,7 @@
 package org.jpc.emulator.execution;
 
 import org.jpc.emulator.execution.decoder.Instruction;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.memory.Memory;
+import org.jpc.emulator.processor.Processor;
 
 public abstract class Executable {
     public static final int CF = 1 << 0;
@@ -53,9 +52,9 @@ public abstract class Executable {
 
     public Executable next;
 
-    public static enum Branch {
+    public enum Branch {
         None, T1, T2, Jmp_Unknown, Call, Call_Unknown, Ret, Exception
-    };
+    }
 
     public final int delta;
 

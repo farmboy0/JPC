@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,15 +33,23 @@
 
 package org.jpc.debugger;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.jpc.emulator.PC;
 import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.codeblock.CodeBlock;
+import org.jpc.emulator.execution.codeblock.CodeBlockManager;
+import org.jpc.emulator.execution.codeblock.SpanningDecodeException;
 import org.jpc.emulator.execution.decoder.Instruction;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.memory.*;
-import org.jpc.emulator.execution.codeblock.*;
+import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.memory.LazyCodeBlockMemory;
+import org.jpc.emulator.memory.LinearAddressSpace;
+import org.jpc.emulator.memory.Memory;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
 import org.jpc.j2se.Option;
 
 public class CodeBlockRecord {
@@ -50,7 +58,7 @@ public class CodeBlockRecord {
 
     static {
         try {
-            getMemory = AddressSpace.class.getDeclaredMethod("getReadMemoryBlockAt", new Class[] { Integer.TYPE });
+            getMemory = AddressSpace.class.getDeclaredMethod("getReadMemoryBlockAt", Integer.TYPE);
             getMemory.setAccessible(true);
         } catch (NoSuchMethodException e) {
             getMemory = null;
@@ -59,7 +67,7 @@ public class CodeBlockRecord {
 
     static {
         try {
-            convertMemory = LazyCodeBlockMemory.class.getDeclaredMethod("convertMemory", new Class[] { Processor.class });
+            convertMemory = LazyCodeBlockMemory.class.getDeclaredMethod("convertMemory", Processor.class);
             convertMemory.setAccessible(true);
         } catch (NoSuchMethodException e) {
             convertMemory = null;
@@ -68,7 +76,7 @@ public class CodeBlockRecord {
 
     static {
         try {
-            validateBlock = LinearAddressSpace.class.getDeclaredMethod("validateTLBEntryRead", new Class[] { Integer.TYPE });
+            validateBlock = LinearAddressSpace.class.getDeclaredMethod("validateTLBEntryRead", Integer.TYPE);
             validateBlock.setAccessible(true);
         } catch (NoSuchMethodException e) {
             validateBlock = null;
@@ -128,16 +136,16 @@ public class CodeBlockRecord {
         }
         Memory memory = null;
         try {
-            memory = (Memory)getMemory.invoke(addressSpace, new Object[] { Integer.valueOf(address) });
+            memory = (Memory)getMemory.invoke(addressSpace, Integer.valueOf(address));
         } catch (IllegalAccessException ex) {
             ex.printStackTrace();
         } catch (InvocationTargetException ex) {
             ex.printStackTrace();
         }
 
-        if ((memory == null) && (addressSpace == linear)) {
+        if (memory == null && addressSpace == linear) {
             try {
-                memory = (Memory)validateBlock.invoke(addressSpace, new Object[] { Integer.valueOf(address) });
+                memory = (Memory)validateBlock.invoke(addressSpace, Integer.valueOf(address));
             } catch (IllegalAccessException ex) {
                 ex.printStackTrace();
             } catch (InvocationTargetException ex) {
@@ -155,16 +163,16 @@ public class CodeBlockRecord {
         }
         Memory memory = null;
         try {
-            memory = (Memory)getMemory.invoke(addressSpace, new Object[] { Integer.valueOf(address) });
+            memory = (Memory)getMemory.invoke(addressSpace, Integer.valueOf(address));
         } catch (IllegalAccessException ex) {
             ex.printStackTrace();
         } catch (InvocationTargetException ex) {
             ex.printStackTrace();
         }
 
-        if ((memory == null) && (addressSpace == linear)) {
+        if (memory == null && addressSpace == linear) {
             try {
-                memory = (Memory)validateBlock.invoke(addressSpace, new Object[] { Integer.valueOf(address) });
+                memory = (Memory)validateBlock.invoke(addressSpace, Integer.valueOf(address));
             } catch (IllegalAccessException ex) {
                 ex.printStackTrace();
             } catch (InvocationTargetException ex) {
@@ -308,7 +316,7 @@ public class CodeBlockRecord {
         if (blockCount <= trace.length) {
             return addresses[row];
         }
-        row += (blockCount % trace.length);
+        row += blockCount % trace.length;
         if (row >= trace.length) {
             row -= trace.length;
         }
@@ -319,7 +327,7 @@ public class CodeBlockRecord {
         if (blockCount <= trace.length) {
             return trace[row].block;
         }
-        row += (blockCount % trace.length);
+        row += blockCount % trace.length;
         if (row >= trace.length) {
             row -= trace.length;
         }
@@ -330,7 +338,7 @@ public class CodeBlockRecord {
         if (blockCount <= trace.length) {
             return trace[row].ssESP;
         }
-        row += (blockCount % trace.length);
+        row += blockCount % trace.length;
         if (row >= trace.length) {
             row -= trace.length;
         }
@@ -341,7 +349,7 @@ public class CodeBlockRecord {
         if (blockCount <= trace.length) {
             return trace[row].state[ProcessorState.ESP];
         }
-        row += (blockCount % trace.length);
+        row += blockCount % trace.length;
         if (row >= trace.length) {
             row -= trace.length;
         }
@@ -352,7 +360,7 @@ public class CodeBlockRecord {
         if (blockCount <= trace.length) {
             return trace[row].state[ProcessorState.EBP];
         }
-        row += (blockCount % trace.length);
+        row += blockCount % trace.length;
         if (row >= trace.length) {
             row -= trace.length;
         }
@@ -363,7 +371,7 @@ public class CodeBlockRecord {
         if (blockCount <= trace.length) {
             return trace[row].state;
         }
-        row += (blockCount % trace.length);
+        row += blockCount % trace.length;
         if (row >= trace.length) {
             row -= trace.length;
         }
@@ -375,7 +383,7 @@ public class CodeBlockRecord {
             return (int)index;
         }
         long offset = blockCount - index - 1;
-        if ((offset < 0) || (offset >= trace.length)) {
+        if (offset < 0 || offset >= trace.length) {
             return -1;
         }
         return trace.length - 1 - (int)offset;

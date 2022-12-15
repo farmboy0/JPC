@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -52,13 +52,13 @@ public class ArgProcessor {
         Option opt = Option.getParameter(key.substring(1));
         if (opt == null)
             opt = Option.getParameter(key);
-        if ((opt != null) && opt.isSet())
+        if (opt != null && opt.isSet())
             return opt.getValue().toString();
         int keyIndex = findKey(args, key);
         if (keyIndex < 0)
             return defaultValue;
 
-        if ((keyIndex + 1) < args.length)
+        if (keyIndex + 1 < args.length)
             return args[keyIndex + 1];
         else
             return defaultValue;

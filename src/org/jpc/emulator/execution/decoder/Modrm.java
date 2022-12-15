@@ -31,7 +31,7 @@ import org.jpc.emulator.processor.Processor;
 
 public class Modrm {
     public static int getSegmentIndex(int prefices) {
-        return (prefices >> 2) & 7;
+        return prefices >> 2 & 7;
     }
 
     public static int Ib(PeekableInputStream in) {
@@ -69,14 +69,14 @@ public class Modrm {
     }
 
     // al, cl, dl, bl, ah, ch, dh, bh, ax, cx, dx, bx, sp, bp, si, di, eax, ecx, edx, ebx, esp, ebp, esi, edi
-    private static int[] regIndices = new int[] { 3, 11, 15, 7, 2, 10, 14, 6, 1, 9, 13, 5, 21, 23, 17, 19, 0, 8, 12, 4, 20, 22, 16, 18 };
+    private static int[] regIndices = { 3, 11, 15, 7, 2, 10, 14, 6, 1, 9, 13, 5, 21, 23, 17, 19, 0, 8, 12, 4, 20, 22, 16, 18 };
 
     public static int mod(int modrm) {
-        return (modrm >> 6) & 3;
+        return modrm >> 6 & 3;
     }
 
     public static int reg(int modrm) {
-        return (modrm >> 3) & 7;
+        return modrm >> 3 & 7;
     }
 
     public static int rm(int modrm) {
@@ -96,7 +96,7 @@ public class Modrm {
     }
 
     public static int Gb(int modrm) {
-        return regIndices[(modrm >> 3) & 7];
+        return regIndices[modrm >> 3 & 7];
     }
 
     public static int Ew(int modrm) {
@@ -104,7 +104,7 @@ public class Modrm {
     }
 
     public static int Gw(int modrm) {
-        return regIndices[8 + ((modrm >> 3) & 7)];
+        return regIndices[8 + (modrm >> 3 & 7)];
     }
 
     public static int Ed(int modrm) {
@@ -112,7 +112,7 @@ public class Modrm {
     }
 
     public static int Gd(int modrm) {
-        return regIndices[16 + ((modrm >> 3) & 7)];
+        return regIndices[16 + (modrm >> 3 & 7)];
     }
 
     public static Pointer Ob(int prefices, PeekableInputStream input) {

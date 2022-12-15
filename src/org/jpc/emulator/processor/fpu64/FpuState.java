@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,9 @@
 
 package org.jpc.emulator.processor.fpu64;
 
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.*;
+import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
 
 public abstract class FpuState implements Hibernatable {
     // stack depth (common to all x87 FPU's)
@@ -196,12 +197,13 @@ public abstract class FpuState implements Hibernatable {
         copy.lastOpcode = lastOpcode;
     }
 
+    @Override
     public boolean equals(Object another) {
         if (!(another instanceof FpuState))
             return false;
         FpuState s = (FpuState)another;
-        if ((s.conditionCode != conditionCode) || (s.top != top) || (s.infinityControl != infinityControl) || (s.lastIP != lastIP)
-            || (s.lastData != lastData) || (s.lastOpcode != lastOpcode))
+        if (s.conditionCode != conditionCode || s.top != top || s.infinityControl != infinityControl || s.lastIP != lastIP
+            || s.lastData != lastData || s.lastOpcode != lastOpcode)
             return false;
 
         return true;

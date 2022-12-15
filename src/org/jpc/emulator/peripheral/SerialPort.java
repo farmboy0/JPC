@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,18 @@
 
 package org.jpc.emulator.peripheral;
 
-import org.jpc.emulator.*;
-import org.jpc.emulator.motherboard.*;
-
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.motherboard.IODevice;
+import org.jpc.emulator.motherboard.IOPortHandler;
+import org.jpc.emulator.motherboard.InterruptController;
 
 /**
  * Emulates a standard 16450 UART.
@@ -94,8 +100,8 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
     private static final byte UART_LSR_OE = 0x02; /* Overrun error indicator */
     private static final byte UART_LSR_DR = 0x01; /* Receiver data ready */
 
-    private static final int[] ioPorts = new int[] { 0x3f8, 0x2f8, 0x3e8, 0x2e8 };
-    private static final int[] irqLines = new int[] { 4, 3, 4, 3 };
+    private static final int[] ioPorts = { 0x3f8, 0x2f8, 0x3e8, 0x2e8 };
+    private static final int[] irqLines = { 4, 3, 4, 3 };
 
     private short divider;
 
@@ -135,6 +141,7 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
         serialOutput = Logger.getLogger(SerialPort.class.getName() + ".port" + portNumber);
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeShort(divider);
         output.writeByte(receiverBufferRegister);
@@ -150,6 +157,7 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
         output.writeInt(baseAddress);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         ioportRegistered = false;
         divider = input.readShort();
@@ -183,9 +191,9 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
     }
 
     private void updateIRQ() {
-        if ((0 != (lineStatusRegister & UART_LSR_DR)) && (0 != (interruptEnableRegister & UART_IER_RDI))) {
+        if (0 != (lineStatusRegister & UART_LSR_DR) && 0 != (interruptEnableRegister & UART_IER_RDI)) {
             interruptIORegister = UART_IIR_RDI;
-        } else if (thrIPending && (0 != (interruptEnableRegister & UART_IER_THRI))) {
+        } else if (thrIPending && 0 != (interruptEnableRegister & UART_IER_THRI)) {
             interruptIORegister = UART_IIR_THRI;
         } else {
             interruptIORegister = UART_IIR_NO_INT;
@@ -197,28 +205,35 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         this.ioportWrite(address, data);
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
     }
 
+    @Override
     public int ioPortRead8(int address) {
         return this.ioportRead(address);
     }
 
+    @Override
     public int ioPortRead16(int address) {
         return 0xffff;
     }
 
+    @Override
     public int ioPortRead32(int address) {
         return 0xffffffff;
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] {
             baseAddress,
@@ -238,7 +253,7 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
         default:
         case 0:
             if (0 != (lineControlRegister & UART_LCR_DLAB)) {
-                divider = (short)((divider & 0xff00) | data);
+                divider = (short)(divider & 0xff00 | data);
             } else {
                 thrIPending = false;
                 lineStatusRegister = (byte)(lineStatusRegister & ~UART_LSR_THRE);
@@ -252,7 +267,7 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
             break;
         case 1:
             if (0 != (lineControlRegister & UART_LCR_DLAB)) {
-                divider = (short)((divider & 0x00ff) | (data << 8));
+                divider = (short)(divider & 0x00ff | data << 8);
             } else {
                 interruptEnableRegister = (byte)(data & 0x0f);
                 if (0 != (lineStatusRegister & UART_LSR_THRE)) {
@@ -296,7 +311,7 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
             }
         case 1:
             if (0 != (lineControlRegister & UART_LCR_DLAB)) {
-                return (divider >>> 8) & 0xff;
+                return divider >>> 8 & 0xff;
             } else {
                 return interruptEnableRegister;
             }
@@ -329,6 +344,7 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
 
     private boolean ioportRegistered;
 
+    @Override
     public void reset() {
         irqDevice = null;
         ioportRegistered = false;
@@ -337,26 +353,30 @@ public class SerialPort extends AbstractHardwareComponent implements IODevice {
         this.interruptIORegister = UART_IIR_NO_INT;
     }
 
+    @Override
     public boolean initialised() {
-        return ioportRegistered && (irqDevice != null);
+        return ioportRegistered && irqDevice != null;
     }
 
+    @Override
     public boolean updated() {
         return ioportRegistered && irqDevice.updated();
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
-        if ((component instanceof IOPortHandler) && component.updated()) {
+        if (component instanceof IOPortHandler && component.updated()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof InterruptController) && component.initialised()) {
+        if (component instanceof InterruptController && component.initialised()) {
             irqDevice = (InterruptController)component;
         }
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }

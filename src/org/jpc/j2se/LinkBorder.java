@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,15 +33,24 @@
 
 package org.jpc.j2se;
 
-import java.awt.*;
 import java.applet.AppletContext;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.net.*;
-import java.util.logging.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.border.*;
+import javax.swing.border.LineBorder;
 
 public class LinkBorder extends LineBorder implements MouseListener, MouseMotionListener {
     private static final Logger LOGGING = Logger.getLogger(LinkBorder.class.getName());
@@ -66,10 +75,12 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
         targetBounds = new Rectangle();
     }
 
+    @Override
     public boolean isBorderOpaque() {
         return true;
     }
 
+    @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
         super.paintBorder(c, g, x, y, width, height);
         if (highlight)
@@ -96,14 +107,17 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
         }
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
         detectMouseHighlight(e.getPoint());
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
         detectMouseHighlight(e.getPoint());
     }
 
+    @Override
     public void mouseClicked(MouseEvent evt) {
         if (!highlight)
             return;
@@ -126,17 +140,21 @@ public class LinkBorder extends LineBorder implements MouseListener, MouseMotion
         }
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
         highlight = false;
         targetComponent.repaint();
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
     }
 }

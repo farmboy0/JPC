@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,14 +33,22 @@
 
 package org.jpc.j2se;
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.LayoutManager;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import javax.swing.JScrollPane;
-
-import org.jpc.emulator.*;
-import org.jpc.emulator.pci.peripheral.*;
-import org.jpc.emulator.peripheral.*;
+import org.jpc.emulator.PC;
+import org.jpc.emulator.pci.peripheral.DefaultVGACard;
+import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.emulator.peripheral.Keyboard;
 
 /**
  * @author Rhys Newman
@@ -88,7 +96,7 @@ public class PCMonitor extends KeyHandlingPanel {
             dummy[j++] = (byte)(val >> 24);
             dummy[j++] = (byte)(val >> 16);
             dummy[j++] = (byte)(val >> 8);
-            dummy[j++] = (byte)(val);
+            dummy[j++] = (byte)val;
         }
 
         DataOutputStream output = new DataOutputStream(out);
@@ -121,18 +129,22 @@ public class PCMonitor extends KeyHandlingPanel {
         this.frame = f;
     }
 
+    @Override
     public void repeatedKeyPress(int keyCode) {
-        keyboard.keyPressed(KeyMapping.getScancode(Integer.valueOf(keyCode)));
+        keyboard.keyPressed(KeyMapping.getScancode(keyCode));
     }
 
+    @Override
     public void keyPressed(int keyCode) {
-        keyboard.keyPressed(KeyMapping.getScancode(Integer.valueOf(keyCode)));
+        keyboard.keyPressed(KeyMapping.getScancode(keyCode));
     }
 
+    @Override
     public void keyReleased(int keyCode) {
-        keyboard.keyReleased(KeyMapping.getScancode(Integer.valueOf(keyCode)));
+        keyboard.keyReleased(KeyMapping.getScancode(keyCode));
     }
 
+    @Override
     public void mouseEventReceived(int dx, int dy, int dz, int buttons) {
         keyboard.putMouseEvent(dx, dy, dz, buttons);
     }
@@ -161,6 +173,7 @@ public class PCMonitor extends KeyHandlingPanel {
             super("PC Monitor Updater Task");
         }
 
+        @Override
         public void run() {
             while (running) {
                 try {
@@ -175,7 +188,7 @@ public class PCMonitor extends KeyHandlingPanel {
                 int xmax = (int)(vgaCard.getXMax() * scaleX);
                 int ymin = (int)((vgaCard.getYMin() - 1) * scaleY);
                 int ymax = (int)(vgaCard.getYMax() * scaleY);
-                
+
                 repaint(xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
                 */
                 repaint();
@@ -225,10 +238,12 @@ public class PCMonitor extends KeyHandlingPanel {
         //System.out.println("scale display scaleX="+scaleX+" scaleY="+scaleY + "actual x="+displayWidth+" y="+displayHeight);
     }
 
+    @Override
     public void update(Graphics g) {
         paint(g);
     }
 
+    @Override
     public void paint(Graphics g) {
         if (clearBackground) {
             g.setColor(Color.white);

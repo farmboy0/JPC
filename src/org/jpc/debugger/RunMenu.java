@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,16 +33,23 @@
 
 package org.jpc.debugger;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
-import java.io.DataInputStream;
-import javax.swing.*;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import org.jpc.emulator.PC;
+import org.jpc.emulator.execution.codeblock.CodeBlock;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.support.Clock;
-import org.jpc.emulator.execution.codeblock.CodeBlock;
 
 public class RunMenu extends JMenu implements ActionListener {
 
@@ -120,6 +127,7 @@ public class RunMenu extends JMenu implements ActionListener {
 
     class FunctionKeys implements KeyEventDispatcher {
 
+        @Override
         public boolean dispatchKeyEvent(KeyEvent e) {
             if (e.getID() == KeyEvent.KEY_PRESSED) {
                 if (e.getKeyCode() == KeyEvent.VK_F8) {
@@ -175,6 +183,7 @@ public class RunMenu extends JMenu implements ActionListener {
 
         class U1 implements Runnable {
 
+            @Override
             public void run() {
                 JPC.getInstance().refresh();
             }
@@ -198,11 +207,13 @@ public class RunMenu extends JMenu implements ActionListener {
                 }
             }
 
+            @Override
             public void run() {
                 JOptionPane.showMessageDialog(JPC.getInstance(), message, title, type);
             }
         }
 
+        @Override
         public void run() {
 
             if (codeBlockRecord == null) {
@@ -246,7 +257,7 @@ public class RunMenu extends JMenu implements ActionListener {
                                 wp.updateValue();
                                 int newVal = wp.getValue();
                                 if (newVal != old) {
-                                    if (!wp.isWatchingForValue() || (wp.getWatchTarget() == (byte)newVal)) {
+                                    if (!wp.isWatchingForValue() || wp.getWatchTarget() == (byte)newVal) {
                                         java.awt.Toolkit.getDefaultToolkit().beep();
                                         new Alerter("Watchpoint",
                                             String.format("Watch at %08x: old value=%02x new value=%02x " + wp.getName(), wp.getAddress(),
@@ -284,7 +295,7 @@ public class RunMenu extends JMenu implements ActionListener {
                     }
 
                     if (bg) {
-                        if ((c % 1000) != 0) {
+                        if (c % 1000 != 0) {
                             continue;
                         }
                         long t2 = System.currentTimeMillis();
@@ -361,7 +372,7 @@ public class RunMenu extends JMenu implements ActionListener {
                     }
                 }
 
-                if ((count % 1000) == 999) {
+                if (count % 1000 == 999) {
                     JPC.getInstance().refresh();
                 }
             }
@@ -401,6 +412,7 @@ public class RunMenu extends JMenu implements ActionListener {
         JPC.getInstance().refresh();
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
         Object src = evt.getSource();
 

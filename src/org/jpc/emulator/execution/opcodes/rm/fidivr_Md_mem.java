@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
 
 public class fidivr_Md_mem extends Executable {
     final Pointer op1;
@@ -42,21 +42,24 @@ public class fidivr_Md_mem extends Executable {
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(0);
-        double freg1 = (double)op1.get32(cpu);
-        if (((freg0 == 0.0) && (freg1 == 0.0)) || (Double.isInfinite(freg0) && Double.isInfinite(freg1)))
+        double freg1 = op1.get32(cpu);
+        if (freg0 == 0.0 && freg1 == 0.0 || Double.isInfinite(freg0) && Double.isInfinite(freg1))
             cpu.fpu.setInvalidOperation();
-        if ((freg0 == 0.0) && !Double.isNaN(freg1) && !Double.isInfinite(freg1))
+        if (freg0 == 0.0 && !Double.isNaN(freg1) && !Double.isInfinite(freg1))
             cpu.fpu.setZeroDivide();
         cpu.fpu.setST(0, freg1 / freg0);
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

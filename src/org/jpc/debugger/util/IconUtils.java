@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,22 @@
 
 package org.jpc.debugger.util;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
-import javax.swing.*;
-import java.io.*;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 public class IconUtils {
     public static ImageIcon createIconFromStream(InputStream input, String description) throws IOException {
@@ -121,15 +131,15 @@ public class IconUtils {
                 else {
                     if (blend != null) {
                         int a = blend.getAlpha();
-                        int r = 0xFF & (rgb >> 16);
-                        int g = 0xFF & (rgb >> 8);
+                        int r = 0xFF & rgb >> 16;
+                        int g = 0xFF & rgb >> 8;
                         int b = 0xFF & rgb;
 
                         r = (int)(fraction * r + r1);
                         g = (int)(fraction * g + g1);
                         b = (int)(fraction * b + b1);
 
-                        rgb = (a << 24) | (r << 16) | (g << 8) | b;
+                        rgb = a << 24 | r << 16 | g << 8 | b;
                     }
 
                     result.setRGB(i, j, rgb);
@@ -153,9 +163,9 @@ public class IconUtils {
             for (int j = 0; j < src.getHeight(); j++) {
                 int rgb = src.getRGB(i, j);
 
-                int a = 0xFF & (rgb >> 24);
-                int r = 0xFF & (rgb >> 16);
-                int g = 0xFF & (rgb >> 8);
+                int a = 0xFF & rgb >> 24;
+                int r = 0xFF & rgb >> 16;
+                int g = 0xFF & rgb >> 8;
                 int b = 0xFF & rgb;
 
                 double grey = (76.0 * r + 150.0 * g + 28.0 * b) / 256 / 256;
@@ -164,7 +174,7 @@ public class IconUtils {
                 g = (int)(grey * g1);
                 b = (int)(grey * b1);
 
-                rgb = (a << 24) | (r << 16) | (g << 8) | b;
+                rgb = a << 24 | r << 16 | g << 8 | b;
                 result.setRGB(i, j, rgb);
             }
 
@@ -208,7 +218,7 @@ public class IconUtils {
     }
 
     public synchronized static BufferedImage createImageFromAsciiMap(String map, int width, int height, Color fg, Color bg) {
-        if ((map == null) || (map.length() == 0))
+        if (map == null || map.length() == 0)
             return null;
         double theta = 0;
 
@@ -281,6 +291,7 @@ public class IconUtils {
             this.im = im;
         }
 
+        @Override
         protected void paintComponent(Graphics g) {
             Dimension s = getSize();
             g.drawImage(im, 0, 0, s.width, s.height, null);

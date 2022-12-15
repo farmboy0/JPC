@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -46,7 +46,7 @@ public interface HardwareComponent extends Hibernatable {
      * through the <code>acceptComponent</code> method.
      * @return true when this component is fully initialised.
      */
-    public boolean initialised();
+    boolean initialised();
 
     /**
      * Offers a <code>Hardware Component</code> as possible configuration information for this object.
@@ -55,25 +55,25 @@ public interface HardwareComponent extends Hibernatable {
      * depending on its type and value.
      * @param component <code>HardwareComponent</code> being offered.
      */
-    public void acceptComponent(HardwareComponent component);
+    void acceptComponent(HardwareComponent component);
 
     /**
      * Resets this component to its default initial state
      * <p>
      * Implementations of this method should not erase any configuration information.
      */
-    public void reset();
+    void reset();
 
     /**
      * Returns true when all references have been received following a call of <code>loadState</code>.
      * @return true on a set of complete external references
      */
-    public boolean updated();
+    boolean updated();
 
     /**
      * Offers this object a component as a possible required external reference following a call of
      * <code>loadState</code>.
      * @param component
      */
-    public void updateComponent(HardwareComponent component);
+    void updateComponent(HardwareComponent component);
 }

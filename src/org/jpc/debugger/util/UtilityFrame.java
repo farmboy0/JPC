@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,24 @@
 
 package org.jpc.debugger.util;
 
-import java.awt.*;
-import java.awt.image.*;
-import java.beans.*;
-import javax.swing.*;
-import javax.swing.event.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
 
 public class UtilityFrame extends JInternalFrame implements PropertyChangeListener, InternalFrameListener {
     private ReportPanel reportPanel;
@@ -58,6 +71,7 @@ public class UtilityFrame extends JInternalFrame implements PropertyChangeListen
         getContentPane().add("South", reportPanel);
     }
 
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         propertyChanged(evt.getPropertyName(), evt.getNewValue());
     }
@@ -111,11 +125,11 @@ public class UtilityFrame extends JInternalFrame implements PropertyChangeListen
     }
 
     public static Component getSuitableDialogParent(JComponent comp) {
-        Component p1 = (Component)SwingUtilities.getAncestorOfClass(JInternalFrame.class, comp);
+        Component p1 = SwingUtilities.getAncestorOfClass(JInternalFrame.class, comp);
         if (p1 == null)
-            p1 = (Component)SwingUtilities.getAncestorOfClass(JDialog.class, comp);
+            p1 = SwingUtilities.getAncestorOfClass(JDialog.class, comp);
         if (p1 == null)
-            p1 = (Component)SwingUtilities.getAncestorOfClass(JFrame.class, comp);
+            p1 = SwingUtilities.getAncestorOfClass(JFrame.class, comp);
         if (p1 == null)
             p1 = comp;
 
@@ -155,30 +169,38 @@ public class UtilityFrame extends JInternalFrame implements PropertyChangeListen
     public void frameClosed() {
     }
 
+    @Override
     public void dispose() {
         super.dispose();
         frameClosed();
     }
 
+    @Override
     public void internalFrameActivated(InternalFrameEvent e) {
     }
 
+    @Override
     public void internalFrameClosed(InternalFrameEvent e) {
     }
 
+    @Override
     public void internalFrameClosing(InternalFrameEvent e) {
         frameClosed();
     }
 
+    @Override
     public void internalFrameDeactivated(InternalFrameEvent e) {
     }
 
+    @Override
     public void internalFrameDeiconified(InternalFrameEvent e) {
     }
 
+    @Override
     public void internalFrameIconified(InternalFrameEvent e) {
     }
 
+    @Override
     public void internalFrameOpened(InternalFrameEvent e) {
     }
 

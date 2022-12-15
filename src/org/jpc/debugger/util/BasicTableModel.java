@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -34,7 +34,9 @@
 package org.jpc.debugger.util;
 
 import javax.swing.JTable;
-import javax.swing.table.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 public abstract class BasicTableModel extends AbstractTableModel {
     private String[] titles;
@@ -51,14 +53,17 @@ public abstract class BasicTableModel extends AbstractTableModel {
         this.isEditable = isEditable;
     }
 
+    @Override
     public int getColumnCount() {
         return titles.length;
     }
 
+    @Override
     public String getColumnName(int col) {
         return titles[col];
     }
 
+    @Override
     public boolean isCellEditable(int r, int c) {
         return isEditable;
     }
@@ -75,6 +80,7 @@ public abstract class BasicTableModel extends AbstractTableModel {
         }
     }
 
+    @Override
     public void fireTableDataChanged() {
         super.fireTableDataChanged();
     }

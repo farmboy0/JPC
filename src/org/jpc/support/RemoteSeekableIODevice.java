@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,9 +33,14 @@
 
 package org.jpc.support;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 public class RemoteSeekableIODevice implements SeekableIODevice {
     public static final int DEFAULT_SECTOR_SIZE = 4 * 1024;
@@ -67,6 +72,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
             setImageLocation(drive);
     }
 
+    @Override
     public void configure(String spec) throws IOException {
         try {
             setImageLocation(new URI(spec));
@@ -101,19 +107,23 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
         writtenSectors = new HashMap();
     }
 
+    @Override
     public synchronized long length() {
         return length;
     }
 
+    @Override
     public boolean readOnly() {
         return false;
     }
 
+    @Override
     public synchronized void close() {
         drive = null;
         length = -1;
     }
 
+    @Override
     public synchronized void seek(long offset) throws IOException {
         if (length < 0)
             throw new IOException("Remote device closed");
@@ -125,7 +135,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
     }
 
     private synchronized byte[] getSector(int index) throws IOException {
-        Integer key = Integer.valueOf(index);
+        Integer key = index;
         byte[] result = (byte[])sectorIndex.get(key);
         if (result != null)
             return result;
@@ -172,6 +182,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
         throw new IOException("Could not contact remote disk server");
     }
 
+    @Override
     public synchronized int read(byte[] data, int offset, int length) throws IOException {
         if (this.length < 0)
             throw new IOException("Remote device closed");
@@ -186,7 +197,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
             if (toRead <= 0)
                 return read;
 
-            Integer index = Integer.valueOf((int)(position / sectorSize));
+            Integer index = (int)(position / sectorSize);
             int off = (int)(position % sectorSize);
             byte[] s = (byte[])writtenSectors.get(index);
             if (s == null)
@@ -201,6 +212,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
         }
     }
 
+    @Override
     public synchronized int write(byte[] data, int offset, int length) throws IOException {
         if (this.length < 0)
             throw new IOException("Remote device closed");
@@ -215,7 +227,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
             if (toWrite <= 0)
                 return written;
 
-            Integer index = Integer.valueOf((int)(position / sectorSize));
+            Integer index = (int)(position / sectorSize);
             int off = (int)(position % sectorSize);
 
             byte[] s = (byte[])writtenSectors.get(index);

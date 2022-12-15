@@ -27,12 +27,19 @@
 
 package tools;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Comparison {
-    public static String[] names = new String[] {
+    public static String[] names = {
         "eax",
         "ecx",
         "edx",
@@ -130,7 +137,7 @@ public class Comparison {
 
     public static void main(String[] args) throws Exception {
         boolean mem = false;
-        if ((args.length > 0) && args[0].equals("-mem")) {
+        if (args.length > 0 && args[0].equals("-mem")) {
             mem = true;
             String[] temp = new String[args.length];
             System.arraycopy(args, 1, temp, 0, temp.length - 1);
@@ -197,26 +204,26 @@ public class Comparison {
 
     private static void compareStacks(int espPageIndex, int esp, Method save1, Object newpc, byte[] sdata1, Method save2, Object oldpc,
         byte[] sdata2, boolean pm, Method load1) throws Exception {
-        Integer sl1 = (Integer)save1.invoke(newpc, new Integer(espPageIndex), sdata1, pm);
-        Integer sl2 = (Integer)save2.invoke(oldpc, new Integer(espPageIndex), sdata2, pm);
+        Integer sl1 = (Integer)save1.invoke(newpc, Integer.valueOf(espPageIndex), sdata1, pm);
+        Integer sl2 = (Integer)save2.invoke(oldpc, Integer.valueOf(espPageIndex), sdata2, pm);
         List<Integer> addrs = new ArrayList();
         if (sl2 > 0)
             if (!samePage(espPageIndex, sdata1, sdata2, addrs)) {
                 int addr = addrs.get(0);
-                if ((addrs.size() == 1) && ((sdata1[addr] ^ sdata2[addr]) == 0x10)) { // ignore differences from pushing different AF to stack
+                if (addrs.size() == 1 && (sdata1[addr] ^ sdata2[addr]) == 0x10) { // ignore differences from pushing different AF to stack
                     System.out.println("ignoring different AF on stack...");
-                    load1.invoke(newpc, new Integer(espPageIndex), sdata2, pm);
+                    load1.invoke(newpc, Integer.valueOf(espPageIndex), sdata2, pm);
                 } else {
                     printHistory();
                     System.out.println("Error here... look above");
                     printPage(sdata1, sdata2, esp);
-                    load1.invoke(newpc, new Integer(espPageIndex), sdata2, pm);
+                    load1.invoke(newpc, Integer.valueOf(espPageIndex), sdata2, pm);
                 }
             }
     }
 
     private static String previousInstruction() {
-        Object[] prev = history[(((historyIndex - 2) % history.length) + history.length) % history.length];
+        Object[] prev = history[((historyIndex - 2) % history.length + history.length) % history.length];
         if (prev == null)
             return "null";
         return (String)prev[2];
@@ -285,19 +292,18 @@ public class Comparison {
     }
 
     public static int getInt(byte[] data, int offset) {
-        return data[offset] & 0xff | ((data[offset + 1] & 0xff) << 8) | ((data[offset + 2] & 0xff) << 16)
-            | ((data[offset + 3] & 0xff) << 24);
+        return data[offset] & 0xff | (data[offset + 1] & 0xff) << 8 | (data[offset + 2] & 0xff) << 16 | (data[offset + 3] & 0xff) << 24;
     }
 
     public static void printIntChars(int i, int c) {
-        int[] ia = new int[] { (i & 0xFF), ((i >> 8) & 0xFF), ((i >> 16) & 0xFF), ((i >> 24) & 0xFF) };
-        int[] ca = new int[] { (c & 0xFF), ((c >> 8) & 0xFF), ((c >> 16) & 0xFF), ((c >> 24) & 0xFF) };
+        int[] ia = { i & 0xFF, i >> 8 & 0xFF, i >> 16 & 0xFF, i >> 24 & 0xFF };
+        int[] ca = { c & 0xFF, c >> 8 & 0xFF, c >> 16 & 0xFF, c >> 24 & 0xFF };
 
         for (int a = 0; a < 4; a++)
             if (ia[a] == ca[a])
-                System.out.printf("%c", (ia[a] == 0 ? ' ' : (char)ia[a]));
+                System.out.printf("%c", ia[a] == 0 ? ' ' : (char)ia[a]);
             else
-                System.out.printf("\u001b[1;44m%c\u001b[1;49m", (ia[a] == 0 ? ' ' : (char)ia[a]));
+                System.out.printf("\u001b[1;44m%c\u001b[1;49m", ia[a] == 0 ? ' ' : (char)ia[a]);
         System.out.printf(" ");
     }
 
@@ -327,7 +333,7 @@ public class Comparison {
                     same = false;
                 }
             } else {
-                if (compareFlags && ((fast[i] & flagMask) != (old[i] & flagMask))) {
+                if (compareFlags && (fast[i] & flagMask) != (old[i] & flagMask)) {
                     if (same) {
                         same = false;
                         diff.add(i);
@@ -372,6 +378,7 @@ public class Comparison {
             this.buttons = buttons;
         }
 
+        @Override
         public int compareTo(MouseEvent o) {
             return (int)(time - o.time);
         }
@@ -386,6 +393,7 @@ public class Comparison {
             this.text = text;
         }
 
+        @Override
         public int compareTo(KeyBoardEvent o) {
             return (int)(time - o.time);
         }

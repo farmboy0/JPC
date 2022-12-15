@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,14 +33,22 @@
 
 package org.jpc.emulator.peripheral;
 
-import java.io.*;
-import java.util.logging.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.jpc.emulator.motherboard.*;
-import org.jpc.emulator.memory.*;
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.memory.LinearAddressSpace;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
+import org.jpc.emulator.motherboard.IODevice;
+import org.jpc.emulator.motherboard.IOPortHandler;
+import org.jpc.emulator.motherboard.InterruptController;
 import org.jpc.emulator.processor.Processor;
-import org.jpc.emulator.*;
-import org.jpc.j2se.*;
+import org.jpc.j2se.Option;
 
 /**
  * @author Chris Dennis
@@ -71,7 +79,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
     private static final byte KBD_CCMD_RESET = (byte)0xFE;
 
     /* Keyboard Commands */
-    private static final byte KBD_CMD_SET_LEDS = (byte)0xED;; /* Set keyboard leds */
+    private static final byte KBD_CMD_SET_LEDS = (byte)0xED; /* Set keyboard leds */
     private static final byte KBD_CMD_ECHO = (byte)0xEE;
     private static final byte KBD_CMD_GET_ID = (byte)0xF2; /* get keyboard ID */
     private static final byte KBD_CMD_SET_RATE = (byte)0xF3; /* Set typematic rate */
@@ -168,6 +176,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
         reset();
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeByte(commandWrite);
         output.writeByte(status);
@@ -188,6 +197,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
         queue.saveState(output);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         ioportRegistered = false;
         commandWrite = input.readByte();
@@ -210,10 +220,12 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
     }
 
     //IODevice Methods
+    @Override
     public int[] ioPortsRequested() {
         return new int[] { 0x60, 0x64 };
     }
 
+    @Override
     public int ioPortRead8(int address) {
         switch (address) {
         case 0x60:
@@ -230,14 +242,17 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public int ioPortRead16(int address) {
-        return (0xff & ioPortRead8(address)) | (0xff00 & ioPortRead8(address + 1));
+        return 0xff & ioPortRead8(address) | 0xff00 & ioPortRead8(address + 1);
     }
 
+    @Override
     public int ioPortRead32(int address) {
         return 0xffffffff;
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         switch (address) {
         case 0x60:
@@ -254,16 +269,19 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         ioPortWrite8(address, data);
         ioPortWrite8(address + 1, data >> 8);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         ioPortWrite16(address, data);
         ioPortWrite16(address + 2, data >> 16);
     }
 
+    @Override
     public void reset() {
         irqDevice = null;
         cpu = null;
@@ -356,7 +374,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
             queue.writeData((byte)0x00, (byte)0);
             break;
         case KBD_CCMD_SELF_TEST:
-            status = (byte)((status & ~KBD_STAT_OBF) | KBD_STAT_SELFTEST);
+            status = (byte)(status & ~KBD_STAT_OBF | KBD_STAT_SELFTEST);
             queue.writeData((byte)0x55, (byte)0);
             break;
         case KBD_CCMD_KBD_TEST:
@@ -588,7 +606,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
             x = 1;
         if (dy1 < 0)
             y = 1;
-        byte b = (byte)(0x08 | (x << 4) | (y << 5) | (mouseButtons & 0x07));
+        byte b = (byte)(0x08 | x << 4 | y << 5 | mouseButtons & 0x07);
 
         synchronized (queue) {
             queue.writeData(b, (byte)1);
@@ -610,7 +628,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
                     dz1 = 7;
                 else if (dz1 < -7)
                     dz1 = -7;
-                b = (byte)((dz1 & 0x0f) | ((mouseButtons & 0x18) << 1));
+                b = (byte)(dz1 & 0x0f | (mouseButtons & 0x18) << 1);
                 queue.writeData(b, (byte)1);
                 break;
             }
@@ -633,7 +651,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
                     if (0 != (mode & KBD_MODE_MOUSE_INT))
                         if (!Option.useBochs.isSet())
                             irq12Level = 1;
-                } else if ((0 != (mode & KBD_MODE_KBD_INT)) && (0 == (mode & KBD_MODE_DISABLE_KBD)))
+                } else if (0 != (mode & KBD_MODE_KBD_INT) && 0 == (mode & KBD_MODE_DISABLE_KBD))
                     irq1Level = 1;
             }
         }
@@ -656,6 +674,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
             length = 0;
         }
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(aux.length);
             output.write(aux);
@@ -666,6 +685,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
             output.writeInt(length);
         }
 
+        @Override
         public void loadState(DataInput input) throws IOException {
             int len = input.readInt();
             aux = new byte[len];
@@ -704,7 +724,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
                 }
                 byte auxValue = this.aux[readPosition];
                 byte dataValue = this.data[readPosition];
-                if ((++readPosition) == KBD_QUEUE_SIZE)
+                if (++readPosition == KBD_QUEUE_SIZE)
                     readPosition = 0;
                 length--;
                 /* reading deasserts IRQ */
@@ -724,7 +744,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
                 }
                 this.aux[writePosition] = aux;
                 this.data[writePosition] = data;
-                if ((++writePosition) == KBD_QUEUE_SIZE)
+                if (++writePosition == KBD_QUEUE_SIZE)
                     writePosition = 0;
                 length++;
             }
@@ -750,7 +770,6 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
                     putKeyboardEvent((byte)0xe0);
                 putKeyboardEvent((byte)(scancode & 0x7f));
             }
-            return;
         }
     }
 
@@ -777,7 +796,7 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
         mouseButtons = buttons;
 
         synchronized (queue) {
-            if ((0 == (mouseStatus & MOUSE_STATUS_REMOTE)) && (queue.length < (KBD_QUEUE_SIZE - 16)))
+            if (0 == (mouseStatus & MOUSE_STATUS_REMOTE) && queue.length < KBD_QUEUE_SIZE - 16)
                 while (true) {
                     /* if not remote, send event.  Multiple events are sent if too big deltas */
                     mouseSendPacket();
@@ -787,31 +806,35 @@ public class Keyboard extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public boolean initialised() {
-        return ioportRegistered && (irqDevice != null) && (cpu != null) && (physicalAddressSpace != null) && (linearAddressSpace != null);
+        return ioportRegistered && irqDevice != null && cpu != null && physicalAddressSpace != null && linearAddressSpace != null;
     }
 
+    @Override
     public boolean updated() {
         return ioportRegistered && irqDevice.updated() && cpu.updated() && physicalAddressSpace.updated() && linearAddressSpace.updated();
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
-        if ((component instanceof IOPortHandler) && component.updated()) {
+        if (component instanceof IOPortHandler && component.updated()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof InterruptController) && component.initialised())
+        if (component instanceof InterruptController && component.initialised())
             irqDevice = (InterruptController)component;
 
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
 
-        if ((component instanceof Processor) && component.initialised())
+        if (component instanceof Processor && component.initialised())
             cpu = (Processor)component;
 
         if (component instanceof PhysicalAddressSpace)

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,9 @@
 
 package org.jpc.support;
 
-import java.io.*;
-import java.util.logging.*;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A generic block device backed by a <code>SeekableIODevice</code> instance.
@@ -54,6 +55,7 @@ public abstract class RawBlockDevice implements BlockDevice {
         setData(data);
     }
 
+    @Override
     public int read(long sectorNumber, byte[] buffer, int size) {
         Integer t;
         try {
@@ -76,6 +78,7 @@ public abstract class RawBlockDevice implements BlockDevice {
         }
     }
 
+    @Override
     public int write(long sectorNumber, byte[] buffer, int size) {
         try {
             data.seek(sectorNumber * SECTOR_SIZE);
@@ -87,18 +90,22 @@ public abstract class RawBlockDevice implements BlockDevice {
         return 0;
     }
 
+    @Override
     public long getTotalSectors() {
         return totalSectors;
     }
 
+    @Override
     public boolean isInserted() {
-        return (data != null);
+        return data != null;
     }
 
+    @Override
     public boolean isReadOnly() {
         return data.readOnly();
     }
 
+    @Override
     public void close() {
         try {
             if (data != null)
@@ -108,6 +115,7 @@ public abstract class RawBlockDevice implements BlockDevice {
         }
     }
 
+    @Override
     public void configure(String specs) throws IOException {
         data.configure(specs);
     }
@@ -124,6 +132,7 @@ public abstract class RawBlockDevice implements BlockDevice {
             totalSectors = data.length() / SECTOR_SIZE;
     }
 
+    @Override
     public String toString() {
         if (data == null)
             return "<empty>";

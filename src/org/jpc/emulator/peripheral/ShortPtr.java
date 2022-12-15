@@ -25,14 +25,17 @@ public class ShortPtr extends Ptr {
         super(p, 0);
     }
 
+    @Override
     public int dataWidth() {
         return 2;
     }
 
+    @Override
     public int get(int off) {
         return readw(off);
     }
 
+    @Override
     public void set(int off, int val) {
         writew(off, val);
     }

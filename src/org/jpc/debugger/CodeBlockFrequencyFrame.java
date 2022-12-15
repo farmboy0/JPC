@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,17 +33,24 @@
 
 package org.jpc.debugger;
 
-import java.util.*;
 import java.awt.Dimension;
-import java.awt.event.*;
-import java.util.logging.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.*;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
-import org.jpc.debugger.util.*;
-import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.debugger.util.BasicTableModel;
+import org.jpc.debugger.util.UtilityFrame;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
-import org.jpc.emulator.execution.decoder.*;
+import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.emulator.memory.AddressSpace;
 
 public class CodeBlockFrequencyFrame extends UtilityFrame implements PCListener, ActionListener, CodeBlockListener, Comparator {
     private static final Logger LOGGING = Logger.getLogger(CodeBlockFrequencyFrame.class.getName());
@@ -78,10 +85,12 @@ public class CodeBlockFrequencyFrame extends UtilityFrame implements PCListener,
             opName = name;
         }
 
+        @Override
         public int hashCode() {
             return opName.hashCode();
         }
 
+        @Override
         public boolean equals(Object obj) {
             OpcodeEntry e = (OpcodeEntry)obj;
             if (!e.opName.equals(opName))
@@ -90,17 +99,21 @@ public class CodeBlockFrequencyFrame extends UtilityFrame implements PCListener,
             return true;
         }
 
+        @Override
         public String toString() {
             return opName;
         }
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
     }
 
+    @Override
     public void codeBlockDecoded(int address, AddressSpace memory, CodeBlock block) {
     }
 
+    @Override
     public synchronized void codeBlockExecuted(int address, AddressSpace memory, CodeBlock block) {
         try {
             Instruction current = block.getInstructions();
@@ -118,28 +131,34 @@ public class CodeBlockFrequencyFrame extends UtilityFrame implements PCListener,
         }
     }
 
+    @Override
     public synchronized void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
         if (record != null)
             record.setCodeBlockListener(null);
     }
 
+    @Override
     public void pcCreated() {
         refreshDetails();
     }
 
+    @Override
     public void pcDisposed() {
         record = null;
         model.fireTableDataChanged();
     }
 
+    @Override
     public void executionStarted() {
     }
 
+    @Override
     public void executionStopped() {
         refreshDetails();
     }
 
+    @Override
     public int compare(Object o1, Object o2) {
         if (o1 == null) {
             if (o2 == null)
@@ -155,6 +174,7 @@ public class CodeBlockFrequencyFrame extends UtilityFrame implements PCListener,
         return e2.frequency - e1.frequency;
     }
 
+    @Override
     public synchronized void refreshDetails() {
         CodeBlockRecord r = (CodeBlockRecord)JPC.getObject(CodeBlockRecord.class);
         if (r != record) {
@@ -179,10 +199,12 @@ public class CodeBlockFrequencyFrame extends UtilityFrame implements PCListener,
             super(new String[] { "Rank", "Opcode", "Frequency" }, new int[] { 80, 200, 80 });
         }
 
+        @Override
         public int getRowCount() {
             return frequentCodes.length;
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             OpcodeEntry e = frequentCodes[row];
             if (e == null)

@@ -27,8 +27,13 @@
 
 package tools;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Opcode {
     public static String HEADER;
@@ -66,9 +71,9 @@ public class Opcode {
             operands[i] = Operand.get(args[i], size, isMem);
         StringBuilder tmp = new StringBuilder();
         tmp.append(mnemonic);
-        for (int i = 0; i < operands.length; i++) {
+        for (Operand operand : operands) {
             tmp.append("_");
-            tmp.append(operands[i]);
+            tmp.append(operand);
         }
         if (isMem)
             tmp.append("_mem");
@@ -124,7 +129,7 @@ public class Opcode {
             if (body.contains("getA") || body.contains("setA")) {
                 body = body.replaceAll("\\$op1.getA", operands[0].getA(1));
                 body = body.replaceAll("\\$op1.setA", operands[0].setA(1));
-                if ((operands.length > 1) && (body.contains("2.getA") || body.contains("2.setA"))) {
+                if (operands.length > 1 && (body.contains("2.getA") || body.contains("2.setA"))) {
                     body = body.replaceAll("\\$op2.getA", operands[1].getA(2));
                     body = body.replaceAll("\\$op2.setA", operands[1].setA(2));
                     if (operands.length > 2) {
@@ -165,7 +170,7 @@ public class Opcode {
             }
         }
         body = body.replaceAll("\\$size", size + "");
-        if ((name.startsWith("mul_") || name.startsWith("div_")) && (size == 32)) {
+        if ((name.startsWith("mul_") || name.startsWith("div_")) && size == 32) {
             body = body.replaceAll("\\$mask", "0xFFFFFFFFL & ");
             body = body.replaceAll("\\$cast", "(int)");
         } else {
@@ -349,7 +354,7 @@ public class Opcode {
         for (String arg : args)
             if (arg.equals("Ep"))
                 return true;
-        if ((args.length == 1) && (args[0].equals("Mw") || args[0].equals("Md") || args[0].equals("Mq") || args[0].equals("Mt")))
+        if (args.length == 1 && (args[0].equals("Mw") || args[0].equals("Md") || args[0].equals("Mq") || args[0].equals("Mt")))
             return true;
         return false;
     }
@@ -400,9 +405,9 @@ public class Opcode {
             return ops;
         }
         for (String[] eachArgs : enumerateArgs(args)) {
-            if (!singleType || (singleType && !mem))
+            if (!singleType || singleType && !mem)
                 ops.add(new Opcode(mnemonic, eachArgs, size, snippet, ret, false, segment));
-            if (!singleType || (singleType && mem))
+            if (!singleType || singleType && mem)
                 if (isMem(args))
                     ops.add(new Opcode(mnemonic, eachArgs, size, snippet, ret, true, segment));
         }

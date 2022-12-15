@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,10 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
 
 public class sti extends Executable {
 
@@ -39,11 +38,12 @@ public class sti extends Executable {
         super(blockStart, eip);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         if (Processor.cpuLevel >= 5) {
             if ((cpu.getCR4() & 2) != 0) // Protected mode Virtual Interrupts enabled
             {
-                if ((cpu.getCPL() == 3) && (cpu.getIOPrivilegeLevel() < 3)) {
+                if (cpu.getCPL() == 3 && cpu.getIOPrivilegeLevel() < 3) {
                     if (cpu.getVIP())
                         throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
                     cpu.eflagsVirtualInterrupt = true;
@@ -57,10 +57,12 @@ public class sti extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

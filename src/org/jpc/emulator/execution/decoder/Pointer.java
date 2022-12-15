@@ -30,10 +30,6 @@ package org.jpc.emulator.execution.decoder;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.fpu64.FpuState64;
 
-import java.util.BitSet;
-
-import static org.jpc.emulator.processor.Processor.*;
-
 public class Pointer extends Address {
     final int base, index;
     final int scale;
@@ -52,7 +48,7 @@ public class Pointer extends Address {
             index = -1;
         if (op.scale != 0)
             scale = (int)op.scale;
-        else if ((op.scale == 0) && (index != -1))
+        else if (op.scale == 0 && index != -1)
             scale = 1;
         else
             scale = 0;
@@ -86,10 +82,12 @@ public class Pointer extends Address {
             return "ds";
     }
 
+    @Override
     public int getBase(Processor cpu) {
         return cpu.segs[segment].getBase();
     }
 
+    @Override
     public int get(Processor cpu) {
         return get(cpu, 0);
     }
@@ -201,8 +199,9 @@ public class Pointer extends Address {
         cpu.segs[segment].setByte(get(cpu), val);
     }
 
+    @Override
     public String toString() {
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         if (segment != -1)
             b.append(Processor.getSegmentString(segment) + ":");
         if (base != -1)
@@ -215,7 +214,7 @@ public class Pointer extends Address {
     }
 
     public String toSource() {
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         if (segment != -1) {
             b.append("((cpu." + Processor.getSegmentString(segment) + " != null) ? " + "cpu." + Processor.getSegmentString(segment)
                 + ".getBase():0)");
@@ -229,7 +228,7 @@ public class Pointer extends Address {
             b.append(String.format("+cpu.regs[%d].get32()*%d", index, scale));
         if (offset != 0)
             b.append(String.format("+0x%08x", offset));
-        else if ((segment == -1) && (base == -1) && (scale == 0))
+        else if (segment == -1 && base == -1 && scale == 0)
             b.append("0x0");
         return b.toString();
     }

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,8 @@
 
 package org.jpc.j2se;
 
-import java.awt.Component;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -42,21 +42,56 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.*;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
-import java.util.jar.*;
-import java.util.logging.*;
-import java.util.zip.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.UIManager;
 
 import org.jpc.emulator.PC;
 import org.jpc.emulator.pci.peripheral.EthernetCard;
 import org.jpc.emulator.pci.peripheral.VGACard;
-import org.jpc.support.*;
+import org.jpc.support.ArgProcessor;
+import org.jpc.support.ArrayBackedSeekableIODevice;
+import org.jpc.support.BlockDevice;
+import org.jpc.support.DriveSet;
+import org.jpc.support.EthernetHub;
+import org.jpc.support.EthernetOutput;
+import org.jpc.support.FileBackedSeekableIODevice;
+import org.jpc.support.FloppyBlockDevice;
+import org.jpc.support.HDBlockDevice;
+import org.jpc.support.SeekableIODevice;
+import org.jpc.support.TreeBlockDevice;
 
 public class JPCApplication extends PCMonitorFrame implements PCControl {
     private static final Logger LOGGING = Logger.getLogger(JPCApplication.class.getName());
@@ -107,6 +142,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
         JMenu snap = new JMenu("Snapshot");
         snap.add("Save Snapshot").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ev) {
                 stop();
 
@@ -122,6 +158,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         });
         snap.add("Load Snapshot").addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent ev) {
                 int cancel = JOptionPane.showOptionDialog(JPCApplication.this,
                     "Selecting a snapshot now will discard the current state of the emulated PC. Are you sure you want to continue?",
@@ -152,6 +189,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
         disks.add("Create disk").addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent ev) {
                 createBlankDisk();
             }
@@ -159,6 +197,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
         disks.add("Create disk from directory").addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent ev) {
                 createDiskFromDirectory();
             }
@@ -179,7 +218,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             ActionListener handler = new FloppyDriveChangeHandler(i, top, included, file);
             Iterator<String> itt = getResources(IMAGES_PATH);
             while (itt.hasNext()) {
-                String path = (String)itt.next();
+                String path = itt.next();
                 if (path.startsWith(IMAGES_PATH))
                     path = path.substring(IMAGES_PATH.length());
                 included.add(path).addActionListener(handler);
@@ -205,7 +244,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             ActionListener handler = new HardDriveChangeHandler(i, top, included, file, directory);
             Iterator<String> itt = getResources(IMAGES_PATH);
             while (itt.hasNext()) {
-                String path = (String)itt.next();
+                String path = itt.next();
                 if (path.startsWith(IMAGES_PATH))
                     path = path.substring(IMAGES_PATH.length());
                 included.add(path).addActionListener(handler);
@@ -220,6 +259,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         JMenu help = new JMenu("Help");
         help.add("Getting Started").addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 JFrame help = new JFrame("JPC - Getting Started");
                 help.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/icon.png")));
@@ -232,6 +272,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         });
         help.add("About JPC").addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 Object[] buttons = { "Visit our Website", "Ok" };
                 if (JOptionPane.showOptionDialog(JPCApplication.this, ABOUT_US, "About JPC", JOptionPane.YES_NO_OPTION,
@@ -266,6 +307,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         getMonitorPane().setViewportView(LICENCE);
         getContentPane().validate();
         this.getRootPane().addComponentListener(new ComponentAdapter() {
+            @Override
             public void componentResized(ComponentEvent evt) {
                 Component c = (Component)evt.getSource();
                 Dimension newSize = c.getSize();
@@ -277,11 +319,13 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         });
     }
 
+    @Override
     public void setSize(Dimension d) {
         super.setSize(new Dimension(monitor.getPreferredSize().width, d.height + keys.getPreferredSize().height + 60));
         getMonitorPane().setPreferredSize(new Dimension(monitor.getPreferredSize().width + 2, monitor.getPreferredSize().height + 2));
     }
 
+    @Override
     public synchronized void start() {
         super.start();
 
@@ -290,10 +334,12 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         monitor.requestFocus();
     }
 
+    @Override
     public synchronized void stop() {
         super.stop();
     }
 
+    @Override
     public synchronized boolean isRunning() {
         return super.isRunning();
     }
@@ -303,7 +349,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         zin.getNextEntry();
         pc.loadState(zin);
         zin.closeEntry();
-        VGACard card = ((VGACard)pc.getComponent(VGACard.class));
+        VGACard card = (VGACard)pc.getComponent(VGACard.class);
         card.setOriginalDisplaySize();
         zin.getNextEntry();
         monitor.loadState(zin);
@@ -337,7 +383,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             if (sizeString == null) {
                 return;
             }
-            long size = Long.parseLong(sizeString) * 1024l * 1024l;
+            long size = Long.parseLong(sizeString) * 1024L * 1024L;
             if (size < 0) {
                 throw new Exception("Negative file size");
             }
@@ -387,6 +433,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             this.top = top;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Component source = (Component)e.getSource();
             if (included.isMenuComponent(source))
@@ -437,6 +484,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             this.top = top;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Component source = (Component)e.getSource();
             if (included.isMenuComponent(source)) {
@@ -513,11 +561,11 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
         int slash = directory.lastIndexOf("/");
         String dir = directory.substring(0, slash + 1);
-        for (int i = 0; i < urls.length; i++) {
-            if (!urls[i].toString().endsWith(".jar"))
+        for (URL url : urls) {
+            if (!url.toString().endsWith(".jar"))
                 continue;
             try {
-                JarInputStream jarStream = new JarInputStream(urls[i].openStream());
+                JarInputStream jarStream = new JarInputStream(url.openStream());
                 while (true) {
                     ZipEntry entry = jarStream.getNextEntry();
                     if (entry == null)
@@ -573,7 +621,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
     }
 
     public static void main(String[] args) throws Exception {
-        if ((args.length > 0) && args[0].equals("-disam")) {
+        if (args.length > 0 && args[0].equals("-disam")) {
             boolean is32Bit = args[1].equals("32");
             byte[] m = new byte[args.length - 2];
             for (int i = 0; i < m.length; i++)
@@ -593,7 +641,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             System.exit(0);
         }
 
-        if ((args.length == 0) && (!Option.boot.isSet() && !Option.hda.isSet() && !Option.cdrom.isSet() && !Option.fda.isSet())) {
+        if (args.length == 0 && !Option.boot.isSet() && !Option.hda.isSet() && !Option.cdrom.isSet() && !Option.fda.isSet()) {
             ClassLoader cl = JPCApplication.class.getClassLoader();
             if (cl instanceof URLClassLoader) {
                 for (URL url : ((URLClassLoader)cl).getURLs()) {

@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,12 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.UCodes;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
 
 public class shr_Eb_Ib extends Executable {
     final int op1Index;
@@ -44,6 +45,7 @@ public class shr_Eb_Ib extends Executable {
         immb = Modrm.Ib(input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         if ((0x1f & immb) != 0) {
@@ -57,10 +59,12 @@ public class shr_Eb_Ib extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

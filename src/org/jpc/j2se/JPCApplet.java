@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,21 +33,48 @@
 
 package org.jpc.j2se;
 
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.*;
-import java.awt.event.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.zip.*;
-import java.util.jar.*;
-import javax.swing.*;
-import javax.imageio.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.zip.ZipInputStream;
 
-import org.jpc.emulator.*;
-import org.jpc.emulator.pci.peripheral.*;
-import org.jpc.support.*;
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.JApplet;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+
+import org.jpc.emulator.PC;
+import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.support.ArrayBackedSeekableIODevice;
+import org.jpc.support.BlockDevice;
+import org.jpc.support.CDROMBlockDevice;
+import org.jpc.support.DriveSet;
+import org.jpc.support.FloppyBlockDevice;
+import org.jpc.support.HDBlockDevice;
+import org.jpc.support.RemoteSeekableIODevice;
+import org.jpc.support.SeekableIODevice;
 
 public class JPCApplet extends JApplet {
     public static final String VERSION = "2.035";
@@ -79,6 +106,7 @@ public class JPCApplet extends JApplet {
         }
     }
 
+    @Override
     public void init() {
         System.out.println("JPC Applet version " + VERSION);
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -87,6 +115,7 @@ public class JPCApplet extends JApplet {
         getContentPane().add("Center", mainPanel);
     }
 
+    @Override
     public void start() {
         stop();
 
@@ -111,6 +140,7 @@ public class JPCApplet extends JApplet {
         }
     }
 
+    @Override
     public void stop() {
         synchronized (JPCApplet.class) {
             if (hasActiveInstance)
@@ -124,6 +154,7 @@ public class JPCApplet extends JApplet {
         }
     }
 
+    @Override
     public void destroy() {
         stop();
     }
@@ -136,6 +167,7 @@ public class JPCApplet extends JApplet {
             super(new BorderLayout(10, 10), pc);
         }
 
+        @Override
         public synchronized void stop() {
             if (runner == null)
                 return;
@@ -150,6 +182,7 @@ public class JPCApplet extends JApplet {
             getPC().stop();
         }
 
+        @Override
         public synchronized void start() {
             if (runner != null)
                 return;
@@ -159,10 +192,12 @@ public class JPCApplet extends JApplet {
             runner.start();
         }
 
+        @Override
         public synchronized boolean isRunning() {
             return runner != null;
         }
 
+        @Override
         public void run() {
             PC pc = getPC();
             try {
@@ -197,6 +232,7 @@ public class JPCApplet extends JApplet {
             addMouseListener(this);
         }
 
+        @Override
         public void paint(Graphics g) {
             super.paint(g);
             Dimension s = getSize();
@@ -223,6 +259,7 @@ public class JPCApplet extends JApplet {
             }
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
             if (control.isRunning())
                 control.stop();
@@ -231,15 +268,19 @@ public class JPCApplet extends JApplet {
             repaint();
         }
 
+        @Override
         public void mouseEntered(MouseEvent e) {
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
         }
     }
@@ -264,18 +305,18 @@ public class JPCApplet extends JApplet {
             String s = Long.toString(n);
             if (s.length() < 4)
                 return s;
-            StringBuffer buf = new StringBuffer();
-            int offset = (s.length() % 3);
+            StringBuilder buf = new StringBuilder();
+            int offset = s.length() % 3;
             if (offset == 0) {
                 buf.append(s.substring(0, 3));
                 offset = 3;
-                for (int i = 0; i < (int)((s.length() - 1) / 3); i++) {
+                for (int i = 0; i < (s.length() - 1) / 3; i++) {
                     buf.append(",");
                     buf.append(s.substring(offset + 3 * i, offset + 3 * i + 3));
                 }
             } else {
                 buf.append(s.substring(0, offset));
-                for (int i = 0; i < (int)((s.length() - 1) / 3); i++) {
+                for (int i = 0; i < (s.length() - 1) / 3; i++) {
                     buf.append(",");
                     buf.append(s.substring(offset + 3 * i, offset + 3 * i + 3));
                 }
@@ -327,8 +368,7 @@ public class JPCApplet extends JApplet {
             if (value.startsWith("net:")) {
                 if (!allowRemote)
                     throw new IOException("Cannot create remote device for " + name);
-                SeekableIODevice result = new RemoteSeekableIODevice(getCodeBase().toURI().resolve(value.substring(4)));
-                return result;
+                return new RemoteSeekableIODevice(getCodeBase().toURI().resolve(value.substring(4)));
             }
 
             ArrayBackedSeekableIODevice device = null;
@@ -350,17 +390,17 @@ public class JPCApplet extends JApplet {
                 return;
 
             String[] list = jars.split(",");
-            for (int i = 0; i < list.length; i++)
+            for (String archiveName : list)
                 try {
-                    String archiveName = list[i];
                     if (!archiveName.endsWith(".jar"))
                         continue;
                     downloadData(stage, getCodeBase().toURI().resolve(archiveName));
                 } catch (Exception e) {
-                    System.out.println("Warning: preloading archive " + list[i] + " failed: " + e);
+                    System.out.println("Warning: preloading archive " + archiveName + " failed: " + e);
                 }
         }
 
+        @Override
         public void run() {
             try {
                 BlockDevice hdaDevice = null, fdaDevice = null, cdromDevice = null;
@@ -405,7 +445,7 @@ public class JPCApplet extends JApplet {
                     zin.getNextEntry();
                     pc.loadState(zin);
                     zin.closeEntry();
-                    VGACard card = ((VGACard)pc.getComponent(VGACard.class));
+                    VGACard card = (VGACard)pc.getComponent(VGACard.class);
                     card.setOriginalDisplaySize();
                     zin.getNextEntry();
                     panel.loadState(zin);
@@ -474,6 +514,7 @@ public class JPCApplet extends JApplet {
         }
 
         class ProgressPanel extends JPanel {
+            @Override
             public void paint(Graphics g) {
                 Dimension s = getSize();
                 g.setColor(Color.white);
@@ -520,13 +561,14 @@ public class JPCApplet extends JApplet {
             progressPanel.repaint();
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             if (!isActive()) {
                 timer.stop();
                 return;
             }
 
-            if (!otherAppletDetected && (monitorPanel == null) && (constructionError == null)) {
+            if (!otherAppletDetected && monitorPanel == null && constructionError == null) {
                 update(progressMessage, progressValue);
                 return;
             }

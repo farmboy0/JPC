@@ -1,10 +1,9 @@
 package org.jpc.emulator.execution.opcodes.rm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
 
 public class fcompp_Md_mem extends Executable {
     final Pointer op1;
@@ -14,6 +13,7 @@ public class fcompp_Md_mem extends Executable {
         op1 = new Pointer(parent.operand[0], parent.adr_mode);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         int newcode = 0xd;
         double freg0 = cpu.fpu.ST(0);
@@ -35,10 +35,12 @@ public class fcompp_Md_mem extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

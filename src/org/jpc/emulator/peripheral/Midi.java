@@ -1,17 +1,26 @@
 package org.jpc.emulator.peripheral;
 
-import org.jpc.j2se.Option;
-
-import javax.sound.midi.*;
 import java.io.InputStream;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiDevice.Info;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Soundbank;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.SysexMessage;
+
+import org.jpc.j2se.Option;
 
 public class Midi {
     private static final Logger Log = Logger.getLogger(Midi.class.getName());
     static final private int SYSEX_SIZE = 1024;
     static final private int RAWBUF = 1024;
 
-    static final private byte[] MIDI_evt_len = new byte[] {
+    static final private byte[] MIDI_evt_len = {
         0,
         0,
         0,
@@ -318,14 +327,14 @@ public class Midi {
         /* Test for a active sysex tranfer */
         if (midi.status == 0xf0) {
             if ((data & 0x80) == 0) {
-                if (midi.sysex.used < (SYSEX_SIZE - 1))
+                if (midi.sysex.used < SYSEX_SIZE - 1)
                     midi.sysex.buf[midi.sysex.used++] = (byte)data;
                 return;
             } else {
                 midi.sysex.buf[midi.sysex.used++] = (byte)0xf7;
 
-                if ((midi.sysex.start != 0) && (midi.sysex.used >= 4) && (midi.sysex.used <= 9) && (midi.sysex.buf[1] == 0x41)
-                    && (midi.sysex.buf[3] == 0x16)) {
+                if (midi.sysex.start != 0 && midi.sysex.used >= 4 && midi.sysex.used <= 9 && midi.sysex.buf[1] == 0x41
+                    && midi.sysex.buf[3] == 0x16) {
                     Log.log(Level.WARNING, "MIDI:Skipping invalid MT-32 SysEx midi message (too short to contain a checksum)");
                 } else {
                     //				LOG(LOG_ALL,LOG_NORMAL)("Play sysex; address:%02X %02X %02X, length:%4d, delay:%3d", midi.sysex.buf[5], midi.sysex.buf[6], midi.sysex.buf[7], midi.sysex.used, midi.sysex.delay);
@@ -342,7 +351,7 @@ public class Midi {
                         } else if (midi.sysex.buf[5] == 0x10 && midi.sysex.buf[6] == 0x00 && midi.sysex.buf[7] == 0x01) {
                             midi.sysex.delay = 30; // Dark Sun 1
                         } else
-                            midi.sysex.delay = (/*Bitu*/int)(((float)(midi.sysex.used) * 1.25f) * 1000.0f / 3125.0f) + 2;
+                            midi.sysex.delay = (/*Bitu*/int)(midi.sysex.used * 1.25f * 1000.0f / 3125.0f) + 2;
                         midi.sysex.start = System.currentTimeMillis();
                     }
                 }
@@ -409,8 +418,8 @@ public class Midi {
 
         if (!def) {
             if (devices != null) {
-                for (int i = 0; i < devices.length; i++) {
-                    if (devices[i].getName().equalsIgnoreCase(dev)) {
+                for (Info element : devices) {
+                    if (element.getName().equalsIgnoreCase(dev)) {
                         try {
                             MidiDevice device = MidiSystem.getMidiDevice(devices[0]);
                             device.open();

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -43,18 +43,20 @@ import org.jpc.emulator.processor.Processor;
 public abstract class AddressSpace extends AbstractMemory {
     public static final int BLOCK_SIZE = 4 * 1024;
     public static final int BLOCK_MASK = BLOCK_SIZE - 1;
-    public static final int INDEX_MASK = ~(BLOCK_MASK);
+    public static final int INDEX_MASK = ~BLOCK_MASK;
     public static final int INDEX_SHIFT = 12;
-    public static final int INDEX_SIZE = 1 << (32 - INDEX_SHIFT);
+    public static final int INDEX_SIZE = 1 << 32 - INDEX_SHIFT;
 
     /**
      * Returns the size of the <code>AddressSpace</code> which is always 2<sup>32</sup>.
      * @return 2<sup>32</sup>
      */
+    @Override
     public final long getSize() {
-        return 0x100000000l;
+        return 0x100000000L;
     }
 
+    @Override
     public boolean isAllocated() {
         return true;
     }
@@ -73,20 +75,26 @@ public abstract class AddressSpace extends AbstractMemory {
      */
     protected abstract Memory getWriteMemoryBlockAt(int offset);
 
+    @Override
     public abstract void clear();
 
+    @Override
     public abstract byte getByte(int offset);
 
+    @Override
     public abstract void setByte(int offset, byte data);
 
+    @Override
     public short getWord(int offset) {
         return super.getWord(offset);
     }
 
+    @Override
     public int getDoubleWord(int offset) {
         return super.getDoubleWord(offset);
     }
 
+    @Override
     public long getQuadWord(int offset) {
         try {
             return getReadMemoryBlockAt(offset).getQuadWord(offset & BLOCK_MASK);
@@ -95,6 +103,7 @@ public abstract class AddressSpace extends AbstractMemory {
         }
     }
 
+    @Override
     public long getLowerDoubleQuadWord(int offset) {
         try {
             return getReadMemoryBlockAt(offset).getLowerDoubleQuadWord(offset & BLOCK_MASK);
@@ -103,6 +112,7 @@ public abstract class AddressSpace extends AbstractMemory {
         }
     }
 
+    @Override
     public long getUpperDoubleQuadWord(int offset) {
         try {
             return getReadMemoryBlockAt(offset).getUpperDoubleQuadWord(offset & BLOCK_MASK);
@@ -111,14 +121,17 @@ public abstract class AddressSpace extends AbstractMemory {
         }
     }
 
+    @Override
     public void setWord(int offset, short data) {
         super.setWord(offset, data);
     }
 
+    @Override
     public void setDoubleWord(int offset, int data) {
         super.setDoubleWord(offset, data);
     }
 
+    @Override
     public void setQuadWord(int offset, long data) {
         try {
             getWriteMemoryBlockAt(offset).setQuadWord(offset & BLOCK_MASK, data);
@@ -127,6 +140,7 @@ public abstract class AddressSpace extends AbstractMemory {
         }
     }
 
+    @Override
     public void setLowerDoubleQuadWord(int offset, long data) {
         try {
             getWriteMemoryBlockAt(offset).setLowerDoubleQuadWord(offset & BLOCK_MASK, data);
@@ -135,6 +149,7 @@ public abstract class AddressSpace extends AbstractMemory {
         }
     }
 
+    @Override
     public void setUpperDoubleQuadWord(int offset, long data) {
 //        System.out.println("Mem.setupperquad " + offset);
         try {
@@ -144,11 +159,12 @@ public abstract class AddressSpace extends AbstractMemory {
         }
     }
 
+    @Override
     public void copyArrayIntoContents(int address, byte[] buffer, int off, int len) {
         do {
             int partialLength = Math.min(BLOCK_SIZE - (address & BLOCK_MASK), len);
             Memory block = getWriteMemoryBlockAt(address);
-            if ((block == null) || block instanceof PhysicalAddressSpace.UnconnectedMemoryBlock)
+            if (block == null || block instanceof PhysicalAddressSpace.UnconnectedMemoryBlock)
                 if (this instanceof PhysicalAddressSpace) {
                     block = new LazyCodeBlockMemory(BLOCK_SIZE, ((PhysicalAddressSpace)this).getCodeBlockManager());
                     ((PhysicalAddressSpace)this).mapMemory(address, block);
@@ -160,6 +176,7 @@ public abstract class AddressSpace extends AbstractMemory {
         } while (len > 0);
     }
 
+    @Override
     public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {
         do {
             int partialLength = Math.min(BLOCK_SIZE - (address & BLOCK_MASK), len);
@@ -177,9 +194,12 @@ public abstract class AddressSpace extends AbstractMemory {
      */
     protected abstract void replaceBlocks(Memory original, Memory replacement);
 
+    @Override
     public abstract int executeReal(Processor cpu, int address);
 
+    @Override
     public abstract int executeProtected(Processor cpu, int address);
 
+    @Override
     public abstract int executeVirtual8086(Processor cpu, int address);
 }

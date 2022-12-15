@@ -27,14 +27,12 @@
 
 package org.jpc.emulator.execution.decoder;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.opcodes.vm.mov_S_Ew;
-import org.jpc.emulator.execution.opcodes.vm.mov_S_Ew_mem;
-import org.jpc.emulator.processor.Processor;
-import org.jpc.j2se.Option;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.j2se.Option;
 
 public class FastDecoder {
     public static final boolean PRINT_DISAM = Option.log_disam.value();
@@ -92,7 +90,7 @@ public class FastDecoder {
         int count = 1;
         boolean delayInterrupts = false;
         while (!current.isBranch()) {
-            if (((delayInterrupts) || (count >= MAX_INSTRUCTIONS_PER_BLOCK)) && !delayInterrupts(current)) {
+            if ((delayInterrupts || count >= MAX_INSTRUCTIONS_PER_BLOCK) && !delayInterrupts(current)) {
                 Executable eip;
                 if (mode == 1)
                     eip = new org.jpc.emulator.execution.opcodes.rm.eip_update(startAddr, (int)input.getAddress(), 0, input);
@@ -101,8 +99,8 @@ public class FastDecoder {
                 else
                     eip = new org.jpc.emulator.execution.opcodes.vm.eip_update(startAddr, (int)input.getAddress(), 0, input);
                 current.next = eip;
-                if (!delayInterrupts && (MAX_INSTRUCTIONS_PER_BLOCK > 10))
-                    System.out.println((String.format("Exceeded maximum number of instructions in a block at %x", startAddr)));
+                if (!delayInterrupts && MAX_INSTRUCTIONS_PER_BLOCK > 10)
+                    System.out.println(String.format("Exceeded maximum number of instructions in a block at %x", startAddr));
                 return constructBlock(start, (int)input.getAddress() - startAddr, count, input, operand_size);
             }
             beginCount = input.getCounter();

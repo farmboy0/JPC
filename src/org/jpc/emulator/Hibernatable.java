@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,9 @@
 
 package org.jpc.emulator;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * An object whose state can be loaded and saved to and from persistent storage.
@@ -45,12 +47,12 @@ public interface Hibernatable {
      * @param input
      * @throws java.io.IOException if thrown by the supplied input object
      */
-    public void loadState(DataInput input) throws IOException;
+    void loadState(DataInput input) throws IOException;
 
     /**
      * Writes this components internal state to output in a format shared by <code>loadState</code>.
      * @param output
      * @throws java.io.IOException if thrown by the supplied output object.
      */
-    public void saveState(DataOutput output) throws IOException;
+    void saveState(DataOutput output) throws IOException;
 }

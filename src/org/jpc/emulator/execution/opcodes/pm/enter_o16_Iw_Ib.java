@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,10 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
 
 public class enter_o16_Iw_Ib extends Executable {
     final int immw;
@@ -43,12 +42,13 @@ public class enter_o16_Iw_Ib extends Executable {
         immb = Modrm.Ib(input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         int frameSize = 0xffff & immw;
         int nestingLevel = immb;
         nestingLevel &= 0x1f;
 
-        cpu.push16((short)cpu.r_bp.get16());
+        cpu.push16(cpu.r_bp.get16());
         int frame_ptr16 = 0xffff & cpu.r_esp.get16();
 
         if (cpu.ss.getDefaultSizeFlag()) {
@@ -76,10 +76,12 @@ public class enter_o16_Iw_Ib extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

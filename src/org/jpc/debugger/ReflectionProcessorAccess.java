@@ -27,19 +27,18 @@
 
 package org.jpc.debugger;
 
-import org.jpc.emulator.processor.Processor;
-import org.jpc.emulator.processor.Segment;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Segment;
 
 public class ReflectionProcessorAccess extends ProcessorAccess {
     private Processor processor;
     private Map<String, Field> lookup;
 
     public ReflectionProcessorAccess(Processor cpu) {
-        super();
         this.processor = cpu;
         try {
             lookup = new HashMap<String, Field>();
@@ -83,6 +82,7 @@ public class ReflectionProcessorAccess extends ProcessorAccess {
         lookup.put(fieldName, targetField);
     }
 
+    @Override
     public int getValue(String name, int defaultValue) {
         if (name.equals("eflags"))
             return processor.getEFlags();
@@ -112,6 +112,7 @@ public class ReflectionProcessorAccess extends ProcessorAccess {
         }
     }
 
+    @Override
     public boolean setValue(String name, int value) {
         Field f = lookup.get(name);
         if (f == null)
@@ -131,6 +132,7 @@ public class ReflectionProcessorAccess extends ProcessorAccess {
         }
     }
 
+    @Override
     public void rowChanged(int row) {
     }
 }

@@ -18,6 +18,7 @@ public class ModeSwitchException extends RuntimeException {
         return x86Count;
     }
 
+    @Override
     public String toString() {
         if (this == REAL_MODE_EXCEPTION)
             return "Switched to REAL mode";

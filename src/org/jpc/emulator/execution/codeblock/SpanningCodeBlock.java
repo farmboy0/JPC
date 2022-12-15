@@ -39,10 +39,12 @@ import org.jpc.emulator.processor.Processor;
 public abstract class SpanningCodeBlock implements CodeBlock {
     private CodeBlock lastBlock = null;
 
+    @Override
     public int getX86Length() {
         return 0;
     }
 
+    @Override
     public int getX86Count() {
         try {
             return lastBlock.getX86Count();
@@ -51,6 +53,7 @@ public abstract class SpanningCodeBlock implements CodeBlock {
         }
     }
 
+    @Override
     public Executable.Branch execute(Processor cpu) {
         if (lastBlock == null)
             lastBlock = decode(cpu);
@@ -68,10 +71,12 @@ public abstract class SpanningCodeBlock implements CodeBlock {
      */
     public abstract CodeBlock decode(Processor cpu);
 
+    @Override
     public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         return false;
     }
 
+    @Override
     public String getDisplayString() {
         if (lastBlock != null)
             return lastBlock.getDisplayString();
@@ -79,6 +84,7 @@ public abstract class SpanningCodeBlock implements CodeBlock {
             return "Undecoded Spanning Block";
     }
 
+    @Override
     public Instruction getInstructions() {
         if (lastBlock != null)
             return lastBlock.getInstructions();

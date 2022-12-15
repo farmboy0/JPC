@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
 
 public class rol_Ed_Ib extends Executable {
     final int op1Index;
@@ -44,14 +44,15 @@ public class rol_Ed_Ib extends Executable {
         immb = Modrm.Ib(input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-        int shift = immb & (32 - 1);
+        int shift = immb & 32 - 1;
         int reg0 = op1.get32();
-        int res = (reg0 << shift) | (reg0 >>> (32 - shift));
+        int res = reg0 << shift | reg0 >>> 32 - shift;
         op1.set32(res);
         boolean bit0 = (res & 1) != 0;
-        boolean bit31 = (res & (1 << (32 - 1))) != 0;
+        boolean bit31 = (res & 1 << 32 - 1) != 0;
         if ((0x1F & immb) > 0) {
             cpu.cf = bit0;
             cpu.of = bit0 ^ bit31;
@@ -60,10 +61,12 @@ public class rol_Ed_Ib extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

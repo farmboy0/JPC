@@ -28,12 +28,12 @@
 package org.jpc.emulator.execution.decoder;
 
 import org.jpc.emulator.PC;
-import org.jpc.emulator.execution.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.Executable.Branch;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
-import org.jpc.emulator.processor.*;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.State;
 import org.jpc.j2se.Option;
-
-import static org.jpc.emulator.execution.Executable.*;
 
 public class BasicBlock implements CodeBlock {
     public static final boolean LOG_BLOCKENTRY = Option.log_blockentry.value();
@@ -68,23 +68,22 @@ public class BasicBlock implements CodeBlock {
     }
 
     private boolean watchedAddress(int addr) {
-        if (addr < MIN_ADDR_WATCH)
-            return false;
-        if ((addr & 0xFFFFFFFFL) > (MAX_ADDR_WATCH & 0xFFFFFFFFL))
+        if ((addr < MIN_ADDR_WATCH) || ((addr & 0xFFFFFFFFL) > (MAX_ADDR_WATCH & 0xFFFFFFFFL)))
             return false;
         return true;
     }
 
     public void postInstruction(Processor cpu, Executable last) {
-        if ((LOG_STATE) && watchedAddress(cpu.getInstructionPointer())) {
+        if (LOG_STATE && watchedAddress(cpu.getInstructionPointer())) {
             System.out.println("\t" + last);
             State.print(cpu);
         }
-        if ((SINGLE_STEP_TIME) && !last.toString().contains("eip"))
+        if (SINGLE_STEP_TIME && !last.toString().contains("eip"))
             cpu.vmClock.update(1);
         cpu.rf(false);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Executable current = start;
         Executable.Branch ret;
@@ -99,22 +98,27 @@ public class BasicBlock implements CodeBlock {
         return ret;
     }
 
+    @Override
     public int getX86Length() {
         return x86Length;
     }
 
+    @Override
     public int getX86Count() {
         return x86Count;
     }
 
+    @Override
     public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         return false;
     }
 
+    @Override
     public String getDisplayString() {
         return toString();
     }
 
+    @Override
     public Instruction getInstructions() {
         return null;
     }

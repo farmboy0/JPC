@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,9 @@
 
 package org.jpc.emulator;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * This class provides default implementations of the <code>HardwareComponent</code> methods. The
@@ -41,26 +43,33 @@ import java.io.*;
  * @author Chris Dennis
  */
 public abstract class AbstractHardwareComponent implements HardwareComponent {
+    @Override
     public boolean initialised() {
         return true;
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
     }
 
+    @Override
     public boolean updated() {
         return true;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
     }
 
+    @Override
     public void reset() {
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
     }
 }

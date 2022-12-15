@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -35,19 +35,46 @@ package org.jpc.debugger;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+
+import org.jpc.debugger.util.BasicTableModel;
+import org.jpc.debugger.util.UtilityFrame;
 import org.jpc.emulator.memory.AddressSpace;
-
-import javax.swing.*;
-
-import org.jpc.debugger.util.*;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
 
 public class WatchpointsFrame extends UtilityFrame implements PCListener {
     public static final String WATCHPOINT_FILE = "watchpoints.jpc";
-    public static final long WATCHPOINT_MAGIC = 0x81057FAB7272F11l;
+    public static final long WATCHPOINT_MAGIC = 0x81057FAB7272F11L;
 
     private boolean edited;
     private List<Watchpoint> watchpoints;
@@ -85,6 +112,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
 
         JMenu options = new JMenu("Options");
         options.add("Set Watchpoint").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 try {
                     String input = JOptionPane.showInputDialog(WatchpointsFrame.this, "Enter the address (in Hex) for the watchpoint: ",
@@ -97,6 +125,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
         });
         options.addSeparator();
         options.add("Remove All Watchpoints").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 removeAllWatchpoints();
             }
@@ -130,6 +159,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
         return edited;
     }
 
+    @Override
     public void frameClosed() {
         if (edited) {
             if (JOptionPane.showConfirmDialog(this, "Do you want to save the changes to the Watchpoints?", "Save Watchpoints",
@@ -170,6 +200,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
             return name.substring(0, dot) + ".jpc";
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             JFileChooser chooser = (JFileChooser)JPC.getObject(JFileChooser.class);
             if (evt.getSource() == load) {
@@ -199,6 +230,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
     }
 
     class Deleter extends AbstractAction {
+        @Override
         public void actionPerformed(ActionEvent evt) {
             deleteWatchpoint(wpTable.getSelectedRow());
         }
@@ -301,13 +333,15 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
             this.watchForValue = watchForValue;
         }
 
+        @Override
         public boolean equals(Object another) {
             if (!(another instanceof Watchpoint))
                 return false;
 
-            return (address == ((Watchpoint)another).address) && (watchValue == ((Watchpoint)another).watchValue);
+            return address == ((Watchpoint)another).address && watchValue == ((Watchpoint)another).watchValue;
         }
 
+        @Override
         public int compareTo(Watchpoint wp) {
             if (address != wp.address)
                 return address - wp.address;
@@ -352,20 +386,24 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
             super(new String[] { "Address", "Name", "Primary", "Watch target", "Watch for value" }, new int[] { 80, 250, 70, 90, 90 });
         }
 
+        @Override
         public int getRowCount() {
             return watchpoints.size();
         }
 
+        @Override
         public boolean isCellEditable(int row, int column) {
             return true;
         }
 
+        @Override
         public Class getColumnClass(int col) {
-            if ((col == 2) || (col == 4))
+            if (col == 2 || col == 4)
                 return Boolean.class;
             return String.class;
         }
 
+        @Override
         public void setValueAt(Object obj, int row, int column) {
             Watchpoint wp = watchpoints.get(row);
 
@@ -395,6 +433,7 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
             edited = true;
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             Watchpoint wp = watchpoints.get(row);
 
@@ -404,11 +443,11 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
             case 1:
                 return wp.name;
             case 2:
-                return new Boolean(wp.isPrimary);
+                return Boolean.valueOf(wp.isPrimary);
             case 3:
                 return String.format("%02x", wp.watchValue);
             case 4:
-                return new Boolean(wp.watchForValue);
+                return Boolean.valueOf(wp.watchForValue);
             default:
                 return "";
             }
@@ -559,18 +598,23 @@ public class WatchpointsFrame extends UtilityFrame implements PCListener {
         }
     }
 
+    @Override
     public void pcCreated() {
     }
 
+    @Override
     public void pcDisposed() {
     }
 
+    @Override
     public void executionStarted() {
     }
 
+    @Override
     public void executionStopped() {
     }
 
+    @Override
     public void refreshDetails() {
         model.fireTableDataChanged();
     }

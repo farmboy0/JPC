@@ -27,7 +27,7 @@
 
 package org.jpc.emulator.execution.decoder;
 
-import org.jpc.emulator.execution.*;
+import org.jpc.emulator.execution.Executable;
 
 public class DebugBasicBlock extends BasicBlock {
     public final Instruction start;
@@ -49,10 +49,12 @@ public class DebugBasicBlock extends BasicBlock {
         contents = b.toString();
     }
 
+    @Override
     public String getDisplayString() {
         return contents;
     }
 
+    @Override
     public Instruction getInstructions() {
         return start;
     }

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,19 +33,30 @@
 
 package org.jpc.j2se;
 
-import java.text.DecimalFormat;
 import java.awt.Dimension;
-import java.awt.event.*;
-import java.security.AccessControlException;
-import java.util.logging.*;
-import java.util.jar.*;
-import java.net.URLClassLoader;
-import javax.swing.*;
-import java.io.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessControlException;
+import java.text.DecimalFormat;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 
 import org.jpc.emulator.PC;
-import org.jpc.support.ArgProcessor;
 
 /**
  * @author Mike Moleschi
@@ -84,33 +95,39 @@ public class PCMonitorFrame extends JFrame implements Runnable {
 
         JMenu file = new JMenu("File");
         file.add("Start").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 start();
             }
         });
         file.add("Stop").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 stop();
             }
         });
         file.add("Reset").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 reset();
             }
         });
         file.addSeparator();
         file.add("Save Configuration").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 saveConfig();
             }
         });
         file.add("Load Configuration").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 loadConfig();
             }
         });
         file.addSeparator();
         file.add("Quit").addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
@@ -128,7 +145,7 @@ public class PCMonitorFrame extends JFrame implements Runnable {
         getContentPane().add("South", speedDisplay);
 
         try {
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         } catch (AccessControlException e) {
             LOGGING.log(Level.WARNING, "Not able to add some components to frame.", e);
         }
@@ -155,7 +172,7 @@ public class PCMonitorFrame extends JFrame implements Runnable {
 
     protected synchronized void stop() {
         running = false;
-        if ((runner != null) && runner.isAlive()) {
+        if (runner != null && runner.isAlive()) {
             try {
                 runner.join(5000);
             } catch (InterruptedException e) {
@@ -213,6 +230,7 @@ public class PCMonitorFrame extends JFrame implements Runnable {
         start();
     }
 
+    @Override
     public void run() {
         pc.start();
         try {
@@ -223,7 +241,7 @@ public class PCMonitorFrame extends JFrame implements Runnable {
                 execCount -= pc.execute();
                 if (execCount > 0)
                     continue;
-                totalExec += (COUNTDOWN - execCount);
+                totalExec += COUNTDOWN - execCount;
                 execCount = COUNTDOWN;
 
                 if (updateMHz)

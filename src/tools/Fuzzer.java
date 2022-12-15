@@ -27,13 +27,27 @@
 
 package tools;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Calendar;
+import java.util.Formatter;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class Fuzzer {
@@ -42,14 +56,14 @@ public class Fuzzer {
     public static final boolean compareFlags = true;
 
     public static void main(String[] args) throws Exception {
-        URL[] urls = new URL[] { new File(newJar).toURL() };
+        URL[] urls = { new File(newJar).toURL() };
         ClassLoader cl1 = new URLClassLoader(urls, tools.Fuzzer.class.getClassLoader());
         Class opts = cl1.loadClass("org.jpc.j2se.Option");
         Method parse = opts.getMethod("parse", String[].class);
         args = (String[])parse.invoke(opts, (Object)args);
         PCHandle pc1 = new PCHandle(cl1, true, args);
 
-        URL[] urls2 = new URL[] { new File(oldJar).toURL() };
+        URL[] urls2 = { new File(oldJar).toURL() };
         ClassLoader cl2 = new URLClassLoader(urls2, tools.Fuzzer.class.getClassLoader());
         PCHandle pc2 = new PCHandle(cl2, false, args);
 
@@ -108,8 +122,8 @@ public class Fuzzer {
         byte[] data1 = new byte[4096];
         byte[] data2 = new byte[4096];
         for (int i = 0; i < 1024 * 1024; i++) {
-            Integer l1 = newpc.savePage(new Integer(i), data1);
-            Integer l2 = oldpc.savePage(new Integer(i), data2);
+            Integer l1 = newpc.savePage(i, data1);
+            Integer l2 = oldpc.savePage(i, data2);
             if (l2 > 0)
                 if (!comparePage(i, data1, data2, log))
                     printAllStates(code, input, newpc.getState(), oldpc.getState(), opclass, disam);
@@ -163,8 +177,8 @@ public class Fuzzer {
 
     public static void printAllStates(byte[] code, int[] input, int[] fast, int[] old, String opclass, String disam) {
         System.out.print("**" + disam + " == " + opclass + " =: ");
-        for (int i = 0; i < code.length; i++)
-            System.out.printf("%02x ", code[i]);
+        for (byte element : code)
+            System.out.printf("%02x ", element);
         System.out.println();
         System.out.println("Input state:");
         printState(input);
@@ -179,7 +193,7 @@ public class Fuzzer {
             f.format("[%8s] ", "ST" + (i - start) / 2);
         f.format("\n");
         for (int i = start; i < end; i += 2)
-            f.format("[%f] ", Double.longBitsToDouble((vals[i] & 0xffffffffL) << 32 | (vals[i + 1] & 0xffffffffL)));
+            f.format("[%f] ", Double.longBitsToDouble((vals[i] & 0xffffffffL) << 32 | vals[i + 1] & 0xffffffffL));
         f.format("\n");
     }
 
@@ -204,7 +218,7 @@ public class Fuzzer {
                     //continueExecution();
                 }
             } else {
-                if (compareFlags && ((fast[i] & FLAG_MASK) != (old[i] & FLAG_MASK))) {
+                if (compareFlags && (fast[i] & FLAG_MASK) != (old[i] & FLAG_MASK)) {
                     b.append(String.format("Difference: %d=%s %08x - %08x\n", i, names[i], fast[i], old[i]));
                     //continueExecution();
                 }
@@ -232,7 +246,7 @@ public class Fuzzer {
     public static final int FLAG_MASK = -1;//~0x10;
 
     public static final int gdtBase = 0xfb632;
-    public static byte[] gdt = new byte[] {
+    public static byte[] gdt = {
         (byte)0x0,
         (byte)0x0,
         (byte)0x0,
@@ -281,7 +295,7 @@ public class Fuzzer {
         (byte)0x93,
         (byte)0x0,
         (byte)0x0 };
-    public static byte[] lgdt = new byte[] { (byte)0x2e, (byte)0x0f, (byte)0x01, (byte)0x16, (byte)0x2c, (byte)0xb6 };
+    public static byte[] lgdt = { (byte)0x2e, (byte)0x0f, (byte)0x01, (byte)0x16, (byte)0x2c, (byte)0xb6 };
     public static int testEip = 0;
     public static int testCS = 0;
 
@@ -295,7 +309,7 @@ public class Fuzzer {
             Class c1 = cl1.loadClass("org.jpc.emulator.PC");
 
             Constructor ctor = c1.getConstructor(String[].class, Calendar.class);
-            pc = ctor.newInstance((Object)args, start);
+            pc = ctor.newInstance(args, start);
 
             Method m1 = c1.getMethod("hello");
             m1.invoke(pc);
@@ -308,7 +322,7 @@ public class Fuzzer {
         }
 
         public void setPM(boolean pm) throws Exception {
-            byte[] setcr0 = new byte[] { (byte)0x0f, (byte)0x22, (byte)0xc0 };
+            byte[] setcr0 = { (byte)0x0f, (byte)0x22, (byte)0xc0 };
             if (pm) {
                 // setup gdt data
                 /*int[] regs0 = new int[16];
@@ -357,7 +371,7 @@ public class Fuzzer {
         }
 
         public void setCode(byte[] code) throws Exception {
-            setCode.invoke(pc, (Object)code);
+            setCode.invoke(pc, code);
         }
 
         public int[] getState() throws Exception {
@@ -373,7 +387,7 @@ public class Fuzzer {
         }
 
         public Integer savePage(Integer page, byte[] buf) throws Exception {
-            return (Integer)savePage.invoke(pc, page, (Object)buf);
+            return (Integer)savePage.invoke(pc, page, buf);
         }
     }
 
@@ -407,6 +421,7 @@ public class Fuzzer {
             }
         }
 
+        @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             if (qName.equals("class"))
                 type = Type.Class;
@@ -418,6 +433,7 @@ public class Fuzzer {
                 type = Type.Input;
         }
 
+        @Override
         public void characters(char ch[], int start, int length) throws SAXException {
             if (type == Type.Class)
                 currentClass = new String(ch, start, length);
@@ -456,6 +472,7 @@ public class Fuzzer {
             }
         }
 
+        @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             type = Type.None;
         }

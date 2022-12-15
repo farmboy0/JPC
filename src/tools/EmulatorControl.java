@@ -59,7 +59,7 @@ public abstract class EmulatorControl {
     public static int DS_BASE_INDEX = 33;
     public static int FS_BASE_INDEX = 34;
     public static int GS_BASE_INDEX = 35;
-    public static String[] names = new String[] {
+    public static String[] names = {
         "eax",
         "ecx",
         "edx",
@@ -223,9 +223,9 @@ public abstract class EmulatorControl {
         for (int i = 7; i >= 0; i--) {
             byte[] value = new byte[8];
             for (int j = 0; j < 4; j++)
-                value[7 - j] = (byte)(state[37 + 2 * i] >> (8 * (3 - j)));
+                value[7 - j] = (byte)(state[37 + 2 * i] >> 8 * (3 - j));
             for (int j = 4; j < 8; j++)
-                value[7 - j] = (byte)(state[37 + 2 * i + 1] >> (8 * (7 - j)));
+                value[7 - j] = (byte)(state[37 + 2 * i + 1] >> 8 * (7 - j));
             // put value in mem at dataAddress
             setPhysicalMemory(nextDataAddress, value);
 
@@ -406,9 +406,9 @@ public abstract class EmulatorControl {
         for (int i = 7; i >= 0; i--) {
             byte[] value = new byte[8];
             for (int j = 0; j < 4; j++)
-                value[7 - j] = (byte)(state[37 + 2 * i] >> (8 * (3 - j)));
+                value[7 - j] = (byte)(state[37 + 2 * i] >> 8 * (3 - j));
             for (int j = 4; j < 8; j++)
-                value[7 - j] = (byte)(state[37 + 2 * i + 1] >> (8 * (7 - j)));
+                value[7 - j] = (byte)(state[37 + 2 * i + 1] >> 8 * (7 - j));
             // put value in mem at dataAddress
             setPhysicalMemory(nextDataAddress, value);
 
@@ -475,7 +475,7 @@ public abstract class EmulatorControl {
                 continue;
             bout.write(0xc7);
             bout.write(0xc0);
-            bout.write((seg + 1) << 3); // gdt index is seg +1
+            bout.write(seg + 1 << 3); // gdt index is seg +1
             bout.write(0);
             bout.write(0x8e); // mov S, ax
             bout.write(0xc0 + (seg << 3));
@@ -613,9 +613,9 @@ public abstract class EmulatorControl {
         for (int i = 7; i >= 0; i--) {
             byte[] value = new byte[8];
             for (int j = 0; j < 4; j++)
-                value[7 - j] = (byte)(state[37 + 2 * i] >> (8 * (3 - j)));
+                value[7 - j] = (byte)(state[37 + 2 * i] >> 8 * (3 - j));
             for (int j = 4; j < 8; j++)
-                value[7 - j] = (byte)(state[37 + 2 * i + 1] >> (8 * (7 - j)));
+                value[7 - j] = (byte)(state[37 + 2 * i + 1] >> 8 * (7 - j));
             // put value in mem at dataAddress
             setPhysicalMemory(nextDataAddress, value);
 
@@ -690,10 +690,10 @@ public abstract class EmulatorControl {
     }
 
     public static long getInterruptGateDescriptor(int gdt_index, int offset) {
-        long d = ((gdt_index << 3) & 0xffffL) << 16;
+        long d = (gdt_index << 3 & 0xffffL) << 16;
         d |= offset & 0xffffL;
         d |= (offset & 0xffff0000L) << 32;
-        d |= (0x86L << 40); // present, 16-bit gate
+        d |= 0x86L << 40; // present, 16-bit gate
         return d;
     }
 
@@ -703,7 +703,7 @@ public abstract class EmulatorControl {
         d |= (base & 0xff000000L) << 32;
         d |= limit & 0xffffL;
         d |= (limit & 0xf0000L) << 32;
-        d |= (0x9aL << 40); // present, execute read conforming code segment
+        d |= 0x9aL << 40; // present, execute read conforming code segment
         return d;
     }
 
@@ -713,7 +713,7 @@ public abstract class EmulatorControl {
         d |= (base & 0xff000000L) << 32;
         d |= limit & 0xffffL;
         d |= (limit & 0xf0000L) << 32;
-        d |= (0x93L << 40); // present, read/write data segment
+        d |= 0x93L << 40; // present, read/write data segment
         return d;
     }
 

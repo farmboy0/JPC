@@ -27,14 +27,19 @@
 
 package tools;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.Map;
 
 public class Bochs extends EmulatorControl {
     public static final String EXE = "/home/ian/jpc/bochs/bochs-2.6.1/bochs";
     public static final boolean PRINT = false;
     private static int lineCount = 0;
-    public static String[] names2 = new String[] {
+    public static String[] names2 = {
         "eax",
         "ecx",
         "edx",
@@ -114,6 +119,7 @@ public class Bochs extends EmulatorControl {
         readLine(); // last line
     }
 
+    @Override
     public String executeInstruction() throws IOException {
         writeCommand("s");
         String pream = readLine();
@@ -128,6 +134,7 @@ public class Bochs extends EmulatorControl {
         return next + pream;
     }
 
+    @Override
     public int[] getState() throws IOException {
         writeCommand("r");
         int[] regs = new int[names2.length];
@@ -193,7 +200,7 @@ public class Bochs extends EmulatorControl {
         while (!(fline = readLine()).contains("fds"))
             ;
         for (int i = 0; i < 8; i++) {
-            int findex = (i - ((status >> 11) & 7)) & 7;
+            int findex = i - (status >> 11 & 7) & 7;
             fline = readLine();
             long val = parseFPUReg(fline);
             regs[37 + 2 * findex] = (int)(val >> 32);
@@ -204,6 +211,7 @@ public class Bochs extends EmulatorControl {
         return regs;
     }
 
+    @Override
     public void setPhysicalMemory(int addr, byte[] data) throws IOException {
         for (int i = 0; i < data.length; i++) {
             writeCommand(String.format("setpmem 0x%x 1 0x%x", addr + i, data[i]));
@@ -213,6 +221,7 @@ public class Bochs extends EmulatorControl {
         }
     }
 
+    @Override
     public byte[] getCMOS() throws IOException {
         writeCommand("info device \"cmos\"");
         String line;
@@ -232,6 +241,7 @@ public class Bochs extends EmulatorControl {
         return res;
     }
 
+    @Override
     public int[] getPit() throws IOException {
         int[] state = new int[3 * 4];
         getPit(state, 0);
@@ -284,30 +294,37 @@ public class Bochs extends EmulatorControl {
         state[4 * channel + 3] = nextChangeTime;
     }
 
+    @Override
     public void keysDown(String keys) {
         throw new IllegalStateException("Unimplemented keysDown");
     }
 
+    @Override
     public void keysUp(String keys) {
         throw new IllegalStateException("Unimplemented keysUp");
     }
 
+    @Override
     public void sendMouse(Integer dx, Integer dy, Integer dz, Integer buttons) {
         throw new IllegalStateException("Unimplemented sendMouse");
     }
 
+    @Override
     public String disam(byte[] code, Integer ops, Boolean mode) {
         throw new IllegalStateException("Unimplemented sendMouse");
     }
 
+    @Override
     public int x86Length(byte[] code, Boolean mode) {
         throw new IllegalStateException("Unimplemented sendMouse");
     }
 
+    @Override
     public Integer getPhysicalPage(Integer page, byte[] data) throws IOException {
         return getPage("xp/4096bx ", page, data);
     }
 
+    @Override
     public Integer getLinearPage(Integer page, byte[] data) throws IOException {
         return getPage("x/4096bx ", page, data);
     }
@@ -339,7 +356,7 @@ public class Bochs extends EmulatorControl {
     private String readLine() throws IOException {
         String line = in.readLine();
         if (PRINT)
-            System.out.println((lineCount++) + " " + line);
+            System.out.println(lineCount++ + " " + line);
         return line;
     }
 
@@ -350,11 +367,11 @@ public class Bochs extends EmulatorControl {
     }
 
     public static int getBase(int high, int low) {
-        return ((low >> 16) & 0xffff) | ((high & 0xff) << 16) | (high & 0xff000000);
+        return low >> 16 & 0xffff | (high & 0xff) << 16 | high & 0xff000000;
     }
 
     public static int getLimit(int high, int low) {
-        return (low & 0xffff) | (high & 0xf0000);
+        return low & 0xffff | high & 0xf0000;
     }
 
     public static void print(int[] r) {
@@ -366,11 +383,11 @@ public class Bochs extends EmulatorControl {
         int start = line.indexOf(":", line.indexOf("raw")) + 1;
         long sign = Integer.parseInt(line.substring(start - 5, start - 4), 16) >= 8 ? 1 : 0;
         long exponent = Long.parseLong(line.substring(start - 5, start - 1), 16);
-        exponent -= (0x3fff - 0x3ff);
+        exponent -= 0x3fff - 0x3ff;
         exponent &= 0x7ff;
         long fraction = Long.parseLong(line.substring(start, start + 14), 16);
         fraction >>= 3;
-        return (sign << 63) | (exponent << 52) | (fraction & 0xfffffffffffffL);
+        return sign << 63 | exponent << 52 | fraction & 0xfffffffffffffL;
     }
 
     public static int parseReg(String line, int size) {
@@ -386,6 +403,7 @@ public class Bochs extends EmulatorControl {
         }
     }
 
+    @Override
     public void destroy() {
         try {
             writeCommand("q");

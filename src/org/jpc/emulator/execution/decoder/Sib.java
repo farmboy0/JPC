@@ -63,7 +63,7 @@ public class Sib {
             base = Processor.EDI_INDEX;
             break;
         }
-        int indexReg = (sib >> 3) & 7;
+        int indexReg = sib >> 3 & 7;
         switch (indexReg) {
         case 0:
             index = Processor.EAX_INDEX;
@@ -131,7 +131,7 @@ public class Sib {
             base = Processor.EDI_INDEX;
             break;
         }
-        int indexReg = (sib >> 3) & 7;
+        int indexReg = sib >> 3 & 7;
         switch (indexReg) {
         case 0:
             index = Processor.EAX_INDEX;
@@ -199,7 +199,7 @@ public class Sib {
             base = Processor.EDI_INDEX;
             break;
         }
-        int indexReg = (sib >> 3) & 7;
+        int indexReg = sib >> 3 & 7;
         switch (indexReg) {
         case 0:
             index = Processor.EAX_INDEX;

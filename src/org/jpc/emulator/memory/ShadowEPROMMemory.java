@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,10 +33,9 @@
 
 package org.jpc.emulator.memory;
 
-import org.jpc.emulator.execution.codeblock.CodeBlockManager;
-
-import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 
 /**
  * Provides an Eprom memory implementation which shadows another page depending on permissions.
@@ -58,6 +57,7 @@ public class ShadowEPROMMemory extends EPROMMemory {
         this.rom = rom;
     }
 
+    @Override
     public byte getByte(int offset) {
         if (readable())
             return super.getByte(offset);
@@ -65,6 +65,7 @@ public class ShadowEPROMMemory extends EPROMMemory {
             return rom.getByte(offset);
     }
 
+    @Override
     public short getWord(int offset) {
         if (readable())
             return super.getWord(offset);
@@ -72,6 +73,7 @@ public class ShadowEPROMMemory extends EPROMMemory {
             return rom.getWord(offset);
     }
 
+    @Override
     public int getDoubleWord(int offset) {
         if (readable())
             return super.getDoubleWord(offset);
@@ -79,6 +81,7 @@ public class ShadowEPROMMemory extends EPROMMemory {
             return rom.getDoubleWord(offset);
     }
 
+    @Override
     public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {
         if (readable())
             super.copyContentsIntoArray(address, buffer, off, len);
@@ -86,6 +89,7 @@ public class ShadowEPROMMemory extends EPROMMemory {
             rom.copyContentsIntoArray(address, buffer, off, len);
     }
 
+    @Override
     public String toString() {
         return "Shadow EPROM Memory [" + getSize() + "]";
     }

@@ -27,8 +27,8 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.processor.Processor;
 
 class SpanningRealModeCodeBlock extends SpanningCodeBlock implements RealModeCodeBlock {
     private PeekableMemoryStream byteSourceStream = new PeekableMemoryStream();
@@ -40,6 +40,7 @@ class SpanningRealModeCodeBlock extends SpanningCodeBlock implements RealModeCod
         this.factories = factories;
     }
 
+    @Override
     public CodeBlock decode(Processor cpu) {
         decodes++;
         if (decodes % 1000 == 0)
@@ -48,7 +49,7 @@ class SpanningRealModeCodeBlock extends SpanningCodeBlock implements RealModeCod
         AddressSpace memory = cpu.physicalMemory;
         int address = cpu.getInstructionPointer();
 
-        for (int i = 0; (i < factories.length) && (block == null); i++) {
+        for (int i = 0; i < factories.length && block == null; i++) {
             try {
                 byteSourceStream.set(memory, address);
                 block = factories[i].getRealModeCodeBlock(byteSourceStream);
@@ -61,6 +62,7 @@ class SpanningRealModeCodeBlock extends SpanningCodeBlock implements RealModeCod
         return block;
     }
 
+    @Override
     public String toString() {
         return "Spanning Real Mode CodeBlock";
     }

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,35 +33,79 @@
 
 package org.jpc.emulator;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import javax.swing.JPanel;
+
 import org.jpc.debugger.LinearMemoryViewer;
+import org.jpc.emulator.execution.codeblock.CodeBlock;
+import org.jpc.emulator.execution.codeblock.CodeBlockManager;
+import org.jpc.emulator.execution.codeblock.PeekableMemoryStream;
 import org.jpc.emulator.execution.decoder.BasicBlock;
 import org.jpc.emulator.execution.decoder.DebugBasicBlock;
 import org.jpc.emulator.execution.decoder.Disassembler;
 import org.jpc.emulator.execution.decoder.Instruction;
-import org.jpc.emulator.execution.codeblock.*;
-import org.jpc.emulator.motherboard.*;
-import org.jpc.emulator.memory.*;
-import org.jpc.emulator.pci.peripheral.*;
-import org.jpc.emulator.pci.*;
-import org.jpc.emulator.peripheral.*;
-import org.jpc.emulator.processor.*;
+import org.jpc.emulator.memory.LinearAddressSpace;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
+import org.jpc.emulator.motherboard.BochsPIT;
+import org.jpc.emulator.motherboard.DMAController;
+import org.jpc.emulator.motherboard.GateA20Handler;
+import org.jpc.emulator.motherboard.IODevice;
+import org.jpc.emulator.motherboard.IOPortHandler;
+import org.jpc.emulator.motherboard.InterruptController;
+import org.jpc.emulator.motherboard.IntervalTimer;
+import org.jpc.emulator.motherboard.RTC;
+import org.jpc.emulator.motherboard.SystemBIOS;
+import org.jpc.emulator.motherboard.VGABIOS;
+import org.jpc.emulator.pci.PCIBus;
+import org.jpc.emulator.pci.PCIHostBridge;
+import org.jpc.emulator.pci.PCIISABridge;
+import org.jpc.emulator.pci.peripheral.DefaultVGACard;
+import org.jpc.emulator.pci.peripheral.EthernetCard;
+import org.jpc.emulator.pci.peripheral.PIIX3IDEInterface;
+import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.emulator.peripheral.Adlib;
+import org.jpc.emulator.peripheral.AudioLayer;
+import org.jpc.emulator.peripheral.FloppyController;
+import org.jpc.emulator.peripheral.Keyboard;
+import org.jpc.emulator.peripheral.MPU401;
+import org.jpc.emulator.peripheral.Midi;
+import org.jpc.emulator.peripheral.Mixer;
+import org.jpc.emulator.peripheral.PCSpeaker;
+import org.jpc.emulator.peripheral.SBlaster;
+import org.jpc.emulator.peripheral.SerialPort;
+import org.jpc.emulator.processor.ModeSwitchException;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
+import org.jpc.emulator.processor.Segment;
+import org.jpc.emulator.processor.SegmentFactory;
 import org.jpc.j2se.KeyMapping;
 import org.jpc.j2se.Option;
 import org.jpc.j2se.PCMonitor;
-import org.jpc.support.*;
-
-import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
-import java.util.logging.*;
-import java.util.zip.*;
-import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 import org.jpc.j2se.VirtualClock;
-
-import javax.swing.*;
+import org.jpc.support.ArgProcessor;
+import org.jpc.support.Clock;
+import org.jpc.support.DriveSet;
 
 /**
  * This class represents the emulated PC and holds references to the hardware components.
@@ -289,7 +333,7 @@ public class PC {
         }
         double[] newFPUStack = new double[8];
         for (int i = 0; i < 8; i++)
-            newFPUStack[i] = Double.longBitsToDouble(0xffffffffL & s[2 * i + 37] | ((0xffffffffL & s[2 * i + 38]) << 32));
+            newFPUStack[i] = Double.longBitsToDouble(0xffffffffL & s[2 * i + 37] | (0xffffffffL & s[2 * i + 38]) << 32);
         processor.fpu.setStack(newFPUStack);
     }
 
@@ -317,16 +361,16 @@ public class PC {
     public void sendKeysDown(String text) {
         for (char c : text.toCharArray()) {
             int[] keycodes = KeyMapping.getJavaKeycodes(c);
-            for (int i = 0; i < keycodes.length; i++)
-                keyboard.keyPressed(KeyMapping.getScancode(keycodes[i]));
+            for (int keycode : keycodes)
+                keyboard.keyPressed(KeyMapping.getScancode(keycode));
         }
     }
 
     public void sendKeysUp(String text) {
         for (char c : text.toCharArray()) {
             int[] keycodes = KeyMapping.getJavaKeycodes(c);
-            for (int i = 0; i < keycodes.length; i++)
-                keyboard.keyReleased(KeyMapping.getScancode(keycodes[i]));
+            for (int keycode : keycodes)
+                keyboard.keyReleased(KeyMapping.getScancode(keycode));
         }
     }
 
@@ -335,7 +379,7 @@ public class PC {
     }
 
     public int[] getState() {
-        int[] res = new int[] {
+        int[] res = {
             processor.r_eax.get32(),
             processor.r_ecx.get32(),
             processor.r_edx.get32(),
@@ -500,7 +544,7 @@ public class PC {
                 fullyInitialised &= outer.initialised();
             }
             count++;
-        } while ((fullyInitialised == false) && (count < 100));
+        } while (!fullyInitialised && count < 100);
 
         if (!fullyInitialised) {
             StringBuilder sb = new StringBuilder("pc >> component configuration errors\n");
@@ -640,7 +684,7 @@ public class PC {
                 fullyInitialised &= outer.updated();
             }
             count++;
-        } while ((fullyInitialised == false) && (count < 100));
+        } while (!fullyInitialised && count < 100);
 
         if (!fullyInitialised) {
             StringBuilder sb = new StringBuilder("pc >> component linking errors\n");
@@ -815,7 +859,7 @@ public class PC {
 
     public int executeRealBlock() {
         try {
-            int block = physicalAddr.executeReal(processor, processor.getInstructionPointer());
+
 //            staticClockx86Count += block;
 //            if (staticClockx86Count >= INSTRUCTIONS_BETWEEN_INTERRUPTS)
 //            {
@@ -827,7 +871,7 @@ public class PC {
 //                        vmClock.update(1);
 //                staticClockx86Count = 0;
 //            }
-            return block;
+            return physicalAddr.executeReal(processor, processor.getInstructionPointer());
         } catch (ProcessorException p) {
             processor.handleRealModeException(p);
         } catch (ModeSwitchException e) {
@@ -852,7 +896,7 @@ public class PC {
 
     public int executeVirtual8086Block() {
         try {
-            int block = linearAddr.executeVirtual8086(processor, processor.getInstructionPointer());
+
 //            staticClockx86Count += block;
 //            if (staticClockx86Count >= INSTRUCTIONS_BETWEEN_INTERRUPTS)
 //            {
@@ -864,7 +908,7 @@ public class PC {
 //                        vmClock.update(1);
 //                staticClockx86Count = 0;
 //            }
-            return block;
+            return linearAddr.executeVirtual8086(processor, processor.getInstructionPointer());
         } catch (ProcessorException p) {
             processor.handleVirtual8086ModeException(p);
         } catch (ModeSwitchException e) {
@@ -889,7 +933,7 @@ public class PC {
 
     public int executeProtectedBlock() {
         try {
-            int block = linearAddr.executeProtected(processor, processor.getInstructionPointer());
+
 //            staticClockx86Count += block;
 //            if (staticClockx86Count >= INSTRUCTIONS_BETWEEN_INTERRUPTS)
 //            {
@@ -901,7 +945,7 @@ public class PC {
 //                        vmClock.update(1);
 //                staticClockx86Count = 0;
 //            }
-            return block;
+            return linearAddr.executeProtected(processor, processor.getInstructionPointer());
         } catch (ProcessorException p) {
             processor.handleProtectedModeException(p);
         } catch (ModeSwitchException e) {

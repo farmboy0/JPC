@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,9 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
 
 public class fdivp_ST6_ST5 extends Executable {
 
@@ -40,22 +38,25 @@ public class fdivp_ST6_ST5 extends Executable {
         int modrm = input.readU8();
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(6);
         double freg1 = cpu.fpu.ST(5);
-        if (((freg0 == 0.0) && (freg1 == 0.0)) || (Double.isInfinite(freg0) && Double.isInfinite(freg1)))
+        if (freg0 == 0.0 && freg1 == 0.0 || Double.isInfinite(freg0) && Double.isInfinite(freg1))
             cpu.fpu.setInvalidOperation();
-        if ((freg1 == 0.0) && !Double.isNaN(freg0) && !Double.isInfinite(freg0))
+        if (freg1 == 0.0 && !Double.isNaN(freg0) && !Double.isInfinite(freg0))
             cpu.fpu.setZeroDivide();
         cpu.fpu.setST(6, freg0 / freg1);
         cpu.fpu.pop();
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

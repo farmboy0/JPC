@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -47,7 +47,7 @@ public interface Decoder {
      * @param limit max x86 instructions to decode.
      * @return decoded instruction stream
      */
-    public BasicBlock decodeReal(PeekableInputStream source, int limit);
+    BasicBlock decodeReal(PeekableInputStream source, int limit);
 
     /**
      * Decodes a sequence of protected-mode x86 bytes into an instruction stream.
@@ -58,7 +58,7 @@ public interface Decoder {
      * @param limit max x86 instructions to decode.
      * @return decoded instruction stream
      */
-    public BasicBlock decodeProtected(PeekableInputStream source, boolean operandSize, int limit);
+    BasicBlock decodeProtected(PeekableInputStream source, boolean operandSize, int limit);
 
     /**
      * Decodes a sequence of virtual8086-mode x86 bytes into an instruction stream.
@@ -66,5 +66,5 @@ public interface Decoder {
      * @param limit max x86 instructions to decode.
      * @return decoded instruction stream
      */
-    public BasicBlock decodeVirtual8086(PeekableInputStream source, int limit);
+    BasicBlock decodeVirtual8086(PeekableInputStream source, int limit);
 }

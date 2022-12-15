@@ -1,10 +1,11 @@
 package org.jpc.emulator.execution.opcodes.rm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Disassembler;
+import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Prefices;
+import org.jpc.emulator.processor.Processor;
 
 public class UnimplementedOpcode extends Executable {
     final int blockLength;
@@ -21,16 +22,19 @@ public class UnimplementedOpcode extends Executable {
             + Disassembler.getRawBytes(input, eip - blockStart);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         if (true)
             throw new IllegalStateException("Unimplemented opcode: " + error);
         return Branch.Jmp_Unknown;
     }
 
+    @Override
     public boolean isBranch() {
         return true;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

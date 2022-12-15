@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -38,15 +38,15 @@ import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.Processor;
 
 public interface CodeBlock {
-    public int getX86Length();
+    int getX86Length();
 
-    public int getX86Count();
+    int getX86Count();
 
-    public Executable.Branch execute(Processor cpu);
+    Executable.Branch execute(Processor cpu);
 
-    public String getDisplayString();
+    String getDisplayString();
 
-    public Instruction getInstructions();
+    Instruction getInstructions();
 
-    public boolean handleMemoryRegionChange(int startAddress, int endAddress);
+    boolean handleMemoryRegionChange(int startAddress, int endAddress);
 }

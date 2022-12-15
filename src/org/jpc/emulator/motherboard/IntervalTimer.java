@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,17 @@
 
 package org.jpc.emulator.motherboard;
 
-import org.jpc.emulator.peripheral.PCSpeaker;
-import org.jpc.j2se.*;
-import org.jpc.support.Clock;
-import org.jpc.emulator.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-import java.io.*;
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.Timer;
+import org.jpc.emulator.TimerResponsive;
+import org.jpc.emulator.peripheral.PCSpeaker;
+import org.jpc.j2se.Option;
+import org.jpc.support.Clock;
 
 /**
  * Emulation of an 8254 Interval Timer.
@@ -79,15 +84,15 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
     }
 
     private static final long scale64(long input, int multiply, int divide) {
-        long rl = (0xffffffffl & input) * multiply;
+        long rl = (0xffffffffL & input) * multiply;
         long rh = (input >>> 32) * multiply;
 
-        rh += (rl >> 32);
+        rh += rl >> 32;
 
-        long resultHigh = 0xffffffffl & (rh / divide);
-        long resultLow = 0xffffffffl & ((((rh % divide) << 32) + (rl & 0xffffffffl)) / divide);
+        long resultHigh = 0xffffffffL & rh / divide;
+        long resultLow = 0xffffffffL & ((rh % divide << 32) + (rl & 0xffffffffL)) / divide;
 
-        return (resultHigh << 32) | resultLow;
+        return resultHigh << 32 | resultLow;
     }
 
     /**
@@ -103,6 +108,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             bochs = new BochsPIT(Option.ips.intValue(150000000));
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(channels.length);
         for (TimerChannel channel : channels) {
@@ -110,6 +116,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         }
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         madeNewTimer = false;
         ioportRegistered = false;
@@ -122,34 +129,41 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         }
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] { ioPortBase, ioPortBase + 1, ioPortBase + 2, ioPortBase + 3 };
     }
 
+    @Override
     public int ioPortRead32(int address) {
-        return (ioPortRead16(address) & 0xffff) | ((ioPortRead16(address + 2) << 16) & 0xffff0000);
+        return ioPortRead16(address) & 0xffff | ioPortRead16(address + 2) << 16 & 0xffff0000;
     }
 
+    @Override
     public int ioPortRead16(int address) {
-        return (ioPortRead8(address) & 0xff) | ((ioPortRead8(address + 1) << 8) & 0xff00);
+        return ioPortRead8(address) & 0xff | ioPortRead8(address + 1) << 8 & 0xff00;
     }
 
+    @Override
     public int ioPortRead8(int address) {
         if ((address & 3) == 3)
             return 0; // read from control word register
         return channels[address & 0x3].read();
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         this.ioPortWrite16(address, 0xffff & data);
-        this.ioPortWrite16(address + 2, 0xffff & (data >>> 16));
+        this.ioPortWrite16(address + 2, 0xffff & data >>> 16);
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         this.ioPortWrite8(address, 0xff & data);
-        this.ioPortWrite8(address + 1, 0xff & (data >>> 8));
+        this.ioPortWrite8(address + 1, 0xff & data >>> 8);
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         data &= 0xff;
         address &= 0x3;
@@ -157,7 +171,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             int channel = data >>> 6;
             if (channel == 3) { // read back command
                 for (channel = 0; channel < 3; channel++) {
-                    if (0 != (data & (2 << channel))) // if channel enabled
+                    if (0 != (data & 2 << channel)) // if channel enabled
                     {
                         channels[channel].readBack(data);
                     }
@@ -175,6 +189,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         }
     }
 
+    @Override
     public void reset() {
         irqDevice = null;
         timingSource = null;
@@ -277,6 +292,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             buf[start + 3] = 0;
         }
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(countValue);
             output.writeInt(outputLatch);
@@ -300,6 +316,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             }
         }
 
+        @Override
         public void loadState(DataInput input) throws IOException {
             countValue = input.readInt();
             outputLatch = input.readInt();
@@ -326,7 +343,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
 
         public int read() {
             if (statusLatched) {
-                if (countLatched_MSB && (readState == RW_Status.MSByte_multiple))
+                if (countLatched_MSB && readState == RW_Status.MSByte_multiple)
                     throw new IllegalStateException("status is latched and count half read");
                 statusLatched = false;
                 return statusLatch;
@@ -346,9 +363,9 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
                     readState = RW_Status.LSByte_Multple;
                 }
                 countLatched_MSB = false;
-                return (outputLatch >> 8) & 0xff;
+                return outputLatch >> 8 & 0xff;
             }
-            if (!((readState == RW_Status.MSByte) || (readState == RW_Status.MSByte_multiple))) {
+            if (!(readState == RW_Status.MSByte || readState == RW_Status.MSByte_multiple)) {
                 // read LSB
                 if (readState == RW_Status.LSByte_Multple)
                     readState = RW_Status.MSByte_multiple;
@@ -356,7 +373,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             } else {
                 if (readState == RW_Status.MSByte_multiple)
                     readState = RW_Status.LSByte_Multple;
-                return (getCount() >> 8) & 0xff;
+                return getCount() >> 8 & 0xff;
             }
         }
 
@@ -402,7 +419,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         private void latchStatus() {
             if (!statusLatched) {
 
-                statusLatch = (getOut(getTime()) << 7) | (nullCount ? 0x40 : 0x00) | (rwMode << 4) | (mode << 1) | (bcd ? 1 : 0);
+                statusLatch = getOut(getTime()) << 7 | (nullCount ? 0x40 : 0x00) | rwMode << 4 | mode << 1 | (bcd ? 1 : 0);
                 statusLatched = true;
             }
         }
@@ -424,13 +441,13 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
                 break;
             case MSByte_multiple:
                 writeState = RW_Status.LSByte_Multple;
-                loadCount((0xff & inputLatch) | ((0xff & data) << 8));
+                loadCount(0xff & inputLatch | (0xff & data) << 8);
                 break;
             }
         }
 
         public void writeControlWord(int data) {
-            int RW = (data >> 4) & 3;
+            int RW = data >> 4 & 3;
             if (RW == 0) {
                 latchCount();
             } else {
@@ -441,7 +458,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
                 inputLatch = 0;
                 rwMode = RW;
                 bcd = (data & 1) != 0;
-                mode = (data >> 1) & 7;
+                mode = data >> 1 & 7;
                 switch (RW) {
                 case 1:
                     // set read state to LSB
@@ -500,12 +517,12 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             case MODE_HARDWARE_RETRIGGERABLE_ONE_SHOT:
             case MODE_SOFTWARE_TRIGGERED_STROBE:
             case MODE_HARDWARE_TRIGGERED_STROBE:
-                return (int)((countValue - now) & 0xffffl);
+                return (int)(countValue - now & 0xffffL);
             case MODE_SQUARE_WAVE:
-                return (int)(countValue - ((2 * now) % countValue));
+                return (int)(countValue - 2 * now % countValue);
             case MODE_RATE_GENERATOR:
             default:
-                return (int)(countValue - (now % countValue));
+                return (int)(countValue - now % countValue);
             }
         }
 
@@ -525,12 +542,12 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
                     return 0;
                 }
             case MODE_RATE_GENERATOR:
-                if ((now % countValue) == countValue - 1)
+                if (now % countValue == countValue - 1)
                     return 0;
                 else
                     return 1;
             case MODE_SQUARE_WAVE:
-                if ((now % countValue) < ((countValue + 1) >>> 1)) {
+                if (now % countValue < countValue + 1 >>> 1) {
                     return 1;
                 } else {
                     return 0;
@@ -557,17 +574,17 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
                 }
             }
             case MODE_RATE_GENERATOR: {
-                long base = (currentTime / countValue) * countValue;
-                if ((currentTime == base)) {
+                long base = currentTime / countValue * countValue;
+                if (currentTime == base) {
                     return base + countValue - 1;
                 } else {
                     return base + countValue;
                 }
             }
             case MODE_SQUARE_WAVE: {
-                long base = (currentTime / countValue) * countValue;
-                long period2 = ((countValue + 1) >>> 1);
-                if ((currentTime - base) < period2) {
+                long base = currentTime / countValue * countValue;
+                long period2 = countValue + 1 >>> 1;
+                if (currentTime - base < period2) {
                     return base + period2;
                 } else {
                     return base + countValue;
@@ -628,6 +645,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             return this.countValue;
         }
 
+        @Override
         public void callback() {
             this.irqTimerUpdate(nextChangeTime);
         }
@@ -640,19 +658,23 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             this.irq = irq;
         }
 
+        @Override
         public int getType() {
             return 2;
         }
     }
 
+    @Override
     public boolean initialised() {
-        return ((irqDevice != null) && (timingSource != null)) && ioportRegistered;
+        return irqDevice != null && timingSource != null && ioportRegistered;
     }
 
+    @Override
     public boolean updated() {
-        return (irqDevice.updated() && timingSource.updated()) && ioportRegistered;
+        return irqDevice.updated() && timingSource.updated() && ioportRegistered;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
         if (component instanceof IOPortHandler) {
             ((IOPortHandler)component).registerIOPortCapable(this);
@@ -664,15 +686,16 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         }
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof InterruptController) && component.initialised()) {
+        if (component instanceof InterruptController && component.initialised()) {
             irqDevice = (InterruptController)component;
         }
-        if ((component instanceof Clock) && component.initialised()) {
+        if (component instanceof Clock && component.initialised()) {
             timingSource = (Clock)component;
         }
 
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
@@ -681,7 +704,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
             speaker = (PCSpeaker)component;
         }
 
-        if (this.initialised() && (channels == null)) {
+        if (this.initialised() && channels == null) {
             channels = new TimerChannel[3];
             for (int i = 0; i < channels.length; i++) {
                 channels[i] = new TimerChannel(i);
@@ -691,6 +714,7 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         }
     }
 
+    @Override
     public String toString() {
         return "Intel i8254 Interval Timer";
     }

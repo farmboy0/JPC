@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -52,6 +52,7 @@ public abstract class Breakpoint implements Comparable<Breakpoint> {
 
     public abstract boolean satisfied(Processor cpu);
 
+    @Override
     public boolean equals(Object another) {
         if (!(another instanceof Breakpoint)) {
             return false;
@@ -59,6 +60,7 @@ public abstract class Breakpoint implements Comparable<Breakpoint> {
         return address == ((Breakpoint)another).address;
     }
 
+    @Override
     public int compareTo(Breakpoint bp) {
         return address - bp.address;
     }

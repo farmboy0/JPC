@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,11 @@
 
 package org.jpc.debugger;
 
-import org.jpc.emulator.memory.AddressSpace;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
+import org.jpc.emulator.memory.AddressSpace;
 
 public interface CodeBlockListener {
-    public void codeBlockDecoded(int address, AddressSpace memory, CodeBlock block);
+    void codeBlockDecoded(int address, AddressSpace memory, CodeBlock block);
 
-    public void codeBlockExecuted(int address, AddressSpace memory, CodeBlock block);
+    void codeBlockExecuted(int address, AddressSpace memory, CodeBlock block);
 }

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -35,13 +35,9 @@ package org.jpc.support;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Ian Preston
@@ -95,6 +91,7 @@ public class EthernetHub extends EthernetOutput {
     }
 
     class Reader implements Runnable {
+        @Override
         public void run() {
             while (true) {
                 if (inQueue.size() > 100) {
@@ -118,6 +115,7 @@ public class EthernetHub extends EthernetOutput {
     }
 
     class Writer implements Runnable {
+        @Override
         public void run() {
             while (true) {
                 try {
@@ -139,11 +137,12 @@ public class EthernetHub extends EthernetOutput {
         }
     }
 
+    @Override
     public byte[] getPacket() {
-        byte[] packet = inQueue.poll();
-        return packet;
+        return inQueue.poll();
     }
 
+    @Override
     public void sendPacket(byte[] data, int offset, int length) {
         byte[] p = new byte[length];
         System.arraycopy(data, offset, p, 0, length);

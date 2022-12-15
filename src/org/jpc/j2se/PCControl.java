@@ -32,9 +32,9 @@ package org.jpc.j2se;
  */
 public interface PCControl {
 
-    public void start();
+    void start();
 
-    public void stop();
+    void stop();
 
-    public boolean isRunning();
+    boolean isRunning();
 }

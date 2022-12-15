@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,10 @@
 
 package org.jpc.debugger.util;
 
-import java.util.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ObjectDatabase {
     private Map<Class, Object> table;
@@ -44,10 +46,7 @@ public class ObjectDatabase {
     }
 
     public synchronized boolean addObject(Class cls, Object value) {
-        if (value == null)
-            return false;
-
-        if (table.containsKey(cls))
+        if ((value == null) || table.containsKey(cls))
             return false;
 
         table.put(cls, value);
@@ -58,7 +57,7 @@ public class ObjectDatabase {
         if (value == null)
             return false;
 
-        Class cls = (Class)value.getClass();
+        Class cls = value.getClass();
 
         return addObject(cls, value);
     }

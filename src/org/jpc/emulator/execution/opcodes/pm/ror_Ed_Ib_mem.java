@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
 
 public class ror_Ed_Ib_mem extends Executable {
     final Pointer op1;
@@ -44,13 +44,14 @@ public class ror_Ed_Ib_mem extends Executable {
         immb = Modrm.Ib(input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
-        int shift = immb & (32 - 1);
+        int shift = immb & 32 - 1;
         int reg0 = op1.get32(cpu);
-        int res = (reg0 >>> shift) | (reg0 << (32 - shift));
+        int res = reg0 >>> shift | reg0 << 32 - shift;
         op1.set32(cpu, res);
-        boolean bit30 = (res & (1 << (32 - 2))) != 0;
-        boolean bit31 = (res & (1 << (32 - 1))) != 0;
+        boolean bit30 = (res & 1 << 32 - 2) != 0;
+        boolean bit31 = (res & 1 << 32 - 1) != 0;
         if (shift > 0) {
             cpu.cf = bit31;
             cpu.of = bit30 ^ bit31;
@@ -59,10 +60,12 @@ public class ror_Ed_Ib_mem extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

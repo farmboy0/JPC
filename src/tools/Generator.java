@@ -27,11 +27,17 @@
 
 package tools;
 
-import java.io.*;
-import java.util.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import java.io.IOException;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class Generator {
     public static void main(String[] cmd) {
@@ -47,6 +53,7 @@ public class Generator {
     }
 
     public static class OpcodeWriter implements Callable {
+        @Override
         public void call(Opcode op, String mode) {
             System.out.println(op.getName());
             op.writeToFile(mode);
@@ -69,10 +76,10 @@ public class Generator {
             Node n = list.item(i);
             String mnemonic = n.getAttributes().getNamedItem("mnemonic").getNodeValue();
             Node seg = n.getAttributes().getNamedItem("segment");
-            boolean segment = (seg != null) && seg.getNodeValue().equals("true");
+            boolean segment = seg != null && seg.getNodeValue().equals("true");
             Node memNode = n.getAttributes().getNamedItem("mem");
-            boolean singleType = (memNode != null);
-            boolean mem = (memNode != null) && memNode.getNodeValue().equals("true");
+            boolean singleType = memNode != null;
+            boolean mem = memNode != null && memNode.getNodeValue().equals("true");
             NodeList children = n.getChildNodes();
             String ret = null, snippet = null;
             // get return and snippet

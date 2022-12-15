@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,25 +33,56 @@
 
 package org.jpc.debugger;
 
-import java.util.*;
-import java.util.zip.*;
-import java.io.*;
-import java.text.DecimalFormat;
 import java.awt.Color;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDesktopPane;
+import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
 
-import org.jpc.debugger.util.*;
+import org.jpc.debugger.util.ApplicationFrame;
+import org.jpc.debugger.util.ObjectDatabase;
 import org.jpc.emulator.PC;
+import org.jpc.emulator.memory.LinearAddressSpace;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
+import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.emulator.peripheral.Keyboard;
+import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.fpu64.FpuState64;
 import org.jpc.j2se.Option;
-import org.jpc.support.*;
-import org.jpc.emulator.memory.*;
-import org.jpc.emulator.processor.Processor;
-import org.jpc.emulator.peripheral.Keyboard;
-import org.jpc.emulator.pci.peripheral.VGACard;
 import org.jpc.j2se.VirtualClock;
+import org.jpc.support.ArgProcessor;
+import org.jpc.support.DriveSet;
 
 public class JPC extends ApplicationFrame implements ActionListener {
 
@@ -95,6 +126,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         actions.addSeparator();
         actions.add("Quit").addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 frameCloseRequested();
             }
@@ -123,6 +155,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         JMenu tools = new JMenu("Tools");
         tools.add("Create Blank Disk (file)").addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 createBlankHardDisk();
             }
@@ -198,6 +231,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
             openFile.addActionListener(this);
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             if (evt.getSource() == openFile) {
                 JFileChooser chooser = (JFileChooser)objects.getObject(JFileChooser.class);
@@ -228,7 +262,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 setText(mainTitle + " " + fileName);
             }
             checkBootEnabled();
-            if (bootFrom.getState() && (getSelectedFile() == null)) {
+            if (bootFrom.getState() && getSelectedFile() == null) {
                 bootFrom.setState(false);
             }
         }
@@ -242,7 +276,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         }
 
         public boolean isBootDevice() {
-            return bootFrom.getState() && (getSelectedFile() != null);
+            return bootFrom.getState() && getSelectedFile() != null;
         }
 
         void rescan(File f) {
@@ -256,18 +290,18 @@ public class JPC extends ApplicationFrame implements ActionListener {
             }
             if (f.isDirectory()) {
                 File[] files = f.listFiles();
-                for (int i = 0; i < files.length; i++) {
-                    if (files[i].getName().toLowerCase().endsWith(".img")) {
-                        if (!diskImages.contains(files[i])) {
-                            diskImages.add(files[i]);
+                for (File file : files) {
+                    if (file.getName().toLowerCase().endsWith(".img")) {
+                        if (!diskImages.contains(file)) {
+                            diskImages.add(file);
                         }
                     }
                 }
             } else if (f.exists()) {
                 boolean found = false;
-                for (int i = 0; i < diskImages.size(); i++) {
-                    if (diskImages.get(i).getAbsolutePath().equals(f.getAbsolutePath())) {
-                        selected = diskImages.get(i);
+                for (File diskImage : diskImages) {
+                    if (diskImage.getAbsolutePath().equals(f.getAbsolutePath())) {
+                        selected = diskImage;
                         found = true;
                     }
                 }
@@ -285,8 +319,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
             add(bootFrom);
             addSeparator();
 
-            for (int i = 0; i < diskImages.size(); i++) {
-                File ff = diskImages.get(i);
+            for (File ff : diskImages) {
                 JRadioButtonMenuItem item = new JRadioButtonMenuItem(ff.getAbsolutePath());
                 item.addActionListener(this);
                 lookup.put(item.getModel(), ff);
@@ -316,13 +349,14 @@ public class JPC extends ApplicationFrame implements ActionListener {
         return desktop;
     }
 
+    @Override
     protected void frameCloseRequested() {
         BreakpointsFrame bp = (BreakpointsFrame)objects.getObject(BreakpointsFrame.class);
-        if ((bp != null) && bp.isEdited()) {
+        if (bp != null && bp.isEdited()) {
             bp.dispose();
         }
         WatchpointsFrame wp = (WatchpointsFrame)objects.getObject(WatchpointsFrame.class);
-        if ((wp != null) && wp.isEdited()) {
+        if (wp != null && wp.isEdited()) {
             wp.dispose();
         }
         System.exit(0);
@@ -333,6 +367,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         desktop.setSelectedFrame(f);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
         Object src = evt.getSource();
 
@@ -402,7 +437,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
                     args[pos++] = "-cdrom";
                     args[pos++] = cdImage.getAbsolutePath();
                 }
-                if (pos <= (argc - 2)) {
+                if (pos <= argc - 2) {
                     args[pos++] = "-boot";
                     if (bootType == DriveSet.BootType.HARD_DRIVE) {
                         args[pos++] = "hda";
@@ -661,8 +696,8 @@ public class JPC extends ApplicationFrame implements ActionListener {
             notifyPCDisposed();
         }
         JInternalFrame[] frames = desktop.getAllFrames();
-        for (int i = 0; i < frames.length; i++) {
-            frames[i].dispose();
+        for (JInternalFrame frame : frames) {
+            frame.dispose();
         }
 
         objects.removeObject(Processor.class);
@@ -739,6 +774,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
             timer.start();
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             if (codeBlocks == null) {
                 return;
@@ -761,18 +797,18 @@ public class JPC extends ApplicationFrame implements ActionListener {
             if (s.length() < 4) {
                 return s;
             }
-            StringBuffer buf = new StringBuffer();
-            int offset = (s.length() % 3);
+            StringBuilder buf = new StringBuilder();
+            int offset = s.length() % 3;
             if (offset == 0) {
                 buf.append(s.substring(0, 3));
                 offset = 3;
-                for (int i = 0; i < (int)((s.length() - 1) / 3); i++) {
+                for (int i = 0; i < (s.length() - 1) / 3; i++) {
                     buf.append(",");
                     buf.append(s.substring(offset + 3 * i, offset + 3 * i + 3));
                 }
             } else {
                 buf.append(s.substring(0, offset));
-                for (int i = 0; i < (int)((s.length() - 1) / 3); i++) {
+                for (int i = 0; i < (s.length() - 1) / 3; i++) {
                     buf.append(",");
                     buf.append(s.substring(offset + 3 * i, offset + 3 * i + 3));
                 }
@@ -792,7 +828,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
             if (sizeString == null) {
                 return;
             }
-            long size = Long.parseLong(sizeString) * 1024l * 1024l;
+            long size = Long.parseLong(sizeString) * 1024L * 1024L;
             if (size < 0) {
                 throw new Exception("Negative file size");
             }
@@ -809,7 +845,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
     }
 
     public static Object getPC() {
-        return instance.getObject(PC.class);
+        return JPC.getObject(PC.class);
     }
 
     public static JPC getInstance() {
@@ -829,7 +865,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         instance.validate();
         instance.setVisible(true);
 
-        if ((args.length > 0) || Option.config.isSet() || Option.boot.isSet()) {
+        if (args.length > 0 || Option.config.isSet() || Option.boot.isSet()) {
             instance.createPC(args);
         }
         instance.initialLayout();

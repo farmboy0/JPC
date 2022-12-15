@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,9 +33,11 @@
 
 package org.jpc.emulator.motherboard;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.IOException;
 
-import org.jpc.emulator.*;
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
 import org.jpc.emulator.processor.Processor;
 
@@ -54,6 +56,7 @@ public class GateA20Handler extends AbstractHardwareComponent implements IODevic
         physicalAddressSpace = null;
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         ioportRegistered = false;
     }
@@ -68,16 +71,19 @@ public class GateA20Handler extends AbstractHardwareComponent implements IODevic
      * @param address location being written to
      * @param data byte value being written
      */
+    @Override
     public void ioPortWrite8(int address, int data) {
         setGateA20State((data & 0x02) != 0);
         if ((data & 0x01) != 0)
             cpu.reset();
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         ioPortWrite8(address, data);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         ioPortWrite8(address, data);
     }
@@ -88,30 +94,37 @@ public class GateA20Handler extends AbstractHardwareComponent implements IODevic
      * @param address location being read
      * @return byte value read
      */
+    @Override
     public int ioPortRead8(int address) {
         return physicalAddressSpace.getGateA20State() ? 0x02 : 0x00;
     }
 
+    @Override
     public int ioPortRead16(int address) {
         return ioPortRead8(address) | 0xff00;
     }
 
+    @Override
     public int ioPortRead32(int address) {
         return ioPortRead8(address) | 0xffffff00;
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] { 0x92 };
     }
 
+    @Override
     public boolean initialised() {
-        return ioportRegistered && (cpu != null) && (physicalAddressSpace != null);
+        return ioportRegistered && cpu != null && physicalAddressSpace != null;
     }
 
+    @Override
     public boolean updated() {
         return ioportRegistered && cpu.updated() && physicalAddressSpace.updated();
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
         if (component instanceof IOPortHandler) {
             ((IOPortHandler)component).registerIOPortCapable(this);
@@ -119,8 +132,9 @@ public class GateA20Handler extends AbstractHardwareComponent implements IODevic
         }
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
@@ -128,10 +142,11 @@ public class GateA20Handler extends AbstractHardwareComponent implements IODevic
         if (component instanceof PhysicalAddressSpace)
             physicalAddressSpace = (PhysicalAddressSpace)component;
 
-        if ((component instanceof Processor) && component.initialised())
+        if (component instanceof Processor && component.initialised())
             cpu = (Processor)component;
     }
 
+    @Override
     public void reset() {
         ioportRegistered = false;
         physicalAddressSpace = null;

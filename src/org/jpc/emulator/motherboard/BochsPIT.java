@@ -1,6 +1,7 @@
 package org.jpc.emulator.motherboard;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BochsPIT {
     public static Map<Integer, long[]> timings = new HashMap();

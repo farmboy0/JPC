@@ -1,15 +1,15 @@
 package org.jpc.emulator.peripheral;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jpc.emulator.AbstractHardwareComponent;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.Timer;
 import org.jpc.emulator.TimerResponsive;
 import org.jpc.emulator.motherboard.InterruptController;
-import org.jpc.emulator.motherboard.IntervalTimer;
 import org.jpc.j2se.Option;
 import org.jpc.support.Clock;
-
-import java.util.logging.*;
 
 public class Mixer extends AbstractHardwareComponent {
     private static final Logger Log = Logger.getLogger(Mixer.class.getName());
@@ -20,12 +20,12 @@ public class Mixer extends AbstractHardwareComponent {
     private static Timer mix;
     private static Timer mix_nosound;
 
-    static public interface MIXER_MixHandler {
-        public void call(/*Bit8u*/short[] sampdate, /*Bit32u*/int len);
+    public interface MIXER_MixHandler {
+        void call(/*Bit8u*/short[] sampdate, /*Bit32u*/int len);
     }
 
-    static public interface MIXER_Handler {
-        public void call(/*Bitu*/int len);
+    public interface MIXER_Handler {
+        void call(/*Bitu*/int len);
     }
 
     static private final class BlahModes {
@@ -42,11 +42,11 @@ public class Mixer extends AbstractHardwareComponent {
         static public final int M_16S = 3;
     }
 
-    static private final int MIXER_BUFSIZE = (16 * 1024);
-    static private final int MIXER_BUFMASK = (MIXER_BUFSIZE - 1);
+    static private final int MIXER_BUFSIZE = 16 * 1024;
+    static private final int MIXER_BUFMASK = MIXER_BUFSIZE - 1;
 
-    static public final int MAX_AUDIO = ((1 << (16 - 1)) - 1);
-    static public final int MIN_AUDIO = -(1 << (16 - 1));
+    static public final int MAX_AUDIO = (1 << 16 - 1) - 1;
+    static public final int MIN_AUDIO = -(1 << 16 - 1);
 
     public static class MixerChannel {
         public void SetVolume(float _left, float _right) {
@@ -66,7 +66,7 @@ public class Mixer extends AbstractHardwareComponent {
         }
 
         public void SetFreq(/*Bitu*/int _freq) {
-            freq_add = (int)((_freq << MIXER_SHIFT) / mixer.freq);
+            freq_add = (_freq << MIXER_SHIFT) / mixer.freq;
         }
 
         public void Mix(/*Bitu*/int _needed) {
@@ -116,10 +116,10 @@ public class Mixer extends AbstractHardwareComponent {
                     if (data.dataWidth() == 1) {
                         if (!signeddata) {
                             if (stereo) {
-                                diff[0] = (((/*Bit8s*/byte)(data.get(pos * 2 + 0) ^ 0x80)) << 8) - last[0];
-                                diff[1] = (((/*Bit8s*/byte)(data.get(pos * 2 + 1) ^ 0x80)) << 8) - last[1];
+                                diff[0] = ((/*Bit8s*/byte)(data.get(pos * 2 + 0) ^ 0x80) << 8) - last[0];
+                                diff[1] = ((/*Bit8s*/byte)(data.get(pos * 2 + 1) ^ 0x80) << 8) - last[1];
                             } else {
-                                diff[0] = (((/*Bit8s*/byte)(data.get(pos) ^ 0x80)) << 8) - last[0];
+                                diff[0] = ((/*Bit8s*/byte)(data.get(pos) ^ 0x80) << 8) - last[0];
                             }
                         } else {
                             if (stereo) {
@@ -173,18 +173,18 @@ public class Mixer extends AbstractHardwareComponent {
                 /*Bits*/int diff_mul = freq_index & MIXER_REMAIN;
                 freq_index += freq_add;
                 mixpos &= MIXER_BUFMASK;
-                /*Bits*/int sample = last[0] + ((diff[0] * diff_mul) >> MIXER_SHIFT);
+                /*Bits*/int sample = last[0] + (diff[0] * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][0] += sample * volmul[0];
                 if (stereo)
-                    sample = last[1] + ((diff[1] * diff_mul) >> MIXER_SHIFT);
+                    sample = last[1] + (diff[1] * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][1] += sample * volmul[1];
                 mixpos++;
                 done++;
             }
         }
 
-        static private interface getSample {
-            public int call(int pos);
+        private interface getSample {
+            int call(int pos);
 
         }
 
@@ -229,10 +229,10 @@ public class Mixer extends AbstractHardwareComponent {
                 /*Bits*/int diff_mul = freq_index & MIXER_REMAIN;
                 freq_index += freq_add;
                 mixpos &= MIXER_BUFMASK;
-                /*Bits*/int sample = last[0] + ((diff[0] * diff_mul) >> MIXER_SHIFT);
+                /*Bits*/int sample = last[0] + (diff[0] * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][0] += sample * volmul[0];
                 if (stereo)
-                    sample = last[1] + ((diff[1] * diff_mul) >> MIXER_SHIFT);
+                    sample = last[1] + (diff[1] * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][1] += sample * volmul[1];
                 mixpos++;
                 done++;
@@ -280,10 +280,10 @@ public class Mixer extends AbstractHardwareComponent {
                 /*Bits*/int diff_mul = freq_index & MIXER_REMAIN;
                 freq_index += freq_add;
                 mixpos &= MIXER_BUFMASK;
-                /*Bits*/int sample = last[0] + ((diff[0] * diff_mul) >> MIXER_SHIFT);
+                /*Bits*/int sample = last[0] + (diff[0] * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][0] += sample * volmul[0];
                 if (stereo)
-                    sample = last[1] + ((diff[1] * diff_mul) >> MIXER_SHIFT);
+                    sample = last[1] + (diff[1] * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][1] += sample * volmul[1];
                 mixpos++;
                 done++;
@@ -314,10 +314,10 @@ public class Mixer extends AbstractHardwareComponent {
                         return;
                     if (!signeddata) {
                         if (stereo) {
-                            diff[0] = (((/*Bit8s*/byte)(data[pos * 2 + 0] ^ 0x80)) << 8) - last[0];
-                            diff[1] = (((/*Bit8s*/byte)(data[pos * 2 + 1] ^ 0x80)) << 8) - last[1];
+                            diff[0] = ((/*Bit8s*/byte)(data[pos * 2 + 0] ^ 0x80) << 8) - last[0];
+                            diff[1] = ((/*Bit8s*/byte)(data[pos * 2 + 1] ^ 0x80) << 8) - last[1];
                         } else {
-                            diff[0] = (((/*Bit8s*/byte)(data[pos] ^ 0x80)) << 8) - last[0];
+                            diff[0] = ((/*Bit8s*/byte)(data[pos] ^ 0x80) << 8) - last[0];
                         }
                     } else {
                         if (stereo) {
@@ -331,14 +331,14 @@ public class Mixer extends AbstractHardwareComponent {
                 /*Bits*/int diff_mul = freq_index & MIXER_REMAIN;
                 freq_index += freq_add;
                 mixpos &= MIXER_BUFMASK;
-                /*Bits*/int sample = last[0] + ((diff[0] * diff_mul) >> MIXER_SHIFT);
+                /*Bits*/int sample = last[0] + (diff[0] * diff_mul >> MIXER_SHIFT);
                 if (mixpos < 10) {
                     System.out.printf("last[0]=%d diff[0]=%d diff_mull=%d \n", last[0], diff[0], diff_mul);
                     System.out.printf("mixpos=%d 0=%d sample=%d volmul=%d\n", mixpos, mixer.work[mixpos][0], sample, volmul[0]);
                 }
                 mixer.work[mixpos][0] += sample * volmul[0];
                 if (stereo)
-                    sample = last[1] + ((diff[1] * diff_mul) >> MIXER_SHIFT);
+                    sample = last[1] + (diff[1] * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][1] += sample * volmul[1];
                 mixpos++;
                 done++;
@@ -417,7 +417,7 @@ public class Mixer extends AbstractHardwareComponent {
             done = needed;
             /*Bitu*/int pos = 0;
             diff = data[0] - last[0];
-            while ((outlen--) != 0) {
+            while (outlen-- != 0) {
                 /*Bitu*/int new_pos = freq_index >> MIXER_SHIFT;
                 if (pos < new_pos) {
                     pos = new_pos;
@@ -427,7 +427,7 @@ public class Mixer extends AbstractHardwareComponent {
                 /*Bits*/int diff_mul = freq_index & MIXER_REMAIN;
                 freq_index += temp_add;
                 mixpos &= MIXER_BUFMASK;
-                /*Bits*/int sample = last[0] + ((diff * diff_mul) >> MIXER_SHIFT);
+                /*Bits*/int sample = last[0] + (diff * diff_mul >> MIXER_SHIFT);
                 mixer.work[mixpos][0] += sample * volmul[0];
                 mixer.work[mixpos][1] += sample * volmul[1];
                 mixpos++;
@@ -511,7 +511,7 @@ public class Mixer extends AbstractHardwareComponent {
 
     private static final int MIXER_SSIZE = 4;
     private static final int MIXER_SHIFT = 14;
-    private static final int MIXER_REMAIN = ((1 << MIXER_SHIFT) - 1);
+    private static final int MIXER_REMAIN = (1 << MIXER_SHIFT) - 1;
     private static final int MIXER_VOLSHIFT = 13;
 
     static /*Bit16s*/short MIXER_CLIP(/*Bits*/int SAMP) {
@@ -600,35 +600,38 @@ public class Mixer extends AbstractHardwareComponent {
         }
         //Reset the the tick_add for constant speed
         if (Mixer_irq_important())
-            mixer.tick_add = ((mixer.freq) << MIXER_SHIFT) / 1000;
+            mixer.tick_add = (mixer.freq << MIXER_SHIFT) / 1000;
         mixer.done = needed;
     }
 
     static private TimerResponsive MIXER_Mix = new TimerResponsive() {
+        @Override
         public void callback() {
             synchronized (audioMutex) {
                 MIXER_MixData(mixer.needed);
                 mixer.tick_remain += mixer.tick_add;
-                mixer.needed += (mixer.tick_remain >> MIXER_SHIFT);
+                mixer.needed += mixer.tick_remain >> MIXER_SHIFT;
                 mixer.tick_remain &= MIXER_REMAIN;
                 nextExpiry += 1000000;
                 mix.setExpiry(nextExpiry);
             }
         }
 
+        @Override
         public int getType() {
             return -1;
         }
     };
 
     static private TimerResponsive MIXER_Mix_NoSound = new TimerResponsive() {
+        @Override
         public void callback() {
             MIXER_MixData(mixer.needed);
             /* Clear piece we've just generated */
             for (/*Bitu*/int i = 0; i < mixer.needed; i++) {
                 mixer.work[mixer.pos][0] = 0;
                 mixer.work[mixer.pos][1] = 0;
-                mixer.pos = (mixer.pos + 1) & MIXER_BUFMASK;
+                mixer.pos = mixer.pos + 1 & MIXER_BUFMASK;
             }
             /* Reduce count in channels */
             for (MixerChannel chan = mixer.channels; chan != null; chan = chan.next) {
@@ -646,13 +649,14 @@ public class Mixer extends AbstractHardwareComponent {
             mix_nosound.setExpiry(nextExpiry);
         }
 
+        @Override
         public int getType() {
             return -1;
         }
     };
 
     static boolean MIXER_CallBack(byte[] stream, int len) {
-        /*Bitu*/int need = (/*Bitu*/int)len / MIXER_SSIZE;
+        /*Bitu*/int need = len / MIXER_SSIZE;
         /*Bit16s*/ShortPtr output = new ShortPtr(stream, 0);
         /*Bitu*/int reduce;
         /*Bitu*/int pos, index, index_add;
@@ -661,22 +665,22 @@ public class Mixer extends AbstractHardwareComponent {
         if (mixer.done < need) {
             if (LOG_BUFFERS)
                 Log.log(Level.INFO, String.format("Full underrun need %d, have %d, min %d", need, mixer.done, mixer.min_needed));
-            if ((need - mixer.done) > (need >> 7)) //Max 1 percent stretch.
+            if (need - mixer.done > need >> 7) //Max 1 percent stretch.
                 return false;
             reduce = mixer.done;
             index_add = (reduce << MIXER_SHIFT) / need;
-            mixer.tick_add = ((mixer.freq + mixer.min_needed) << MIXER_SHIFT) / 1000;
+            mixer.tick_add = (mixer.freq + mixer.min_needed << MIXER_SHIFT) / 1000;
         } else if (mixer.done < mixer.max_needed) {
             /*Bitu*/int left = mixer.done - need;
             if (left < mixer.min_needed) {
                 if (!Mixer_irq_important()) {
                     /*Bitu*/int needed = mixer.needed - need;
                     /*Bitu*/int diff = (mixer.min_needed > needed ? mixer.min_needed : needed) - left;
-                    mixer.tick_add = ((mixer.freq + (diff * 3)) << MIXER_SHIFT) / 1000;
+                    mixer.tick_add = (mixer.freq + diff * 3 << MIXER_SHIFT) / 1000;
                     left = 0; //No stretching as we compensate with the tick_add value
                 } else {
-                    left = (mixer.min_needed - left);
-                    left = 1 + (2 * left) / mixer.min_needed; //left=1,2,3
+                    left = mixer.min_needed - left;
+                    left = 1 + 2 * left / mixer.min_needed; //left=1,2,3
                 }
                 if (LOG_BUFFERS)
                     Log.log(Level.INFO,
@@ -685,7 +689,7 @@ public class Mixer extends AbstractHardwareComponent {
                 index_add = (reduce << MIXER_SHIFT) / need;
             } else {
                 reduce = need;
-                index_add = (1 << MIXER_SHIFT);
+                index_add = 1 << MIXER_SHIFT;
                 if (LOG_BUFFERS)
                     Log.log(Level.INFO,
                         String.format("regular run need %d, have %d, min %d, left %d", need, mixer.done, mixer.min_needed, left));
@@ -697,12 +701,12 @@ public class Mixer extends AbstractHardwareComponent {
                  * 3) A little to nothing above the min_needed buffer > go to default value
                  */
                 /*Bitu*/int diff = left - mixer.min_needed;
-                if (diff > (mixer.min_needed << 1))
+                if (diff > mixer.min_needed << 1)
                     diff = mixer.min_needed << 1;
-                if (diff > (mixer.min_needed >> 1))
-                    mixer.tick_add = ((mixer.freq - (diff / 5)) << MIXER_SHIFT) / 1000;
-                else if (diff > (mixer.min_needed >> 4))
-                    mixer.tick_add = ((mixer.freq - (diff >> 3)) << MIXER_SHIFT) / 1000;
+                if (diff > mixer.min_needed >> 1)
+                    mixer.tick_add = (mixer.freq - diff / 5 << MIXER_SHIFT) / 1000;
+                else if (diff > mixer.min_needed >> 4)
+                    mixer.tick_add = (mixer.freq - (diff >> 3) << MIXER_SHIFT) / 1000;
                 else
                     mixer.tick_add = (mixer.freq << MIXER_SHIFT) / 1000;
             }
@@ -716,7 +720,7 @@ public class Mixer extends AbstractHardwareComponent {
                 index_add = mixer.done - 2 * mixer.min_needed;
             index_add = (index_add << MIXER_SHIFT) / need;
             reduce = mixer.done - 2 * mixer.min_needed;
-            mixer.tick_add = ((mixer.freq - (mixer.min_needed / 5)) << MIXER_SHIFT) / 1000;
+            mixer.tick_add = (mixer.freq - mixer.min_needed / 5 << MIXER_SHIFT) / 1000;
         }
         /* Reduce done count in all channels */
         for (MixerChannel chan = mixer.channels; chan != null; chan = chan.next) {
@@ -733,11 +737,11 @@ public class Mixer extends AbstractHardwareComponent {
         mixer.done -= reduce;
         mixer.needed -= reduce;
         pos = mixer.pos;
-        mixer.pos = (mixer.pos + reduce) & MIXER_BUFMASK;
+        mixer.pos = mixer.pos + reduce & MIXER_BUFMASK;
         index = 0;
         if (need != reduce) {
-            while ((need--) != 0) {
-                /*Bitu*/int i = (pos + (index >> MIXER_SHIFT)) & MIXER_BUFMASK;
+            while (need-- != 0) {
+                /*Bitu*/int i = pos + (index >> MIXER_SHIFT) & MIXER_BUFMASK;
                 index += index_add;
                 sample = mixer.work[i][0] >> MIXER_VOLSHIFT;
                 output.setInc(MIXER_CLIP(sample));
@@ -745,14 +749,14 @@ public class Mixer extends AbstractHardwareComponent {
                 output.setInc(MIXER_CLIP(sample));
             }
             /* Clean the used buffer */
-            while ((reduce--) != 0) {
+            while (reduce-- != 0) {
                 pos &= MIXER_BUFMASK;
                 mixer.work[pos][0] = 0;
                 mixer.work[pos][1] = 0;
                 pos++;
             }
         } else {
-            while ((reduce--) != 0) {
+            while (reduce-- != 0) {
                 pos &= MIXER_BUFMASK;
                 sample = mixer.work[pos][0] >> MIXER_VOLSHIFT;
                 output.setInc(MIXER_CLIP(sample));
@@ -768,7 +772,7 @@ public class Mixer extends AbstractHardwareComponent {
 
     public void MakeVolume(String scan, FloatRef vol0, FloatRef vol1) {
         /*Bitu*/int w = 0;
-        boolean db = (scan.toUpperCase().charAt(0) == 'D');
+        boolean db = scan.toUpperCase().charAt(0) == 'D';
         if (db)
             scan = scan.substring(1);
         while (scan.length() > 0) {
@@ -791,7 +795,7 @@ public class Mixer extends AbstractHardwareComponent {
             if (!db)
                 val /= 100;
             else
-                val = (float)Math.pow(10.0f, (float)val / 20.0f);
+                val = (float)Math.pow(10.0f, val / 20.0f);
             if (val < 0)
                 val = 1.0f;
             if (w == 0) {
@@ -805,13 +809,9 @@ public class Mixer extends AbstractHardwareComponent {
     }
 
     private void ShowVolume(String name, FloatRef vol0, FloatRef vol1) {
-        System.out.printf("%-8s %3.0f:%-3.0f  %+3.2f:%-+3.2f \n",
-            new Object[] {
-                name,
-                new Float(vol0.value * 100),
-                new Float(vol1.value * 100),
-                new Float(20 * Math.log(vol0.value) / Math.log(10.0f)),
-                new Float(20 * Math.log(vol1.value) / Math.log(10.0f)) });
+        System.out.printf("%-8s %3.0f:%-3.0f  %+3.2f:%-+3.2f \n", name, Float.valueOf(vol0.value * 100), Float.valueOf(vol1.value * 100),
+            Float.valueOf((float)(20 * Math.log(vol0.value) / Math.log(10.0f))),
+            Float.valueOf((float)(20 * Math.log(vol1.value) / Math.log(10.0f))));
     }
 
     public static void MIXER_Stop() {
@@ -840,13 +840,13 @@ public class Mixer extends AbstractHardwareComponent {
         mixer.min_needed = Option.mixer_prebuffer.intValue(20);
         if (mixer.min_needed > 100)
             mixer.min_needed = 100;
-        mixer.min_needed = (int)(mixer.freq * mixer.min_needed) / 1000;
-        mixer.max_needed = (int)mixer.blocksize * 2 + 2 * mixer.min_needed;
+        mixer.min_needed = mixer.freq * mixer.min_needed / 1000;
+        mixer.max_needed = mixer.blocksize * 2 + 2 * mixer.min_needed;
         mixer.needed = mixer.min_needed + 1;
 
         if (mixer.nosound) {
             Log.log(Level.INFO, "MIXER:No Sound Mode Selected.");
-            mixer.tick_add = ((mixer.freq) << MIXER_SHIFT) / 1000;
+            mixer.tick_add = (mixer.freq << MIXER_SHIFT) / 1000;
             //Timer.TIMER_AddTickHandler(MIXER_Mix_NoSound);
             mix_nosound = timeSource.newTimer(MIXER_Mix_NoSound);
             nextExpiry = timeSource.getEmulatedNanos();
@@ -870,18 +870,21 @@ public class Mixer extends AbstractHardwareComponent {
         }
     }
 
+    @Override
     public boolean initialised() {
-        return (irqDevice != null) && irqDevice.initialised() && (timeSource != null);
+        return irqDevice != null && irqDevice.initialised() && timeSource != null;
     }
 
+    @Override
     public boolean updated() {
-        return (irqDevice.updated() && timeSource.updated());
+        return irqDevice.updated() && timeSource.updated();
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof InterruptController) && component.initialised())
+        if (component instanceof InterruptController && component.initialised())
             irqDevice = (InterruptController)component;
-        if ((component instanceof Clock) && component.initialised()) {
+        if (component instanceof Clock && component.initialised()) {
             timeSource = (Clock)component;
             mix = timeSource.newTimer(MIXER_Mix);
             nextExpiry = timeSource.getEmulatedNanos();

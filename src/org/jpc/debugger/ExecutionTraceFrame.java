@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -36,11 +36,15 @@ package org.jpc.debugger;
 import java.awt.Dimension;
 
 import javax.swing.JScrollPane;
-import javax.swing.event.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-import org.jpc.debugger.util.*;
+import org.jpc.debugger.util.BasicTableModel;
+import org.jpc.debugger.util.UtilityFrame;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
-import org.jpc.emulator.memory.*;
+import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.memory.LinearAddressSpace;
+import org.jpc.emulator.memory.Memory;
 
 public class ExecutionTraceFrame extends UtilityFrame implements PCListener, ListSelectionListener {
     private DisassemblyOverlayTable trace;
@@ -67,6 +71,7 @@ public class ExecutionTraceFrame extends UtilityFrame implements PCListener, Lis
         JPC.getInstance().refresh();
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         if (codeBlocks == null)
             return;
@@ -78,25 +83,31 @@ public class ExecutionTraceFrame extends UtilityFrame implements PCListener, Lis
         ((ProcessorFrame)JPC.getObject(ProcessorFrame.class)).refreshDetails();
     }
 
+    @Override
     public void pcCreated() {
     }
 
+    @Override
     public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
 
+    @Override
     public void pcDisposed() {
         codeBlocks = null;
         model.fireTableDataChanged();
     }
 
+    @Override
     public void executionStarted() {
     }
 
+    @Override
     public void executionStopped() {
         refreshDetails();
     }
 
+    @Override
     public void refreshDetails() {
         codeBlocks = (CodeBlockRecord)JPC.getObject(CodeBlockRecord.class);
         if (codeBlocks == null)
@@ -119,12 +130,14 @@ public class ExecutionTraceFrame extends UtilityFrame implements PCListener, Lis
                 new int[] { 100, 400, 80, 80, 80, 80, 50, 50, 400 });
         }
 
+        @Override
         public int getRowCount() {
             if (codeBlocks == null)
                 return 0;
             return codeBlocks.getMaximumTrace();
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             if (row >= codeBlocks.getTraceLength())
                 return null;
@@ -171,9 +184,9 @@ public class ExecutionTraceFrame extends UtilityFrame implements PCListener, Lis
     }
 
     public static String toHexString(byte[] b) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < b.length; i++)
-            sb.append(Integer.toHexString(b[i] & 0xFF) + " ");
+        StringBuilder sb = new StringBuilder();
+        for (byte element : b)
+            sb.append(Integer.toHexString(element & 0xFF) + " ");
         return sb.toString();
     }
 }

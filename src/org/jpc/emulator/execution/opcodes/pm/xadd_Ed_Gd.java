@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,12 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.UCodes;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
 
 public class xadd_Ed_Gd extends Executable {
     final int op1Index;
@@ -44,6 +45,7 @@ public class xadd_Ed_Gd extends Executable {
         op2Index = Modrm.Gd(modrm);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         Reg op2 = cpu.regs[op2Index];
@@ -51,19 +53,21 @@ public class xadd_Ed_Gd extends Executable {
         int tmp2 = op2.get32();
         cpu.flagOp1 = tmp1;
         cpu.flagOp2 = tmp2;
-        cpu.flagResult = (cpu.flagOp1 + cpu.flagOp2);
+        cpu.flagResult = cpu.flagOp1 + cpu.flagOp2;
         op1.set32(cpu.flagResult);
         cpu.flagIns = UCodes.ADD32;
         cpu.flagStatus = OSZAPC;
         op2.set32(tmp1);
-        op1.set32((tmp1 + tmp2));
+        op1.set32(tmp1 + tmp2);
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

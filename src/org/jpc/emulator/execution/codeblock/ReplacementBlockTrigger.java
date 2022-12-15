@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -49,26 +49,32 @@ class ReplacementBlockTrigger implements CodeBlock {
         replacement = block;
     }
 
+    @Override
     public int getX86Length() {
         return replacement.getX86Length();
     }
 
+    @Override
     public int getX86Count() {
         return replacement.getX86Count();
     }
 
+    @Override
     public Executable.Branch execute(Processor cpu) {
         throw new CodeBlockReplacementException(replacement);
     }
 
+    @Override
     public String getDisplayString() {
         return replacement.getDisplayString();
     }
 
+    @Override
     public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         return false;
     }
 
+    @Override
     public Instruction getInstructions() {
         return replacement.getInstructions();
     }

@@ -70,7 +70,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
             overflow = false;
             if (delay == 0 || !enabled)
                 return;
-            double delta = (time - start);
+            double delta = time - start;
             double rem = delta % delay;
             double next = delay - rem;
             start = time + next;
@@ -382,18 +382,18 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
     static final private int MODE_DUALOPL2 = 1;
     static final private int MODE_OPL3 = 2;
 
-    static public interface Handler {
+    public interface Handler {
         //Write an address to a chip, returns the address the chip sets
-        public /*Bit32u*/long WriteAddr( /*Bit32u*/int port, /*Bit8u*/short val);
+        /*Bit32u*/long WriteAddr( /*Bit32u*/int port, /*Bit8u*/short val);
 
         //Write to a specific register in the chip
-        public void WriteReg( /*Bit32u*/int addr, /*Bit8u*/short val);
+        void WriteReg( /*Bit32u*/int addr, /*Bit8u*/short val);
 
         //Generate a certain amount of samples
-        public void Generate(Mixer.MixerChannel chan, /*Bitu*/int samples);
+        void Generate(Mixer.MixerChannel chan, /*Bitu*/int samples);
 
         //Initialize at a specific sample rate and mode
-        public void Init( /*Bitu*/long rate);
+        void Init( /*Bitu*/long rate);
     }
 
 //The cache for 2 chips or an opl3
@@ -480,7 +480,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
                 if (index == 0)
                     return (short)(normal & 0xFF);
                 else
-                    return (short)((normal >> 8) & 0xFF);
+                    return (short)(normal >> 8 & 0xFF);
             }
 
             /*Bit8u*/void dual(int index, int value) {
@@ -489,7 +489,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
                     normal |= value & 0xFF;
                 } else {
                     normal &= 0xFFFF00FF;
-                    normal |= (value << 8) & 0xFF;
+                    normal |= value << 8 & 0xFF;
                 }
             }
         }
@@ -503,7 +503,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
 
         private void DualWrite( /*Bit8u*/short index, /*Bit8u*/short reg, /*Bit8u*/short val) {
             //Make sure you don't use opl3 features
-            //Don't allow write to disable opl3		
+            //Don't allow write to disable opl3
             if (reg == 5) {
                 return;
             }
@@ -609,7 +609,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
                     return 0xff;
                 }
                 //Make sure the low /*Bits*/int are 6 on opl2
-                return chip[(port >> 1) & 1].Read() | 0x6;
+                return chip[port >> 1 & 1].Read() | 0x6;
             }
             return 0;
         }
@@ -633,10 +633,11 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
     private static Module module = null;
 
     private final Mixer.MIXER_Handler OPL_CallBack = new Mixer.MIXER_Handler() {
+        @Override
         public void call(/*Bitu*/int len) {
             module.handler.Generate(module.mixerChan, len);
             //Disable the sound generation after 30 seconds of silence
-            if ((timeSource.getEmulatedMicros() - module.lastUsed) > 30000000) {
+            if (timeSource.getEmulatedMicros() - module.lastUsed > 30000000) {
                 /*Bitu*/int i;
                 for (i = 0xb0; i < 0xb9; i++)
                     if ((module.cache[i] & 0x20) != 0 || (module.cache[i + 0x100] & 0x20) != 0)
@@ -654,6 +655,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
         module = new Module();
     }
 
+    @Override
     public int[] ioPortsRequested() {
         int[] ports = new int[6 + (single ? 0 : 4)];
         int base = Option.sbbase.intValue(SBlaster.BASE, 16);
@@ -668,39 +670,47 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
         return ports;
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof Clock) && component.initialised())
+        if (component instanceof Clock && component.initialised())
             timeSource = (Clock)component;
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public boolean initialised() {
-        return (timeSource != null) && ioportRegistered;
+        return timeSource != null && ioportRegistered;
     }
 
+    @Override
     public int ioPortRead8(int address) {
         return ioPortRead32(address);
     }
 
+    @Override
     public int ioPortRead16(int address) {
         return ioPortRead32(address);
     }
 
+    @Override
     public int ioPortRead32(int port) {
         return module.PortRead(port);
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         ioPortWrite32(address, data);
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         ioPortWrite32(address, data);
     }
 
+    @Override
     public void ioPortWrite32(int port, int data) {
         module.PortWrite(port, (short)data);
     }

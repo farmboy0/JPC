@@ -142,21 +142,21 @@ public class Ptr {
     }
 
     public void writeb(/*HostPt*/int off, /*Bit8u*/ short val) {
-        p[off * dataWidth() + this.off] = (byte)(val);
+        p[off * dataWidth() + this.off] = (byte)val;
     }
 
     public void writew(/*HostPt*/int off, /*Bit16u*/int val) {
         off = off * dataWidth() + this.off;
-        p[off] = (byte)(val);
-        p[off + 1] = (byte)((val >> 8));
+        p[off] = (byte)val;
+        p[off + 1] = (byte)(val >> 8);
     }
 
     public void writed(/*HostPt*/int off, /*Bit32u*/long val) {
         off = off * dataWidth() + this.off;
-        p[off] = (byte)(val);
-        p[off + 1] = (byte)((val >> 8));
-        p[off + 2] = (byte)((val >> 16));
-        p[off + 3] = (byte)((val >> 24));
+        p[off] = (byte)val;
+        p[off + 1] = (byte)(val >> 8);
+        p[off + 2] = (byte)(val >> 16);
+        p[off + 3] = (byte)(val >> 24);
     }
 
     public /*Bit8u*/short readb(/*HostPt*/int off) {
@@ -165,12 +165,12 @@ public class Ptr {
 
     public /*Bit16u*/int readw(/*HostPt*/int off) {
         off = off * dataWidth() + this.off;
-        return (p[off] & 0xFF) | ((p[off + 1] & 0xFF) << 8);
+        return p[off] & 0xFF | (p[off + 1] & 0xFF) << 8;
     }
 
     public /*Bit32u*/int readd(/*HostPt*/int off) {
         off = off * dataWidth() + this.off;
-        return (p[off] & 0xFF) | ((p[off + 1] & 0xFF) << 8) | ((p[off + 2] & 0xFF) << 16) | ((p[off + 3] & 0xFF) << 24);
+        return p[off] & 0xFF | (p[off + 1] & 0xFF) << 8 | (p[off + 2] & 0xFF) << 16 | (p[off + 3] & 0xFF) << 24;
     }
 
     public void read(byte[] b) {
@@ -182,18 +182,18 @@ public class Ptr {
     }
 
     public /*Bitu*/int read(int size, /*HostPt*/int o) {
-        int off = (int)o;
+        int off = o;
         if (size == 1)
             return readb(off);
         else if (size == 2)
             return readw(off);
         else if (size == 4)
-            return (int)readd(off);
+            return readd(off);
         return 0;
     }
 
     public void write(int size, /*HostPt*/int o, /*Bitu*/int val) {
-        int off = (int)o;
+        int off = o;
         if (size == 1)
             writeb(off, (short)val);
         else if (size == 2)

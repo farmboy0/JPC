@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -53,38 +53,47 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
         addressSpace = target;
     }
 
+    @Override
     protected Memory getReadMemoryBlockAt(int offset) {
         return addressSpace.getReadMemoryBlockAt(offset);
     }
 
+    @Override
     protected Memory getWriteMemoryBlockAt(int offset) {
         return addressSpace.getWriteMemoryBlockAt(offset);
     }
 
+    @Override
     protected void replaceBlocks(Memory oldBlock, Memory newBlock) {
         addressSpace.replaceBlocks(oldBlock, newBlock);
     }
 
+    @Override
     public int executeReal(Processor cpu, int offset) {
         return addressSpace.executeReal(cpu, offset);
     }
 
+    @Override
     public int executeProtected(Processor cpu, int offset) {
         return addressSpace.executeReal(cpu, offset);
     }
 
+    @Override
     public int executeVirtual8086(Processor cpu, int offset) {
         return addressSpace.executeReal(cpu, offset);
     }
 
+    @Override
     public void clear() {
         addressSpace.clear();
     }
 
+    @Override
     public byte getByte(int offset) {
         return addressSpace.getByte(offset);
     }
 
+    @Override
     public void setByte(int offset, byte data) {
         addressSpace.setByte(offset, data);
     }
@@ -95,6 +104,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @return short value read.
      */
+    @Override
     public short getWord(int offset) {
         if ((offset & 0x1) != 0)
             throw ProcessorException.ALIGNMENT_CHECK_0;
@@ -108,6 +118,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @return int value read.
      */
+    @Override
     public int getDoubleWord(int offset) {
         if ((offset & 0x3) != 0)
             throw ProcessorException.ALIGNMENT_CHECK_0;
@@ -121,6 +132,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @return int value read.
      */
+    @Override
     public long getQuadWord(int offset) {
         if ((offset & 0x7) != 0)
             throw ProcessorException.ALIGNMENT_CHECK_0;
@@ -134,6 +146,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @return long value read.
      */
+    @Override
     public long getLowerDoubleQuadWord(int offset) {
         if ((offset & 0xF) != 0)
             throw ProcessorException.ALIGNMENT_CHECK_0;
@@ -141,6 +154,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
         return addressSpace.getLowerDoubleQuadWord(offset);
     }
 
+    @Override
     public long getUpperDoubleQuadWord(int offset) {
         return addressSpace.getUpperDoubleQuadWord(offset);
     }
@@ -151,6 +165,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @param data value to write.
      */
+    @Override
     public void setWord(int offset, short data) {
         if ((offset & 0x1) != 0)
             throw ProcessorException.ALIGNMENT_CHECK_0;
@@ -164,6 +179,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @param data value to write.
      */
+    @Override
     public void setDoubleWord(int offset, int data) {
         if ((offset & 0x3) != 0)
             throw ProcessorException.ALIGNMENT_CHECK_0;
@@ -177,6 +193,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @param data value to write.
      */
+    @Override
     public void setQuadWord(int offset, long data) {
         if ((offset & 0x7) != 0)
             throw ProcessorException.ALIGNMENT_CHECK_0;
@@ -190,6 +207,7 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
      * @param offset address to be read.
      * @param data value to write.
      */
+    @Override
     public void setLowerDoubleQuadWord(int offset, long data) {
         if ((offset & 0xF) != 0)
             throw ProcessorException.GENERAL_PROTECTION_0;
@@ -197,18 +215,22 @@ public class AlignmentCheckedAddressSpace extends AddressSpace {
         addressSpace.setLowerDoubleQuadWord(offset, data);
     }
 
+    @Override
     public void setUpperDoubleQuadWord(int offset, long data) {
         addressSpace.setUpperDoubleQuadWord(offset, data);
     }
 
+    @Override
     public void copyArrayIntoContents(int address, byte[] buffer, int off, int len) {
         addressSpace.copyArrayIntoContents(address, buffer, off, len);
     }
 
+    @Override
     public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {
         addressSpace.copyContentsIntoArray(address, buffer, off, len);
     }
 
+    @Override
     public void loadInitialContents(int address, byte[] buf, int off, int len) {
         throw new UnsupportedOperationException("Not supported yet.");
     }

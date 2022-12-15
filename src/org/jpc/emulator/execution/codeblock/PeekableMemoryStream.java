@@ -43,14 +43,17 @@ public class PeekableMemoryStream implements PeekableInputStream {
         start = offset;
     }
 
+    @Override
     public void seek(int delta) {
         position += delta;
     }
 
+    @Override
     public int peek() {
-        return 0xFF & memory.getByte((int)(position));
+        return 0xFF & memory.getByte(position);
     }
 
+    @Override
     public void forward() {
         position++;
     }
@@ -59,54 +62,65 @@ public class PeekableMemoryStream implements PeekableInputStream {
         return position;
     }
 
+    @Override
     public long readU(long bits) {
         if (bits == 8)
-            return 0xFF & memory.getByte((int)(position++));
+            return 0xFF & memory.getByte(position++);
         if (bits == 16)
             return read16();
         if (bits == 32)
             return read32();
         if (bits == 64)
-            return read32() | (((long)read32()) << 32);
+            return read32() | (long)read32() << 32;
         throw new IllegalStateException("unimplemented read amount " + bits);
     }
 
+    @Override
     public byte read8() {
-        return memory.getByte((position++));
+        return memory.getByte(position++);
     }
 
+    @Override
     public short read16() {
-        return (short)(readU8() | (read8() << 8));
+        return (short)(readU8() | read8() << 8);
     }
 
+    @Override
     public int read32() {
-        return (readU16() | (read16() << 16));
+        return readU16() | read16() << 16;
     }
 
+    @Override
     public int readU8() {
-        return 0xFF & memory.getByte((int)(position++));
+        return 0xFF & memory.getByte(position++);
     }
 
+    @Override
     public int readU16() {
-        return (0xFF & memory.getByte((int)(position++))) | ((0xFF & memory.getByte((int)(position++))) << 8);
+        return 0xFF & memory.getByte(position++) | (0xFF & memory.getByte(position++)) << 8;
     }
 
+    @Override
     public long readU32() {
-        return readU16() | (readU16() << 16);
+        return readU16() | readU16() << 16;
     }
 
+    @Override
     public long getAddress() {
         return position;
     }
 
+    @Override
     public int getCounter() {
-        return (int)(position - start);
+        return position - start;
     }
 
+    @Override
     public void resetCounter() {
         start = position;
     }
 
+    @Override
     public String toString() {
         return "PeekableMemoryStream: [" + memory + "] @ 0x" + Integer.toHexString(start);
     }

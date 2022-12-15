@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,13 @@
 
 package org.jpc.emulator.motherboard;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.jpc.emulator.*;
+import org.jpc.emulator.HardwareComponent;
 
 /**
  * This class provides a <code>Bios</code> implementation for the VGA Bios. The VGA Bios is loaded
@@ -66,15 +68,18 @@ public class VGABIOS extends Bios implements IODevice {
         ioportRegistered = false;
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         super.loadState(input);
         ioportRegistered = false;
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] { 0x500, 0x501, 0x502, 0x503 };
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         switch (address) {
         /* LGPL VGA-BIOS Messages */
@@ -86,6 +91,7 @@ public class VGABIOS extends Bios implements IODevice {
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         switch (address) {
         /* Bochs BIOS Messages */
@@ -95,51 +101,61 @@ public class VGABIOS extends Bios implements IODevice {
         }
     }
 
+    @Override
     public int ioPortRead8(int address) {
         return 0xff;
     }
 
+    @Override
     public int ioPortRead16(int address) {
         return 0xffff;
     }
 
+    @Override
     public int ioPortRead32(int address) {
         return 0xffffffff;
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
     }
 
+    @Override
     protected int loadAddress() {
         return 0xc0000;
     }
 
+    @Override
     public boolean updated() {
         return super.updated() && ioportRegistered;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
         super.updateComponent(component);
 
-        if ((component instanceof IOPortHandler) && component.updated()) {
+        if (component instanceof IOPortHandler && component.updated()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public boolean initialised() {
         return super.initialised() && ioportRegistered;
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
         super.acceptComponent(component);
 
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public void reset() {
         super.reset();
         ioportRegistered = false;

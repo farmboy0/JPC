@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,10 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
 
 public class jne_Jb extends Executable {
     final int jmp;
@@ -45,9 +44,10 @@ public class jne_Jb extends Executable {
         blockLength = eip - blockStart + instructionLength;
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         if (!cpu.zf()) {
-            int target = (cpu.eip + jmp + blockLength) & 0xffff;
+            int target = cpu.eip + jmp + blockLength & 0xffff;
             cpu.cs.checkAddress(target);
             cpu.eip = target;
             return Branch.T1;
@@ -57,10 +57,12 @@ public class jne_Jb extends Executable {
         }
     }
 
+    @Override
     public boolean isBranch() {
         return true;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

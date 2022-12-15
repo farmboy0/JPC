@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,10 +33,12 @@
 
 package org.jpc.emulator.pci;
 
-import org.jpc.emulator.motherboard.InterruptController;
-import org.jpc.emulator.HardwareComponent;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-import java.io.*;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.motherboard.InterruptController;
 
 /**
  * Emulates the PCI-ISA bridge functionality of the Intel 82371SB PIIX3 southbridge.
@@ -63,6 +65,7 @@ public class PCIISABridge extends AbstractPCIDevice {
         this.internalReset();
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         super.saveState(output);
         output.writeInt(irqLevels.length);
@@ -72,6 +75,7 @@ public class PCIISABridge extends AbstractPCIDevice {
                 output.writeInt(level);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         super.reset();
         super.loadState(input);
@@ -115,9 +119,9 @@ public class PCIISABridge extends AbstractPCIDevice {
     private void setIRQ(PCIDevice device, int irqNumber, int level) {
         irqNumber = this.slotGetPIRQ(device, irqNumber);
         int irqIndex = device.getIRQIndex();
-        int shift = (irqIndex & 0x1f);
+        int shift = irqIndex & 0x1f;
         int p = irqLevels[irqNumber][irqIndex >> 5];
-        irqLevels[irqNumber][irqIndex >> 5] = (p & ~(1 << shift)) | (level << shift);
+        irqLevels[irqNumber][irqIndex >> 5] = p & ~(1 << shift) | level << shift;
 
         /* now we change the pic irq level according to the piix irq mappings */
         int picIRQ = this.configReadByte(0x60 + irqNumber); //short/int/long?
@@ -147,27 +151,31 @@ public class PCIISABridge extends AbstractPCIDevice {
 
     int slotGetPIRQ(PCIDevice device, int irqNumber) {
         int slotAddEnd;
-        slotAddEnd = (device.getDeviceFunctionNumber() >> 3);
-        return (irqNumber + slotAddEnd) & 0x3;
+        slotAddEnd = device.getDeviceFunctionNumber() >> 3;
+        return irqNumber + slotAddEnd & 0x3;
     }
 
     private class DefaultIRQBouncer implements IRQBouncer {
         DefaultIRQBouncer() {
         }
 
+        @Override
         public void setIRQ(PCIDevice device, int irqNumber, int level) {
             PCIISABridge.this.setIRQ(device, irqNumber, level);
         }
     }
 
+    @Override
     public IORegion getIORegion(int index) {
         return null;
     }
 
+    @Override
     public IORegion[] getIORegions() {
         return null;
     }
 
+    @Override
     public void reset() {
         irqDevice = null;
 
@@ -180,21 +188,25 @@ public class PCIISABridge extends AbstractPCIDevice {
         super.reset();
     }
 
+    @Override
     public boolean initialised() {
-        return (irqDevice != null) && super.initialised();
+        return irqDevice != null && super.initialised();
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof InterruptController) && component.initialised())
+        if (component instanceof InterruptController && component.initialised())
             irqDevice = (InterruptController)component;
 
         super.acceptComponent(component);
     }
 
+    @Override
     public boolean updated() {
-        return (irqDevice.updated()) && super.updated();
+        return irqDevice.updated() && super.updated();
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
         //	if ((component instanceof InterruptController)
         //	    && component.updated())
@@ -203,6 +215,7 @@ public class PCIISABridge extends AbstractPCIDevice {
         super.acceptComponent(component);
     }
 
+    @Override
     public String toString() {
         return "Intel 82371SB PIIX3 PCI ISA Bridge";
     }

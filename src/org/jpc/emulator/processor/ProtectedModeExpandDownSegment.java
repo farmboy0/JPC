@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -35,6 +35,7 @@ package org.jpc.emulator.processor;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.jpc.emulator.memory.AddressSpace;
 
 /**
@@ -48,7 +49,7 @@ public abstract class ProtectedModeExpandDownSegment extends ProtectedModeSegmen
 
     public ProtectedModeExpandDownSegment(AddressSpace memory, int selector, long descriptor) {
         super(memory, selector, descriptor);
-        rawLimit = (int)((descriptor & 0xffffL) | ((descriptor >>> 32) & 0xf0000L));
+        rawLimit = (int)(descriptor & 0xffffL | descriptor >>> 32 & 0xf0000L);
         if (defaultSize) {
             //base = (int) (tmpbase + tmplimit - 0x10000000L);
             //limit = 0xFFFFFFFF - tmplimit;
@@ -62,14 +63,14 @@ public abstract class ProtectedModeExpandDownSegment extends ProtectedModeSegmen
         }
     }
 
+    @Override
     public void checkAddress(int offset) {
-        if (((offset < 0) && (maxOffset < 0)) | ((offset > 0) && (maxOffset > 0))) {
+        if ((offset < 0 && maxOffset < 0) || (offset > 0 && maxOffset > 0)) {
             if (offset >= maxOffset) {
                 LOGGING.log(Level.INFO, this + "expand down segment: offset not within bounds.");
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
             }
         } else if (offset > 0) {
-            return;
         } else {
             LOGGING.log(Level.INFO, this + "expand down segment: offset not within bounds.");
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
@@ -80,6 +81,7 @@ public abstract class ProtectedModeExpandDownSegment extends ProtectedModeSegmen
         return rawLimit;
     }
 
+    @Override
     public boolean setSelector(int selector) {
         throw new IllegalStateException("Cannot set a selector for a Protected Mode segment");
     }
@@ -89,6 +91,7 @@ public abstract class ProtectedModeExpandDownSegment extends ProtectedModeSegmen
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_DATA_WRITABLE;
         }

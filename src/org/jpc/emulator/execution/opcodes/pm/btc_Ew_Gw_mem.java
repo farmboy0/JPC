@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,12 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
 
 public class btc_Ew_Gw_mem extends Executable {
     final Pointer op1;
@@ -44,20 +45,23 @@ public class btc_Ew_Gw_mem extends Executable {
         op2Index = Modrm.Gw(modrm);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
-        int bit = 1 << (op2.get16() & (16 - 1));
-        int offset = ((op2.get16() & ~(16 - 1)) / 8);
-        cpu.cf = (0 != (op1.get16(cpu, offset) & bit));
+        int bit = 1 << (op2.get16() & 16 - 1);
+        int offset = (op2.get16() & ~(16 - 1)) / 8;
+        cpu.cf = 0 != (op1.get16(cpu, offset) & bit);
         cpu.flagStatus &= NCF;
         op1.set16(cpu, offset, (short)(op1.get16(cpu, offset) ^ bit));
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,10 @@
 
 package org.jpc.support;
 
-import java.io.*;
-import java.util.logging.*;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A <code>SeekableIODevice</code> backed by a file on local disk.
@@ -61,6 +63,7 @@ public class FileBackedSeekableIODevice implements SeekableIODevice {
      * @param spec file path
      * @throws java.io.IOException if the file cannot be opened
      */
+    @Override
     public void configure(String spec) throws IOException {
         fileName = spec;
 
@@ -87,19 +90,23 @@ public class FileBackedSeekableIODevice implements SeekableIODevice {
         configure(file);
     }
 
+    @Override
     public void seek(long offset) throws IOException {
         image.seek(offset);
     }
 
+    @Override
     public int write(byte[] data, int offset, int length) throws IOException {
         image.write(data, offset, length);
         return length;
     }
 
+    @Override
     public int read(byte[] data, int offset, int length) throws IOException {
         return image.read(data, offset, length);
     }
 
+    @Override
     public long length() {
         try {
             return image.length();
@@ -108,14 +115,17 @@ public class FileBackedSeekableIODevice implements SeekableIODevice {
         }
     }
 
+    @Override
     public void close() throws IOException {
         image.close();
     }
 
+    @Override
     public boolean readOnly() {
         return readOnly;
     }
 
+    @Override
     public String toString() {
         return fileName;
     }

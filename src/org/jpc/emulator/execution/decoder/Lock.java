@@ -27,9 +27,8 @@
 
 package org.jpc.emulator.execution.decoder;
 
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.memory.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.processor.Processor;
 
 public class Lock extends Executable {
     Executable exec;
@@ -44,6 +43,7 @@ public class Lock extends Executable {
         this.exec = parent;
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         cpu.lock(0);
         Branch b = exec.execute(cpu);
@@ -51,6 +51,7 @@ public class Lock extends Executable {
         return b;
     }
 
+    @Override
     public boolean isBranch() {
         return exec.isBranch();
     }

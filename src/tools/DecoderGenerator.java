@@ -27,9 +27,17 @@
 
 package tools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.jpc.emulator.execution.decoder.*;
+import org.jpc.emulator.execution.decoder.Disassembler;
+import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.emulator.execution.decoder.Prefices;
 
 public class DecoderGenerator {
     public static String args = "blockStart, eip, prefices, input";
@@ -59,15 +67,12 @@ public class DecoderGenerator {
             myops.put(in, raw);
         }
 
+        @Override
         public boolean equals(Object o) {
             if (!(o instanceof OpcodeHolder))
                 return false;
             OpcodeHolder other = (OpcodeHolder)o;
-            if (myops.size() != other.myops.size())
-                return false;
-            if (!namesSet.equals(other.namesSet))
-                return false;
-            if (!names.equals(other.names))
+            if ((myops.size() != other.myops.size()) || !namesSet.equals(other.namesSet) || !names.equals(other.names))
                 return false;
             return true;
         }
@@ -95,7 +100,7 @@ public class DecoderGenerator {
         public Map<Instruction, byte[]> getNonreps() {
             Map<Instruction, byte[]> reps = new HashMap();
             for (Instruction in : myops.keySet())
-                if ((myops.get(in)[0] != (byte)0xF2) && (myops.get(in)[0] != (byte)0xF3))
+                if (myops.get(in)[0] != (byte)0xF2 && myops.get(in)[0] != (byte)0xF3)
                     reps.put(in, myops.get(in));
             return reps;
         }
@@ -136,6 +141,7 @@ public class DecoderGenerator {
             return false;
         }
 
+        @Override
         public String toString() {
             if (namesSet.size() == 0)
                 return "null;";
@@ -180,6 +186,7 @@ public class DecoderGenerator {
             b.append("    }\n};\n");
         }
 
+        @Override
         public String toString() {
             StringBuilder b = new StringBuilder();
             writeStart(b);
@@ -196,6 +203,7 @@ public class DecoderGenerator {
             this.classname = name;
         }
 
+        @Override
         public void writeBody(StringBuilder b) {
             b.append("        return new " + classname + "(" + args + ");\n");
         }
@@ -214,6 +222,7 @@ public class DecoderGenerator {
             this.mode = mode;
         }
 
+        @Override
         public void writeBody(StringBuilder b) {
             Set<String> repNames = new HashSet<String>();
             for (Instruction in : reps.keySet())
@@ -341,7 +350,7 @@ public class DecoderGenerator {
         b.append("        if (modrm < 0xC0)\n        {\n");
         b.append("            switch (reg) {\n");
         for (int i = 0; i < 8; i++)
-            if ((i + 1 < 8) && names[i * 8].equals(names[i * 8 + 8]))
+            if (i + 1 < 8 && names[i * 8].equals(names[i * 8 + 8]))
                 b.append(String.format("            case 0x%02x:\n", i));
             else
                 b.append(getConstructorLine(names[i * 8], i));
@@ -350,7 +359,7 @@ public class DecoderGenerator {
         b.append("        else\n        {\n");
         b.append("            switch (reg) {\n");
         for (int i = 0; i < 8; i++)
-            if ((i + 1 < 8) && names[0xc0 + i * 8].equals(names[0xc0 + i * 8 + 8]))
+            if (i + 1 < 8 && names[0xc0 + i * 8].equals(names[0xc0 + i * 8 + 8]))
                 b.append(String.format("            case 0x%02x:\n", i));
             else
                 b.append(getConstructorLine(names[0xc0 + i * 8], i));
@@ -389,7 +398,7 @@ public class DecoderGenerator {
             // post must be false otherwise IsSimpleModrmSplit would be true
             b.append("            switch (modrm) {\n");
             for (int i = 0xc0; i < 0x100; i++)
-                if ((i + 1 < 0x100) && names[i].equals(names[i + 1]))
+                if (i + 1 < 0x100 && names[i].equals(names[i + 1]))
                     b.append(String.format("            case 0x%02x:\n", i));
                 else
                     b.append(getConstructorLine(names[i], i));
@@ -407,6 +416,7 @@ public class DecoderGenerator {
             this.name = name;
         }
 
+        @Override
         public void writeBody(StringBuilder b) {
             b.append("        if (Modrm.isMem(input.peek()))\n            return new " + name + "_mem(" + args
                 + ");\n        else\n            return new " + name + "(" + args + ");\n");
@@ -468,9 +478,7 @@ public class DecoderGenerator {
                 for (int i = 0; i < 2; i++) // 0F opcode start
                 {
                     for (int opcode = 0; opcode < 256; opcode++) {
-                        if (Prefices.isPrefix(opcode))
-                            continue;
-                        if ((opcode == 0x0f) && ((base & 0x100) == 0))
+                        if (Prefices.isPrefix(opcode) || (opcode == 0x0f && (base & 0x100) == 0))
                             continue;
                         // fill x86 with appropriate bytes
                         x86[opbyte] = (byte)opcode;
@@ -496,7 +504,7 @@ public class DecoderGenerator {
                         }
                         int argumentsLength = input.getCounter() - opcodeLength - preficesLength;
                         String[] args = in.getArgsTypes();
-                        if ((args.length == 1) && (immediates.contains(args[0]))) {
+                        if (args.length == 1 && immediates.contains(args[0])) {
                             // don't enumerate immediates
                             ops[base + opcode].addOpcode(in, x86.clone());
                         } else {
@@ -541,5 +549,5 @@ public class DecoderGenerator {
         }
     }
 
-    public static List<String> immediates = Arrays.asList(new String[] { "Jb", "Jw", "Jd", "Ib", "Iw", "Id" });
+    public static List<String> immediates = Arrays.asList("Jb", "Jw", "Jd", "Ib", "Iw", "Id");
 }

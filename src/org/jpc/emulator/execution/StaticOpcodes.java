@@ -27,11 +27,14 @@
 
 package org.jpc.emulator.execution;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import static org.jpc.emulator.processor.Processor.*;
-import static org.jpc.emulator.execution.Executable.*;
+import static org.jpc.emulator.execution.Executable.OSZAPC;
+import static org.jpc.emulator.execution.Executable.OSZP;
+import static org.jpc.emulator.execution.Executable.SZP;
+
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
+import org.jpc.emulator.processor.ProtectedModeSegment;
+import org.jpc.emulator.processor.Segment;
 
 public class StaticOpcodes {
     public static final void aaa(Processor cpu) {
@@ -56,7 +59,7 @@ public class StaticOpcodes {
         /* Validated against Intel Pentium family hardware. */
 
         boolean cf = false, af = false;
-        if (((cpu.r_eax.get32() & 0xf) > 9) || cpu.af()) {
+        if ((cpu.r_eax.get32() & 0xf) > 9 || cpu.af()) {
             cpu.r_ax.set16(cpu.r_ax.get16() + 0x106);
             af = cf = true;
         }
@@ -75,8 +78,8 @@ public class StaticOpcodes {
     }
 
     public static void aad(Processor cpu, int base) {
-        int tl = (cpu.r_eax.get8() & 0xff);
-        int th = (cpu.r_eax.getHigh() & 0xff);
+        int tl = cpu.r_eax.get8() & 0xff;
+        int th = cpu.r_eax.getHigh() & 0xff;
         int ax1 = th * base;
         int ax2 = ax1 + tl;
         cpu.r_ax.set16(ax2 & 0xff);
@@ -91,9 +94,9 @@ public class StaticOpcodes {
             throw ProcessorException.DIVIDE_ERROR;
 
         int inAL = 0xff & cpu.r_al.get8();
-        int ah = 0xff & (inAL / base);
-        int al = 0xff & (inAL % base);
-        cpu.r_eax.set16(al | (ah << 8));
+        int ah = 0xff & inAL / base;
+        int al = 0xff & inAL % base;
+        cpu.r_eax.set16(al | ah << 8);
 
         //flags
         cpu.of = cpu.af = cpu.cf = false;
@@ -103,7 +106,7 @@ public class StaticOpcodes {
 
     public static void aas(Processor cpu) {
         boolean cf = false, af = false;
-        if (((cpu.r_eax.get32() & 0xf) > 9) || cpu.af()) {
+        if ((cpu.r_eax.get32() & 0xf) > 9 || cpu.af()) {
             cpu.r_ax.set16(cpu.r_ax.get16() - 0x106);
             af = cf = true;
         }
@@ -124,13 +127,13 @@ public class StaticOpcodes {
     public static final void daa(Processor cpu) {
         int tempAL = cpu.r_al.get8() & 0xff;
         boolean tempCF = false, tempAF = false;
-        if (((tempAL & 0xf) > 0x9) || cpu.af()) {
-            tempCF = (tempAL > 0xF9) || cpu.cf();
+        if ((tempAL & 0xf) > 0x9 || cpu.af()) {
+            tempCF = tempAL > 0xF9 || cpu.cf();
             cpu.r_al.set8(tempAL + 6);
             tempAF = true;
         }
 
-        if ((tempAL > 0x99) || cpu.cf()) {
+        if (tempAL > 0x99 || cpu.cf()) {
             cpu.r_al.set8(cpu.r_al.get8() + 0x60);
             tempCF = true;
         }
@@ -145,13 +148,13 @@ public class StaticOpcodes {
     public static final void das(Processor cpu) {
         boolean tempCF = false, tempAF = false;
         int tempAL = 0xff & cpu.r_al.get8();
-        if (((tempAL & 0xf) > 0x9) || cpu.af()) {
-            tempCF = (tempAL < 0x06) || cpu.cf();
+        if ((tempAL & 0xf) > 0x9 || cpu.af()) {
+            tempCF = tempAL < 0x06 || cpu.cf();
             cpu.r_al.set8(tempAL - 0x06);
             tempAF = true;
         }
 
-        if ((tempAL > 0x99) || cpu.cf()) {
+        if (tempAL > 0x99 || cpu.cf()) {
             cpu.r_al.set8(0xFF & cpu.r_al.get8() - 0x60);
             tempCF = true;
         }
@@ -214,7 +217,7 @@ public class StaticOpcodes {
         else
             descriptorTable = cpu.gdtr;
 
-        if ((offset + 7) > descriptorTable.getLimit()) {
+        if (offset + 7 > descriptorTable.getLimit()) {
             cpu.zf(false);
             return original;
         }
@@ -222,10 +225,10 @@ public class StaticOpcodes {
         int descriptor = cpu.readSupervisorDoubleWord(descriptorTable, offset + 4);
         int type = (descriptor & 0x1f00) >> 8;
         int dpl = (descriptor & 0x6000) >> 13;
-        int rpl = (selector & 0x3);
+        int rpl = selector & 0x3;
 
         int conformingCode = ProtectedModeSegment.TYPE_CODE | ProtectedModeSegment.TYPE_CODE_CONFORMING;
-        if ((((type & conformingCode) != conformingCode) && ((cpu.getCPL() > dpl) || (rpl > dpl))) || !valid[type]) {
+        if ((type & conformingCode) != conformingCode && (cpu.getCPL() > dpl || rpl > dpl) || !valid[type]) {
             cpu.zf(false);
             return original;
         } else {
@@ -277,7 +280,7 @@ public class StaticOpcodes {
         else
             descriptorTable = cpu.gdtr;
 
-        if ((offset + 8) > descriptorTable.getLimit()) { //
+        if (offset + 8 > descriptorTable.getLimit()) { //
             cpu.zf(false);
             return original;
         }
@@ -286,9 +289,9 @@ public class StaticOpcodes {
 
         int type = (segmentDescriptor & 0x1f00) >> 8;
         int dpl = (segmentDescriptor & 0x6000) >> 13;
-        int rpl = (selector & 0x3);
+        int rpl = selector & 0x3;
         int conformingCode = ProtectedModeSegment.TYPE_CODE | ProtectedModeSegment.TYPE_CODE_CONFORMING;
-        if ((((type & conformingCode) != conformingCode) && ((cpu.getCPL() > dpl) || (rpl > dpl))) || !valid[type]) {
+        if ((type & conformingCode) != conformingCode && (cpu.getCPL() > dpl || rpl > dpl) || !valid[type]) {
             cpu.zf(false);
             return original;
         }
@@ -299,10 +302,10 @@ public class StaticOpcodes {
         else
             lowsize = cpu.readSupervisorWord(cpu.gdtr, offset);
 
-        int size = (segmentDescriptor & 0xf0000) | (lowsize & 0xFFFF);
+        int size = segmentDescriptor & 0xf0000 | lowsize & 0xFFFF;
 
         if ((segmentDescriptor & 0x800000) != 0) // granularity ==1
-            size = (size << 12) | 0xFFF;
+            size = size << 12 | 0xFFF;
 
         cpu.zf(true);
         return size;
@@ -881,7 +884,7 @@ public class StaticOpcodes {
                 cpu.r_si.set16(addrOne);
                 cpu.flagOp1 = dataOne;
                 cpu.flagOp2 = dataTwo;
-                cpu.flagResult = (dataOne - dataTwo);
+                cpu.flagResult = dataOne - dataTwo;
                 cpu.flagIns = UCodes.SUB32;
                 cpu.flagStatus = OSZAPC;
             }
@@ -922,7 +925,7 @@ public class StaticOpcodes {
                 cpu.r_si.set32(addrOne);
                 cpu.flagOp1 = dataOne;
                 cpu.flagOp2 = dataTwo;
-                cpu.flagResult = (dataOne - dataTwo);
+                cpu.flagResult = dataOne - dataTwo;
                 cpu.flagIns = UCodes.SUB32;
                 cpu.flagStatus = OSZAPC;
             }
@@ -963,7 +966,7 @@ public class StaticOpcodes {
                 cpu.r_esi.set32(addrOne);
                 cpu.flagOp1 = dataOne;
                 cpu.flagOp2 = dataTwo;
-                cpu.flagResult = (dataOne - dataTwo);
+                cpu.flagResult = dataOne - dataTwo;
                 cpu.flagIns = UCodes.SUB32;
                 cpu.flagStatus = OSZAPC;
             }
@@ -1779,7 +1782,7 @@ public class StaticOpcodes {
 
     public static void stosw_a16(Processor cpu) {
         int tAddr = cpu.r_di.get16() & 0xffff;
-        short data = (short)cpu.r_ax.get16();
+        short data = cpu.r_ax.get16();
 
         try {
             if (cpu.df) {
@@ -1796,7 +1799,7 @@ public class StaticOpcodes {
 
     public static void stosw_a32(Processor cpu) {
         int tAddr = cpu.r_di.get32();
-        short data = (short)cpu.r_ax.get16();
+        short data = cpu.r_ax.get16();
 
         try {
             if (cpu.df) {
@@ -1848,7 +1851,7 @@ public class StaticOpcodes {
     public static void rep_stosw_a16(Processor cpu) {
         int count = cpu.r_cx.get16() & 0xffff;
         int tAddr = cpu.r_di.get16() & 0xffff;
-        short data = (short)cpu.r_ax.get16();
+        short data = cpu.r_ax.get16();
 
         try {
             if (cpu.df) {
@@ -2509,7 +2512,7 @@ public class StaticOpcodes {
             n = n - 2;
             i = y;
         }
-        return n - ((i << 1) >>> 31);
+        return n - (i << 1 >>> 31);
     }
 
     public static int numberOfLeadingZeros(int i) {

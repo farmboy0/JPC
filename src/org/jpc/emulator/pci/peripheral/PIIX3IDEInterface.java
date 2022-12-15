@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,14 +33,23 @@
 
 package org.jpc.emulator.pci.peripheral;
 
-import org.jpc.emulator.pci.*;
-import org.jpc.emulator.motherboard.*;
-import org.jpc.support.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
-
-import java.io.*;
-import java.util.logging.*;
+import org.jpc.emulator.motherboard.IOPortHandler;
+import org.jpc.emulator.motherboard.InterruptController;
+import org.jpc.emulator.pci.AbstractPCIDevice;
+import org.jpc.emulator.pci.IORegion;
+import org.jpc.emulator.pci.PCIBus;
+import org.jpc.emulator.pci.PCIDevice;
+import org.jpc.emulator.pci.PCIISABridge;
+import org.jpc.support.BlockDevice;
+import org.jpc.support.DriveSet;
 
 /**
  * @author Chris Dennis
@@ -78,6 +87,7 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
         bmdmaRegions[0] = new BMDMAIORegion(bmdmaRegions[1]);
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         channels[0].saveState(output);
         channels[1].saveState(output);
@@ -87,6 +97,7 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
         }
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         channels[0].loadState(input);
         channels[1].loadState(input);
@@ -109,18 +120,22 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
             ioportHandler.registerIOPortCapable(bmdmaRegions[1]);
     }
 
+    @Override
     public boolean autoAssignDeviceFunctionNumber() {
         return false;
     }
 
+    @Override
     public void deassignDeviceFunctionNumber() {
         LOGGING.log(Level.WARNING, "PCI device/function number conflict.");
     }
 
+    @Override
     public IORegion[] getIORegions() {
         return new IORegion[] { bmdmaRegions[0] };
     }
 
+    @Override
     public IORegion getIORegion(int index) {
         if (index == 4) {
             return bmdmaRegions[0];
@@ -133,10 +148,12 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
     private boolean pciRegistered;
     private boolean dmaRegistered;
 
+    @Override
     public boolean initialised() {
-        return ioportRegistered && pciRegistered && dmaRegistered && (irqDevice != null) && (drives != null);
+        return ioportRegistered && pciRegistered && dmaRegistered && irqDevice != null && drives != null;
     }
 
+    @Override
     public void reset() {
         devfnSet = false;
         ioportRegistered = false;
@@ -166,12 +183,14 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
 
     private boolean devfnSet;
 
+    @Override
     public boolean updated() {
         return ioportRegistered && pciRegistered && dmaRegistered && irqDevice.updated() && drivesUpdated;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
-        if ((component instanceof IOPortHandler) && irqDevice.updated() && drivesUpdated) {
+        if (component instanceof IOPortHandler && irqDevice.updated() && drivesUpdated) {
             //Run IDEChannel Constructors
             //            channels[0] = new IDEChannel(14, irqDevice, 0x1f0, 0x3f6, new BlockDevice[]{drives[0], drives[1]}, bmdmaRegions[0]);
             //            channels[1] = new IDEChannel(15, irqDevice, 0x170, 0x376, new BlockDevice[]{drives[2], drives[3]}, bmdmaRegions[1]);
@@ -182,16 +201,16 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
             ioportRegistered = true;
         }
 
-        if ((component instanceof PCIBus) && component.updated() && !pciRegistered && devfnSet) {
+        if (component instanceof PCIBus && component.updated() && !pciRegistered && devfnSet) {
             pciRegistered = ((PCIBus)component).registerDevice(this);
         }
 
-        if ((component instanceof PCIISABridge) && component.updated()) {
+        if (component instanceof PCIISABridge && component.updated()) {
             this.assignDeviceFunctionNumber(((PCIDevice)component).getDeviceFunctionNumber() + 1);
             devfnSet = true;
         }
 
-        if ((component instanceof DriveSet) && component.updated()) {
+        if (component instanceof DriveSet && component.updated()) {
             //	    drives = new BlockDevice[4];
             drives[0] = ((DriveSet)component).getHardDrive(0);
             drives[1] = ((DriveSet)component).getHardDrive(1);
@@ -207,11 +226,12 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
         }
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof InterruptController) && component.initialised())
+        if (component instanceof InterruptController && component.initialised())
             irqDevice = (InterruptController)component;
 
-        if ((component instanceof IOPortHandler) && component.initialised() && (irqDevice != null) && (drives != null)) {
+        if (component instanceof IOPortHandler && component.initialised() && irqDevice != null && drives != null) {
             //Run IDEChannel Constructors
             channels[0] = new IDEChannel(14, irqDevice, 0x1f0, 0x3f6, new BlockDevice[] { drives[0], drives[1] }, bmdmaRegions[0]);
             channels[1] = new IDEChannel(15, irqDevice, 0x170, 0x376, new BlockDevice[] { drives[2], drives[3] }, bmdmaRegions[1]);
@@ -220,16 +240,16 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
             ioportRegistered = true;
         }
 
-        if ((component instanceof PCIBus) && component.initialised() && !pciRegistered && devfnSet) {
+        if (component instanceof PCIBus && component.initialised() && !pciRegistered && devfnSet) {
             pciRegistered = ((PCIBus)component).registerDevice(this);
         }
 
-        if ((component instanceof PCIISABridge) && component.initialised()) {
+        if (component instanceof PCIISABridge && component.initialised()) {
             this.assignDeviceFunctionNumber(((PCIDevice)component).getDeviceFunctionNumber() + 1);
             devfnSet = true;
         }
 
-        if ((component instanceof DriveSet) && component.initialised()) {
+        if (component instanceof DriveSet && component.initialised()) {
             drives = new BlockDevice[4];
             drives[0] = ((DriveSet)component).getHardDrive(0);
             drives[1] = ((DriveSet)component).getHardDrive(1);
@@ -244,6 +264,7 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
         }
     }
 
+    @Override
     public String toString() {
         return "Intel PIIX3 IDE Interface";
     }

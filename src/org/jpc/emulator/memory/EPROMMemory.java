@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,8 @@
 
 package org.jpc.emulator.memory;
 
-import java.util.logging.*;
+import java.util.logging.Logger;
+
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 
 /**
@@ -96,6 +97,7 @@ public class EPROMMemory extends LazyCodeBlockMemory {
     }
 
     // EEPROM can be written to! The ability is controlled through the PCIHostBridge
+    @Override
     public void setByte(int offset, byte data) {
         if (writable)
             super.setByte(offset, data);
@@ -103,6 +105,7 @@ public class EPROMMemory extends LazyCodeBlockMemory {
             writeAttempted(offset, 1);
     }
 
+    @Override
     public void setWord(int offset, short data) {
         if (writable)
             super.setWord(offset, data);
@@ -110,6 +113,7 @@ public class EPROMMemory extends LazyCodeBlockMemory {
             writeAttempted(offset, 2);
     }
 
+    @Override
     public void setDoubleWord(int offset, int data) {
         if (writable)
             super.setDoubleWord(offset, data);
@@ -117,6 +121,7 @@ public class EPROMMemory extends LazyCodeBlockMemory {
             writeAttempted(offset, 4);
     }
 
+    @Override
     public void copyArrayIntoContents(int address, byte[] buf, int off, int len) {
 //        if (writable)
         super.copyArrayIntoContents(address, buf, off, len);
@@ -124,10 +129,12 @@ public class EPROMMemory extends LazyCodeBlockMemory {
 //            writeAttempted(address, len);
     }
 
+    @Override
     public void clear() {
         constructCodeBlocksArray();
     }
 
+    @Override
     public String toString() {
         return "EPROM Memory [" + getSize() + "]";
     }

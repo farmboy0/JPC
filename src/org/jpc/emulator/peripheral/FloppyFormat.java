@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,7 @@
 
 package org.jpc.emulator.peripheral;
 
-import static org.jpc.emulator.peripheral.FloppyController.DriveType;
+import org.jpc.emulator.peripheral.FloppyController.DriveType;
 
 /**
  * @author Chris Dennis
@@ -86,7 +86,7 @@ enum FloppyFormat {
 
     private static enum DiskType {
         DISK_288, DISK_144, DISK_720, DISK_USER, DISK_NONE
-    };
+    }
 
     private final DriveType drive;
     private final DiskType disk;
@@ -95,7 +95,7 @@ enum FloppyFormat {
     private final int maxHead;
     private final String description;
 
-    private FloppyFormat(DriveType drive, DiskType disk, int lastSector, int maxTrack, int maxHead, String description) {
+    FloppyFormat(DriveType drive, DiskType disk, int lastSector, int maxTrack, int maxHead, String description) {
         this.drive = drive;
         this.disk = disk;
         this.lastSector = lastSector;
@@ -124,6 +124,7 @@ enum FloppyFormat {
         return heads() * tracks() * sectors() * 512L;
     }
 
+    @Override
     public String toString() {
         return description;
     }
@@ -133,7 +134,7 @@ enum FloppyFormat {
         for (FloppyFormat f : values()) {
             if (f.drive() == DriveType.DRIVE_NONE)
                 break;
-            if ((drive == f.drive()) || (drive == DriveType.DRIVE_NONE)) {
+            if (drive == f.drive() || drive == DriveType.DRIVE_NONE) {
                 if (f.length() == size) {
                     return f;
                 }

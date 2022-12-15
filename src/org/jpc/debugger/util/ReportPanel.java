@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,13 +33,31 @@
 
 package org.jpc.debugger.util;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.tree.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.util.Date;
 
-import java.util.*;
-import java.text.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.UIManager;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 
 public class ReportPanel extends JPanel implements ActionListener {
     private static DateFormat dateFormat = DateFormat.getDateTimeInstance();
@@ -130,6 +148,7 @@ public class ReportPanel extends JPanel implements ActionListener {
         showError(cause, error, timeOfError);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource() == status) {
             if (error == null)
@@ -236,6 +255,7 @@ public class ReportPanel extends JPanel implements ActionListener {
             return errorCleared;
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             if (evt.getSource() == ok)
                 dispose();

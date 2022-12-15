@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,9 @@
 
 package org.jpc.emulator;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 import org.jpc.support.Clock;
 
@@ -62,11 +64,13 @@ public class Timer implements Comparable, Hibernatable {
         enabled = false;
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeLong(expireTime);
         output.writeBoolean(enabled);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         setExpiry(input.readLong());
         setStatus(input.readBoolean());
@@ -113,7 +117,7 @@ public class Timer implements Comparable, Hibernatable {
      * @return <code>true</code> if timer had expired and callback was fired.
      */
     public synchronized boolean check(long time) {
-        if (this.enabled && (time >= expireTime)) {
+        if (this.enabled && time >= expireTime) {
             disable();
             callback.callback();
             return true;
@@ -130,31 +134,33 @@ public class Timer implements Comparable, Hibernatable {
         return expireTime;
     }
 
+    @Override
     public int compareTo(Object o) {
         if (!(o instanceof Timer))
             return -1;
 
         if (getExpiry() - ((Timer)o).getExpiry() < 0)
             return -1;
-        else if ((getExpiry() - ((Timer)o).getExpiry() == 0) && (callback == ((Timer)o).callback))
+        else if (getExpiry() - ((Timer)o).getExpiry() == 0 && callback == ((Timer)o).callback)
             return 0;
         else
             return 1;
     }
 
+    @Override
     public int hashCode() {
         int hash = 7;
-        hash = 67 * hash + (int)(this.expireTime ^ (this.expireTime >>> 32));
-        hash = 67 * hash + (this.enabled ? 1 : 0);
-        return hash;
+        hash = 67 * hash + (int)(this.expireTime ^ this.expireTime >>> 32);
+        return 67 * hash + (this.enabled ? 1 : 0);
     }
 
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof Timer))
             return false;
 
         Timer t = (Timer)o;
 
-        return (t.enabled() == enabled()) && (t.getExpiry() == getExpiry()) && (t.callback == callback);
+        return t.enabled() == enabled() && t.getExpiry() == getExpiry() && t.callback == callback;
     }
 }

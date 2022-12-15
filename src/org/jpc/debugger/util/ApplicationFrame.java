@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,27 @@
 
 package org.jpc.debugger.util;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.AWTEvent;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.util.logging.*;
-import javax.swing.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 public class ApplicationFrame extends JFrame {
     private static final Logger LOGGING = Logger.getLogger(ApplicationFrame.class.getName());
@@ -54,6 +70,7 @@ public class ApplicationFrame extends JFrame {
     }
 
     class W1 extends WindowAdapter {
+        @Override
         public void windowClosing(WindowEvent e) {
             frameCloseRequested();
         }
@@ -172,9 +189,7 @@ public class ApplicationFrame extends JFrame {
             key = key.substring(1);
 
         for (int i = 0; i < args.length - 1; i++) {
-            if (!args[i].startsWith("-"))
-                continue;
-            if (!args[i].substring(1).toLowerCase().equals(key.toLowerCase()))
+            if (!args[i].startsWith("-") || !args[i].substring(1).toLowerCase().equals(key.toLowerCase()))
                 continue;
 
             String value = args[i + 1];

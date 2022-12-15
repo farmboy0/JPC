@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,17 +33,18 @@
 
 package org.jpc.debugger;
 
-import java.io.*;
 import java.awt.Dimension;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import javax.swing.border.Border;
-import org.jpc.debugger.util.*;
+import org.jpc.debugger.util.UtilityFrame;
 import org.jpc.emulator.PC;
-import org.jpc.j2se.PCMonitor;
 import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.j2se.PCMonitor;
 
 public class PCMonitorFrame extends UtilityFrame implements PCListener {
     private PC currentPC;
@@ -61,6 +62,7 @@ public class PCMonitorFrame extends UtilityFrame implements PCListener {
         JPC.getInstance().objects().addObject(this);
     }
 
+    @Override
     public void setSize(Dimension d) {
         java.awt.Insets borders = this.getBorder().getBorderInsets(this);
         super.setSize(new Dimension(d.width + borders.bottom + borders.top + 10, d.height + borders.left + borders.right + 25));
@@ -78,25 +80,31 @@ public class PCMonitorFrame extends UtilityFrame implements PCListener {
         monitor.saveState(out);
     }
 
+    @Override
     public void frameClosed() {
         if (monitor != null)
             monitor.stopUpdateThread();
         JPC.getInstance().objects().removeObject(this);
     }
 
+    @Override
     public void pcCreated() {
     }
 
+    @Override
     public void pcDisposed() {
         dispose();
     }
 
+    @Override
     public void executionStarted() {
     }
 
+    @Override
     public void executionStopped() {
     }
 
+    @Override
     public void refreshDetails() {
         PC pc = (PC)JPC.getObject(PC.class);
         if (pc != currentPC) {

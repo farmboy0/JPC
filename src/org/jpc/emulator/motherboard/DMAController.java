@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,10 +33,16 @@
 
 package org.jpc.emulator.motherboard;
 
-import org.jpc.emulator.*;
-import org.jpc.emulator.memory.*;
-import java.io.*;
-import java.util.logging.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
 
 /**
  * Emulation of an 8237 Direct Memory Access Controller
@@ -51,7 +57,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
     private static final int pagePortList1 = 0x2;
     private static final int pagePortList2 = 0x3;
     private static final int pagePortList3 = 0x7;
-    private static final int[] pagePortList = new int[] { pagePortList0, pagePortList1, pagePortList2, pagePortList3 };
+    private static final int[] pagePortList = { pagePortList0, pagePortList1, pagePortList2, pagePortList3 };
     private static final int COMMAND_MEMORY_TO_MEMORY = 0x01;
     private static final int COMMAND_ADDRESS_HOLD = 0x02;
     private static final int COMMAND_CONTROLLER_DISABLE = 0x04;
@@ -97,6 +103,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
         public int pageLow, pageHigh;
         private boolean masked = false;
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(currentAddress);
             output.writeInt(currentWordCount);
@@ -111,6 +118,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
 
         }
 
+        @Override
         public void loadState(DataInput input) throws IOException {
             currentAddress = input.readInt();
             currentWordCount = input.readInt();
@@ -144,7 +152,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
          * @param length number of bytes to read.
          */
         public void readMemory(byte[] buffer, int offset, int position, int length) {
-            int address = (pageHigh << 24) | (pageLow << 16) | currentAddress;
+            int address = pageHigh << 24 | pageLow << 16 | currentAddress;
 
             if ((mode & DMAChannel.MODE_ADDRESS_INCREMENT) != 0) {
                 LOGGING.log(Level.WARNING, "read in address decrement mode");
@@ -171,7 +179,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
          * @param length number of bytes to write.
          */
         public void writeMemory(byte[] buffer, int offset, int position, int length) {
-            int address = (pageHigh << 24) | (pageLow << 16) | currentAddress;
+            int address = pageHigh << 24 | pageLow << 16 | currentAddress;
 
             if ((mode & DMAChannel.MODE_ADDRESS_INCREMENT) != 0) {
                 LOGGING.log(Level.WARNING, "write in address decrement mode");
@@ -191,14 +199,14 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
             if (masked == mask)
                 return;
             masked = mask;
-            if ((masked) && (eventHandler != null))
+            if (masked && eventHandler != null)
                 eventHandler.handleDMAEvent(DMAEvent.DMA_MASKED);
-            if ((!masked) && (eventHandler != null))
+            if (!masked && eventHandler != null)
                 eventHandler.handleDMAEvent(DMAEvent.DMA_UNMASKED);
         }
 
         private void run() {
-            int n = transferDevice.handleTransfer(this, currentWordCount, (baseWordCount + 1) << controllerNumber);
+            int n = transferDevice.handleTransfer(this, currentWordCount, baseWordCount + 1 << controllerNumber);
             currentWordCount = n;
         }
 
@@ -221,7 +229,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
         dShift = primary ? 0 : 1;
         ioBase = primary ? 0x00 : 0xc0;
         pageLowBase = primary ? 0x80 : 0x88;
-        pageHighBase = highPageEnable ? (primary ? 0x480 : 0x488) : -1;
+        pageHighBase = highPageEnable ? primary ? 0x480 : 0x488 : -1;
         controllerNumber = primary ? 0 : 1;
         dmaChannels = new DMAChannel[4];
         for (int i = 0; i < 4; i++)
@@ -229,6 +237,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
         reset();
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(status);
         output.writeInt(command);
@@ -240,10 +249,11 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
         output.writeInt(pageHighBase);
         output.writeInt(controllerNumber);
         output.writeInt(dmaChannels.length);
-        for (int i = 0; i < dmaChannels.length; i++)
-            dmaChannels[i].saveState(output);
+        for (DMAChannel dmaChannel : dmaChannels)
+            dmaChannel.saveState(output);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         ioportRegistered = false;
         status = input.readInt();
@@ -277,12 +287,13 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
      * @return <code>true</code> if this is the primary DMA controller.
      */
     public boolean isPrimary() {
-        return (this.dShift == 0);
+        return this.dShift == 0;
     }
 
+    @Override
     public void reset() {
-        for (int i = 0; i < dmaChannels.length; i++)
-            dmaChannels[i].reset();
+        for (DMAChannel dmaChannel : dmaChannels)
+            dmaChannel.reset();
 
         this.writeController(0x0d << this.dShift, 0);
 
@@ -291,35 +302,35 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
     }
 
     private void writeChannel(int portNumber, int data) {
-        int port = (portNumber >>> dShift) & 0x0f;
+        int port = portNumber >>> dShift & 0x0f;
         int channelNumber = port >>> 1;
         DMAChannel r = dmaChannels[channelNumber];
         if (getFlipFlop()) {
             if ((port & 1) == DMAChannel.ADDRESS)
-                r.baseAddress = (r.baseAddress & 0xff) | ((data << 8) & 0xff00);
+                r.baseAddress = r.baseAddress & 0xff | data << 8 & 0xff00;
             else
-                r.baseWordCount = (r.baseWordCount & 0xff) | ((data << 8) & 0xff00);
+                r.baseWordCount = r.baseWordCount & 0xff | data << 8 & 0xff00;
             initChannel(channelNumber);
         } else if ((port & 1) == DMAChannel.ADDRESS)
-            r.baseAddress = (r.baseAddress & 0xff00) | (data & 0xff);
+            r.baseAddress = r.baseAddress & 0xff00 | data & 0xff;
         else
-            r.baseWordCount = (r.baseWordCount & 0xff00) | (data & 0xff);
+            r.baseWordCount = r.baseWordCount & 0xff00 | data & 0xff;
     }
 
     private void writeController(int portNumber, int data) {
-        int port = (portNumber >>> this.dShift) & 0x0f;
+        int port = portNumber >>> this.dShift & 0x0f;
         switch (port) {
         case ADDRESS_WRITE_COMMAND: /* command */
-            if ((data != 0) && ((data & CMD_NOT_SUPPORTED) != 0))
+            if (data != 0 && (data & CMD_NOT_SUPPORTED) != 0)
                 break;
             command = data;
             break;
         case ADDRESS_WRITE_REQUEST:
             int channelNumber = data & 3;
             if ((data & 4) == 0)
-                status &= ~(1 << (channelNumber + 4));
+                status &= ~(1 << channelNumber + 4);
             else
-                status |= 1 << (channelNumber + 4);
+                status |= 1 << channelNumber + 4;
 
             status &= ~(1 << channelNumber);
             runTransfers();
@@ -331,7 +342,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
                 mask &= ~(1 << (data & 3));
                 runTransfers();
             }
-            dmaChannels[data & 3].setMask((mask & (1 << (data & 3))) != 0);
+            dmaChannels[data & 3].setMask((mask & 1 << (data & 3)) != 0);
             break;
         case ADDRESS_WRITE_MODE:
             channelNumber = data & DMAChannel.MODE_CHANNEL_SELECT;
@@ -345,16 +356,16 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
             mask = ~0;
             status = 0;
             command = 0;
-            for (int i = 0; i < dmaChannels.length; i++)
-                if (dmaChannels[i] != null) {
-                    dmaChannels[i].setMask(true);
+            for (DMAChannel dmaChannel : dmaChannels)
+                if (dmaChannel != null) {
+                    dmaChannel.setMask(true);
                 }
             break;
         case ADDRESS_WRITE_CLEAR_MASK: /* clear mask for all channels */
             mask = 0;
-            for (int i = 0; i < dmaChannels.length; i++)
-                if (dmaChannels[i] != null) {
-                    dmaChannels[i].setMask(false);
+            for (DMAChannel dmaChannel : dmaChannels)
+                if (dmaChannel != null) {
+                    dmaChannel.setMask(false);
                 }
             runTransfers();
             break;
@@ -362,7 +373,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
             mask = data;
             for (int i = 0; i < dmaChannels.length; i++)
                 if (dmaChannels[i] != null) {
-                    dmaChannels[i].setMask((mask & (1 << i)) != 0);
+                    dmaChannels[i].setMask((mask & 1 << i) != 0);
                 }
             runTransfers();
             break;
@@ -372,7 +383,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
 
     }
 
-    private static final int[] channels = new int[] { -1, 2, 3, 1, -1, -1, -1, 0 };
+    private static final int[] channels = { -1, 2, 3, 1, -1, -1, -1, 0 };
 
     private void writePageLow(int portNumber, int data) {
         int channelNumber = channels[portNumber & 7];
@@ -389,12 +400,12 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
     }
 
     private int readChannel(int portNumber) {
-        int port = (portNumber >>> dShift) & 0x0f;
+        int port = portNumber >>> dShift & 0x0f;
         int channelNumber = port >>> 1;
         int registerNumber = port & 1;
         DMAChannel r = dmaChannels[channelNumber];
 
-        int direction = ((r.mode & DMAChannel.MODE_ADDRESS_INCREMENT) == 0) ? 1 : -1;
+        int direction = (r.mode & DMAChannel.MODE_ADDRESS_INCREMENT) == 0 ? 1 : -1;
 
         boolean flipflop = getFlipFlop();
         int val;
@@ -402,12 +413,12 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
             val = (r.baseWordCount << dShift) - r.currentWordCount;
         else
             val = r.currentAddress + r.currentWordCount * direction;
-        return (val >>> (dShift + (flipflop ? 0x8 : 0x0))) & 0xff;
+        return val >>> dShift + (flipflop ? 0x8 : 0x0) & 0xff;
     }
 
     private int readController(int portNumber) {
         int val;
-        int port = (portNumber >>> dShift) & 0x0f;
+        int port = portNumber >>> dShift & 0x0f;
         switch (port) {
         case ADDRESS_READ_STATUS:
             val = status;
@@ -438,8 +449,9 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
         return dmaChannels[channelNumber].pageHigh;
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
-        switch ((address - ioBase) >>> dShift) {
+        switch (address - ioBase >>> dShift) {
         case 0x0:
         case 0x1:
         case 0x2:
@@ -488,18 +500,21 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
 
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         this.ioPortWrite8(address, data);
         this.ioPortWrite8(address + 1, data >>> 8);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         this.ioPortWrite16(address, data);
         this.ioPortWrite16(address + 2, data >>> 16);
     }
 
+    @Override
     public int ioPortRead8(int address) {
-        switch ((address - ioBase) >>> dShift) {
+        switch (address - ioBase >>> dShift) {
         case 0x0:
         case 0x1:
         case 0x2:
@@ -545,32 +560,35 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
         return 0xff;
     }
 
+    @Override
     public int ioPortRead16(int address) {
-        return (0xff & this.ioPortRead8(address)) | ((this.ioPortRead8(address) << 8) & 0xff);
+        return 0xff & this.ioPortRead8(address) | this.ioPortRead8(address) << 8 & 0xff;
     }
 
+    @Override
     public int ioPortRead32(int address) {
-        return (0xffff & this.ioPortRead8(address)) | ((this.ioPortRead8(address) << 16) & 0xffff);
+        return 0xffff & this.ioPortRead8(address) | this.ioPortRead8(address) << 16 & 0xffff;
     }
 
+    @Override
     public int[] ioPortsRequested() {
         int[] temp;
         if (pageHighBase >= 0)
-            temp = new int[16 + (2 * pagePortList.length)];
+            temp = new int[16 + 2 * pagePortList.length];
         else
             temp = new int[16 + pagePortList.length];
 
         int j = 0;
         for (int i = 0; i < 8; i++)
             temp[j++] = ioBase + (i << this.dShift);
-        for (int i = 0; i < pagePortList.length; i++) {
-            temp[j++] = pageLowBase + pagePortList[i];
+        for (int element : pagePortList) {
+            temp[j++] = pageLowBase + element;
             if (pageHighBase >= 0)
-                temp[j++] = pageHighBase + pagePortList[i];
+                temp[j++] = pageHighBase + element;
         }
 
         for (int i = 0; i < 8; i++)
-            temp[j++] = ioBase + ((i + 8) << this.dShift);
+            temp[j++] = ioBase + (i + 8 << this.dShift);
         return temp;
     }
 
@@ -616,11 +634,11 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
             i = y;
         }
 
-        return n - ((i << 1) >>> 31);
+        return n - (i << 1 >>> 31);
     }
 
     private void runTransfers() {
-        int value = ~mask & (status >>> 4) & 0xf;
+        int value = ~mask & status >>> 4 & 0xf;
         if (value == 0)
             return;
 
@@ -650,7 +668,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
      * @param channel channel index.
      */
     public void holdDmaRequest(int channel) {
-        status |= 1 << (channel + 4);
+        status |= 1 << channel + 4;
         runTransfers();
     }
 
@@ -661,7 +679,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
      * @param channel channel index.
      */
     public void releaseDmaRequest(int channel) {
-        status &= ~(1 << (channel + 4));
+        status &= ~(1 << channel + 4);
     }
 
     /**
@@ -678,14 +696,17 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
 
     private boolean ioportRegistered;
 
+    @Override
     public boolean initialised() {
-        return ((memory != null) && ioportRegistered);
+        return memory != null && ioportRegistered;
     }
 
+    @Override
     public boolean updated() {
-        return memory.updated() && ioportRegistered && (!isPrimary() || (slave != null));
+        return memory.updated() && ioportRegistered && (!isPrimary() || slave != null);
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
         if (component instanceof PhysicalAddressSpace)
             this.memory = (PhysicalAddressSpace)component;
@@ -698,6 +719,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
                 slave = (DMAController)component;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
         if (component instanceof IOPortHandler) {
             ((IOPortHandler)component).registerIOPortCapable(this);
@@ -706,6 +728,7 @@ public class DMAController extends AbstractHardwareComponent implements IODevice
 
     }
 
+    @Override
     public String toString() {
         return "DMA Controller [element " + dShift + "]";
     }

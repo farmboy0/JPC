@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -58,15 +58,18 @@ public class CDROMBlockDevice extends RawBlockDevice {
         this(null);
     }
 
+    @Override
     public void close() {
         super.close();
         eject();
     }
 
+    @Override
     public boolean isLocked() {
         return locked;
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }
@@ -75,6 +78,7 @@ public class CDROMBlockDevice extends RawBlockDevice {
      * Locks or unlocks the drive to prevents or allow the ejection or insertion of discs.
      * @param locked <code>true</code> to lock the device
      */
+    @Override
     public void setLock(boolean locked) {
         this.locked = locked;
     }
@@ -111,22 +115,27 @@ public class CDROMBlockDevice extends RawBlockDevice {
      * Hard coded to return the type constant for a cdrom device.
      * @return <code>TYPE_CDROM</code>
      */
+    @Override
     public Type getType() {
         return Type.CDROM;
     }
 
+    @Override
     public int getCylinders() {
         return 2;
     }
 
+    @Override
     public int getHeads() {
         return 16;
     }
 
+    @Override
     public int getSectors() {
         return 63;
     }
 
+    @Override
     public String toString() {
         return "CDROM: " + super.toString();
     }

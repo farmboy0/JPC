@@ -27,11 +27,14 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.opcodes.pm.pushfd;
-import org.jpc.emulator.processor.*;
-import static org.jpc.emulator.execution.Executable.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.Executable.Branch;
+import org.jpc.emulator.execution.SelfModifyingCodeException;
+import org.jpc.emulator.execution.decoder.BasicBlock;
+import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.emulator.processor.ModeSwitchException;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
 
 public class InterpretedProtectedModeBlock implements ProtectedModeCodeBlock {
     private final BasicBlock b;
@@ -41,14 +44,17 @@ public class InterpretedProtectedModeBlock implements ProtectedModeCodeBlock {
         this.b = b;
     }
 
+    @Override
     public int getX86Length() {
         return b.getX86Length();
     }
 
+    @Override
     public int getX86Count() {
         return b.getX86Count();
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Executable current = b.start;
         Executable.Branch ret;
@@ -98,14 +104,17 @@ public class InterpretedProtectedModeBlock implements ProtectedModeCodeBlock {
         }
     }
 
+    @Override
     public String getDisplayString() {
         return "Interpreted Protected Mode Block:\n" + b.getDisplayString();
     }
 
+    @Override
     public Instruction getInstructions() {
         return b.getInstructions();
     }
 
+    @Override
     public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         valid = b.handleMemoryRegionChange(startAddress, endAddress);
         return valid;

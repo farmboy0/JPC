@@ -1,28 +1,36 @@
 package org.jpc.emulator.memory;
 
-import org.jpc.emulator.execution.codeblock.*;
+import org.jpc.emulator.execution.codeblock.SpanningCodeBlock;
 
 public abstract class AbstractMemory implements Memory {
+    @Override
     public void lock(int addr) {
     }
 
+    @Override
     public void unlock(int addr) {
     }
 
+    @Override
     public void addSpanningBlock(SpanningCodeBlock b, int lengthRemaining) {
     }
 
+    @Override
     public abstract long getSize();
 
+    @Override
     public abstract byte getByte(int offset);
 
+    @Override
     public abstract void setByte(int offset, byte data);
 
+    @Override
     public void clear() {
         for (int i = 0; i < getSize(); i++)
             setByte(i, (byte)0);
     }
 
+    @Override
     public void clear(int start, int length) {
         int limit = start + length;
         if (limit > getSize())
@@ -31,11 +39,13 @@ public abstract class AbstractMemory implements Memory {
             setByte(i, (byte)0);
     }
 
+    @Override
     public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {
         for (int i = off; i < off + len; i++, address++)
             buffer[i] = getByte(address);
     }
 
+    @Override
     public void copyArrayIntoContents(int address, byte[] buffer, int off, int len) {
         for (int i = off; i < off + len; i++, address++)
             setByte(address, buffer[i]);
@@ -49,7 +59,7 @@ public abstract class AbstractMemory implements Memory {
     protected final short getWordInBytes(int offset) {
         int result = 0xFF & getByte(offset + 1);
         result <<= 8;
-        result |= (0xFF & getByte(offset));
+        result |= 0xFF & getByte(offset);
         return (short)result;
     }
 
@@ -61,7 +71,7 @@ public abstract class AbstractMemory implements Memory {
     protected final int getDoubleWordInBytes(int offset) {
         int result = 0xFFFF & getWordInBytes(offset + 2);
         result <<= 16;
-        result |= (0xFFFF & getWordInBytes(offset));
+        result |= 0xFFFF & getWordInBytes(offset);
         return result;
     }
 
@@ -71,28 +81,33 @@ public abstract class AbstractMemory implements Memory {
      * @return quadword at <code>offset</code> as a long.
      */
     protected final long getQuadWordInBytes(int offset) {
-        long result = 0xFFFFFFFFl & getDoubleWordInBytes(offset + 4);
+        long result = 0xFFFFFFFFL & getDoubleWordInBytes(offset + 4);
         result <<= 32;
-        result |= (0xFFFFFFFFl & getDoubleWordInBytes(offset));
+        result |= 0xFFFFFFFFL & getDoubleWordInBytes(offset);
         return result;
     }
 
+    @Override
     public short getWord(int offset) {
         return getWordInBytes(offset);
     }
 
+    @Override
     public int getDoubleWord(int offset) {
         return getDoubleWordInBytes(offset);
     }
 
+    @Override
     public long getQuadWord(int offset) {
         return getQuadWordInBytes(offset);
     }
 
+    @Override
     public long getLowerDoubleQuadWord(int offset) {
         return getQuadWordInBytes(offset);
     }
 
+    @Override
     public long getUpperDoubleQuadWord(int offset) {
         return getQuadWordInBytes(offset + 8);
     }
@@ -136,22 +151,27 @@ public abstract class AbstractMemory implements Memory {
         setDoubleWordInBytes(offset + 4, (int)(data >> 32));
     }
 
+    @Override
     public void setWord(int offset, short data) {
         setWordInBytes(offset, data);
     }
 
+    @Override
     public void setDoubleWord(int offset, int data) {
         setDoubleWordInBytes(offset, data);
     }
 
+    @Override
     public void setQuadWord(int offset, long data) {
         setQuadWordInBytes(offset, data);
     }
 
+    @Override
     public void setLowerDoubleQuadWord(int offset, long data) {
         setQuadWordInBytes(offset, data);
     }
 
+    @Override
     public void setUpperDoubleQuadWord(int offset, long data) {
         setQuadWordInBytes(offset + 8, data);
     }
@@ -160,7 +180,7 @@ public abstract class AbstractMemory implements Memory {
 //    {
 //        return (short) ((0xFF & src[offset]) | (0xFF00 & (src[offset+1] << 8)));
 //    }
-//    
+//
 //    public static final int getDoubleWord(int offset, byte[] src)
 //    {
 //        return (0xFFFF & getWord(offset, src)) | (0xFFFF0000 & (getWord(offset+2, src) << 16));

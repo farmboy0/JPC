@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,17 @@
 
 package org.jpc.emulator.memory;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jpc.emulator.*;
-import org.jpc.emulator.execution.codeblock.*;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.PC;
+import org.jpc.emulator.execution.codeblock.CodeBlockManager;
+import org.jpc.emulator.execution.codeblock.SpanningCodeBlock;
+import org.jpc.emulator.execution.codeblock.SpanningDecodeException;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.j2se.Option;
 
@@ -90,13 +95,14 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         setGateA20State(false);
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeBoolean(gateA20MaskState);
         dumpMemory(output, quickNonA20MaskedIndex, nonA20MaskedIndex);
     }
 
     private static void dumpMemory(DataOutput output, Memory[] quick, Memory[][] full) throws IOException {
-        byte[] temp = new byte[0];
+        byte[] temp = {};
         output.writeInt(quick.length);
         for (Memory block : quick) {
             int blockLength = (int)block.getSize();
@@ -129,7 +135,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
 
             output.writeInt(chunk.length);
             for (Memory block : chunk) {
-                if ((block == null) || (!block.isAllocated())) {
+                if (block == null || !block.isAllocated()) {
                     output.writeInt(0);
                     continue;
                 }
@@ -157,7 +163,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
     }
 
     private static void loadMemory(DataInput input, Memory[] quick, Memory[][] full, CodeBlockManager manager) throws IOException {
-        byte[] temp = new byte[0];
+        byte[] temp = {};
         int quickLength = input.readInt();
         for (int i = 0; i < quickLength; i++) {
             Memory block = quick[i];
@@ -234,10 +240,10 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
                 continue;
 
             for (int b = 0; b < BOTTOM_INDEX_SIZE; b++) {
-                int i = (a << BOTTOM_INDEX_BITS) | b;
+                int i = a << BOTTOM_INDEX_BITS | b;
 
-                if ((i & (GATEA20_MASK >>> INDEX_SHIFT)) == i) {
-                    int modi = i | (~GATEA20_MASK >>> INDEX_SHIFT);
+                if ((i & GATEA20_MASK >>> INDEX_SHIFT) == i) {
+                    int modi = i | ~GATEA20_MASK >>> INDEX_SHIFT;
                     int moda = modi >>> BOTTOM_INDEX_BITS;
                     int modb = modi & BOTTOM_INDEX_BITS;
                     try {
@@ -253,14 +259,15 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         //fill in a20 masked quick array
         System.arraycopy(quickNonA20MaskedIndex, 0, quickA20MaskedIndex, 0, quickA20MaskedIndex.length);
         for (int i = 0; i < QUICK_INDEX_SIZE; i++) {
-            if ((i & (GATEA20_MASK >>> INDEX_SHIFT)) == i) {
+            if ((i & GATEA20_MASK >>> INDEX_SHIFT) == i) {
                 quickA20MaskedIndex[i] = quickNonA20MaskedIndex[i];
-                int modi = i | (~GATEA20_MASK >>> INDEX_SHIFT);
+                int modi = i | ~GATEA20_MASK >>> INDEX_SHIFT;
                 quickA20MaskedIndex[modi] = quickNonA20MaskedIndex[i];
             }
         }
     }
 
+    @Override
     public void loadState(DataInput in) {
     }
 
@@ -308,7 +315,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             index = a20MaskedIndex;
         }
 
-        if ((linearAddr != null) && linearAddr.isPagingEnabled()) {
+        if (linearAddr != null && linearAddr.isPagingEnabled()) {
             linearAddr.flush();
         }
     }
@@ -335,18 +342,22 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         dirtyPages.clear();
     }
 
+    @Override
     protected Memory getReadMemoryBlockAt(int offset) {
         return getMemoryBlockAt(offset);
     }
 
+    @Override
     public byte getByte(int offset) {
         return getReadMemoryBlockAt(offset).getByte(offset & BLOCK_MASK);
     }
 
+    @Override
     public void setByte(int offset, byte data) {
         getWriteMemoryBlockAt(offset).setByte(offset & BLOCK_MASK, data);
     }
 
+    @Override
     public short getWord(int offset) {
         try {
             return getReadMemoryBlockAt(offset).getWord(offset & BLOCK_MASK);
@@ -355,6 +366,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
     }
 
+    @Override
     public void setWord(int offset, short data) {
         try {
             getWriteMemoryBlockAt(offset).setWord(offset & BLOCK_MASK, data);
@@ -363,6 +375,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
     }
 
+    @Override
     public int getDoubleWord(int offset) {
         try {
             return getReadMemoryBlockAt(offset).getDoubleWord(offset & BLOCK_MASK);
@@ -371,6 +384,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
     }
 
+    @Override
     public void setDoubleWord(int offset, int data) {
         try {
             getWriteMemoryBlockAt(offset).setDoubleWord(offset & BLOCK_MASK, data);
@@ -379,11 +393,13 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
     }
 
+    @Override
     protected Memory getWriteMemoryBlockAt(int offset) {
         logWrite(offset);
         return getMemoryBlockAt(offset);
     }
 
+    @Override
     public int executeReal(Processor cpu, int offset) {
         try {
 //            if (PC.HISTORY)
@@ -405,14 +421,17 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
     }
 
+    @Override
     public int executeProtected(Processor cpu, int offset) {
         throw new IllegalStateException("Cannot execute protected mode block in physical memory");
     }
 
+    @Override
     public int executeVirtual8086(Processor cpu, int offset) {
         throw new IllegalStateException("Cannot execute protected mode block in physical memory");
     }
 
+    @Override
     protected void replaceBlocks(Memory oldBlock, Memory newBlock) {
         for (int i = 0; i < quickA20MaskedIndex.length; i++) {
             if (quickA20MaskedIndex[i] == oldBlock) {
@@ -457,27 +476,34 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             memory = mem;
         }
 
+        @Override
         public void lock(int addr) {
         }
 
+        @Override
         public void unlock(int addr) {
         }
 
+        @Override
         public void addSpanningBlock(SpanningCodeBlock b, int lengthRemaining) {
         }
 
+        @Override
         public long getSize() {
             return BLOCK_SIZE;
         }
 
+        @Override
         public boolean isAllocated() {
             return memory.isAllocated();
         }
 
+        @Override
         public void clear() {
             memory.clear(baseAddress, (int)getSize());
         }
 
+        @Override
         public void clear(int start, int length) {
             if (start + length > getSize()) {
                 throw new ArrayIndexOutOfBoundsException("Attempt to clear outside of memory bounds");
@@ -486,100 +512,120 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             memory.clear(start, length);
         }
 
+        @Override
         public void copyContentsIntoArray(int offset, byte[] buffer, int off, int len) {
             offset = baseAddress | offset;
             memory.copyContentsIntoArray(offset, buffer, off, len);
         }
 
+        @Override
         public void copyArrayIntoContents(int offset, byte[] buffer, int off, int len) {
             offset = baseAddress | offset;
             memory.copyArrayIntoContents(offset, buffer, off, len);
         }
 
+        @Override
         public byte getByte(int offset) {
             offset = baseAddress | offset;
             return memory.getByte(offset);
         }
 
+        @Override
         public short getWord(int offset) {
             offset = baseAddress | offset;
             return memory.getWord(offset);
         }
 
+        @Override
         public int getDoubleWord(int offset) {
             offset = baseAddress | offset;
             return memory.getDoubleWord(offset);
         }
 
+        @Override
         public long getQuadWord(int offset) {
             offset = baseAddress | offset;
             return memory.getQuadWord(offset);
         }
 
+        @Override
         public long getLowerDoubleQuadWord(int offset) {
             offset = baseAddress | offset;
             return memory.getQuadWord(offset);
         }
 
+        @Override
         public long getUpperDoubleQuadWord(int offset) {
             offset += 8;
             offset = baseAddress | offset;
             return memory.getQuadWord(offset);
         }
 
+        @Override
         public void setByte(int offset, byte data) {
             offset = baseAddress | offset;
             memory.setByte(offset, data);
         }
 
+        @Override
         public void setWord(int offset, short data) {
             offset = baseAddress | offset;
             memory.setWord(offset, data);
         }
 
+        @Override
         public void setDoubleWord(int offset, int data) {
             offset = baseAddress | offset;
             memory.setDoubleWord(offset, data);
         }
 
+        @Override
         public void setQuadWord(int offset, long data) {
             offset = baseAddress | offset;
             memory.setQuadWord(offset, data);
         }
 
+        @Override
         public void setLowerDoubleQuadWord(int offset, long data) {
             offset = baseAddress | offset;
             memory.setQuadWord(offset, data);
         }
 
+        @Override
         public void setUpperDoubleQuadWord(int offset, long data) {
             offset += 8;
             offset = baseAddress | offset;
             memory.setQuadWord(offset, data);
         }
 
+        @Override
         public int executeReal(Processor cpu, int offset) {
             offset = baseAddress | offset;
             return memory.executeReal(cpu, offset);
         }
 
+        @Override
         public int executeProtected(Processor cpu, int offset) {
             throw new IllegalStateException("Cannot execute protected mode block in physical memory");
         }
 
+        @Override
         public int executeVirtual8086(Processor cpu, int offset) {
             throw new IllegalStateException("Cannot execute protected mode block in physical memory");
         }
 
+        @Override
         public String toString() {
             return "Mapped Memory";
         }
 
+        @Override
         public void loadInitialContents(int address, byte[] buf, int off, int len) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 
+    @Override
     public void clear() {
         for (Memory block : quickNonA20MaskedIndex) {
             block.clear();
@@ -608,11 +654,11 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
      * @throws java.lang.IllegalStateException if range is not of <code>BLOCK_SIZE</code> granularity
      */
     public void unmap(int start, int length) {
-        if ((start % BLOCK_SIZE) != 0) {
+        if (start % BLOCK_SIZE != 0) {
             throw new IllegalStateException("Cannot deallocate memory starting at " + Integer.toHexString(start)
                 + "; this is not block aligned at " + BLOCK_SIZE + " boundaries");
         }
-        if ((length % BLOCK_SIZE) != 0) {
+        if (length % BLOCK_SIZE != 0) {
             throw new IllegalStateException(
                 "Cannot deallocate memory in partial blocks. " + length + " is not a multiple of " + BLOCK_SIZE);
         }
@@ -637,19 +683,19 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             throw new IllegalStateException(
                 "Underlying memory (length=" + underlying.getSize() + ") is too short for mapping into region " + length + " bytes long");
         }
-        if ((start % BLOCK_SIZE) != 0) {
+        if (start % BLOCK_SIZE != 0) {
             throw new IllegalStateException(
                 "Cannot map memory starting at " + Integer.toHexString(start) + "; this is not aligned to " + BLOCK_SIZE + " blocks");
         }
-        if ((length % BLOCK_SIZE) != 0) {
+        if (length % BLOCK_SIZE != 0) {
             throw new IllegalStateException("Cannot map memory in partial blocks: " + length + " is not a multiple of " + BLOCK_SIZE);
         }
         unmap(start, length);
         if (Option.log_memory_maps.isSet())
-            if (((start & 0xffffffffL) > PC.SYS_RAM_SIZE) || !(underlying instanceof LazyCodeBlockMemory))
+            if ((start & 0xffffffffL) > PC.SYS_RAM_SIZE || !(underlying instanceof LazyCodeBlockMemory))
                 System.out.printf("Mapping %s into memory from %x to %x\n", underlying, start, start + length);
 
-        long s = 0xFFFFFFFFl & start;
+        long s = 0xFFFFFFFFL & start;
         for (long i = s; i < s + length; i += BLOCK_SIZE) {
             Memory w = new MapWrapper(underlying, (int)(i - s));
             setMemoryBlockAt((int)i, w);
@@ -666,7 +712,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
      * @throws java.lang.IllegalStateException if there is an error in the mapping.
      */
     public void mapMemory(int start, Memory block) {
-        if ((start % BLOCK_SIZE) != 0) {
+        if (start % BLOCK_SIZE != 0) {
             throw new IllegalStateException(
                 "Cannot allocate memory starting at " + Integer.toHexString(start) + "; this is not aligned to " + BLOCK_SIZE + " bytes");
         }
@@ -678,127 +724,159 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             if (block instanceof EPROMMemory)
                 System.out.printf("Mapping %s into memory from %x to %x\n", block, start, start + BLOCK_SIZE);
 
-        long s = 0xFFFFFFFFl & start;
+        long s = 0xFFFFFFFFL & start;
         setMemoryBlockAt((int)s, block);
     }
 
     public static final class UnconnectedMemoryBlock implements Memory {
 
+        @Override
         public boolean isAllocated() {
             return false;
         }
 
+        @Override
         public void lock(int addr) {
         }
 
+        @Override
         public void unlock(int addr) {
         }
 
+        @Override
         public void addSpanningBlock(SpanningCodeBlock b, int lengthRemaining) {
         }
 
+        @Override
         public void clear() {
         }
 
+        @Override
         public void clear(int start, int length) {
         }
 
+        @Override
         public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {
         }
 
+        @Override
         public void copyArrayIntoContents(int address, byte[] buffer, int off, int len) {
             throw new IllegalStateException("Cannot load array into unconnected memory block");
         }
 
+        @Override
         public long getSize() {
             return BLOCK_SIZE;
         }
 
+        @Override
         public byte getByte(int offset) {
             return (byte)-1;
         }
 
+        @Override
         public short getWord(int offset) {
             return (short)-1;
         }
 
+        @Override
         public int getDoubleWord(int offset) {
             return -1;
         }
 
+        @Override
         public long getQuadWord(int offset) {
-            return -1l;
+            return -1L;
         }
 
+        @Override
         public long getLowerDoubleQuadWord(int offset) {
-            return -1l;
+            return -1L;
         }
 
+        @Override
         public long getUpperDoubleQuadWord(int offset) {
-            return -1l;
+            return -1L;
         }
 
+        @Override
         public void setByte(int offset, byte data) {
         }
 
+        @Override
         public void setWord(int offset, short data) {
         }
 
+        @Override
         public void setDoubleWord(int offset, int data) {
         }
 
+        @Override
         public void setQuadWord(int offset, long data) {
         }
 
+        @Override
         public void setLowerDoubleQuadWord(int offset, long data) {
         }
 
+        @Override
         public void setUpperDoubleQuadWord(int offset, long data) {
         }
 
+        @Override
         public int executeReal(Processor cpu, int offset) {
             throw new IllegalStateException("Trying to execute in Unconnected Block @ 0x" + Integer.toHexString(offset));
         }
 
+        @Override
         public int executeProtected(Processor cpu, int offset) {
             throw new IllegalStateException("Trying to execute in Unconnected Block @ 0x" + Integer.toHexString(offset));
         }
 
+        @Override
         public int executeVirtual8086(Processor cpu, int offset) {
             throw new IllegalStateException("Trying to execute in Unconnected Block @ 0x" + Integer.toHexString(offset));
         }
 
+        @Override
         public String toString() {
             return "Unconnected Memory";
         }
 
+        @Override
         public void loadInitialContents(int address, byte[] buf, int off, int len) {
         }
     }
 
+    @Override
     public void reset() {
         clear();
         setGateA20State(false);
         linearAddr = null;
     }
 
+    @Override
     public boolean updated() {
         return true;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
     }
 
+    @Override
     public boolean initialised() {
-        return (linearAddr != null);
+        return linearAddr != null;
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
         if (component instanceof LinearAddressSpace) {
             linearAddr = (LinearAddressSpace)component;
         }
     }
 
+    @Override
     public String toString() {
         return "Physical Pointer Bus";
     }
@@ -829,7 +907,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
             return quickIndex[i >>> INDEX_SHIFT];
         } catch (ArrayIndexOutOfBoundsException e) {
             try {
-                return index[i >>> TOP_INDEX_SHIFT][(i >>> BOTTOM_INDEX_SHIFT) & BOTTOM_INDEX_MASK];
+                return index[i >>> TOP_INDEX_SHIFT][i >>> BOTTOM_INDEX_SHIFT & BOTTOM_INDEX_MASK];
             } catch (NullPointerException n) {
                 return UNCONNECTED;
             }
@@ -840,38 +918,39 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         try {
             int idx = i >>> INDEX_SHIFT;
             quickNonA20MaskedIndex[idx] = b;
-            if ((idx & (GATEA20_MASK >>> INDEX_SHIFT)) == idx) {
+            if ((idx & GATEA20_MASK >>> INDEX_SHIFT) == idx) {
                 quickA20MaskedIndex[idx] = b;
-                quickA20MaskedIndex[idx | ((~GATEA20_MASK) >>> INDEX_SHIFT)] = b;
+                quickA20MaskedIndex[idx | ~GATEA20_MASK >>> INDEX_SHIFT] = b;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             try {
-                nonA20MaskedIndex[i >>> TOP_INDEX_SHIFT][(i >>> BOTTOM_INDEX_SHIFT) & BOTTOM_INDEX_MASK] = b;
+                nonA20MaskedIndex[i >>> TOP_INDEX_SHIFT][i >>> BOTTOM_INDEX_SHIFT & BOTTOM_INDEX_MASK] = b;
             } catch (NullPointerException n) {
                 nonA20MaskedIndex[i >>> TOP_INDEX_SHIFT] = new Memory[BOTTOM_INDEX_SIZE];
-                nonA20MaskedIndex[i >>> TOP_INDEX_SHIFT][(i >>> BOTTOM_INDEX_SHIFT) & BOTTOM_INDEX_MASK] = b;
+                nonA20MaskedIndex[i >>> TOP_INDEX_SHIFT][i >>> BOTTOM_INDEX_SHIFT & BOTTOM_INDEX_MASK] = b;
             }
 
             i &= GATEA20_MASK;
             if ((i & GATEA20_MASK) == i) {
                 try {
-                    a20MaskedIndex[i >>> TOP_INDEX_SHIFT][(i >>> BOTTOM_INDEX_SHIFT) & BOTTOM_INDEX_MASK] = b;
+                    a20MaskedIndex[i >>> TOP_INDEX_SHIFT][i >>> BOTTOM_INDEX_SHIFT & BOTTOM_INDEX_MASK] = b;
                 } catch (NullPointerException n) {
                     a20MaskedIndex[i >>> TOP_INDEX_SHIFT] = new Memory[BOTTOM_INDEX_SIZE];
-                    a20MaskedIndex[i >>> TOP_INDEX_SHIFT][(i >>> BOTTOM_INDEX_SHIFT) & BOTTOM_INDEX_MASK] = b;
+                    a20MaskedIndex[i >>> TOP_INDEX_SHIFT][i >>> BOTTOM_INDEX_SHIFT & BOTTOM_INDEX_MASK] = b;
                 }
 
                 int modi = i | ~GATEA20_MASK;
                 try {
-                    a20MaskedIndex[modi >>> TOP_INDEX_SHIFT][(modi >>> BOTTOM_INDEX_SHIFT) & BOTTOM_INDEX_MASK] = b;
+                    a20MaskedIndex[modi >>> TOP_INDEX_SHIFT][modi >>> BOTTOM_INDEX_SHIFT & BOTTOM_INDEX_MASK] = b;
                 } catch (NullPointerException n) {
                     a20MaskedIndex[modi >>> TOP_INDEX_SHIFT] = new Memory[BOTTOM_INDEX_SIZE];
-                    a20MaskedIndex[modi >>> TOP_INDEX_SHIFT][(modi >>> BOTTOM_INDEX_SHIFT) & BOTTOM_INDEX_MASK] = b;
+                    a20MaskedIndex[modi >>> TOP_INDEX_SHIFT][modi >>> BOTTOM_INDEX_SHIFT & BOTTOM_INDEX_MASK] = b;
                 }
             }
         }
     }
 
+    @Override
     public void loadInitialContents(int address, byte[] buf, int off, int len) {
         throw new UnsupportedOperationException("Not supported yet.");
     }

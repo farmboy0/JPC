@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,16 @@
 
 package org.jpc.emulator.pci;
 
-import org.jpc.emulator.memory.PhysicalAddressSpace;
-import org.jpc.emulator.motherboard.*;
-import org.jpc.emulator.HardwareComponent;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.util.logging.*;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
+import org.jpc.emulator.motherboard.IODevice;
+import org.jpc.emulator.motherboard.IOPortHandler;
 
 /**
  * Emulation of an Intel i440FX PCI Host Bridge.
@@ -70,11 +74,13 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
         putConfigByte(PCI_CONFIG_HEADER, (byte)0x00); // header_type
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         super.saveState(output);
         output.writeInt(configRegister);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         super.loadState(input);
         ioportRegistered = false;
@@ -82,54 +88,62 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
         configRegister = input.readInt();
     }
 
+    @Override
     public boolean autoAssignDeviceFunctionNumber() {
         return false;
     }
 
+    @Override
     public void deassignDeviceFunctionNumber() {
         LOGGING.log(Level.WARNING, "PCI device/function number conflict.");
     }
 
     /* BEGIN PCIDevice Methods */
     //IOPort Registration Aids
+    @Override
     public IORegion[] getIORegions() {
         return null;
     }
 
+    @Override
     public IORegion getIORegion(int index) {
         return null;
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] { 0xcf8, 0xcf9, 0xcfa, 0xcfb, 0xcfc, 0xcfd, 0xcfe, 0xcff };
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         switch (address) {
         case 0xcfc:
         case 0xcfd:
         case 0xcfe:
         case 0xcff:
-            if ((configRegister & (1 << 31)) != 0)
-                attachedBus.writePCIDataByte(configRegister | (address & 0x3), (byte)data);
+            if ((configRegister & 1 << 31) != 0)
+                attachedBus.writePCIDataByte(configRegister | address & 0x3, (byte)data);
             break;
         default:
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         switch (address) {
         case 0xcfc:
         case 0xcfd:
         case 0xcfe:
         case 0xcff:
-            if ((configRegister & (1 << 31)) != 0)
-                attachedBus.writePCIDataWord(configRegister | (address & 0x3), (short)data);
+            if ((configRegister & 1 << 31) != 0)
+                attachedBus.writePCIDataWord(configRegister | address & 0x3, (short)data);
             break;
         default:
         }
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         switch (address) {
         case 0xcf8:
@@ -142,44 +156,47 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
         case 0xcfd:
         case 0xcfe:
         case 0xcff:
-            if ((configRegister & (1 << 31)) != 0)
-                attachedBus.writePCIDataLong(configRegister | (address & 0x3), data);
+            if ((configRegister & 1 << 31) != 0)
+                attachedBus.writePCIDataLong(configRegister | address & 0x3, data);
             break;
         default:
         }
     }
 
+    @Override
     public int ioPortRead8(int address) {
         switch (address) {
         case 0xcfc:
         case 0xcfd:
         case 0xcfe:
         case 0xcff:
-            if ((configRegister & (1 << 31)) == 0)
+            if ((configRegister & 1 << 31) == 0)
                 return 0xff;
             else
-                return 0xff & attachedBus.readPCIDataByte(configRegister | (address & 0x3));
+                return 0xff & attachedBus.readPCIDataByte(configRegister | address & 0x3);
 
         default:
             return 0xff;
         }
     }
 
+    @Override
     public int ioPortRead16(int address) {
         switch (address) {
         case 0xcfc:
         case 0xcfd:
         case 0xcfe:
         case 0xcff:
-            if ((configRegister & (1 << 31)) == 0)
+            if ((configRegister & 1 << 31) == 0)
                 return 0xffff;
             else
-                return 0xffff & attachedBus.readPCIDataWord(configRegister | (address & 0x3));
+                return 0xffff & attachedBus.readPCIDataWord(configRegister | address & 0x3);
         default:
             return 0xffff;
         }
     }
 
+    @Override
     public int ioPortRead32(int address) {
         switch (address) {
         case 0xcf8:
@@ -191,10 +208,10 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
         case 0xcfd:
         case 0xcfe:
         case 0xcff:
-            if ((configRegister & (1 << 31)) == 0)
+            if ((configRegister & 1 << 31) == 0)
                 return 0xffffffff;
             else
-                return attachedBus.readPCIDataLong(configRegister | (address & 0x3));
+                return attachedBus.readPCIDataLong(configRegister | address & 0x3);
         default:
             return 0xffffffff;
         }
@@ -202,27 +219,28 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
 
     /* END IODevice Methods */
 
+    @Override
     public boolean configWriteByte(int address, byte data) {
         byte prior = super.configReadByte(address);
         boolean res = super.configWriteByte(address, data);
         if (data != prior) {
             if (address == 0x59) {
-                boolean w = (data & (1 << 5)) != 0;
-                boolean r = (data & (1 << 4)) != 0;
+                boolean w = (data & 1 << 5) != 0;
+                boolean r = (data & 1 << 4) != 0;
                 for (int page = 0xF0000; page < 0x100000; page += 0x1000) {
                     memory.setEpromWritable(page, w);
                     memory.setEpromReadable(page, r);
                 }
-            } else if ((address > 0x59) && (address <= 0x5F)) {
-                boolean w1 = (data & (1 << 0)) != 0;
-                boolean r1 = (data & (1 << 1)) != 0;
+            } else if (address > 0x59 && address <= 0x5F) {
+                boolean w1 = (data & 1 << 0) != 0;
+                boolean r1 = (data & 1 << 1) != 0;
                 int page = (address - 0x5a) * 2 * 0x4000 + 0xC0000;
                 for (int pa = page; pa < page + 0x4000; pa += 0x1000) {
                     memory.setEpromWritable(pa, w1);
                     memory.setEpromReadable(pa, r1);
                 }
-                boolean w2 = (data & (1 << 5)) != 0;
-                boolean r2 = (data & (1 << 4)) != 0;
+                boolean w2 = (data & 1 << 5) != 0;
+                boolean r2 = (data & 1 << 4) != 0;
                 page += 0x4000;
                 for (int pa = page; pa < page + 0x4000; pa += 0x1000) {
                     memory.setEpromWritable(pa, w2);
@@ -237,10 +255,12 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
     private boolean ioportRegistered;
     private boolean pciRegistered;
 
+    @Override
     public boolean initialised() {
-        return ioportRegistered && pciRegistered && (memory != null);
+        return ioportRegistered && pciRegistered && memory != null;
     }
 
+    @Override
     public void reset() {
         attachedBus = null;
         pciRegistered = false;
@@ -255,37 +275,41 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
         putConfigByte(PCI_CONFIG_HEADER, (byte)0x00); // header_type
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof PCIBus) && component.initialised() && !pciRegistered) {
+        if (component instanceof PCIBus && component.initialised() && !pciRegistered) {
             attachedBus = (PCIBus)component;
             pciRegistered = attachedBus.registerDevice(this);
         }
 
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
 
-        if ((component instanceof PhysicalAddressSpace) && component.initialised())
+        if (component instanceof PhysicalAddressSpace && component.initialised())
             memory = (PhysicalAddressSpace)component;
     }
 
+    @Override
     public boolean updated() {
         return ioportRegistered && pciRegistered;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
-        if ((component instanceof PCIBus) && component.updated() && !pciRegistered) {
+        if (component instanceof PCIBus && component.updated() && !pciRegistered) {
             //	    attachedBus = (PCIBus)component;
             pciRegistered = attachedBus.registerDevice(this);
         }
 
-        if ((component instanceof IOPortHandler) && component.updated()) {
+        if (component instanceof IOPortHandler && component.updated()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public String toString() {
         return "Intel i440FX PCI-Host Bridge";
     }

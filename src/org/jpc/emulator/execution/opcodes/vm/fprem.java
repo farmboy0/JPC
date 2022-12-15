@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,9 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
 
 public class fprem extends Executable {
 
@@ -39,6 +37,7 @@ public class fprem extends Executable {
         super(blockStart, eip);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(0);
         double freg1 = cpu.fpu.ST(1);
@@ -60,19 +59,21 @@ public class fprem extends Executable {
             // partial remainder
             cpu.fpu.conditionCode |= 4; // set C2
             int n = 63; // implementation dependent in manual
-            double f = Math.pow(2.0, (double)(d - n));
-            double z = (freg0 / freg1) / f;
-            double qq = (z < 0) ? Math.ceil(z) : Math.floor(z);
-            freg0 = freg0 - (freg1 * qq * f);
+            double f = Math.pow(2.0, d - n);
+            double z = freg0 / freg1 / f;
+            double qq = z < 0 ? Math.ceil(z) : Math.floor(z);
+            freg0 = freg0 - freg1 * qq * f;
         }
         cpu.fpu.setST(0, freg0);
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

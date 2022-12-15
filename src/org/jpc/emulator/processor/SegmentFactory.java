@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,10 +33,13 @@
 
 package org.jpc.emulator.processor;
 
-import org.jpc.emulator.memory.*;
+import static org.jpc.emulator.processor.ProtectedModeSegment.TYPE_AVAILABLE_32_TSS;
+import static org.jpc.emulator.processor.ProtectedModeSegment.TYPE_BUSY_32_TSS;
 
-import java.io.*;
-import static org.jpc.emulator.processor.ProtectedModeSegment.*;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.jpc.emulator.memory.AddressSpace;
 
 /**
  * @author Chris Dennis
@@ -85,7 +88,7 @@ public class SegmentFactory {
     public static Segment createProtectedModeSegment(AddressSpace memory, int selector, long descriptor, boolean isStack) {
         switch ((int)((descriptor & (DESCRIPTOR_TYPE | SEGMENT_TYPE)) >>> 40)) {
 
-        // System Segments 
+        // System Segments
         default:
         case 0x00: //Reserved
         case 0x08: //Reserved
@@ -172,30 +175,37 @@ public class SegmentFactory {
             super(null);
         }
 
+        @Override
         public void printState() {
             System.out.println("Null Segment");
         }
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(4);
         }
 
+        @Override
         public int getType() {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
+        @Override
         public int getSelector() {
             return 0;
         }
 
+        @Override
         public void checkAddress(int offset) {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
+        @Override
         public int translateAddressRead(int offset) {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
+        @Override
         public int translateAddressWrite(int offset) {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
@@ -204,10 +214,12 @@ public class SegmentFactory {
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
         }
 
+        @Override
         public int getBase() {
             throw new IllegalStateException(getClass().toString());
         }
 
+        @Override
         public int getLimit() {
             throw new IllegalStateException(getClass().toString());
         }
@@ -216,30 +228,37 @@ public class SegmentFactory {
             throw new IllegalStateException(getClass().toString());
         }
 
+        @Override
         public boolean setSelector(int selector) {
             throw new IllegalStateException(getClass().toString());
         }
 
+        @Override
         public int getDPL() {
             throw new IllegalStateException(getClass().toString());
         }
 
+        @Override
         public int getRPL() {
             throw new IllegalStateException(getClass().toString());
         }
 
+        @Override
         public void setRPL(int cpl) {
             throw new IllegalStateException(getClass().toString());
         }
 
+        @Override
         public boolean getDefaultSizeFlag() {
             throw new IllegalStateException(getClass().toString());
         }
 
+        @Override
         public boolean isPresent() {
             return true;
         }
 
+        @Override
         public boolean isSystem() {
             return false;
         }

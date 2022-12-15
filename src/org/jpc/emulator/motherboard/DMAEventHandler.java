@@ -5,5 +5,5 @@ package org.jpc.emulator.motherboard;
  * @author Ian Preston
  */
 public interface DMAEventHandler {
-    public void handleDMAEvent(DMAEvent ev);
+    void handleDMAEvent(DMAEvent ev);
 }

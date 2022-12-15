@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
 
 public class rcl_Ed_Ib_mem extends Executable {
     final Pointer op1;
@@ -44,25 +44,28 @@ public class rcl_Ed_Ib_mem extends Executable {
         immb = Modrm.Ib(input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         int shift = immb & 0x1f;
         shift %= 32 + 1;
         long val = 0xffffffffL & op1.get32(cpu);
         val |= cpu.cf() ? 1L << 32 : 0;
-        val = (val << shift) | (val >>> (32 + 1 - shift));
+        val = val << shift | val >>> 32 + 1 - shift;
         op1.set32(cpu, (int)val);
-        boolean bit31 = (val & (1L << (32 - 1))) != 0;
-        boolean bit32 = (val & (1L << (32))) != 0;
+        boolean bit31 = (val & 1L << 32 - 1) != 0;
+        boolean bit32 = (val & 1L << 32) != 0;
         cpu.cf(bit32);
         if (shift == 1)
             cpu.of(bit31 ^ bit32);
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

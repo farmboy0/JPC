@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,27 @@
 
 package org.jpc.support;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutput;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.nio.charset.Charset;
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Presents a directory on the local machine as a FAT32 volume within the guest.
@@ -127,8 +143,8 @@ public class TreeBlockDevice implements BlockDevice {
 
     /* notes:
        Write Tree: to write a copy of the entire directory tree to disk, create a new folder and pass it as a File to writeNewTree(File file)
-    
-       Synchronise: to continuously try to synchronise the virtual tree with the underlying tree set bufferWrites to false, otherwise all writes are buffered 
+
+       Synchronise: to continuously try to synchronise the virtual tree with the underlying tree set bufferWrites to false, otherwise all writes are buffered
        in an array
     */
 
@@ -159,6 +175,7 @@ public class TreeBlockDevice implements BlockDevice {
      * @param specs specification string
      * @throws java.io.IOException on an underlying fs error
      */
+    @Override
     public void configure(String specs) throws IOException {
         boolean buffer = true;
         String rootName = specs;
@@ -183,16 +200,16 @@ public class TreeBlockDevice implements BlockDevice {
         long dataSize = FREE_SPACE_FACTOR * (root.getDirectorySubClusters() + root.getSizeInClusters());
         dataSize = Math.max(FAT32_MIN_CLUSTERS, dataSize);
         fatSize = (int)Math.ceil((double)((dataSize + 2) * 4) / SECTOR_SIZE);
-        long volumeLength = (dataSize * SECTORS_PER_CLUSTER) + (FAT_COPIES * fatSize) + RESERVED_SECTORS;
+        long volumeLength = dataSize * SECTORS_PER_CLUSTER + FAT_COPIES * fatSize + RESERVED_SECTORS;
         long suggestedLength = volumeLength + HIDDEN_SECTORS;
         driveLength = getLba(getCylinder(suggestedLength), HEADS_PER_CYLINDER, SECTORS_PER_TRACK);
 
         //revise numbers for Microsoft formulation
         long temp1 = driveLength - HEADER_SECTION_LENGTH;
-        long temp2 = ((256 * SECTORS_PER_CLUSTER) + FAT_COPIES) / 2;
+        long temp2 = (256 * SECTORS_PER_CLUSTER + FAT_COPIES) / 2;
         fatSize = (int)((temp1 + temp2 - 1) / temp2);
 
-        dataSectionStart = HEADER_SECTION_LENGTH + (FAT_COPIES * fatSize);
+        dataSectionStart = HEADER_SECTION_LENGTH + FAT_COPIES * fatSize;
 
         fatImage = createFatImage(fat);
         sectorToFatEntry = createDataMap(fat);
@@ -216,13 +233,13 @@ public class TreeBlockDevice implements BlockDevice {
         mbr[PART_1 + PART_BOOT] = (byte)0x00;// 80 means system partition, 00 means do not use for booting
 
         mbr[PART_1 + PART_START_CHS] = (byte)getHead(start);
-        mbr[PART_1 + PART_START_CHS + 1] = (byte)(((getCylinder(start) >> 2) & 0xC0) | (0x3F & getSector(start)));
+        mbr[PART_1 + PART_START_CHS + 1] = (byte)(getCylinder(start) >> 2 & 0xC0 | 0x3F & getSector(start));
         mbr[PART_1 + PART_START_CHS + 2] = (byte)getCylinder(start);
 
         mbr[PART_1 + PART_TYPE] = (byte)PART_TYPE_WIN95_OSR2_FAT32_LBA;//System ID
 
         mbr[PART_1 + PART_END_CHS] = (byte)getHead(end);
-        mbr[PART_1 + PART_END_CHS + 1] = (byte)(((getCylinder(end) >> 2) & 0xC0) | (0x3F & getSector(end)));
+        mbr[PART_1 + PART_END_CHS + 1] = (byte)(getCylinder(end) >> 2 & 0xC0 | 0x3F & getSector(end));
         mbr[PART_1 + PART_END_CHS + 2] = (byte)getCylinder(end);
 
         putInt(mbr, PART_1 + PART_START, (int)start);
@@ -296,11 +313,13 @@ public class TreeBlockDevice implements BlockDevice {
     /**
      * Closes this device and all associated local filesystem objects
      */
+    @Override
     public void close() {
         fileCache.close();
     }
 
     //READ up to 16 sectors at a time
+    @Override
     public int read(long sectorNumber, byte[] buffer, int size) {
         if (size != 1)
             LOGGING.log(Level.WARNING, "Request to do multiple sector read.");
@@ -338,6 +357,7 @@ public class TreeBlockDevice implements BlockDevice {
         return 0;
     }
 
+    @Override
     public int write(long sectorNumber, byte[] buffer, int size) {
         if (size != 1)
             LOGGING.log(Level.WARNING, "Request to do multiple sector write.");
@@ -348,7 +368,7 @@ public class TreeBlockDevice implements BlockDevice {
         if (bufferWrites) {
             byte[] write = new byte[SECTOR_SIZE];
             System.arraycopy(buffer, 0, write, 0, SECTOR_SIZE);
-            bufferedWrites.put(Long.valueOf(sectorNumber), write);
+            bufferedWrites.put(sectorNumber, write);
         } else if (sectorNumber < HEADER_SECTION_LENGTH)
             System.arraycopy(buffer, 0, start, (int)sectorNumber * SECTOR_SIZE, SECTOR_SIZE);
         else if (sectorNumber < dataSectionStart)
@@ -368,7 +388,7 @@ public class TreeBlockDevice implements BlockDevice {
         long fatSectorNumber = (sectorNumber - HEADER_SECTION_LENGTH) % fatSize;
         System.arraycopy(buffer, 0, fatImage, (int)fatSectorNumber * SECTOR_SIZE, SECTOR_SIZE);
 
-        int minCluster = (int)((fatSectorNumber * SECTOR_SIZE) >>> 2);
+        int minCluster = (int)(fatSectorNumber * SECTOR_SIZE >>> 2);
 
         for (int entryOffset = 0; entryOffset < SECTOR_SIZE; entryOffset += 4) {
             boolean entryChanged = false;
@@ -401,7 +421,7 @@ public class TreeBlockDevice implements BlockDevice {
                     FatEntry entry = sectorToFatEntry.get(Long.valueOf(getSectorNumber(cluster)));
                     if (entry != null) {
                         for (int j = 0; j < SECTORS_PER_CLUSTER; j++) {
-                            Long key = Long.valueOf(getSectorNumber(thisCluster) + j);
+                            Long key = getSectorNumber(thisCluster) + j;
                             byte[] array = bufferedWrites.remove(key);
                             if (array != null)
                                 write(key.longValue(), buffer, 1);
@@ -433,8 +453,8 @@ public class TreeBlockDevice implements BlockDevice {
             } else {
                 byte[] temp = new byte[SECTOR_SIZE];
                 System.arraycopy(buffer, 0, temp, 0, SECTOR_SIZE);
-                bufferedWrites.put(Long.valueOf(sectorNumber), temp);
-                unmappedClusters.add(Long.valueOf(getClusterNumber(sectorNumber)));
+                bufferedWrites.put(sectorNumber, temp);
+                unmappedClusters.add(getClusterNumber(sectorNumber));
             }
         }
         return 0;
@@ -449,13 +469,14 @@ public class TreeBlockDevice implements BlockDevice {
     }
 
     private long getSectorNumber(long cluster) {
-        return ((cluster - 2) * SECTORS_PER_CLUSTER) + dataSectionStart;
+        return (cluster - 2) * SECTORS_PER_CLUSTER + dataSectionStart;
     }
 
     /**
      * Returns <code>true</code> as hard drives are always inserted.
      * @return <code>true</code>
      */
+    @Override
     public boolean isInserted() {
         return true;
     }
@@ -464,6 +485,7 @@ public class TreeBlockDevice implements BlockDevice {
      * Returns <code>true</code> as hard drives are always locked.
      * @return <code>true</code>
      */
+    @Override
     public boolean isLocked() {
         return true;
     }
@@ -474,6 +496,7 @@ public class TreeBlockDevice implements BlockDevice {
      * Writes are always possible even though they may be buffered.
      * @return <code>false</code>
      */
+    @Override
     public boolean isReadOnly() {
         return false;
     }
@@ -482,21 +505,26 @@ public class TreeBlockDevice implements BlockDevice {
      * Does nothing, the drive is always locked.
      * @param l ignored
      */
+    @Override
     public void setLock(boolean l) {
     }
 
+    @Override
     public long getTotalSectors() {
         return driveLength;
     }
 
+    @Override
     public int getCylinders() {
         return getCylinder(getTotalSectors());
     }
 
+    @Override
     public int getHeads() {
         return HEADS_PER_CYLINDER;
     }
 
+    @Override
     public int getSectors() {
         return SECTORS_PER_TRACK;
     }
@@ -505,6 +533,7 @@ public class TreeBlockDevice implements BlockDevice {
      * Returns <code>Type.HARDDRIVE</code>.
      * @return <code>Type.HARDDRIVE</code>
      */
+    @Override
     public Type getType() {
         return Type.HARDDRIVE;
     }
@@ -543,7 +572,7 @@ public class TreeBlockDevice implements BlockDevice {
             FatEntry fatEntry = entry.getValue();
             long startSector = getSectorNumber(entry.getKey().longValue());
             for (long i = 0; i < fatEntry.getSizeSectors(); i++)
-                dataMap.put(Long.valueOf(startSector + i), fatEntry);
+                dataMap.put(startSector + i, fatEntry);
         }
 
         return dataMap;
@@ -564,7 +593,7 @@ public class TreeBlockDevice implements BlockDevice {
                     //convert fatImage entry to an int
                     sum = 0;
                     for (int k = 0; k < 4; k++) {
-                        sum += ((fatImage[4 * j + k] & 0xFF) << k * 8);
+                        sum += (fatImage[4 * j + k] & 0xFF) << k * 8;
                     }
 
                     //check it isn't empty
@@ -585,7 +614,7 @@ public class TreeBlockDevice implements BlockDevice {
 
         if (file.isDirectory()) {
             byte[] acluster = new byte[SECTOR_SIZE * SECTORS_PER_CLUSTER];
-            byte[] dir = new byte[0];
+            byte[] dir = {};
 
             //read directory into byte[]
             while (true) {
@@ -611,7 +640,7 @@ public class TreeBlockDevice implements BlockDevice {
             int newStartCluster;
             boolean isDirectory;
             for (int k = 0; k < dir.length / 32; k++) {
-                if ((dir[32 * k] == 0) || dir[32 * k + 11] == 0xF)
+                if (dir[32 * k] == 0 || dir[32 * k + 11] == 0xF)
                     continue;
 
                 String name = new String(dir, 32 * k, 8, US_ASCII).trim();
@@ -662,7 +691,7 @@ public class TreeBlockDevice implements BlockDevice {
                                 break;
 
                             //if sector ends in a 0 and we are in the last cluster, then trim the zeroes from the end
-                            if ((((Integer)hashFAT.get(Integer.valueOf(cluster))).intValue() == 268435455) && (buffer[511] == 0)) {
+                            if (((Integer)hashFAT.get(Integer.valueOf(cluster))).intValue() == 268435455 && buffer[511] == 0) {
                                 int index = 511;
                                 while (buffer[index] == 0) {
                                     index--;
@@ -747,8 +776,8 @@ public class TreeBlockDevice implements BlockDevice {
             //time and date stuff
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTimeInMillis(getFile().lastModified());
-            int time = (cal.get(Calendar.SECOND) >>> 1) | (cal.get(Calendar.MINUTE) << 5) | (cal.get(Calendar.HOUR_OF_DAY) << 11);
-            int date = cal.get(Calendar.DAY_OF_MONTH) | ((cal.get(Calendar.MONTH) + 1) << 5) | ((cal.get(Calendar.YEAR) - 1980) << 9);
+            int time = cal.get(Calendar.SECOND) >>> 1 | cal.get(Calendar.MINUTE) << 5 | cal.get(Calendar.HOUR_OF_DAY) << 11;
+            int date = cal.get(Calendar.DAY_OF_MONTH) | cal.get(Calendar.MONTH) + 1 << 5 | cal.get(Calendar.YEAR) - 1980 << 9;
             entry[22] = (byte)time;
             entry[23] = (byte)(time >>> 8);
             entry[24] = (byte)date;
@@ -781,12 +810,12 @@ public class TreeBlockDevice implements BlockDevice {
 
         protected void makeClusterList() {
             for (long counter = 0, cluster = getStartCluster(); counter < getSizeInClusters(); counter++, cluster++)
-                clusterList.put(Long.valueOf(cluster), Long.valueOf(counter));
+                clusterList.put(cluster, counter);
         }
 
         protected void updateClusterList(long sectorNumber) {
             if (!clusterList.containsKey(Long.valueOf(getClusterNumber(sectorNumber)))) {
-                clusterList.put(Long.valueOf(getClusterNumber(sectorNumber)), Long.valueOf(getSizeInClusters() + 1));
+                clusterList.put(getClusterNumber(sectorNumber), getSizeInClusters() + 1);
                 setSizeClusters(getSizeInClusters() + 1);
             }
         }
@@ -864,9 +893,10 @@ public class TreeBlockDevice implements BlockDevice {
                 throw new IndexOutOfBoundsException("Too many files loaded: try a directory with fewer files.");
 
             fileSize = getFile().length();
-            setSizeSectors(((fileSize - 1) / SECTOR_SIZE) + 1);
+            setSizeSectors((fileSize - 1) / SECTOR_SIZE + 1);
         }
 
+        @Override
         public void read(long sectorNumber, byte[] buffer) throws IOException {
             long oddsectors = getClusterOffset(sectorNumber);
             long offset = clusterList.get(Long.valueOf(getClusterNumber(sectorNumber))).longValue() * SECTORS_PER_CLUSTER * SECTOR_SIZE;
@@ -877,7 +907,7 @@ public class TreeBlockDevice implements BlockDevice {
             if (backingFile != null)
                 backing = backingFile.get();
 
-            if ((backing == null) || !backing.getFD().valid()) {
+            if (backing == null || !backing.getFD().valid()) {
                 backing = fileCache.getBackingFor(getFile());
                 backingFile = new WeakReference(backing);
             }
@@ -886,6 +916,7 @@ public class TreeBlockDevice implements BlockDevice {
             backing.readFully(buffer, 0, len);
         }
 
+        @Override
         public void write(long sectorNumber, byte[] buffer) throws IOException {
             //continually commit writes
             //check to see if the sector is in the data section
@@ -920,12 +951,13 @@ public class TreeBlockDevice implements BlockDevice {
             //update file's clusterlist
             updateClusterList(sectorNumber);
 
-            sectorToFatEntry.put(Long.valueOf(sectorNumber), this);
+            sectorToFatEntry.put(sectorNumber, this);
         }
 
+        @Override
         protected long buildTree(Map<Long, FatEntry> fat) throws IOException {
             makeClusterList();
-            fat.put(Long.valueOf(getStartCluster()), this);
+            fat.put(getStartCluster(), this);
             return getSizeInClusters();
         }
 
@@ -937,11 +969,12 @@ public class TreeBlockDevice implements BlockDevice {
             return fileSize;
         }
 
+        @Override
         protected byte[] getDirectoryEntryComponent() {
             byte[] entry = super.getDirectoryEntryComponent();
             entry[11] = (byte)0x20; //Attrib Byte (Marks As File)
 
-            //put in file size in bytes 
+            //put in file size in bytes
             entry[28] = (byte)fileSize;
             entry[29] = (byte)(fileSize >>> 8);
             entry[30] = (byte)(fileSize >>> 16);
@@ -966,7 +999,7 @@ public class TreeBlockDevice implements BlockDevice {
         private List<FatEntry> files = new ArrayList<FatEntry>();
         private long dirSubClusters;
         private Set<String> shortNames = new HashSet<String>();
-        private byte[] dirEntry = new byte[0];
+        private byte[] dirEntry = {};
         private int size;
 
         public DirectoryEntry(File path, long startCluster, DirectoryEntry parent) {
@@ -995,13 +1028,13 @@ public class TreeBlockDevice implements BlockDevice {
 
             for (int i = 0; i < name.length(); i++) {
                 char letter = name.charAt(i);
-                if (!Character.isLetterOrDigit(letter) && ("$%'-_@~`!(){}^#&".indexOf(letter) < 0))
+                if (!Character.isLetterOrDigit(letter) && "$%'-_@~`!(){}^#&".indexOf(letter) < 0)
                     name.setCharAt(i, '_');
             }
 
             for (int i = 0; i < extension.length(); i++) {
                 char letter = extension.charAt(i);
-                if (!Character.isLetterOrDigit(letter) && ("$%'-_@~`!(){}^#&".indexOf(letter) < 0))
+                if (!Character.isLetterOrDigit(letter) && "$%'-_@~`!(){}^#&".indexOf(letter) < 0)
                     extension.setCharAt(i, '_');
             }
 
@@ -1037,6 +1070,7 @@ public class TreeBlockDevice implements BlockDevice {
         }
 
         //get set of directory entries for this directory
+        @Override
         public void read(long sectorNumber, byte[] buffer) throws IOException {
             long oddsectors = getClusterOffset(sectorNumber);
             long offset = clusterList.get(Long.valueOf(getClusterNumber(sectorNumber))).longValue() * SECTORS_PER_CLUSTER * SECTOR_SIZE;
@@ -1050,6 +1084,7 @@ public class TreeBlockDevice implements BlockDevice {
                 buffer[i] = 0x00;
         }
 
+        @Override
         public void write(long sectorNumber, byte[] buffer) {
             //continually commit writes
             //check to see if the sector is in the data section
@@ -1068,25 +1103,23 @@ public class TreeBlockDevice implements BlockDevice {
             //add buffer to directory's set of direntries
             writeDirectoryEntry(buffer, clusterCount * SECTORS_PER_CLUSTER + offset, sectorNumber);
             //update sectorToFatEntry
-            sectorToFatEntry.put(Long.valueOf(sectorNumber), this);
+            sectorToFatEntry.put(sectorNumber, this);
             for (int i = 0; i < 16; i++) {
                 int newStartCluster = (buffer[32 * i + 26] & 0xFF) + ((buffer[32 * i + 27] & 0xFF) << 8)
                     + ((buffer[32 * i + 20] & 0xFF) << 16) + ((buffer[32 * i + 21] & 0xFF) << 24);
-                if (((buffer[32 * i] & 0xFF) == 0xE5) && (followFatChainLink(newStartCluster) == 0)) {
+                if ((buffer[32 * i] & 0xFF) == 0xE5 && followFatChainLink(newStartCluster) == 0) {
                     FatEntry entry = sectorToFatEntry.get(Long.valueOf(getSectorNumber(newStartCluster)));
 
                     if (entry != null) {
                         entry.getFile().delete();
 
-                        //remove all entries for file in sectorToFatEntry          
+                        //remove all entries for file in sectorToFatEntry
                         for (int n = 0, next = newStartCluster; n < clusterCount + 1; n++, next = followFatChainLink(next))
                             for (int s = 0; s < SECTORS_PER_CLUSTER; s++)
                                 sectorToFatEntry.remove(Long.valueOf(getSectorNumber(next) + s));
                     }
-                } else if ((buffer[32 * i + 11] & 0xFF) == 0xF)
-                    //skip LFN's for now
-                    continue;
-                else if ((buffer[32 * i] & 0xFF) == 0xE5)
+                } else if ((buffer[32 * i + 11] & 0xFF) == 0xF) {
+                } else if ((buffer[32 * i] & 0xFF) == 0xE5)
                     continue;
                 else {
                     boolean changed = false;
@@ -1098,7 +1131,7 @@ public class TreeBlockDevice implements BlockDevice {
                     String name = new String(buffer, 32 * i, 8, US_ASCII).trim();
                     String ext = new String(buffer, 32 * i + 8, 3, US_ASCII).trim();
 
-                    if ((name.equals(".")) || (name.equals(".."))) //skip current and parent directory entries
+                    if (name.equals(".") || name.equals("..")) //skip current and parent directory entries
                         continue;
                     long newStartSector = getSectorNumber(newStartCluster);
                     boolean isDirectory = (buffer[32 * i + 11] & 0x10) == 0x10;
@@ -1119,7 +1152,7 @@ public class TreeBlockDevice implements BlockDevice {
                                 zero[c] = 0;
                             newEntry.writeDirectoryEntry(zero, 0, newStartSector); //need to think about whether this is necessary
                             for (int d = 0; d < SECTORS_PER_CLUSTER; d++)
-                                sectorToFatEntry.put(Long.valueOf(newStartSector + d), newEntry);
+                                sectorToFatEntry.put(newStartSector + d, newEntry);
                         } else {
                             long fileSize = (buffer[32 * i + 28] & 0xFF) + ((buffer[32 * i + 29] & 0xFF) << 8)
                                 + ((buffer[32 * i + 30] & 0xFF) << 16) + ((buffer[32 * i + 31] & 0xFF) << 24);
@@ -1131,7 +1164,7 @@ public class TreeBlockDevice implements BlockDevice {
                                 FileEntry newEntry = new FileEntry(newFile, newStartCluster, this);
                                 newEntry.setSizeClusters(-1);
                                 newEntry.setFileSize(fileSize);
-                                sectorToFatEntry.put(Long.valueOf(newStartSector), newEntry);
+                                sectorToFatEntry.put(newStartSector, newEntry);
                             } catch (IOException e) {
                                 LOGGING.log(Level.WARNING, "cannot create new file", e);
                             } catch (SecurityException e) {
@@ -1162,6 +1195,7 @@ public class TreeBlockDevice implements BlockDevice {
             }
         }
 
+        @Override
         protected long buildTree(Map<Long, FatEntry> fat) throws IOException {
             if (!getFile().exists())
                 throw new IllegalStateException("Directory for virtual FAT32 drive doesn't exist! " + getFile().getName());
@@ -1173,12 +1207,12 @@ public class TreeBlockDevice implements BlockDevice {
                 String filename = f.getName();
 
                 if (filename.length() > 8)
-                    size += 1 + (((filename.length() - 1) / 13) + 1);
+                    size += 1 + (filename.length() - 1) / 13 + 1;
                 else
                     size += 1;
             }
 
-            //set cluster size of this directory        
+            //set cluster size of this directory
             setSizeSectors((long)(size * 32 - 1) / SECTOR_SIZE + 1);
 
             long subClusters = 0;
@@ -1203,11 +1237,12 @@ public class TreeBlockDevice implements BlockDevice {
             makeClusterList();
 
             //add entry to fatImage map
-            fat.put(Long.valueOf(getStartCluster()), this);
+            fat.put(getStartCluster(), this);
 
             return dirSubClusters + getSizeInClusters();
         }
 
+        @Override
         public void setFile(File file) {
             super.setFile(file);
             changePathOfTree(file);
@@ -1218,16 +1253,13 @@ public class TreeBlockDevice implements BlockDevice {
             for (int i = 0; i < dirEntry.length / 32; i++) {
                 int newStartCluster = (dirEntry[32 * i + 26] & 0xFF) + ((dirEntry[32 * i + 27] & 0xFF) << 8)
                     + ((dirEntry[32 * i + 20] & 0xFF) << 16) + ((dirEntry[32 * i + 21] & 0xFF) << 24);
-                if ((dirEntry[32 * i] & 0xFF) == 0xE5)
-                    continue;
-                if ((dirEntry[32 * i + 11] & 0xFF) == 0xF)
-                    continue; //skip LFN's for now
-                if ((dirEntry[32 * i] & 0xFF) == 0x00)
+                 //skip LFN's for now
+                if (((dirEntry[32 * i] & 0xFF) == 0xE5) || ((dirEntry[32 * i + 11] & 0xFF) == 0xF) || ((dirEntry[32 * i] & 0xFF) == 0x00))
                     continue;
                 String name = new String(dirEntry, 32 * i, 8, US_ASCII).trim();
                 String ext = new String(dirEntry, 32 * i + 8, 3, US_ASCII).trim();
 
-                if ((name.equals(".")) || (name.equals(".."))) //skip current and parent directory entries
+                if (name.equals(".") || name.equals("..")) //skip current and parent directory entries
                     continue;
 
                 long newStartSector = getSectorNumber(newStartCluster);
@@ -1250,7 +1282,7 @@ public class TreeBlockDevice implements BlockDevice {
 
         public void writeDirectoryEntry(byte[] buffer, long sectorOffset, long sectorNumber) {
             //update clusterlist
-            clusterList.put(Long.valueOf(getClusterNumber(sectorNumber)), Long.valueOf(sectorOffset / SECTORS_PER_CLUSTER));
+            clusterList.put(getClusterNumber(sectorNumber), sectorOffset / SECTORS_PER_CLUSTER);
 
             if (dirEntry.length < SECTOR_SIZE + sectorOffset * SECTOR_SIZE) {
                 byte[] temp = new byte[(int)(sectorOffset + 1) * SECTOR_SIZE];
@@ -1314,6 +1346,7 @@ public class TreeBlockDevice implements BlockDevice {
             }
         }
 
+        @Override
         protected byte[] getDirectoryEntryComponent() {
             byte[] entry = super.getDirectoryEntryComponent();
             entry[11] = (byte)0x10; //Attrib Byte (Marks As Directory)
@@ -1380,15 +1413,15 @@ public class TreeBlockDevice implements BlockDevice {
     }
 
     private static int getHead(long lba) {
-        return (int)((lba % (HEADS_PER_CYLINDER * SECTORS_PER_TRACK)) / SECTORS_PER_TRACK);
+        return (int)(lba % (HEADS_PER_CYLINDER * SECTORS_PER_TRACK) / SECTORS_PER_TRACK);
     }
 
     private static int getSector(long lba) {
-        return (int)((lba % (HEADS_PER_CYLINDER * SECTORS_PER_TRACK)) % SECTORS_PER_TRACK + 1);
+        return (int)(lba % (HEADS_PER_CYLINDER * SECTORS_PER_TRACK) % SECTORS_PER_TRACK + 1);
     }
 
     private static int getLba(int cylinder, int head, int sector) {
-        return (((cylinder * HEADS_PER_CYLINDER) + head) * SECTORS_PER_TRACK) + sector - 1;
+        return (cylinder * HEADS_PER_CYLINDER + head) * SECTORS_PER_TRACK + sector - 1;
     }
 
     private static byte[] makeLongFileNameEntry(byte[] unicodeName, byte checksum, int index) {
@@ -1398,12 +1431,12 @@ public class TreeBlockDevice implements BlockDevice {
         if (remaining <= 0)
             return null;
 
-        boolean last = (remaining <= 26);
+        boolean last = remaining <= 26;
 
         byte[] entry = new byte[32];
 
         if (last)
-            entry[0] = (byte)((index + 1) | 0x40);
+            entry[0] = (byte)(index + 1 | 0x40);
         else
             entry[0] = (byte)(index + 1);
 

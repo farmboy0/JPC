@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,12 @@
 
 package org.jpc.support;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 //Do not even think about adding an import line to this class - especially not import java.net.*!
 import java.io.IOException;
-import java.io.DataOutput;
-import java.io.DataInput;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jpc.emulator.AbstractHardwareComponent;
 
@@ -48,11 +49,11 @@ import org.jpc.emulator.AbstractHardwareComponent;
 public class DriveSet extends AbstractHardwareComponent {
     private static final Logger LOGGING = Logger.getLogger(DriveSet.class.getName());
 
-    public static enum BootType {
+    public enum BootType {
         FLOPPY, HARD_DRIVE, CDROM;
     }
 
-    private static enum Devices {
+    private enum Devices {
         DEFAULT("org.jpc.support.FileBackedSeekableIODevice"),
 
         dir("org.jpc.support.TreeBlockDevice"), mem("org.jpc.support.ArrayBackedSeekableIODevice"),
@@ -119,7 +120,7 @@ public class DriveSet extends AbstractHardwareComponent {
         ides = new BlockDevice[4];
         ides[0] = hardDriveA;
         ides[1] = hardDriveB;
-        ides[2] = (hardDriveC == null) ? new CDROMBlockDevice() : hardDriveC;
+        ides[2] = hardDriveC == null ? new CDROMBlockDevice() : hardDriveC;
         ides[3] = hardDriveD;
     }
 
@@ -184,13 +185,13 @@ public class DriveSet extends AbstractHardwareComponent {
             return null;
         }
 
-        if ((spec.indexOf("\"") == 0) && (spec.indexOf("\"", 1) > 0))
+        if (spec.indexOf("\"") == 0 && spec.indexOf("\"", 1) > 0)
             spec = spec.substring(1, spec.length() - 2);
 
         int colon = spec.indexOf(':');
         String deviceKey = "DEFAULT";
         String deviceSpec = spec;
-        if ((colon >= 0) && (spec.indexOf("\\") != colon + 1)) {
+        if (colon >= 0 && spec.indexOf("\\") != colon + 1) {
             deviceKey = spec.substring(0, colon);
             deviceSpec = spec.substring(colon + 1);
         }
@@ -199,7 +200,7 @@ public class DriveSet extends AbstractHardwareComponent {
         if (deviceKey.startsWith("caching")) {
             deviceKey = "DEFAULT";
             int secondcolon = deviceSpec.indexOf(':');
-            if ((secondcolon > 0) && (deviceSpec.indexOf("\\") != secondcolon + 1)) {
+            if (secondcolon > 0 && deviceSpec.indexOf("\\") != secondcolon + 1) {
                 deviceSpec = deviceSpec.substring(secondcolon + 1);
                 deviceKey = deviceSpec.substring(0, secondcolon);
             }
@@ -254,12 +255,14 @@ public class DriveSet extends AbstractHardwareComponent {
             return (BlockDevice)device;
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(initialArgs.length);
-        for (int i = 0; i < initialArgs.length; i++)
-            output.writeUTF(initialArgs[i]);
+        for (String initialArg : initialArgs)
+            output.writeUTF(initialArg);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         int len = input.readInt();
         String[] newArgs = new String[len];

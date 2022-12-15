@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,12 @@
 
 package org.jpc.emulator.pci;
 
-import org.jpc.emulator.*;
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
 
 /**
  * Provides a default implementations for the core features of a standard PCI device. This includes
@@ -54,6 +58,7 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
         configuration = new byte[256];
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(irq);
         output.writeInt(deviceFunctionNumber);
@@ -61,6 +66,7 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
         output.write(configuration);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         irq = input.readInt();
         deviceFunctionNumber = input.readInt();
@@ -71,18 +77,22 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
 
     //PCI Bus Registering
 
+    @Override
     public int getDeviceFunctionNumber() {
         return deviceFunctionNumber;
     }
 
+    @Override
     public void assignDeviceFunctionNumber(int devFN) {
         deviceFunctionNumber = devFN;
     }
 
+    @Override
     public boolean autoAssignDeviceFunctionNumber() {
         return true;
     }
 
+    @Override
     public void deassignDeviceFunctionNumber() {
         pciRegistered = false;
         assignDeviceFunctionNumber(-1);
@@ -170,18 +180,20 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
         }
     }
 
+    @Override
     public boolean configWriteByte(int address, byte data) //returns true if device needs remapping
 
     {
         if (checkConfigWrite(address))
             putConfigByte(address, data);
 
-        if (address >= PCI_CONFIG_COMMAND && address < (PCI_CONFIG_COMMAND + 2))
+        if (address >= PCI_CONFIG_COMMAND && address < PCI_CONFIG_COMMAND + 2)
             /* if the command register is modified, we must modify the mappings */
             return true;
         return false;
     }
 
+    @Override
     public final boolean configWriteWord(int address, short data) //returns true if device needs remapping
 
     {
@@ -193,25 +205,26 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
             data >>>= 8;
         }
 
-        if ((modAddress > PCI_CONFIG_COMMAND) && (address < (PCI_CONFIG_COMMAND + 2)))
-            // if the command register is modified, we must modify the mappings 
+        if (modAddress > PCI_CONFIG_COMMAND && address < PCI_CONFIG_COMMAND + 2)
+            // if the command register is modified, we must modify the mappings
             return true;
         return false;
     }
 
+    @Override
     public final boolean configWriteLong(int address, int data) {
-        if (((address >= PCI_CONFIG_BASE_ADDRESS && address < (PCI_CONFIG_BASE_ADDRESS + 4 * 6))
-            || (address >= PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS && address < (PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS + 4)))) {
+        if (address >= PCI_CONFIG_BASE_ADDRESS && address < PCI_CONFIG_BASE_ADDRESS + 4 * 6
+            || address >= PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS && address < PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS + 4) {
             int regionIndex;
             if (address >= PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS)
                 regionIndex = PCI_ROM_SLOT;
             else
-                regionIndex = (address - PCI_CONFIG_BASE_ADDRESS) >>> 2;
+                regionIndex = address - PCI_CONFIG_BASE_ADDRESS >>> 2;
             IORegion r = getIORegion(regionIndex);
 
             if (r != null) {
                 if (regionIndex == PCI_ROM_SLOT)
-                    data &= (~(r.getSize() - 1)) | 1;
+                    data &= ~(r.getSize() - 1) | 1;
                 else {
                     data &= ~(r.getSize() - 1);
                     data |= r.getType();
@@ -229,34 +242,39 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
             data = data >>> 8;
         }
 
-        if (modAddress > PCI_CONFIG_COMMAND && address < (PCI_CONFIG_COMMAND + 2))
+        if (modAddress > PCI_CONFIG_COMMAND && address < PCI_CONFIG_COMMAND + 2)
             /* if the command register is modified, we must modify the mappings */
             return true;
         return false;
     }
 
+    @Override
     public final byte configReadByte(int address) {
         return configuration[address];
     }
 
+    @Override
     public final short configReadWord(int address) {
         short result = configReadByte(address + 1);
         result <<= 8;
-        result |= (0xff & configReadByte(address));
+        result |= 0xff & configReadByte(address);
         return result;
     }
 
+    @Override
     public final int configReadLong(int address) {
         int result = 0xffff & configReadWord(address + 2);
         result <<= 16;
-        result |= (0xffff & configReadWord(address));
+        result |= 0xffff & configReadWord(address);
         return result;
     }
 
+    @Override
     public final void putConfigByte(int address, byte data) {
         configuration[address] = data;
     }
 
+    @Override
     public final void putConfigWord(int address, short data) {
         putConfigByte(address, (byte)data);
         address++;
@@ -264,6 +282,7 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
         putConfigByte(address, (byte)data);
     }
 
+    @Override
     public final void putConfigLong(int address, int data) {
         putConfigWord(address, (short)data);
         address += 2;
@@ -271,40 +290,49 @@ public abstract class AbstractPCIDevice extends AbstractHardwareComponent implem
         putConfigWord(address, (short)data);
     }
 
+    @Override
     public void setIRQIndex(int irqIndex) {
         irq = irqIndex;
     }
 
+    @Override
     public int getIRQIndex() {
         return irq;
     }
 
+    @Override
     public void addIRQBouncer(IRQBouncer bouncer) {
         irqBouncer = bouncer;
     }
 
+    @Override
     public IRQBouncer getIRQBouncer() {
         return irqBouncer;
     }
 
+    @Override
     public boolean initialised() {
         return pciRegistered;
     }
 
+    @Override
     public void reset() {
         pciRegistered = false;
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof PCIBus) && component.initialised() && !pciRegistered)
+        if (component instanceof PCIBus && component.initialised() && !pciRegistered)
             pciRegistered = ((PCIBus)component).registerDevice(this);
     }
 
+    @Override
     public void updateComponent(org.jpc.emulator.HardwareComponent component) {
-        if ((component instanceof PCIBus) && component.updated() && !pciRegistered)
+        if (component instanceof PCIBus && component.updated() && !pciRegistered)
             pciRegistered = ((PCIBus)component).registerDevice(this);
     }
 
+    @Override
     public boolean updated() {
         return initialised();
     }

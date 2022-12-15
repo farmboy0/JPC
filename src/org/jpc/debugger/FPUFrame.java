@@ -27,12 +27,20 @@
 
 package org.jpc.debugger;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 
-import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 
-import org.jpc.debugger.util.*;
+import org.jpc.debugger.util.BasicTableModel;
+import org.jpc.debugger.util.UtilityFrame;
+import org.jpc.debugger.util.ValidatingTextField;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.fpu64.FpuState64;
 
@@ -60,9 +68,9 @@ public class FPUFrame extends UtilityFrame implements PCListener {
         ValidatingTextField binary = new ValidatingTextField("01", '0', 8);
         ValidatingTextField hex = new ValidatingTextField("0123456789abcdefABCDEF", '0', 8);
         binary.setFont(f);
-        binary.setHorizontalAlignment(JLabel.RIGHT);
+        binary.setHorizontalAlignment(SwingConstants.RIGHT);
         hex.setFont(f);
-        hex.setHorizontalAlignment(JLabel.RIGHT);
+        hex.setHorizontalAlignment(SwingConstants.RIGHT);
 
         registerTable.setDefaultEditor(Object.class, new DefaultCellEditor(binary));
         registerTable.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(hex));
@@ -75,10 +83,12 @@ public class FPUFrame extends UtilityFrame implements PCListener {
         pcCreated();
     }
 
+    @Override
     public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
 
+    @Override
     public void pcCreated() {
         fpu = (FpuState64)((Processor)JPC.getObject(Processor.class)).fpu;
         access = (FPUAccess)JPC.getObject(FPUAccess.class);
@@ -89,6 +99,7 @@ public class FPUFrame extends UtilityFrame implements PCListener {
         refreshDetails();
     }
 
+    @Override
     public void pcDisposed() {
         fpu = null;
         access = null;
@@ -97,15 +108,18 @@ public class FPUFrame extends UtilityFrame implements PCListener {
         refreshDetails();
     }
 
+    @Override
     public void executionStarted() {
         editableModel = false;
     }
 
+    @Override
     public void executionStopped() {
         editableModel = true;
         refreshDetails();
     }
 
+    @Override
     public void refreshDetails() {
         model.fireTableDataChanged();
     }
@@ -153,21 +167,24 @@ public class FPUFrame extends UtilityFrame implements PCListener {
             registers[8] = new FieldWrapper("status", "statusWord");
         }
 
+        @Override
         public int getRowCount() {
             return registers.length;
         }
 
+        @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             return columnIndex > 0;
         }
 
         private String getZeroExtendedHexString(int value) {
-            StringBuffer buf = new StringBuffer(Integer.toHexString(value).toUpperCase());
+            StringBuilder buf = new StringBuilder(Integer.toHexString(value).toUpperCase());
             while (buf.length() < 8)
                 buf.insert(0, "0");
             return buf.toString();
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             long value = registers[row].getLongValue();
 
@@ -186,6 +203,7 @@ public class FPUFrame extends UtilityFrame implements PCListener {
             }
         }
 
+        @Override
         public void setValueAt(Object obj, int row, int column) {
             try {
                 if (column == 5) {
@@ -197,10 +215,10 @@ public class FPUFrame extends UtilityFrame implements PCListener {
 
                     int shift = 32 * (4 - column);
                     long mask = 0xFFFFFFFFL << shift;
-                    current &= (0xFFFFFFFF ^ mask);
+                    current &= 0xFFFFFFFF ^ mask;
                     current |= value << shift;
 
-                    if ((row >= 8) && (row < 14))
+                    if (row >= 8 && row < 14)
                         current = 0xFFFF & current;
 
                     registers[row].setLongValue(current);
@@ -215,6 +233,7 @@ public class FPUFrame extends UtilityFrame implements PCListener {
     class CellRenderer extends DefaultTableCellRenderer {
         Color bg = new Color(0xFFF0F0);
 
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
             int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -222,12 +241,12 @@ public class FPUFrame extends UtilityFrame implements PCListener {
 
             setBackground(Color.white);
             setForeground(Color.black);
-            setHorizontalAlignment(JLabel.RIGHT);
+            setHorizontalAlignment(SwingConstants.RIGHT);
 
             if (column == 0) {
                 setBackground(Color.blue);
                 setForeground(Color.white);
-                setHorizontalAlignment(JLabel.CENTER);
+                setHorizontalAlignment(SwingConstants.CENTER);
             } else {
                 if (row < 8)
                     setBackground(bg);
@@ -238,7 +257,7 @@ public class FPUFrame extends UtilityFrame implements PCListener {
                     setForeground(Color.magenta);
             }
 
-            if ((row >= 8) && (row < 14) && ((column == 1) || (column == 2))) {
+            if (row >= 8 && row < 14 && (column == 1 || column == 2)) {
                 setBackground(Color.lightGray);
                 setForeground(Color.blue);
             } else if (row == 14) {
@@ -248,7 +267,7 @@ public class FPUFrame extends UtilityFrame implements PCListener {
                 }
             } else if (row == 15)
                 setBackground(Color.cyan);
-            else if ((row > 15) && (row < 21)) {
+            else if (row > 15 && row < 21) {
                 setBackground(Color.green);
                 setForeground(Color.black);
             } else if (row >= 21) {

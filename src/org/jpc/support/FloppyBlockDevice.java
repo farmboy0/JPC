@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -50,6 +50,7 @@ public class FloppyBlockDevice extends RawBlockDevice {
      * Returns <code>false</code> as a floppy drive cannot be locked
      * @return <code>false</code>
      */
+    @Override
     public boolean isLocked() {
         return false;
     }
@@ -58,25 +59,31 @@ public class FloppyBlockDevice extends RawBlockDevice {
      * Does nothing, a floppy drive cannot be locked
      * @param locked dummy
      */
+    @Override
     public void setLock(boolean locked) {
     }
 
+    @Override
     public int getCylinders() {
         return -1;
     }
 
+    @Override
     public int getHeads() {
         return -1;
     }
 
+    @Override
     public int getSectors() {
         return -1;
     }
 
+    @Override
     public Type getType() {
         return Type.FLOPPY;
     }
 
+    @Override
     public String toString() {
         return "Floppy: " + super.toString();
     }

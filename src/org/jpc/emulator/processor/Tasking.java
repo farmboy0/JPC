@@ -28,7 +28,7 @@
 package org.jpc.emulator.processor;
 
 public class Tasking {
-    public static enum Source {
+    public enum Source {
         CALL, INT, IRET, JUMP
     }
 
@@ -93,7 +93,7 @@ public class Tasking {
         //         if initiated with a CALL or JMP instruction, an exception, or
         //         an interrupt, the NT flag is left unchanged.
         int oldEFlags = cpu.getEFlags();
-        if ((tss instanceof ProtectedModeSegment.Busy16BitTSS) || (tss instanceof ProtectedModeSegment.Busy32BitTSS))
+        if (tss instanceof ProtectedModeSegment.Busy16BitTSS || tss instanceof ProtectedModeSegment.Busy32BitTSS)
             oldEFlags &= ~Processor.EFLAGS_NT_MASK;
 
         // STEP 5: Save the current task state in the TSS. Up to this point,
@@ -162,7 +162,7 @@ public class Tasking {
         }
 
         // effect on link field of new task
-        if ((source == Source.CALL) || (source == Source.INT)) {
+        if (source == Source.CALL || source == Source.INT) {
             boolean isSup = cpu.linearMemory.isSupervisor();
             try {
                 cpu.linearMemory.setSupervisor(true);
@@ -256,7 +256,7 @@ public class Tasking {
         cpu.tss = tss;
 
         // Step 9: Set TS flag in the CR0 image stored in the new task TSS.
-        cpu.setCR0(cpu.getCR0() | cpu.CR0_TASK_SWITCHED);
+        cpu.setCR0(cpu.getCR0() | Processor.CR0_TASK_SWITCHED);
 
         // Task switch clears LE/L3/L2/L1/L0 in DR7
         cpu.dr7 &= ~0x00000155;
@@ -264,7 +264,7 @@ public class Tasking {
         // Step 10: If call or interrupt, set the NT flag in the eflags
         //          image stored in new task's TSS.  If IRET or JMP,
         //          NT is restored from new TSS eflags image. (no change)
-        if ((source == Source.CALL) || (source == Source.INT))
+        if (source == Source.CALL || source == Source.INT)
             newEflags |= Processor.EFLAGS_NT_MASK;
 
         // Step 11: Load the new task (dynamic) state from new TSS.
@@ -301,7 +301,7 @@ public class Tasking {
             cpu.ldtr = newSegment;
         }
 
-        if ((tss.getType() >= 9) && (cpu.pagingEnabled())) {
+        if (tss.getType() >= 9 && cpu.pagingEnabled()) {
             // change CR3 only if it actually modified
             if (newCR3 != cpu.getCR3()) {
                 cpu.setCR3(newCR3);
@@ -344,13 +344,7 @@ public class Tasking {
 
             Segment ss = cpu.loadSegment(newSs, true);
 
-            if (!((ProtectedModeSegment)ss).isDataWritable() || ((ProtectedModeSegment)ss).isCode())
-                throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newSs & 0xfffc, true);
-
-            if (ss.getDPL() != (newCs & 3))
-                throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newSs & 0xfffc, true);
-
-            if (ss.getDPL() != ss.getRPL())
+            if (!((ProtectedModeSegment)ss).isDataWritable() || ((ProtectedModeSegment)ss).isCode() || (ss.getDPL() != (newCs & 3)) || (ss.getDPL() != ss.getRPL()))
                 throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newSs & 0xfffc, true);
 
             if (touch_segment((ProtectedModeSegment)ss, cpu))
@@ -396,7 +390,7 @@ public class Tasking {
                 cpu.checkAlignmentChecking();
             }
 
-            if ((tss.getType() >= 9) && ((trap_word & 1) != 0))
+            if (tss.getType() >= 9 && (trap_word & 1) != 0)
                 // TODO debug trap
 
                 if (Processor.cpuLevel >= 6) {
@@ -428,11 +422,11 @@ public class Tasking {
             return false;
 
         ProtectedModeSegment s = (ProtectedModeSegment)seg;
-        if (s.isSystem() || (s.isCode() && !s.isCodeReadable()))
+        if (s.isSystem() || s.isCode() && !s.isCodeReadable())
             throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, s.getSelector() & 0xfffc, true);
 
         if (s.isDataWritable() || !s.isConforming())
-            if ((s.getRPL() > s.getDPL()) || (cs_rpl > s.getDPL()))
+            if (s.getRPL() > s.getDPL() || cs_rpl > s.getDPL())
                 throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, s.getSelector() & 0xfffc, true);
 
         return touch_segment(s, cpu);

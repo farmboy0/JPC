@@ -27,8 +27,103 @@
 
 package org.jpc.emulator.execution.decoder;
 
-import java.util.*;
-import static org.jpc.emulator.execution.decoder.ZygoteOperand.*;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_AHr12b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_AL;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ALr8b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_AX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ap;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_BHr15b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_BLr11b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_C;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_CHr13b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_CL;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_CLr9b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_CS;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_D;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_DHr14b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_DLr10b;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_DS;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_DX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ES;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Eb;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ed;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ep;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ev;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ew;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ex;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_FS;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_GS;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Gb;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Gd;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Gv;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Gvw;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Gw;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Gz;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_I1;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ib;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Iv;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Iw;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Iz;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Jb;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Jz;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_M;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Md;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Mq;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Mt;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Mw;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_NONE;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ob;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Ov;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_P;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_PR;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_Q;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_R;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_S;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_SS;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST0;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST1;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST2;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST3;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST4;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST5;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST6;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_ST7;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_V;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_VR;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_W;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eAX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eBP;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eBX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eCX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eDI;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eDX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eSI;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_eSP;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rAX;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rAXr8;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rBPr13;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rBXr11;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rCXr9;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rDIr15;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rDXr10;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rSIr14;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.O_rSPr12;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_ImpAddr;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_aso;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_c1;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_c2;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_def64;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_depM;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_inv64;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_none;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_oso;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_rexb;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_rexr;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_rexw;
+import static org.jpc.emulator.execution.decoder.ZygoteOperand.P_rexx;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class Table {
 
@@ -160,1124 +255,94 @@ public class Table {
     public static final int ITAB__PFX_SSEF3__0F__OP_C7__REG = 115;
     public static final int ITAB__PFX_SSEF3__0F__OP_C7__REG__OP_07__VENDOR = 116;
 
-    public static List<String> operator = Arrays.asList(new String[] {
-        "3dnow",
-        "aaa",
-        "aad",
-        "aam",
-        "aas",
-        "adc",
-        "add",
-        "addpd",
-        "addps",
-        "addsd",
-        "addss",
-        "addsubpd",
-        "addsubps",
-        "and",
-        "andpd",
-        "andps",
-        "andnpd",
-        "andnps",
-        "arpl",
-        "movsxd",
-        "bound",
-        "bsf",
-        "bsr",
-        "bswap",
-        "bt",
-        "btc",
-        "btr",
-        "bts",
-        "call",
-        "cbw",
-        "cwde",
-        "cdqe",
-        "clc",
-        "cld",
-        "clflush",
-        "clgi",
-        "cli",
-        "clts",
-        "cmc",
-        "cmovo",
-        "cmovno",
-        "cmovb",
-        "cmovae",
-        "cmove",
-        "cmovne",
-        "cmovbe",
-        "cmova",
-        "cmovs",
-        "cmovns",
-        "cmovp",
-        "cmovnp",
-        "cmovl",
-        "cmovge",
-        "cmovle",
-        "cmovg",
-        "cmp",
-        "cmppd",
-        "cmpps",
-        "cmpsb",
-        "cmpsw",
-        "cmpsd",
-        "cmpsq",
-        "cmpss",
-        "cmpxchg",
-        "cmpxchg8b",
-        "comisd",
-        "comiss",
-        "cpuid",
-        "cvtdq2pd",
-        "cvtdq2ps",
-        "cvtpd2dq",
-        "cvtpd2pi",
-        "cvtpd2ps",
-        "cvtpi2ps",
-        "cvtpi2pd",
-        "cvtps2dq",
-        "cvtps2pi",
-        "cvtps2pd",
-        "cvtsd2si",
-        "cvtsd2ss",
-        "cvtsi2ss",
-        "cvtss2si",
-        "cvtss2sd",
-        "cvttpd2pi",
-        "cvttpd2dq",
-        "cvttps2dq",
-        "cvttps2pi",
-        "cvttsd2si",
-        "cvtsi2sd",
-        "cvttss2si",
-        "cwd",
-        "cdq",
-        "cqo",
-        "daa",
-        "das",
-        "dec",
-        "div",
-        "divpd",
-        "divps",
-        "divsd",
-        "divss",
-        "emms",
-        "enter",
-        "f2xm1",
-        "fabs",
-        "fadd",
-        "faddp",
-        "fbld",
-        "fbstp",
-        "fchs",
-        "fclex",
-        "fcmovb",
-        "fcmove",
-        "fcmovbe",
-        "fcmovu",
-        "fcmovnb",
-        "fcmovne",
-        "fcmovnbe",
-        "fcmovnu",
-        "fucomi",
-        "fcom",
-        "fcom2",
-        "fcomp3",
-        "fcomi",
-        "fucomip",
-        "fcomip",
-        "fcomp",
-        "fcomp5",
-        "fcompp",
-        "fcos",
-        "fdecstp",
-        "fdiv",
-        "fdivp",
-        "fdivr",
-        "fdivrp",
-        "femms",
-        "ffree",
-        "ffreep",
-        "ficom",
-        "ficomp",
-        "fild",
-        "fincstp",
-        "fninit",
-        "fiadd",
-        "fidivr",
-        "fidiv",
-        "fisub",
-        "fisubr",
-        "fist",
-        "fistp",
-        "fisttp",
-        "fld",
-        "fld1",
-        "fldl2t",
-        "fldl2e",
-        "fldpi",
-        "fldlg2",
-        "fldln2",
-        "fldz",
-        "fldcw",
-        "fldenv",
-        "fmul",
-        "fmulp",
-        "fimul",
-        "fnop",
-        "fpatan",
-        "fprem",
-        "fprem1",
-        "fptan",
-        "frndint",
-        "frstor",
-        "fnsave",
-        "fscale",
-        "fsin",
-        "fsincos",
-        "fsqrt",
-        "fstp",
-        "fstp1",
-        "fstp8",
-        "fstp9",
-        "fst",
-        "fnstcw",
-        "fnstenv",
-        "fnstsw",
-        "fndisi",
-        "fsetpm",
-        "fsub",
-        "fsubp",
-        "fsubr",
-        "fsubrp",
-        "ftst",
-        "fucom",
-        "fucomp",
-        "fucompp",
-        "fxam",
-        "fxch",
-        "fxch4",
-        "fxch7",
-        "fxrstor",
-        "fxsave",
-        "fxtract",
-        "fyl2x",
-        "fyl2xp1",
-        "haddpd",
-        "haddps",
-        "hlt",
-        "hsubpd",
-        "hsubps",
-        "idiv",
-        "in",
-        "imul",
-        "inc",
-        "insb",
-        "insw",
-        "insd",
-        "int1",
-        "int3",
-        "int",
-        "into",
-        "invd",
-        "invlpg",
-        "invlpga",
-        "iretw",
-        "iretd",
-        "iretq",
-        "jo",
-        "jno",
-        "jb",
-        "jae",
-        "je",
-        "jne",
-        "jbe",
-        "ja",
-        "js",
-        "jns",
-        "jp",
-        "jnp",
-        "jl",
-        "jge",
-        "jle",
-        "jg",
-        "jcxz",
-        "jecxz",
-        "jrcxz",
-        "jmp",
-        "lahf",
-        "lar",
-        "lddqu",
-        "ldmxcsr",
-        "lds",
-        "lea",
-        "les",
-        "lfs",
-        "lgs",
-        "lidt",
-        "lss",
-        "leave",
-        "lfence",
-        "lgdt",
-        "lldt",
-        "lmsw",
-        "lock",
-        "lodsb",
-        "lodsw",
-        "lodsd",
-        "lodsq",
-        "loopne",
-        "loope",
-        "loop",
-        "lsl",
-        "ltr",
-        "maskmovq",
-        "maxpd",
-        "maxps",
-        "maxsd",
-        "maxss",
-        "mfence",
-        "minpd",
-        "minps",
-        "minsd",
-        "minss",
-        "monitor",
-        "mov",
-        "movapd",
-        "movaps",
-        "movd",
-        "movddup",
-        "movdqa",
-        "movdqu",
-        "movdq2q",
-        "movhpd",
-        "movhps",
-        "movlhps",
-        "movlpd",
-        "movlps",
-        "movhlps",
-        "movmskpd",
-        "movmskps",
-        "movntdq",
-        "movnti",
-        "movntpd",
-        "movntps",
-        "movntq",
-        "movq",
-        "movq2dq",
-        "movsb",
-        "movsw",
-        "movsd",
-        "movsq",
-        "movsldup",
-        "movshdup",
-        "movss",
-        "movsx",
-        "movupd",
-        "movups",
-        "movzx",
-        "mul",
-        "mulpd",
-        "mulps",
-        "mulsd",
-        "mulss",
-        "mwait",
-        "neg",
-        "nop",
-        "not",
-        "or",
-        "orpd",
-        "orps",
-        "out",
-        "outsb",
-        "outsw",
-        "outsd",
-        "outsq",
-        "packsswb",
-        "packssdw",
-        "packuswb",
-        "paddb",
-        "paddw",
-        "paddq",
-        "paddsb",
-        "paddsw",
-        "paddusb",
-        "paddusw",
-        "pand",
-        "pandn",
-        "pause",
-        "pavgb",
-        "pavgw",
-        "pcmpeqb",
-        "pcmpeqw",
-        "pcmpeqd",
-        "pcmpgtb",
-        "pcmpgtw",
-        "pcmpgtd",
-        "pextrw",
-        "pinsrw",
-        "pmaddwd",
-        "pmaxsw",
-        "pmaxub",
-        "pminsw",
-        "pminub",
-        "pmovmskb",
-        "pmulhuw",
-        "pmulhw",
-        "pmullw",
-        "pmuludq",
-        "pop",
-        "popa",
-        "popad",
-        "popfw",
-        "popfd",
-        "popfq",
-        "por",
-        "prefetch",
-        "prefetchnta",
-        "prefetcht0",
-        "prefetcht1",
-        "prefetcht2",
-        "psadbw",
-        "pshufd",
-        "pshufhw",
-        "pshuflw",
-        "pshufw",
-        "pslldq",
-        "psllw",
-        "pslld",
-        "psllq",
-        "psraw",
-        "psrad",
-        "psrlw",
-        "psrld",
-        "psrlq",
-        "psrldq",
-        "psubb",
-        "psubw",
-        "psubd",
-        "psubq",
-        "psubsb",
-        "psubsw",
-        "psubusb",
-        "psubusw",
-        "punpckhbw",
-        "punpckhwd",
-        "punpckhdq",
-        "punpckhqdq",
-        "punpcklbw",
-        "punpcklwd",
-        "punpckldq",
-        "punpcklqdq",
-        "pi2fw",
-        "pi2fd",
-        "pf2iw",
-        "pf2id",
-        "pfnacc",
-        "pfpnacc",
-        "pfcmpge",
-        "pfmin",
-        "pfrcp",
-        "pfrsqrt",
-        "pfsub",
-        "pfadd",
-        "pfcmpgt",
-        "pfmax",
-        "pfrcpit1",
-        "pfrspit1",
-        "pfsubr",
-        "pfacc",
-        "pfcmpeq",
-        "pfmul",
-        "pfrcpit2",
-        "pmulhrw",
-        "pswapd",
-        "pavgusb",
-        "push",
-        "pusha",
-        "pushad",
-        "pushfw",
-        "pushfd",
-        "pushfq",
-        "pxor",
-        "rcl",
-        "rcr",
-        "rol",
-        "ror",
-        "rcpps",
-        "rcpss",
-        "rdmsr",
-        "rdpmc",
-        "rdtsc",
-        "rdtscp",
-        "repne",
-        "rep",
-        "ret",
-        "retf",
-        "rsm",
-        "rsqrtps",
-        "rsqrtss",
-        "sahf",
-        "sal",
-        "salc",
-        "sar",
-        "shl",
-        "shr",
-        "sbb",
-        "scasb",
-        "scasw",
-        "scasd",
-        "scasq",
-        "seto",
-        "setno",
-        "setb",
-        "setae",
-        "sete",
-        "setne",
-        "setbe",
-        "seta",
-        "sets",
-        "setns",
-        "setp",
-        "setnp",
-        "setl",
-        "setge",
-        "setle",
-        "setg",
-        "sfence",
-        "sgdt",
-        "shld",
-        "shrd",
-        "shufpd",
-        "shufps",
-        "sidt",
-        "sldt",
-        "smsw",
-        "sqrtps",
-        "sqrtpd",
-        "sqrtsd",
-        "sqrtss",
-        "stc",
-        "std",
-        "stgi",
-        "sti",
-        "skinit",
-        "stmxcsr",
-        "stosb",
-        "stosw",
-        "stosd",
-        "stosq",
-        "str",
-        "sub",
-        "subpd",
-        "subps",
-        "subsd",
-        "subss",
-        "swapgs",
-        "syscall",
-        "sysenter",
-        "sysexit",
-        "sysret",
-        "test",
-        "ucomisd",
-        "ucomiss",
-        "ud2",
-        "unpckhpd",
-        "unpckhps",
-        "unpcklps",
-        "unpcklpd",
-        "verr",
-        "verw",
-        "vmcall",
-        "vmclear",
-        "vmxon",
-        "vmptrld",
-        "vmptrst",
-        "vmresume",
-        "vmxoff",
-        "vmrun",
-        "vmmcall",
-        "vmload",
-        "vmsave",
-        "wait",
-        "wbinvd",
-        "wrmsr",
-        "xadd",
-        "xchg",
-        "xlatb",
-        "xor",
-        "xorpd",
-        "xorps",
-        "db",
-        "invalid", });
+    public static List<String> operator = Arrays.asList("3dnow", "aaa", "aad", "aam", "aas", "adc", "add", "addpd", "addps", "addsd",
+        "addss", "addsubpd", "addsubps", "and", "andpd", "andps", "andnpd", "andnps", "arpl", "movsxd", "bound", "bsf", "bsr", "bswap",
+        "bt", "btc", "btr", "bts", "call", "cbw", "cwde", "cdqe", "clc", "cld", "clflush", "clgi", "cli", "clts", "cmc", "cmovo", "cmovno",
+        "cmovb", "cmovae", "cmove", "cmovne", "cmovbe", "cmova", "cmovs", "cmovns", "cmovp", "cmovnp", "cmovl", "cmovge", "cmovle", "cmovg",
+        "cmp", "cmppd", "cmpps", "cmpsb", "cmpsw", "cmpsd", "cmpsq", "cmpss", "cmpxchg", "cmpxchg8b", "comisd", "comiss", "cpuid",
+        "cvtdq2pd", "cvtdq2ps", "cvtpd2dq", "cvtpd2pi", "cvtpd2ps", "cvtpi2ps", "cvtpi2pd", "cvtps2dq", "cvtps2pi", "cvtps2pd", "cvtsd2si",
+        "cvtsd2ss", "cvtsi2ss", "cvtss2si", "cvtss2sd", "cvttpd2pi", "cvttpd2dq", "cvttps2dq", "cvttps2pi", "cvttsd2si", "cvtsi2sd",
+        "cvttss2si", "cwd", "cdq", "cqo", "daa", "das", "dec", "div", "divpd", "divps", "divsd", "divss", "emms", "enter", "f2xm1", "fabs",
+        "fadd", "faddp", "fbld", "fbstp", "fchs", "fclex", "fcmovb", "fcmove", "fcmovbe", "fcmovu", "fcmovnb", "fcmovne", "fcmovnbe",
+        "fcmovnu", "fucomi", "fcom", "fcom2", "fcomp3", "fcomi", "fucomip", "fcomip", "fcomp", "fcomp5", "fcompp", "fcos", "fdecstp",
+        "fdiv", "fdivp", "fdivr", "fdivrp", "femms", "ffree", "ffreep", "ficom", "ficomp", "fild", "fincstp", "fninit", "fiadd", "fidivr",
+        "fidiv", "fisub", "fisubr", "fist", "fistp", "fisttp", "fld", "fld1", "fldl2t", "fldl2e", "fldpi", "fldlg2", "fldln2", "fldz",
+        "fldcw", "fldenv", "fmul", "fmulp", "fimul", "fnop", "fpatan", "fprem", "fprem1", "fptan", "frndint", "frstor", "fnsave", "fscale",
+        "fsin", "fsincos", "fsqrt", "fstp", "fstp1", "fstp8", "fstp9", "fst", "fnstcw", "fnstenv", "fnstsw", "fndisi", "fsetpm", "fsub",
+        "fsubp", "fsubr", "fsubrp", "ftst", "fucom", "fucomp", "fucompp", "fxam", "fxch", "fxch4", "fxch7", "fxrstor", "fxsave", "fxtract",
+        "fyl2x", "fyl2xp1", "haddpd", "haddps", "hlt", "hsubpd", "hsubps", "idiv", "in", "imul", "inc", "insb", "insw", "insd", "int1",
+        "int3", "int", "into", "invd", "invlpg", "invlpga", "iretw", "iretd", "iretq", "jo", "jno", "jb", "jae", "je", "jne", "jbe", "ja",
+        "js", "jns", "jp", "jnp", "jl", "jge", "jle", "jg", "jcxz", "jecxz", "jrcxz", "jmp", "lahf", "lar", "lddqu", "ldmxcsr", "lds",
+        "lea", "les", "lfs", "lgs", "lidt", "lss", "leave", "lfence", "lgdt", "lldt", "lmsw", "lock", "lodsb", "lodsw", "lodsd", "lodsq",
+        "loopne", "loope", "loop", "lsl", "ltr", "maskmovq", "maxpd", "maxps", "maxsd", "maxss", "mfence", "minpd", "minps", "minsd",
+        "minss", "monitor", "mov", "movapd", "movaps", "movd", "movddup", "movdqa", "movdqu", "movdq2q", "movhpd", "movhps", "movlhps",
+        "movlpd", "movlps", "movhlps", "movmskpd", "movmskps", "movntdq", "movnti", "movntpd", "movntps", "movntq", "movq", "movq2dq",
+        "movsb", "movsw", "movsd", "movsq", "movsldup", "movshdup", "movss", "movsx", "movupd", "movups", "movzx", "mul", "mulpd", "mulps",
+        "mulsd", "mulss", "mwait", "neg", "nop", "not", "or", "orpd", "orps", "out", "outsb", "outsw", "outsd", "outsq", "packsswb",
+        "packssdw", "packuswb", "paddb", "paddw", "paddq", "paddsb", "paddsw", "paddusb", "paddusw", "pand", "pandn", "pause", "pavgb",
+        "pavgw", "pcmpeqb", "pcmpeqw", "pcmpeqd", "pcmpgtb", "pcmpgtw", "pcmpgtd", "pextrw", "pinsrw", "pmaddwd", "pmaxsw", "pmaxub",
+        "pminsw", "pminub", "pmovmskb", "pmulhuw", "pmulhw", "pmullw", "pmuludq", "pop", "popa", "popad", "popfw", "popfd", "popfq", "por",
+        "prefetch", "prefetchnta", "prefetcht0", "prefetcht1", "prefetcht2", "psadbw", "pshufd", "pshufhw", "pshuflw", "pshufw", "pslldq",
+        "psllw", "pslld", "psllq", "psraw", "psrad", "psrlw", "psrld", "psrlq", "psrldq", "psubb", "psubw", "psubd", "psubq", "psubsb",
+        "psubsw", "psubusb", "psubusw", "punpckhbw", "punpckhwd", "punpckhdq", "punpckhqdq", "punpcklbw", "punpcklwd", "punpckldq",
+        "punpcklqdq", "pi2fw", "pi2fd", "pf2iw", "pf2id", "pfnacc", "pfpnacc", "pfcmpge", "pfmin", "pfrcp", "pfrsqrt", "pfsub", "pfadd",
+        "pfcmpgt", "pfmax", "pfrcpit1", "pfrspit1", "pfsubr", "pfacc", "pfcmpeq", "pfmul", "pfrcpit2", "pmulhrw", "pswapd", "pavgusb",
+        "push", "pusha", "pushad", "pushfw", "pushfd", "pushfq", "pxor", "rcl", "rcr", "rol", "ror", "rcpps", "rcpss", "rdmsr", "rdpmc",
+        "rdtsc", "rdtscp", "repne", "rep", "ret", "retf", "rsm", "rsqrtps", "rsqrtss", "sahf", "sal", "salc", "sar", "shl", "shr", "sbb",
+        "scasb", "scasw", "scasd", "scasq", "seto", "setno", "setb", "setae", "sete", "setne", "setbe", "seta", "sets", "setns", "setp",
+        "setnp", "setl", "setge", "setle", "setg", "sfence", "sgdt", "shld", "shrd", "shufpd", "shufps", "sidt", "sldt", "smsw", "sqrtps",
+        "sqrtpd", "sqrtsd", "sqrtss", "stc", "std", "stgi", "sti", "skinit", "stmxcsr", "stosb", "stosw", "stosd", "stosq", "str", "sub",
+        "subpd", "subps", "subsd", "subss", "swapgs", "syscall", "sysenter", "sysexit", "sysret", "test", "ucomisd", "ucomiss", "ud2",
+        "unpckhpd", "unpckhps", "unpcklps", "unpcklpd", "verr", "verw", "vmcall", "vmclear", "vmxon", "vmptrld", "vmptrst", "vmresume",
+        "vmxoff", "vmrun", "vmmcall", "vmload", "vmsave", "wait", "wbinvd", "wrmsr", "xadd", "xchg", "xlatb", "xor", "xorpd", "xorps", "db",
+        "invalid");
 
-    public static List<String> operator_spl = Arrays.asList(new String[] {
-        "grp_x87",
-        "d3vil",
-        "na",
-        "grp_mod",
-        "grp_reg",
-        "none",
-        "grp_rm",
-        "grp_osize",
-        "grp_mode",
-        "grp_vendor",
-        "grp_asize", });
+    public static List<String> operator_spl = Arrays.asList("grp_x87", "d3vil", "na", "grp_mod", "grp_reg", "none", "grp_rm", "grp_osize",
+        "grp_mode", "grp_vendor", "grp_asize");
 
-    public static List<String> operators_str = Arrays.asList(new String[] {
-        "3dnow",
-        "aaa",
-        "aad",
-        "aam",
-        "aas",
-        "adc",
-        "add",
-        "addpd",
-        "addps",
-        "addsd",
-        "addss",
-        "addsubpd",
-        "addsubps",
-        "and",
-        "andpd",
-        "andps",
-        "andnpd",
-        "andnps",
-        "arpl",
-        "movsxd",
-        "bound",
-        "bsf",
-        "bsr",
-        "bswap",
-        "bt",
-        "btc",
-        "btr",
-        "bts",
-        "call",
-        "cbw",
-        "cwde",
-        "cdqe",
-        "clc",
-        "cld",
-        "clflush",
-        "clgi",
-        "cli",
-        "clts",
-        "cmc",
-        "cmovo",
-        "cmovno",
-        "cmovb",
-        "cmovae",
-        "cmove",
-        "cmovne",
-        "cmovbe",
-        "cmova",
-        "cmovs",
-        "cmovns",
-        "cmovp",
-        "cmovnp",
-        "cmovl",
-        "cmovge",
-        "cmovle",
-        "cmovg",
-        "cmp",
-        "cmppd",
-        "cmpps",
-        "cmpsb",
-        "cmpsw",
-        "cmpsd",
-        "cmpsq",
-        "cmpss",
-        "cmpxchg",
-        "cmpxchg8b",
-        "comisd",
-        "comiss",
-        "cpuid",
-        "cvtdq2pd",
-        "cvtdq2ps",
-        "cvtpd2dq",
-        "cvtpd2pi",
-        "cvtpd2ps",
-        "cvtpi2ps",
-        "cvtpi2pd",
-        "cvtps2dq",
-        "cvtps2pi",
-        "cvtps2pd",
-        "cvtsd2si",
-        "cvtsd2ss",
-        "cvtsi2ss",
-        "cvtss2si",
-        "cvtss2sd",
-        "cvttpd2pi",
-        "cvttpd2dq",
-        "cvttps2dq",
-        "cvttps2pi",
-        "cvttsd2si",
-        "cvtsi2sd",
-        "cvttss2si",
-        "cwd",
-        "cdq",
-        "cqo",
-        "daa",
-        "das",
-        "dec",
-        "div",
-        "divpd",
-        "divps",
-        "divsd",
-        "divss",
-        "emms",
-        "enter",
-        "f2xm1",
-        "fabs",
-        "fadd",
-        "faddp",
-        "fbld",
-        "fbstp",
-        "fchs",
-        "fclex",
-        "fcmovb",
-        "fcmove",
-        "fcmovbe",
-        "fcmovu",
-        "fcmovnb",
-        "fcmovne",
-        "fcmovnbe",
-        "fcmovnu",
-        "fucomi",
-        "fcom",
-        "fcom2",
-        "fcomp3",
-        "fcomi",
-        "fucomip",
-        "fcomip",
-        "fcomp",
-        "fcomp5",
-        "fcompp",
-        "fcos",
-        "fdecstp",
-        "fdiv",
-        "fdivp",
-        "fdivr",
-        "fdivrp",
-        "femms",
-        "ffree",
-        "ffreep",
-        "ficom",
-        "ficomp",
-        "fild",
-        "fincstp",
-        "fninit",
-        "fiadd",
-        "fidivr",
-        "fidiv",
-        "fisub",
-        "fisubr",
-        "fist",
-        "fistp",
-        "fisttp",
-        "fld",
-        "fld1",
-        "fldl2t",
-        "fldl2e",
-        "fldpi",
-        "fldlg2",
-        "fldln2",
-        "fldz",
-        "fldcw",
-        "fldenv",
-        "fmul",
-        "fmulp",
-        "fimul",
-        "fnop",
-        "fpatan",
-        "fprem",
-        "fprem1",
-        "fptan",
-        "frndint",
-        "frstor",
-        "fnsave",
-        "fscale",
-        "fsin",
-        "fsincos",
-        "fsqrt",
-        "fstp",
-        "fstp1",
-        "fstp8",
-        "fstp9",
-        "fst",
-        "fnstcw",
-        "fnstenv",
-        "fnstsw",
-        "fndisi",
-        "fsetpm",
-        "fsub",
-        "fsubp",
-        "fsubr",
-        "fsubrp",
-        "ftst",
-        "fucom",
-        "fucomp",
-        "fucompp",
-        "fxam",
-        "fxch",
-        "fxch4",
-        "fxch7",
-        "fxrstor",
-        "fxsave",
-        "fxtract",
-        "fyl2x",
-        "fyl2xp1",
-        "haddpd",
-        "haddps",
-        "hlt",
-        "hsubpd",
-        "hsubps",
-        "idiv",
-        "in",
-        "imul",
-        "inc",
-        "insb",
-        "insw",
-        "insd",
-        "int1",
-        "int3",
-        "int",
-        "into",
-        "invd",
-        "invlpg",
-        "invlpga",
-        "iretw",
-        "iretd",
-        "iretq",
-        "jo",
-        "jno",
-        "jb",
-        "jae",
-        "je",
-        "jne",
-        "jbe",
-        "ja",
-        "js",
-        "jns",
-        "jp",
-        "jnp",
-        "jl",
-        "jge",
-        "jle",
-        "jg",
-        "jcxz",
-        "jecxz",
-        "jrcxz",
-        "jmp",
-        "lahf",
-        "lar",
-        "lddqu",
-        "ldmxcsr",
-        "lds",
-        "lea",
-        "les",
-        "lfs",
-        "lgs",
-        "lidt",
-        "lss",
-        "leave",
-        "lfence",
-        "lgdt",
-        "lldt",
-        "lmsw",
-        "lock",
-        "lodsb",
-        "lodsw",
-        "lodsd",
-        "lodsq",
-        "loopne",
-        "loope",
-        "loop",
-        "lsl",
-        "ltr",
-        "maskmovq",
-        "maxpd",
-        "maxps",
-        "maxsd",
-        "maxss",
-        "mfence",
-        "minpd",
-        "minps",
-        "minsd",
-        "minss",
-        "monitor",
-        "mov",
-        "movapd",
-        "movaps",
-        "movd",
-        "movddup",
-        "movdqa",
-        "movdqu",
-        "movdq2q",
-        "movhpd",
-        "movhps",
-        "movlhps",
-        "movlpd",
-        "movlps",
-        "movhlps",
-        "movmskpd",
-        "movmskps",
-        "movntdq",
-        "movnti",
-        "movntpd",
-        "movntps",
-        "movntq",
-        "movq",
-        "movq2dq",
-        "movsb",
-        "movsw",
-        "movsd",
-        "movsq",
-        "movsldup",
-        "movshdup",
-        "movss",
-        "movsx",
-        "movupd",
-        "movups",
-        "movzx",
-        "mul",
-        "mulpd",
-        "mulps",
-        "mulsd",
-        "mulss",
-        "mwait",
-        "neg",
-        "nop",
-        "not",
-        "or",
-        "orpd",
-        "orps",
-        "out",
-        "outsb",
-        "outsw",
-        "outsd",
-        "outsq",
-        "packsswb",
-        "packssdw",
-        "packuswb",
-        "paddb",
-        "paddw",
-        "paddq",
-        "paddsb",
-        "paddsw",
-        "paddusb",
-        "paddusw",
-        "pand",
-        "pandn",
-        "pause",
-        "pavgb",
-        "pavgw",
-        "pcmpeqb",
-        "pcmpeqw",
-        "pcmpeqd",
-        "pcmpgtb",
-        "pcmpgtw",
-        "pcmpgtd",
-        "pextrw",
-        "pinsrw",
-        "pmaddwd",
-        "pmaxsw",
-        "pmaxub",
-        "pminsw",
-        "pminub",
-        "pmovmskb",
-        "pmulhuw",
-        "pmulhw",
-        "pmullw",
-        "pmuludq",
-        "pop",
-        "popa",
-        "popad",
-        "popfw",
-        "popfd",
-        "popfq",
-        "por",
-        "prefetch",
-        "prefetchnta",
-        "prefetcht0",
-        "prefetcht1",
-        "prefetcht2",
-        "psadbw",
-        "pshufd",
-        "pshufhw",
-        "pshuflw",
-        "pshufw",
-        "pslldq",
-        "psllw",
-        "pslld",
-        "psllq",
-        "psraw",
-        "psrad",
-        "psrlw",
-        "psrld",
-        "psrlq",
-        "psrldq",
-        "psubb",
-        "psubw",
-        "psubd",
-        "psubq",
-        "psubsb",
-        "psubsw",
-        "psubusb",
-        "psubusw",
-        "punpckhbw",
-        "punpckhwd",
-        "punpckhdq",
-        "punpckhqdq",
-        "punpcklbw",
-        "punpcklwd",
-        "punpckldq",
-        "punpcklqdq",
-        "pi2fw",
-        "pi2fd",
-        "pf2iw",
-        "pf2id",
-        "pfnacc",
-        "pfpnacc",
-        "pfcmpge",
-        "pfmin",
-        "pfrcp",
-        "pfrsqrt",
-        "pfsub",
-        "pfadd",
-        "pfcmpgt",
-        "pfmax",
-        "pfrcpit1",
-        "pfrspit1",
-        "pfsubr",
-        "pfacc",
-        "pfcmpeq",
-        "pfmul",
-        "pfrcpit2",
-        "pmulhrw",
-        "pswapd",
-        "pavgusb",
-        "push",
-        "pusha",
-        "pushad",
-        "pushfw",
-        "pushfd",
-        "pushfq",
-        "pxor",
-        "rcl",
-        "rcr",
-        "rol",
-        "ror",
-        "rcpps",
-        "rcpss",
-        "rdmsr",
-        "rdpmc",
-        "rdtsc",
-        "rdtscp",
-        "repne",
-        "rep",
-        "ret",
-        "retf",
-        "rsm",
-        "rsqrtps",
-        "rsqrtss",
-        "sahf",
-        "sal",
-        "salc",
-        "sar",
-        "shl",
-        "shr",
-        "sbb",
-        "scasb",
-        "scasw",
-        "scasd",
-        "scasq",
-        "seto",
-        "setno",
-        "setb",
-        "setae",
-        "sete",
-        "setne",
-        "setbe",
-        "seta",
-        "sets",
-        "setns",
-        "setp",
-        "setnp",
-        "setl",
-        "setge",
-        "setle",
-        "setg",
-        "sfence",
-        "sgdt",
-        "shld",
-        "shrd",
-        "shufpd",
-        "shufps",
-        "sidt",
-        "sldt",
-        "smsw",
-        "sqrtps",
-        "sqrtpd",
-        "sqrtsd",
-        "sqrtss",
-        "stc",
-        "std",
-        "stgi",
-        "sti",
-        "skinit",
-        "stmxcsr",
-        "stosb",
-        "stosw",
-        "stosd",
-        "stosq",
-        "str",
-        "sub",
-        "subpd",
-        "subps",
-        "subsd",
-        "subss",
-        "swapgs",
-        "syscall",
-        "sysenter",
-        "sysexit",
-        "sysret",
-        "test",
-        "ucomisd",
-        "ucomiss",
-        "ud2",
-        "unpckhpd",
-        "unpckhps",
-        "unpcklps",
-        "unpcklpd",
-        "verr",
-        "verw",
-        "vmcall",
-        "vmclear",
-        "vmxon",
-        "vmptrld",
-        "vmptrst",
-        "vmresume",
-        "vmxoff",
-        "vmrun",
-        "vmmcall",
-        "vmload",
-        "vmsave",
-        "wait",
-        "wbinvd",
-        "wrmsr",
-        "xadd",
-        "xchg",
-        "xlatb",
-        "xor",
-        "xorpd",
-        "xorps",
-        "db",
-        "invalid", });
+    public static List<String> operators_str = Arrays.asList("3dnow", "aaa", "aad", "aam", "aas", "adc", "add", "addpd", "addps", "addsd",
+        "addss", "addsubpd", "addsubps", "and", "andpd", "andps", "andnpd", "andnps", "arpl", "movsxd", "bound", "bsf", "bsr", "bswap",
+        "bt", "btc", "btr", "bts", "call", "cbw", "cwde", "cdqe", "clc", "cld", "clflush", "clgi", "cli", "clts", "cmc", "cmovo", "cmovno",
+        "cmovb", "cmovae", "cmove", "cmovne", "cmovbe", "cmova", "cmovs", "cmovns", "cmovp", "cmovnp", "cmovl", "cmovge", "cmovle", "cmovg",
+        "cmp", "cmppd", "cmpps", "cmpsb", "cmpsw", "cmpsd", "cmpsq", "cmpss", "cmpxchg", "cmpxchg8b", "comisd", "comiss", "cpuid",
+        "cvtdq2pd", "cvtdq2ps", "cvtpd2dq", "cvtpd2pi", "cvtpd2ps", "cvtpi2ps", "cvtpi2pd", "cvtps2dq", "cvtps2pi", "cvtps2pd", "cvtsd2si",
+        "cvtsd2ss", "cvtsi2ss", "cvtss2si", "cvtss2sd", "cvttpd2pi", "cvttpd2dq", "cvttps2dq", "cvttps2pi", "cvttsd2si", "cvtsi2sd",
+        "cvttss2si", "cwd", "cdq", "cqo", "daa", "das", "dec", "div", "divpd", "divps", "divsd", "divss", "emms", "enter", "f2xm1", "fabs",
+        "fadd", "faddp", "fbld", "fbstp", "fchs", "fclex", "fcmovb", "fcmove", "fcmovbe", "fcmovu", "fcmovnb", "fcmovne", "fcmovnbe",
+        "fcmovnu", "fucomi", "fcom", "fcom2", "fcomp3", "fcomi", "fucomip", "fcomip", "fcomp", "fcomp5", "fcompp", "fcos", "fdecstp",
+        "fdiv", "fdivp", "fdivr", "fdivrp", "femms", "ffree", "ffreep", "ficom", "ficomp", "fild", "fincstp", "fninit", "fiadd", "fidivr",
+        "fidiv", "fisub", "fisubr", "fist", "fistp", "fisttp", "fld", "fld1", "fldl2t", "fldl2e", "fldpi", "fldlg2", "fldln2", "fldz",
+        "fldcw", "fldenv", "fmul", "fmulp", "fimul", "fnop", "fpatan", "fprem", "fprem1", "fptan", "frndint", "frstor", "fnsave", "fscale",
+        "fsin", "fsincos", "fsqrt", "fstp", "fstp1", "fstp8", "fstp9", "fst", "fnstcw", "fnstenv", "fnstsw", "fndisi", "fsetpm", "fsub",
+        "fsubp", "fsubr", "fsubrp", "ftst", "fucom", "fucomp", "fucompp", "fxam", "fxch", "fxch4", "fxch7", "fxrstor", "fxsave", "fxtract",
+        "fyl2x", "fyl2xp1", "haddpd", "haddps", "hlt", "hsubpd", "hsubps", "idiv", "in", "imul", "inc", "insb", "insw", "insd", "int1",
+        "int3", "int", "into", "invd", "invlpg", "invlpga", "iretw", "iretd", "iretq", "jo", "jno", "jb", "jae", "je", "jne", "jbe", "ja",
+        "js", "jns", "jp", "jnp", "jl", "jge", "jle", "jg", "jcxz", "jecxz", "jrcxz", "jmp", "lahf", "lar", "lddqu", "ldmxcsr", "lds",
+        "lea", "les", "lfs", "lgs", "lidt", "lss", "leave", "lfence", "lgdt", "lldt", "lmsw", "lock", "lodsb", "lodsw", "lodsd", "lodsq",
+        "loopne", "loope", "loop", "lsl", "ltr", "maskmovq", "maxpd", "maxps", "maxsd", "maxss", "mfence", "minpd", "minps", "minsd",
+        "minss", "monitor", "mov", "movapd", "movaps", "movd", "movddup", "movdqa", "movdqu", "movdq2q", "movhpd", "movhps", "movlhps",
+        "movlpd", "movlps", "movhlps", "movmskpd", "movmskps", "movntdq", "movnti", "movntpd", "movntps", "movntq", "movq", "movq2dq",
+        "movsb", "movsw", "movsd", "movsq", "movsldup", "movshdup", "movss", "movsx", "movupd", "movups", "movzx", "mul", "mulpd", "mulps",
+        "mulsd", "mulss", "mwait", "neg", "nop", "not", "or", "orpd", "orps", "out", "outsb", "outsw", "outsd", "outsq", "packsswb",
+        "packssdw", "packuswb", "paddb", "paddw", "paddq", "paddsb", "paddsw", "paddusb", "paddusw", "pand", "pandn", "pause", "pavgb",
+        "pavgw", "pcmpeqb", "pcmpeqw", "pcmpeqd", "pcmpgtb", "pcmpgtw", "pcmpgtd", "pextrw", "pinsrw", "pmaddwd", "pmaxsw", "pmaxub",
+        "pminsw", "pminub", "pmovmskb", "pmulhuw", "pmulhw", "pmullw", "pmuludq", "pop", "popa", "popad", "popfw", "popfd", "popfq", "por",
+        "prefetch", "prefetchnta", "prefetcht0", "prefetcht1", "prefetcht2", "psadbw", "pshufd", "pshufhw", "pshuflw", "pshufw", "pslldq",
+        "psllw", "pslld", "psllq", "psraw", "psrad", "psrlw", "psrld", "psrlq", "psrldq", "psubb", "psubw", "psubd", "psubq", "psubsb",
+        "psubsw", "psubusb", "psubusw", "punpckhbw", "punpckhwd", "punpckhdq", "punpckhqdq", "punpcklbw", "punpcklwd", "punpckldq",
+        "punpcklqdq", "pi2fw", "pi2fd", "pf2iw", "pf2id", "pfnacc", "pfpnacc", "pfcmpge", "pfmin", "pfrcp", "pfrsqrt", "pfsub", "pfadd",
+        "pfcmpgt", "pfmax", "pfrcpit1", "pfrspit1", "pfsubr", "pfacc", "pfcmpeq", "pfmul", "pfrcpit2", "pmulhrw", "pswapd", "pavgusb",
+        "push", "pusha", "pushad", "pushfw", "pushfd", "pushfq", "pxor", "rcl", "rcr", "rol", "ror", "rcpps", "rcpss", "rdmsr", "rdpmc",
+        "rdtsc", "rdtscp", "repne", "rep", "ret", "retf", "rsm", "rsqrtps", "rsqrtss", "sahf", "sal", "salc", "sar", "shl", "shr", "sbb",
+        "scasb", "scasw", "scasd", "scasq", "seto", "setno", "setb", "setae", "sete", "setne", "setbe", "seta", "sets", "setns", "setp",
+        "setnp", "setl", "setge", "setle", "setg", "sfence", "sgdt", "shld", "shrd", "shufpd", "shufps", "sidt", "sldt", "smsw", "sqrtps",
+        "sqrtpd", "sqrtsd", "sqrtss", "stc", "std", "stgi", "sti", "skinit", "stmxcsr", "stosb", "stosw", "stosd", "stosq", "str", "sub",
+        "subpd", "subps", "subsd", "subss", "swapgs", "syscall", "sysenter", "sysexit", "sysret", "test", "ucomisd", "ucomiss", "ud2",
+        "unpckhpd", "unpckhps", "unpcklps", "unpcklpd", "verr", "verw", "vmcall", "vmclear", "vmxon", "vmptrld", "vmptrst", "vmresume",
+        "vmxoff", "vmrun", "vmmcall", "vmload", "vmsave", "wait", "wbinvd", "wrmsr", "xadd", "xchg", "xlatb", "xor", "xorpd", "xorps", "db",
+        "invalid");
 
-    private ZygoteInstruction[] itab__0f = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_00__REG),
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG),
         new ZygoteInstruction("lar", O_Gv, O_Ew, O_NONE, P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -1534,7 +599,7 @@ public class Table {
         new ZygoteInstruction("paddw", O_P, O_Q, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_00__reg = {
         new ZygoteInstruction("sldt", O_Ev, O_NONE, O_NONE, P_aso | P_oso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("str", O_Ev, O_NONE, O_NONE, P_aso | P_oso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("lldt", O_Ew, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
@@ -1543,7 +608,7 @@ public class Table {
         new ZygoteInstruction("verw", O_Ew, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg = {
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_00__MOD),
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_01__MOD),
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_02__MOD),
@@ -1552,10 +617,10 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("lmsw", O_Ew, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_07__MOD), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod = {
         new ZygoteInstruction("sgdt", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("grp_rm", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_00__MOD__OP_01__RM), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_00__MOD__OP_01__RM__OP_01__VENDOR),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -1564,19 +629,19 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm__op_01__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm__op_01__vendor = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("vmcall", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm__op_03__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm__op_03__vendor = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("vmresume", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm__op_04__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_00__mod__op_01__rm__op_04__vendor = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("vmxoff", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_01__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_01__mod = {
         new ZygoteInstruction("sidt", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("grp_rm", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_01__MOD__OP_01__RM), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_01__mod__op_01__rm = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_01__mod__op_01__rm = {
         new ZygoteInstruction("monitor", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("mwait", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -1585,13 +650,13 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_02__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_02__mod = {
         new ZygoteInstruction("lgdt", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod = {
         new ZygoteInstruction("lidt", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("grp_rm", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_03__MOD__OP_01__RM), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm = {
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_03__MOD__OP_01__RM__OP_00__VENDOR),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_03__MOD__OP_01__RM__OP_01__VENDOR),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_03__MOD__OP_01__RM__OP_02__VENDOR),
@@ -1600,37 +665,37 @@ public class Table {
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_03__MOD__OP_01__RM__OP_05__VENDOR),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_03__MOD__OP_01__RM__OP_06__VENDOR),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_03__MOD__OP_01__RM__OP_07__VENDOR), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_00__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_00__vendor = {
         new ZygoteInstruction("vmrun", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_01__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_01__vendor = {
         new ZygoteInstruction("vmmcall", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_02__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_02__vendor = {
         new ZygoteInstruction("vmload", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_03__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_03__vendor = {
         new ZygoteInstruction("vmsave", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_04__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_04__vendor = {
         new ZygoteInstruction("stgi", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_05__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_05__vendor = {
         new ZygoteInstruction("clgi", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_06__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_06__vendor = {
         new ZygoteInstruction("skinit", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_07__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_03__mod__op_01__rm__op_07__vendor = {
         new ZygoteInstruction("invlpga", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_04__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_04__mod = {
         new ZygoteInstruction("smsw", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_07__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_07__mod = {
         new ZygoteInstruction("invlpg", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("grp_rm", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_07__MOD__OP_01__RM), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_07__mod__op_01__rm = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_07__mod__op_01__rm = {
         new ZygoteInstruction("swapgs", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_01__REG__OP_07__MOD__OP_01__RM__OP_01__VENDOR),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -1639,10 +704,10 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_01__reg__op_07__mod__op_01__rm__op_01__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_01__reg__op_07__mod__op_01__rm__op_01__vendor = {
         new ZygoteInstruction("rdtscp", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_0d__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_0d__reg = {
         new ZygoteInstruction("prefetch", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("prefetch", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("prefetch", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -1651,7 +716,7 @@ public class Table {
         new ZygoteInstruction("prefetch", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("prefetch", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("prefetch", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__0f__op_18__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_18__reg = {
         new ZygoteInstruction("prefetchnta", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("prefetcht0", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("prefetcht1", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -1660,7 +725,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_71__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_71__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psrlw", O_PR, O_Ib, O_NONE, P_none),
@@ -1669,7 +734,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psllw", O_PR, O_Ib, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_72__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_72__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psrld", O_PR, O_Ib, O_NONE, P_none),
@@ -1678,7 +743,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("pslld", O_PR, O_Ib, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_73__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_73__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psrlq", O_PR, O_Ib, O_NONE, P_none),
@@ -1687,10 +752,10 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psllq", O_PR, O_Ib, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_ae__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_AE__MOD__OP_00__REG),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_ae__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__mod__op_00__reg = {
         new ZygoteInstruction("fxsave", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fxrstor", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -1699,7 +764,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_ae__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("ldmxcsr", O_Md, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -1708,10 +773,10 @@ public class Table {
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_AE__REG__OP_05__MOD),
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_AE__REG__OP_06__MOD),
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_AE__REG__OP_07__MOD), };
-    private ZygoteInstruction[] itab__0f__op_ae__reg__op_05__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__reg__op_05__mod = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("grp_rm", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_AE__REG__OP_05__MOD__OP_01__RM), };
-    private ZygoteInstruction[] itab__0f__op_ae__reg__op_05__mod__op_01__rm = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__reg__op_05__mod__op_01__rm = {
         new ZygoteInstruction("lfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("lfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("lfence", O_NONE, O_NONE, O_NONE, P_none),
@@ -1720,10 +785,10 @@ public class Table {
         new ZygoteInstruction("lfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("lfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("lfence", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_ae__reg__op_06__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__reg__op_06__mod = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("grp_rm", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_AE__REG__OP_06__MOD__OP_01__RM), };
-    private ZygoteInstruction[] itab__0f__op_ae__reg__op_06__mod__op_01__rm = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__reg__op_06__mod__op_01__rm = {
         new ZygoteInstruction("mfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("mfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("mfence", O_NONE, O_NONE, O_NONE, P_none),
@@ -1732,10 +797,10 @@ public class Table {
         new ZygoteInstruction("mfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("mfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("mfence", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_ae__reg__op_07__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__reg__op_07__mod = {
         new ZygoteInstruction("clflush", O_M, O_NONE, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("grp_rm", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_AE__REG__OP_07__MOD__OP_01__RM), };
-    private ZygoteInstruction[] itab__0f__op_ae__reg__op_07__mod__op_01__rm = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ae__reg__op_07__mod__op_01__rm = {
         new ZygoteInstruction("sfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("sfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("sfence", O_NONE, O_NONE, O_NONE, P_none),
@@ -1744,7 +809,7 @@ public class Table {
         new ZygoteInstruction("sfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("sfence", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("sfence", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__0f__op_ba__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_ba__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -1753,7 +818,7 @@ public class Table {
         new ZygoteInstruction("bts", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("btr", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("btc", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__0f__op_c7__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_c7__reg = {
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_C7__REG__OP_00__VENDOR),
         new ZygoteInstruction("cmpxchg8b", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -1762,13 +827,13 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__0F__OP_C7__REG__OP_07__VENDOR), };
-    private ZygoteInstruction[] itab__0f__op_c7__reg__op_00__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_c7__reg__op_00__vendor = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("vmptrld", O_Mq, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__0f__op_c7__reg__op_07__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__0f__op_c7__reg__op_07__vendor = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("vmptrst", O_Mq, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte = {
         new ZygoteInstruction("add", O_Eb, O_Gb, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("add", O_Ev, O_Gv, O_NONE, P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("add", O_Gb, O_Eb, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
@@ -2025,27 +1090,27 @@ public class Table {
         new ZygoteInstruction("std", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_FE__REG),
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_FF__REG), };
-    private ZygoteInstruction[] itab__1byte__op_60__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_60__osize = {
         new ZygoteInstruction("pusha", O_NONE, O_NONE, O_NONE, P_inv64 | P_oso),
         new ZygoteInstruction("pushad", O_NONE, O_NONE, O_NONE, P_inv64 | P_oso),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_61__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_61__osize = {
         new ZygoteInstruction("popa", O_NONE, O_NONE, O_NONE, P_inv64 | P_oso),
         new ZygoteInstruction("popad", O_NONE, O_NONE, O_NONE, P_inv64 | P_oso),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_63__mode = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_63__mode = {
         new ZygoteInstruction("arpl", O_Ew, O_Gw, O_NONE, P_inv64 | P_aso),
         new ZygoteInstruction("arpl", O_Ew, O_Gw, O_NONE, P_inv64 | P_aso),
         new ZygoteInstruction("movsxd", O_Gv, O_Ed, O_NONE, P_c2 | P_aso | P_oso | P_rexw | P_rexx | P_rexr | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_6d__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_6d__osize = {
         new ZygoteInstruction("insw", O_NONE, O_NONE, O_NONE, P_oso),
         new ZygoteInstruction("insd", O_NONE, O_NONE, O_NONE, P_oso),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_6f__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_6f__osize = {
         new ZygoteInstruction("outsw", O_NONE, O_NONE, O_NONE, P_oso),
         new ZygoteInstruction("outsd", O_NONE, O_NONE, O_NONE, P_oso),
         new ZygoteInstruction("outsq", O_NONE, O_NONE, O_NONE, P_oso), };
-    private ZygoteInstruction[] itab__1byte__op_80__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_80__reg = {
         new ZygoteInstruction("add", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("or", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("adc", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2054,7 +1119,7 @@ public class Table {
         new ZygoteInstruction("sub", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("xor", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("cmp", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_81__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_81__reg = {
         new ZygoteInstruction("add", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("or", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("adc", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2063,7 +1128,7 @@ public class Table {
         new ZygoteInstruction("sub", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("xor", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("cmp", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_82__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_82__reg = {
         new ZygoteInstruction("add", O_Eb, O_Ib, O_NONE, P_c1 | P_inv64 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("or", O_Eb, O_Ib, O_NONE, P_c1 | P_inv64 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("adc", O_Eb, O_Ib, O_NONE, P_c1 | P_inv64 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2072,7 +1137,7 @@ public class Table {
         new ZygoteInstruction("sub", O_Eb, O_Ib, O_NONE, P_c1 | P_inv64 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("xor", O_Eb, O_Ib, O_NONE, P_c1 | P_inv64 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("cmp", O_Eb, O_Ib, O_NONE, P_c1 | P_inv64 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_83__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_83__reg = {
         new ZygoteInstruction("add", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("or", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("adc", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2081,7 +1146,7 @@ public class Table {
         new ZygoteInstruction("sub", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("xor", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("cmp", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_8f__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_8f__reg = {
         new ZygoteInstruction("pop", O_Ev, O_NONE, O_NONE, P_c1 | P_def64 | P_depM | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -2090,59 +1155,59 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_98__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_98__osize = {
         new ZygoteInstruction("cbw", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("cwde", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("cdqe", O_NONE, O_NONE, O_NONE, P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_99__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_99__osize = {
         new ZygoteInstruction("cwd", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("cdq", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("cqo", O_NONE, O_NONE, O_NONE, P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_9c__mode = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_9c__mode = {
         new ZygoteInstruction("grp_osize", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_9C__MODE__OP_00__OSIZE),
         new ZygoteInstruction("grp_osize", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_9C__MODE__OP_01__OSIZE),
         new ZygoteInstruction("pushfq", O_NONE, O_NONE, O_NONE, P_def64 | P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_9c__mode__op_00__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_9c__mode__op_00__osize = {
         new ZygoteInstruction("pushfw", O_NONE, O_NONE, O_NONE, P_def64 | P_oso),
         new ZygoteInstruction("pushfd", O_NONE, O_NONE, O_NONE, P_def64 | P_oso),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_9c__mode__op_01__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_9c__mode__op_01__osize = {
         new ZygoteInstruction("pushfw", O_NONE, O_NONE, O_NONE, P_def64 | P_oso),
         new ZygoteInstruction("pushfd", O_NONE, O_NONE, O_NONE, P_def64 | P_oso),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_9d__mode = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_9d__mode = {
         new ZygoteInstruction("grp_osize", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_9D__MODE__OP_00__OSIZE),
         new ZygoteInstruction("grp_osize", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_9D__MODE__OP_01__OSIZE),
         new ZygoteInstruction("popfq", O_NONE, O_NONE, O_NONE, P_def64 | P_depM | P_oso), };
-    private ZygoteInstruction[] itab__1byte__op_9d__mode__op_00__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_9d__mode__op_00__osize = {
         new ZygoteInstruction("popfw", O_NONE, O_NONE, O_NONE, P_def64 | P_depM | P_oso),
         new ZygoteInstruction("popfd", O_NONE, O_NONE, O_NONE, P_def64 | P_depM | P_oso),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_9d__mode__op_01__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_9d__mode__op_01__osize = {
         new ZygoteInstruction("popfw", O_NONE, O_NONE, O_NONE, P_def64 | P_depM | P_oso),
         new ZygoteInstruction("popfd", O_NONE, O_NONE, O_NONE, P_def64 | P_depM | P_oso),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_a5__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_a5__osize = {
         new ZygoteInstruction("movsw", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw),
         new ZygoteInstruction("movsd", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw),
         new ZygoteInstruction("movsq", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_a7__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_a7__osize = {
         new ZygoteInstruction("cmpsw", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("cmpsd", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("cmpsq", O_NONE, O_NONE, O_NONE, P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_ab__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_ab__osize = {
         new ZygoteInstruction("stosw", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw),
         new ZygoteInstruction("stosd", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw),
         new ZygoteInstruction("stosq", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_ad__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_ad__osize = {
         new ZygoteInstruction("lodsw", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw),
         new ZygoteInstruction("lodsd", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw),
         new ZygoteInstruction("lodsq", O_NONE, O_NONE, O_NONE, P_ImpAddr | P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_af__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_af__osize = {
         new ZygoteInstruction("scasw", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("scasd", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("scasq", O_NONE, O_NONE, O_NONE, P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_c0__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_c0__reg = {
         new ZygoteInstruction("rol", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ror", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("rcl", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2151,7 +1216,7 @@ public class Table {
         new ZygoteInstruction("shr", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("shl", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("sar", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_c1__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_c1__reg = {
         new ZygoteInstruction("rol", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ror", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("rcl", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2160,7 +1225,7 @@ public class Table {
         new ZygoteInstruction("shr", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("shl", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("sar", O_Ev, O_Ib, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_c6__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_c6__reg = {
         new ZygoteInstruction("mov", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -2169,7 +1234,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_c7__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_c7__reg = {
         new ZygoteInstruction("mov", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -2178,11 +1243,11 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_cf__osize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_cf__osize = {
         new ZygoteInstruction("iretw", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("iretd", O_NONE, O_NONE, O_NONE, P_oso | P_rexw),
         new ZygoteInstruction("iretq", O_NONE, O_NONE, O_NONE, P_oso | P_rexw), };
-    private ZygoteInstruction[] itab__1byte__op_d0__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d0__reg = {
         new ZygoteInstruction("rol", O_Eb, O_I1, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ror", O_Eb, O_I1, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("rcl", O_Eb, O_I1, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2191,7 +1256,7 @@ public class Table {
         new ZygoteInstruction("shr", O_Eb, O_I1, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("shl", O_Eb, O_I1, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("sar", O_Eb, O_I1, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_d1__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d1__reg = {
         new ZygoteInstruction("rol", O_Ev, O_I1, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ror", O_Ev, O_I1, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("rcl", O_Ev, O_I1, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2200,7 +1265,7 @@ public class Table {
         new ZygoteInstruction("shr", O_Ev, O_I1, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("shl", O_Ev, O_I1, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("sar", O_Ev, O_I1, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_d2__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d2__reg = {
         new ZygoteInstruction("rol", O_Eb, O_CL, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ror", O_Eb, O_CL, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("rcl", O_Eb, O_CL, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2209,7 +1274,7 @@ public class Table {
         new ZygoteInstruction("shr", O_Eb, O_CL, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("shl", O_Eb, O_CL, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("sar", O_Eb, O_CL, O_NONE, P_aso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_d3__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d3__reg = {
         new ZygoteInstruction("rol", O_Ev, O_CL, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ror", O_Ev, O_CL, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("rcl", O_Ev, O_CL, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2218,10 +1283,10 @@ public class Table {
         new ZygoteInstruction("shr", O_Ev, O_CL, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("shl", O_Ev, O_CL, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("sar", O_Ev, O_CL, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_d8__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d8__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_D8__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_D8__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_d8__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d8__mod__op_00__reg = {
         new ZygoteInstruction("fadd", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fmul", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fcom", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2230,7 +1295,7 @@ public class Table {
         new ZygoteInstruction("fsubr", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fdiv", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fdivr", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_d8__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d8__mod__op_01__x87 = {
         new ZygoteInstruction("fadd", O_ST0, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fadd", O_ST0, O_ST1, O_NONE, P_none),
         new ZygoteInstruction("fadd", O_ST0, O_ST2, O_NONE, P_none),
@@ -2295,10 +1360,10 @@ public class Table {
         new ZygoteInstruction("fdivr", O_ST0, O_ST5, O_NONE, P_none),
         new ZygoteInstruction("fdivr", O_ST0, O_ST6, O_NONE, P_none),
         new ZygoteInstruction("fdivr", O_ST0, O_ST7, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_d9__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d9__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_D9__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_D9__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_d9__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d9__mod__op_00__reg = {
         new ZygoteInstruction("fld", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("fst", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2307,7 +1372,7 @@ public class Table {
         new ZygoteInstruction("fldcw", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fnstenv", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fnstcw", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_d9__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_d9__mod__op_01__x87 = {
         new ZygoteInstruction("fld", O_ST0, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fld", O_ST0, O_ST1, O_NONE, P_none),
         new ZygoteInstruction("fld", O_ST0, O_ST2, O_NONE, P_none),
@@ -2372,10 +1437,10 @@ public class Table {
         new ZygoteInstruction("fscale", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("fsin", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("fcos", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_da__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_da__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DA__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DA__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_da__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_da__mod__op_00__reg = {
         new ZygoteInstruction("fiadd", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fimul", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ficom", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2384,7 +1449,7 @@ public class Table {
         new ZygoteInstruction("fisubr", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fidiv", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fidivr", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_da__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_da__mod__op_01__x87 = {
         new ZygoteInstruction("fcmovb", O_ST0, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fcmovb", O_ST0, O_ST1, O_NONE, P_none),
         new ZygoteInstruction("fcmovb", O_ST0, O_ST2, O_NONE, P_none),
@@ -2449,10 +1514,10 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_db__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_db__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DB__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DB__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_db__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_db__mod__op_00__reg = {
         new ZygoteInstruction("fild", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fisttp", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fist", O_Md, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2461,7 +1526,7 @@ public class Table {
         new ZygoteInstruction("fld", O_Mt, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("fstp", O_Mt, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_db__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_db__mod__op_01__x87 = {
         new ZygoteInstruction("fcmovnb", O_ST0, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fcmovnb", O_ST0, O_ST1, O_NONE, P_none),
         new ZygoteInstruction("fcmovnb", O_ST0, O_ST2, O_NONE, P_none),
@@ -2526,10 +1591,10 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_dc__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_dc__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DC__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DC__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_dc__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_dc__mod__op_00__reg = {
         new ZygoteInstruction("fadd", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fmul", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fcom", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2538,7 +1603,7 @@ public class Table {
         new ZygoteInstruction("fsubr", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fdiv", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fdivr", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_dc__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_dc__mod__op_01__x87 = {
         new ZygoteInstruction("fadd", O_ST0, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fadd", O_ST1, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fadd", O_ST2, O_ST0, O_NONE, P_none),
@@ -2603,10 +1668,10 @@ public class Table {
         new ZygoteInstruction("fdiv", O_ST5, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fdiv", O_ST6, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fdiv", O_ST7, O_ST0, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_dd__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_dd__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DD__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DD__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_dd__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_dd__mod__op_00__reg = {
         new ZygoteInstruction("fld", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fisttp", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fst", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2615,7 +1680,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("fnsave", O_M, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fnstsw", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_dd__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_dd__mod__op_01__x87 = {
         new ZygoteInstruction("ffree", O_ST0, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("ffree", O_ST1, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("ffree", O_ST2, O_NONE, O_NONE, P_none),
@@ -2680,10 +1745,10 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_de__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_de__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DE__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DE__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_de__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_de__mod__op_00__reg = {
         new ZygoteInstruction("fiadd", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fimul", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("ficom", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2692,7 +1757,7 @@ public class Table {
         new ZygoteInstruction("fisubr", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fidiv", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fidivr", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_de__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_de__mod__op_01__x87 = {
         new ZygoteInstruction("faddp", O_ST0, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("faddp", O_ST1, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("faddp", O_ST2, O_ST0, O_NONE, P_none),
@@ -2757,10 +1822,10 @@ public class Table {
         new ZygoteInstruction("fdivp", O_ST5, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fdivp", O_ST6, O_ST0, O_NONE, P_none),
         new ZygoteInstruction("fdivp", O_ST7, O_ST0, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_df__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_df__mod = {
         new ZygoteInstruction("grp_reg", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DF__MOD__OP_00__REG),
         new ZygoteInstruction("grp_x87", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_DF__MOD__OP_01__X87), };
-    private ZygoteInstruction[] itab__1byte__op_df__mod__op_00__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_df__mod__op_00__reg = {
         new ZygoteInstruction("fild", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fisttp", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fist", O_Mw, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
@@ -2769,7 +1834,7 @@ public class Table {
         new ZygoteInstruction("fild", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fbstp", O_Mt, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("fistp", O_Mq, O_NONE, O_NONE, P_c1 | P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_df__mod__op_01__x87 = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_df__mod__op_01__x87 = {
         new ZygoteInstruction("ffreep", O_ST0, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("ffreep", O_ST1, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("ffreep", O_ST2, O_NONE, O_NONE, P_none),
@@ -2834,11 +1899,11 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_e3__asize = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_e3__asize = {
         new ZygoteInstruction("jcxz", O_Jb, O_NONE, O_NONE, P_aso),
         new ZygoteInstruction("jecxz", O_Jb, O_NONE, O_NONE, P_aso),
         new ZygoteInstruction("jrcxz", O_Jb, O_NONE, O_NONE, P_aso), };
-    private ZygoteInstruction[] itab__1byte__op_f6__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_f6__reg = {
         new ZygoteInstruction("test", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("test", O_Eb, O_Ib, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("not", O_Eb, O_NONE, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2847,7 +1912,7 @@ public class Table {
         new ZygoteInstruction("imul", O_Eb, O_NONE, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("div", O_Eb, O_NONE, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("idiv", O_Eb, O_NONE, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_f7__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_f7__reg = {
         new ZygoteInstruction("test", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("test", O_Ev, O_Iz, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("not", O_Ev, O_NONE, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2856,7 +1921,7 @@ public class Table {
         new ZygoteInstruction("imul", O_Ev, O_NONE, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("div", O_Ev, O_NONE, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("idiv", O_Ev, O_NONE, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__1byte__op_fe__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_fe__reg = {
         new ZygoteInstruction("inc", O_Eb, O_NONE, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("dec", O_Eb, O_NONE, O_NONE, P_c1 | P_aso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -2865,7 +1930,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_ff__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_ff__reg = {
         new ZygoteInstruction("inc", O_Ev, O_NONE, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("dec", O_Ev, O_NONE, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("call", O_Ev, O_NONE, O_NONE, P_c1 | P_def64 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
@@ -2874,10 +1939,10 @@ public class Table {
         new ZygoteInstruction("grp_mod", O_NONE, O_NONE, O_NONE, ITAB__1BYTE__OP_FF__REG__OP_05__MOD),
         new ZygoteInstruction("push", O_Ev, O_NONE, O_NONE, P_c1 | P_def64 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__1byte__op_ff__reg__op_05__mod = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__1byte__op_ff__reg__op_05__mod = {
         new ZygoteInstruction("jmp", O_Ep, O_NONE, O_NONE, P_c1 | P_aso | P_oso | P_rexw | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__3dnow = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__3dnow = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -3134,7 +2199,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__pfx_sse66__0f = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_sse66__0f = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -3391,7 +2456,7 @@ public class Table {
         new ZygoteInstruction("paddw", O_V, O_W, O_NONE, P_aso | P_rexr | P_rexx | P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__pfx_sse66__0f__op_71__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_sse66__0f__op_71__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psrlw", O_VR, O_Ib, O_NONE, P_rexb),
@@ -3400,7 +2465,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psllw", O_VR, O_Ib, O_NONE, P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__pfx_sse66__0f__op_72__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_sse66__0f__op_72__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psrld", O_VR, O_Ib, O_NONE, P_rexb),
@@ -3409,7 +2474,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("pslld", O_VR, O_Ib, O_NONE, P_rexb),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__pfx_sse66__0f__op_73__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_sse66__0f__op_73__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psrlq", O_VR, O_Ib, O_NONE, P_rexb),
@@ -3418,7 +2483,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("psllq", O_VR, O_Ib, O_NONE, P_rexb),
         new ZygoteInstruction("pslldq", O_VR, O_Ib, O_NONE, P_rexb), };
-    private ZygoteInstruction[] itab__pfx_sse66__0f__op_c7__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_sse66__0f__op_c7__reg = {
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__PFX_SSE66__0F__OP_C7__REG__OP_00__VENDOR),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -3427,10 +2492,10 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__pfx_sse66__0f__op_c7__reg__op_00__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_sse66__0f__op_c7__reg__op_00__vendor = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("vmclear", O_Mq, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb), };
-    private ZygoteInstruction[] itab__pfx_ssef2__0f = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_ssef2__0f = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -3687,7 +2752,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__pfx_ssef3__0f = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_ssef3__0f = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -3944,7 +3009,7 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none), };
-    private ZygoteInstruction[] itab__pfx_ssef3__0f__op_c7__reg = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_ssef3__0f__op_c7__reg = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
@@ -3953,12 +3018,12 @@ public class Table {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("grp_vendor", O_NONE, O_NONE, O_NONE, ITAB__PFX_SSEF3__0F__OP_C7__REG__OP_07__VENDOR), };
-    private ZygoteInstruction[] itab__pfx_ssef3__0f__op_c7__reg__op_07__vendor = new ZygoteInstruction[] {
+    private ZygoteInstruction[] itab__pfx_ssef3__0f__op_c7__reg__op_07__vendor = {
         new ZygoteInstruction("invalid", O_NONE, O_NONE, O_NONE, P_none),
         new ZygoteInstruction("vmxon", O_Mq, O_NONE, O_NONE, P_aso | P_rexr | P_rexx | P_rexb), };
 
-// the order of this table matches itab_index 
-    public ZygoteInstruction[][] itab_list = new ZygoteInstruction[][] {
+// the order of this table matches itab_index
+    public ZygoteInstruction[][] itab_list = {
         itab__0f,
         itab__0f__op_00__reg,
         itab__0f__op_01__reg,

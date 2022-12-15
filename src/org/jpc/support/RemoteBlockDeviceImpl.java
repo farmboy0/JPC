@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,10 +33,14 @@
 
 package org.jpc.support;
 
-import java.io.*;
-import java.util.logging.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import static org.jpc.support.RemoteBlockDevice.Protocol;
+import org.jpc.support.RemoteBlockDevice.Protocol;
 
 /**
  * @author Ian Preston
@@ -58,6 +62,7 @@ public class RemoteBlockDeviceImpl implements Runnable {
         new Thread(this).start();
     }
 
+    @Override
     public void run() {
         while (true) {
             try {

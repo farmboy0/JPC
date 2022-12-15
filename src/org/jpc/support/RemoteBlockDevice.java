@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,20 +33,25 @@
 
 package org.jpc.support;
 
-import java.io.*;
-import java.net.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 
 /**
  * @author Ian Preston
  */
 public class RemoteBlockDevice implements BlockDevice {
-    static enum Protocol {
+    enum Protocol {
         READ, WRITE, TOTAL_SECTORS, CYLINDERS, HEADS, SECTORS, TYPE, INSERTED, LOCKED, READ_ONLY, SET_LOCKED, CLOSE;
     }
 
     private DataInputStream in;
     private DataOutputStream out;
 
+    @Override
     public void configure(String spec) throws IOException {
         String server = spec;
         int port = 6666;
@@ -70,6 +75,7 @@ public class RemoteBlockDevice implements BlockDevice {
         this.out = new DataOutputStream(out);
     }
 
+    @Override
     public synchronized void close() {
         try {
             out.write(Protocol.CLOSE.ordinal());
@@ -79,6 +85,7 @@ public class RemoteBlockDevice implements BlockDevice {
         }
     }
 
+    @Override
     public synchronized int read(long sectorNumber, byte[] buffer, int size) {
         try {
             //          System.out.println("trying to read " + sectorNumber);
@@ -101,6 +108,7 @@ public class RemoteBlockDevice implements BlockDevice {
         return -1;
     }
 
+    @Override
     public synchronized int write(long sectorNumber, byte[] buffer, int size) {
         try {
             //          System.out.println("trying to write " + sectorNumber);
@@ -113,54 +121,53 @@ public class RemoteBlockDevice implements BlockDevice {
             if (in.read() != 0)
                 throw new IOException("Write failed");
 
-            int result = in.readInt();
-
-            return result;
+            return in.readInt();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return -1;
     }
 
+    @Override
     public synchronized boolean isInserted() {
         try {
             out.write(Protocol.INSERTED.ordinal());
             out.flush();
 
-            boolean result = in.readBoolean();
-            return result;
+            return in.readBoolean();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    @Override
     public synchronized boolean isLocked() {
         try {
             out.write(Protocol.LOCKED.ordinal());
             out.flush();
 
-            boolean result = in.readBoolean();
-            return result;
+            return in.readBoolean();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    @Override
     public synchronized boolean isReadOnly() {
         try {
             out.write(Protocol.READ_ONLY.ordinal());
             out.flush();
 
-            boolean result = in.readBoolean();
-            return result;
+            return in.readBoolean();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    @Override
     public synchronized void setLock(boolean locked) {
         try {
             out.write(Protocol.SET_LOCKED.ordinal());
@@ -171,58 +178,59 @@ public class RemoteBlockDevice implements BlockDevice {
         }
     }
 
+    @Override
     public synchronized long getTotalSectors() {
         try {
             out.write(Protocol.TOTAL_SECTORS.ordinal());
             out.flush();
 
-            long result = in.readLong();
-            return result;
+            return in.readLong();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return -1;
     }
 
+    @Override
     public synchronized int getCylinders() {
         try {
             out.write(Protocol.CYLINDERS.ordinal());
             out.flush();
 
-            int result = in.readInt();
-            return result;
+            return in.readInt();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return -1;
     }
 
+    @Override
     public synchronized int getHeads() {
         try {
             out.write(Protocol.HEADS.ordinal());
             out.flush();
 
-            int result = in.readInt();
-            return result;
+            return in.readInt();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return -1;
     }
 
+    @Override
     public synchronized int getSectors() {
         try {
             out.write(Protocol.SECTORS.ordinal());
             out.flush();
 
-            int result = in.readInt();
-            return result;
+            return in.readInt();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return -1;
     }
 
+    @Override
     public synchronized Type getType() {
         try {
             out.write(Protocol.TYPE.ordinal());

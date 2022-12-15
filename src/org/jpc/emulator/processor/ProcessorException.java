@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,8 @@
 
 package org.jpc.emulator.processor;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Chris Dennis
@@ -49,7 +50,7 @@ public final class ProcessorException extends RuntimeException {
     public static final ProcessorException ALIGNMENT_CHECK_0 = new ProcessorException(Type.ALIGNMENT_CHECK, 0, true);
     public static final ProcessorException NO_FPU = new ProcessorException(Type.NO_FPU, 0, true);
 
-    public static enum Type {
+    public enum Type {
         DIVIDE_ERROR(0x00), DEBUG(0x01), NMI(0x02), BREAKPOINT(0x03), OVERFLOW(0x04), BOUND_RANGE(0x05), UNDEFINED(0x06), NO_FPU(0x07),
         DOUBLE_FAULT(0x08), FPU_SEGMENT_OVERRUN(0x09), TASK_SWITCH(0x0a), NOT_PRESENT(0x0b), STACK_SEGMENT(0x0c), GENERAL_PROTECTION(0x0d),
         PAGE_FAULT(0x0e), RESERVED(0x0f), FLOATING_POINT(0x10), ALIGNMENT_CHECK(0x11), MACHINE_CHECK(0x12), SIMD_FLOATING_POINT(0x13);
@@ -141,12 +142,13 @@ public final class ProcessorException extends RuntimeException {
                 return false;
             }
         case PAGE_FAULT:
-            return (original.getType() == Type.PAGE_FAULT);
+            return original.getType() == Type.PAGE_FAULT;
         default:
             return false;
         }
     }
 
+    @Override
     public String toString() {
         if (hasErrorCode())
             return "Processor Exception: " + type + " [errorcode:0x" + Integer.toHexString(getErrorCode()) + "]";

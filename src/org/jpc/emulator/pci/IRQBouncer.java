@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -48,5 +48,5 @@ public interface IRQBouncer {
      * @param irqNumber interrupt number to adjust
      * @param level 1 to raise, 0 to lower.
      */
-    public void setIRQ(PCIDevice device, int irqNumber, int level);
+    void setIRQ(PCIDevice device, int irqNumber, int level);
 }

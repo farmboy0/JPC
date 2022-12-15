@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,17 @@
 
 package org.jpc.emulator.pci.peripheral;
 
-import org.jpc.emulator.motherboard.*;
-import org.jpc.support.BlockDevice;
-import org.jpc.emulator.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.util.logging.*;
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.motherboard.IODevice;
+import org.jpc.emulator.motherboard.InterruptController;
+import org.jpc.support.BlockDevice;
 
 /**
  * @author Chris Dennis
@@ -53,6 +58,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
     private int nextDriveSerial;
     public static final String CDLABEL = "CDROM";//"JPC CD-ROM";
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(ioBase);
         output.writeInt(ioBaseTwo);
@@ -70,13 +76,14 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         output.writeInt(currentDeviceIndex);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         ioBase = input.readInt();
         ioBaseTwo = input.readInt();
         irq = input.readInt();
         nextDriveSerial = input.readInt();
-        for (int i = 0; i < devices.length; i++) {
-            devices[i].loadState(input);
+        for (IDEState element : devices) {
+            element.loadState(input);
         }
         int currentDeviceIndex = input.readInt();
         currentDevice = devices[currentDeviceIndex];
@@ -84,36 +91,36 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
 
     private static void shortToBigEndianBytes(byte[] buffer, int offset, short val) {
         buffer[offset + 0] = (byte)(val >> 8);
-        buffer[offset + 1] = (byte)(val);
+        buffer[offset + 1] = (byte)val;
     }
 
     private static void intToBigEndianBytes(byte[] buffer, int offset, int val) {
         buffer[offset + 0] = (byte)(val >> 24);
         buffer[offset + 1] = (byte)(val >> 16);
         buffer[offset + 2] = (byte)(val >> 8);
-        buffer[offset + 3] = (byte)(val);
+        buffer[offset + 3] = (byte)val;
     }
 
     private static int bigEndianBytesToInt(byte[] buffer, int offset) {
         int val = 0;
-        val |= ((buffer[offset + 0] << 24) & 0xff000000);
-        val |= ((buffer[offset + 1] << 16) & 0x00ff0000);
-        val |= ((buffer[offset + 2] << 8) & 0x0000ff00);
-        val |= ((buffer[offset + 3] << 0) & 0x000000ff);
+        val |= buffer[offset + 0] << 24 & 0xff000000;
+        val |= buffer[offset + 1] << 16 & 0x00ff0000;
+        val |= buffer[offset + 2] << 8 & 0x0000ff00;
+        val |= buffer[offset + 3] << 0 & 0x000000ff;
         return val;
     }
 
     private static short bigEndianBytesToShort(byte[] buffer, int offset) {
         short val = 0;
-        val |= ((buffer[offset + 0] << 8) & 0xff00);
-        val |= ((buffer[offset + 1] << 0) & 0x00ff);
+        val |= buffer[offset + 0] << 8 & 0xff00;
+        val |= buffer[offset + 1] << 0 & 0x00ff;
         return val;
     }
 
     private static void lbaToMSF(byte[] buffer, int offset, int lba) {
         lba += 150;
-        buffer[offset + 0] = (byte)((lba / 75) / 60);
-        buffer[offset + 1] = (byte)((lba / 75) % 60);
+        buffer[offset + 0] = (byte)(lba / 75 / 60);
+        buffer[offset + 1] = (byte)(lba / 75 % 60);
         buffer[offset + 2] = (byte)(lba % 75);
     }
 
@@ -126,10 +133,10 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         byte[] temp = text.getBytes();
         int i = 0;
         for (; i < Math.min(temp.length, length); i++) {
-            dest[(start + i) ^ 1] = temp[i];
+            dest[start + i ^ 1] = temp[i];
         }
         for (; i < length; i++) {
-            dest[(start + i) ^ 1] = 0x20;
+            dest[start + i ^ 1] = 0x20;
         }
     }
 
@@ -155,16 +162,16 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         devices[1].setDrive(drives[1]);
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         if (address == ioBaseTwo) {
             writeCommand(data);
-            return;
         } else {
             writeIDE(address, data);
-            return;
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         switch (address - ioBase) {
         case 0:
@@ -178,6 +185,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         switch (address - ioBase) {
         case 0:
@@ -193,6 +201,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public int ioPortRead8(int address) {
         if (address == ioBaseTwo) {
             return readStatus();
@@ -201,16 +210,18 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public int ioPortRead16(int address) {
         switch (address - ioBase) {
         case 0:
         case 1:
             return readDataWord();
         default:
-            return (0xff & ioPortRead8(address)) | (0xff00 & (ioPortRead8(address + 1) << 8));
+            return 0xff & ioPortRead8(address) | 0xff00 & ioPortRead8(address + 1) << 8;
         }
     }
 
+    @Override
     public int ioPortRead32(int address) {
         switch (address - ioBase) {
         case 0:
@@ -219,10 +230,11 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         case 3:
             return readDataLong();
         default:
-            return (0xffff & ioPortRead16(address)) | (0xffff0000 & (ioPortRead16(address + 2) << 16));
+            return 0xffff & ioPortRead16(address) | 0xffff0000 & ioPortRead16(address + 2) << 16;
         }
     }
 
+    @Override
     public int[] ioPortsRequested() {
         if (ioBaseTwo == 0) {
             return new int[] { ioBase, ioBase + 1, ioBase + 2, ioBase + 3, ioBase + 4, ioBase + 5, ioBase + 6, ioBase + 7 };
@@ -233,13 +245,13 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
 
     private void writeCommand(int data) {
         /* common for both drives */
-        if (((devices[0].command & IDEState.IDE_CMD_RESET) == 0) && ((data & IDEState.IDE_CMD_RESET) != 0)) {
+        if ((devices[0].command & IDEState.IDE_CMD_RESET) == 0 && (data & IDEState.IDE_CMD_RESET) != 0) {
             /* reset low to high */
             devices[0].status = (byte)(IDEState.BUSY_STAT | IDEState.SEEK_STAT);
             devices[0].error = 0x01;
             devices[1].status = (byte)(IDEState.BUSY_STAT | IDEState.SEEK_STAT);
             devices[1].error = 0x01;
-        } else if (((devices[0].command & IDEState.IDE_CMD_RESET) != 0) && ((data & IDEState.IDE_CMD_RESET) == 0)) {
+        } else if ((devices[0].command & IDEState.IDE_CMD_RESET) != 0 && (data & IDEState.IDE_CMD_RESET) == 0) {
             /* reset high to low */
             for (int i = 0; i < 2; i++) {
                 if (devices[i].isCDROM) {
@@ -257,8 +269,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
     }
 
     private int readStatus() {
-        if (((devices[0].drive == null) && (devices[1].drive == null))
-            || ((currentDevice != devices[0]) && (currentDevice.drive == null))) {
+        if (devices[0].drive == null && devices[1].drive == null || currentDevice != devices[0] && currentDevice.drive == null) {
             return 0;
         } else {
             return currentDevice.status;
@@ -310,10 +321,10 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             break;
         case 6:
             // FIXME: HOB readback uses bit 7
-            devices[0].select = (byte)((data & ~0x10) | 0xa0);
+            devices[0].select = (byte)(data & ~0x10 | 0xa0);
             devices[1].select = (byte)(data | 0x10 | 0xa0);
             /* select drive */
-            currentDevice = devices[(data >> 4) & 1];
+            currentDevice = devices[data >> 4 & 1];
             break;
         default:
         case 7:
@@ -324,7 +335,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             }
             switch (data) {
             case IDEState.WIN_IDENTIFY:
-                if ((currentDevice.drive != null) && !currentDevice.isCDROM) {
+                if (currentDevice.drive != null && !currentDevice.isCDROM) {
                     currentDevice.identify();
                     currentDevice.status = (byte)(IDEState.READY_STAT | IDEState.SEEK_STAT);
                     currentDevice.transferStart(currentDevice.ioBuffer, 0, 512, IDEState.ETF_TRANSFER_STOP);
@@ -344,7 +355,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                 break;
             case IDEState.WIN_SETMULT:
                 if (currentDevice.nSector > IDEState.MAX_MULT_SECTORS || currentDevice.nSector == 0
-                    || (currentDevice.nSector & (currentDevice.nSector - 1)) != 0) {
+                    || (currentDevice.nSector & currentDevice.nSector - 1) != 0) {
                     currentDevice.abortCommand();
                 } else {
                     currentDevice.multSectors = currentDevice.nSector;
@@ -475,12 +486,12 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                         putLE16InByte(currentDevice.identifyData, 176, 0x3f);
                         break;
                     case 0x04: /* mdma mode */
-                        putLE16InByte(currentDevice.identifyData, 126, 0x07 | (1 << (val + 8)));
+                        putLE16InByte(currentDevice.identifyData, 126, 0x07 | 1 << val + 8);
                         putLE16InByte(currentDevice.identifyData, 176, 0x3f);
                         break;
                     case 0x08: /* udma mode */
                         putLE16InByte(currentDevice.identifyData, 126, 0x07);
-                        putLE16InByte(currentDevice.identifyData, 176, 0x3f | (1 << (val + 8)));
+                        putLE16InByte(currentDevice.identifyData, 176, 0x3f | 1 << val + 8);
                         break;
                     default:
                         currentDevice.abortCommand();
@@ -536,25 +547,19 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                 currentDevice.error = 0x01;
                 break;
             case IDEState.WIN_PACKETCMD:
-                if (!currentDevice.isCDROM) {
-                    currentDevice.abortCommand();
-                    currentDevice.setIRQ();
-                    return;
-                }
                 /* overlapping commands not supported */
-                if ((currentDevice.feature & 0x02) != 0) {
+                if (!currentDevice.isCDROM || ((currentDevice.feature & 0x02) != 0)) {
                     currentDevice.abortCommand();
                     currentDevice.setIRQ();
                     return;
                 }
-                currentDevice.atapiDMA = ((currentDevice.feature & 1) == 1);
+                currentDevice.atapiDMA = (currentDevice.feature & 1) == 1;
                 currentDevice.nSector = 1;
                 currentDevice.transferStart(currentDevice.ioBuffer, 0, IDEState.ATAPI_PACKET_SIZE, IDEState.ETF_ATAPI_COMMAND);
                 break;
             default:
                 currentDevice.abortCommand();
                 currentDevice.setIRQ();
-                return;
             }
 
         }
@@ -615,7 +620,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             }
         default:
         case 7:
-            if ((devices[0].drive == null && devices[1].drive == null) || (currentDevice != devices[0] && currentDevice.drive == null)) {
+            if (devices[0].drive == null && devices[1].drive == null || currentDevice != devices[0] && currentDevice.drive == null) {
                 irqDevice.setIRQ(irq, 0);
                 return 0;
             } else {
@@ -628,7 +633,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
     private int readDataWord() {
         int data = 0;
         data |= 0xff & currentDevice.dataBuffer[currentDevice.dataBufferOffset++];
-        data |= 0xff00 & (currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 8);
+        data |= 0xff00 & currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 8;
 
         if (currentDevice.dataBufferOffset >= currentDevice.dataBufferEnd) {
             currentDevice.endTransfer(currentDevice.endTransferFunction);
@@ -639,9 +644,9 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
     private int readDataLong() {
         int data = 0;
         data |= 0xff & currentDevice.dataBuffer[currentDevice.dataBufferOffset++];
-        data |= 0xff00 & (currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 8);
-        data |= 0xff0000 & (currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 16);
-        data |= 0xff000000 & (currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 24);
+        data |= 0xff00 & currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 8;
+        data |= 0xff0000 & currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 16;
+        data |= 0xff000000 & currentDevice.dataBuffer[currentDevice.dataBufferOffset++] << 24;
 
         if (currentDevice.dataBufferOffset >= currentDevice.dataBufferEnd) {
             currentDevice.endTransfer(currentDevice.endTransferFunction);
@@ -650,7 +655,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
     }
 
     private void writeDataWord(int data) {
-        currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)(data);
+        currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)data;
         currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)(data >> 8);
 
         if (currentDevice.dataBufferOffset >= currentDevice.dataBufferEnd) {
@@ -659,7 +664,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
     }
 
     private void writeDataLong(int data) {
-        currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)(data);
+        currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)data;
         currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)(data >> 8);
         currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)(data >> 16);
         currentDevice.dataBuffer[currentDevice.dataBufferOffset++] = (byte)(data >> 24);
@@ -940,7 +945,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         public static final int GPCMD_READ_HEADER = 0x44;
         public static final int GPCMD_READ_TRACK_RZONE_INFO = 0x52;
         public static final int GPCMD_READ_SUBCHANNEL = 0x42;
-        public static final int GPCMD_READ_TOC_PMA_ATIP = 0x43;;
+        public static final int GPCMD_READ_TOC_PMA_ATIP = 0x43;
         public static final int GPCMD_REPAIR_RZONE_TRACK = 0x58;
         public static final int GPCMD_REPORT_KEY = 0xa4;
         public static final int GPCMD_REQUEST_SENSE = 0x03;
@@ -1071,6 +1076,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             this.drive = drive;
         }
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(cylinders);
             output.writeInt(heads);
@@ -1118,6 +1124,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             output.writeInt(cdSectorSize);
         }
 
+        @Override
         public void loadState(DataInput input) throws IOException {
             cylinders = input.readInt();
             heads = input.readInt();
@@ -1218,7 +1225,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             for (int i = 0; i < 512; i++) {
                 ioBuffer[i] = (byte)0;
             }
-            putLE16InByte(ioBuffer, 0, (2 << 14) | (5 << 8) | (1 << 7) | (2 << 5) | (0 << 0));
+            putLE16InByte(ioBuffer, 0, 2 << 14 | 5 << 8 | 1 << 7 | 2 << 5 | 0 << 0);
             stringToBytes("JPC" + driveSerial, ioBuffer, 20, 20);
             putLE16InByte(ioBuffer, 40, 3); /* XXX: retired, remove ? */
             putLE16InByte(ioBuffer, 42, 512); /* cache size in sectors */
@@ -1226,7 +1233,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             stringToBytes(HD_VERSION, ioBuffer, 46, 8);
             stringToBytes(CDLABEL, ioBuffer, 54, 40);
             putLE16InByte(ioBuffer, 96, 1); /* dword I/O */
-            putLE16InByte(ioBuffer, 98, (1 << 9)); /* DMA and LBA supported */
+            putLE16InByte(ioBuffer, 98, 1 << 9); /* DMA and LBA supported */
             putLE16InByte(ioBuffer, 106, 3); /* words 54-58, 64-70 are valid */
             putLE16InByte(ioBuffer, 126, 0x103);
             putLE16InByte(ioBuffer, 128, 1);
@@ -1245,7 +1252,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         public void setSector(long sectorNumber) {
             if ((select & 0x40) != 0) {
                 if (!lba48) {
-                    select = (byte)((select & 0xf0) | (sectorNumber >>> 24));
+                    select = (byte)(select & 0xf0 | sectorNumber >>> 24);
                     hcyl = (byte)(sectorNumber >>> 16);
                     lcyl = (byte)(sectorNumber >>> 8);
                     sector = (byte)sectorNumber;
@@ -1261,9 +1268,9 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                 int cyl = (int)(sectorNumber / (heads * sectors));
                 int r = (int)(sectorNumber % (heads * sectors));
                 hcyl = (byte)(cyl >>> 8);
-                lcyl = (byte)(cyl);
-                select = (byte)((select & 0xf0) | ((r / sectors) & 0x0f));
-                sector = (byte)((r % sectors) + 1);
+                lcyl = (byte)cyl;
+                select = (byte)(select & 0xf0 | r / sectors & 0x0f);
+                sector = (byte)(r % sectors + 1);
             }
         }
 
@@ -1348,10 +1355,10 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             stringToBytes("Generic 1234", ioBuffer, 54, 40); //TODO revert to "JPC HARDDISK"
             putLE16InByte(ioBuffer, 94, 0x8000 | MAX_MULT_SECTORS);
             putLE16InByte(ioBuffer, 96, 1); /* dword I/O */
-            putLE16InByte(ioBuffer, 98, (1 << 11) | (1 << 9) | (1 << 8)); /* DMA and LBA supported */
+            putLE16InByte(ioBuffer, 98, 1 << 11 | 1 << 9 | 1 << 8); /* DMA and LBA supported */
             putLE16InByte(ioBuffer, 102, 0x200); /* PIO transfer cycle */
             putLE16InByte(ioBuffer, 104, 0x200); /* DMA transfer cycle */
-            putLE16InByte(ioBuffer, 106, 1 | (1 << 1) | (1 << 2)); /* words 54-58, 64-70, 88 are valid */
+            putLE16InByte(ioBuffer, 106, 1 | 1 << 1 | 1 << 2); /* words 54-58, 64-70, 88 are valid */
             putLE16InByte(ioBuffer, 108, cylinders);
             putLE16InByte(ioBuffer, 110, heads);
             putLE16InByte(ioBuffer, 112, sectors);
@@ -1371,15 +1378,15 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             putLE16InByte(ioBuffer, 160, 0xf0); // ata3 -> ata6 supported
             putLE16InByte(ioBuffer, 162, 0x16); // conforms to ata5
             putLE16InByte(ioBuffer, 164, 1 << 14);
-            putLE16InByte(ioBuffer, 166, (1 << 14) | (1 << 13) | (1 << 12));
+            putLE16InByte(ioBuffer, 166, 1 << 14 | 1 << 13 | 1 << 12);
             //putLE16InByte(ioBuffer, 166, (1 << 14) | (1 << 13) | (1 << 12) | (1 << 10));
             putLE16InByte(ioBuffer, 168, 1 << 14);
             putLE16InByte(ioBuffer, 170, 1 << 14);
-            putLE16InByte(ioBuffer, 172, (1 << 14) | (1 << 13) | (1 << 12));
+            putLE16InByte(ioBuffer, 172, 1 << 14 | 1 << 13 | 1 << 12);
             //putLE16InByte(ioBuffer, 172, (1 << 14) | (1 << 13) | (1 << 12) | (1 << 10));
             putLE16InByte(ioBuffer, 174, 1 << 14);
-            putLE16InByte(ioBuffer, 176, 0x3f | (1 << 13));
-            putLE16InByte(ioBuffer, 186, 1 | (1 << 14) | 0x2000);
+            putLE16InByte(ioBuffer, 176, 0x3f | 1 << 13);
+            putLE16InByte(ioBuffer, 186, 1 | 1 << 14 | 0x2000);
             putLE16InByte(ioBuffer, 200, nSector);
             putLE16InByte(ioBuffer, 202, nSector >>> 16);
             putLE16InByte(ioBuffer, 204, /*nSector >>> 32*/ 0);
@@ -1414,12 +1421,12 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                     nSector = 256;
                 }
             } else {
-                if ((nSector == 0) && (hobNSector == 0)) {
+                if (nSector == 0 && hobNSector == 0) {
                     nSector = 65536;
                 } else {
                     int lo = 0xff & nSector;
                     int hi = 0xff & hobNSector;
-                    nSector = (hi << 8) | lo;
+                    nSector = hi << 8 | lo;
                 }
             }
         }
@@ -1427,13 +1434,13 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         private long getSector() {
             if ((select & 0x40) != 0) { /* lba */
                 if (!lba48) {
-                    return ((select & 0x0fl) << 24) | ((0xffl & hcyl) << 16) | ((0xffl & lcyl) << 8) | (0xffl & sector);
+                    return (select & 0x0fL) << 24 | (0xffL & hcyl) << 16 | (0xffL & lcyl) << 8 | 0xffL & sector;
                 } else {
-                    return ((0xffl & hobHCyl) << 40) | ((0xffl & hobLCyl) << 32) | ((0xffl & hobSector) << 24) | ((0xffl & hcyl) << 16)
-                        | ((0xffl & lcyl) << 16) | (0xffl & sector);
+                    return (0xffL & hobHCyl) << 40 | (0xffL & hobLCyl) << 32 | (0xffL & hobSector) << 24 | (0xffL & hcyl) << 16
+                        | (0xffL & lcyl) << 16 | 0xffL & sector;
                 }
             } else {
-                return ((((0xffl & hcyl) << 8) | (0xffl & lcyl)) * heads * sectors) + ((select & 0x0fl) * sectors) + ((0xffl & sector) - 1);
+                return ((0xffL & hcyl) << 8 | 0xffL & lcyl) * heads * sectors + (select & 0x0fL) * sectors + (0xffL & sector) - 1;
             }
         }
 
@@ -1532,7 +1539,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
 
                         ioBuffer[12] = 0x70;
                         ioBuffer[13] = 3 << 5;
-                        ioBuffer[14] = (1 << 0) | (1 << 3) | (1 << 5);
+                        ioBuffer[14] = 1 << 0 | 1 << 3 | 1 << 5;
                         if (drive.isLocked()) {
                             ioBuffer[6] |= 1 << 1;
                         }
@@ -1570,7 +1577,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                 for (int i = 0; i < 18; i++) {
                     ioBuffer[i] = 0;
                 }
-                ioBuffer[0] = (byte)(0x70 | (1 << 7));
+                ioBuffer[0] = (byte)(0x70 | 1 << 7);
                 ioBuffer[2] = senseKey;
                 ioBuffer[7] = 10;
                 ioBuffer[12] = asc;
@@ -1603,7 +1610,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                     atapiCommandOk();
                     break;
                 }
-                if ((((0xffffffffl & lba) + (0xffffffffl & numSectors)) << 2) > drive.getTotalSectors()) {
+                if ((0xffffffffL & lba) + (0xffffffffL & numSectors) << 2 > drive.getTotalSectors()) {
                     atapiCommandError(SENSE_ILLEGAL_REQUEST, ASC_LOGICAL_BLOCK_OOR);
                     break;
                 }
@@ -1615,13 +1622,13 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                     atapiCommandError(SENSE_NOT_READY, ASC_MEDIUM_NOT_PRESENT);
                     break;
                 }
-                int numSectors = ((0xff & ioBuffer[6]) << 16) | ((0xff & ioBuffer[7]) << 8) | (0xff & ioBuffer[8]);
+                int numSectors = (0xff & ioBuffer[6]) << 16 | (0xff & ioBuffer[7]) << 8 | 0xff & ioBuffer[8];
                 int lba = bigEndianBytesToInt(ioBuffer, 2);
                 if (numSectors == 0) {
                     atapiCommandOk();
                     break;
                 }
-                if ((((0xffffffffl & lba) + (0xffffffffl & numSectors)) << 2) > drive.getTotalSectors()) {
+                if ((0xffffffffL & lba) + (0xffffffffL & numSectors) << 2 > drive.getTotalSectors()) {
                     atapiCommandError(SENSE_ILLEGAL_REQUEST, ASC_LOGICAL_BLOCK_OOR);
                     break;
                 }
@@ -1651,7 +1658,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                     break;
                 }
                 int lba = bigEndianBytesToInt(ioBuffer, 2);
-                if (((0xffffffffl & lba) << 2) > drive.getTotalSectors()) {
+                if ((0xffffffffL & lba) << 2 > drive.getTotalSectors()) {
                     atapiCommandError(SENSE_ILLEGAL_REQUEST, ASC_LOGICAL_BLOCK_OOR);
                     break;
                 }
@@ -1659,8 +1666,8 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             }
                 break;
             case GPCMD_START_STOP_UNIT: {
-                boolean start = ((ioBuffer[4] & 1) != 0);
-                boolean eject = ((ioBuffer[4] & 2) != 0);
+                boolean start = (ioBuffer[4] & 1) != 0;
+                boolean eject = (ioBuffer[4] & 2) != 0;
 
                 if (eject && !start) {
                     /* eject the disk */
@@ -1688,7 +1695,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                 }
                 int maxLength = bigEndianBytesToShort(ioBuffer, 7);
                 int format = (0xff & ioBuffer[9]) >>> 6;
-                int msf = (ioBuffer[1] >>> 1) & 1;
+                int msf = ioBuffer[1] >>> 1 & 1;
                 int startTrack = 0xff & ioBuffer[6];
                 switch (format) {
                 case 0:
@@ -1791,14 +1798,14 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         private void atapiCommandOk() {
             error = 0;
             status = READY_STAT;
-            nSector = (nSector & ~7) | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
+            nSector = nSector & ~7 | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
             setIRQ();
         }
 
         private void atapiCommandError(int senseKey, int asc) {
             error = (byte)(this.senseKey << 4);
             status = READY_STAT | ERR_STAT;
-            nSector = (nSector & ~7) | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
+            nSector = nSector & ~7 | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
             this.senseKey = (byte)senseKey;
             this.asc = (byte)asc;
             setIRQ();
@@ -1848,7 +1855,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             if (packetTransferSize <= 0) { //end of transfer
                 transferStop();
                 status = READY_STAT;
-                nSector = (nSector & ~7) | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
+                nSector = nSector & ~7 | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
                 setIRQ();
             } else {
                 /* see if a new sector must be read */
@@ -1865,8 +1872,8 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
                     ioBufferIndex += size;
                 } else {
                     /* a new transfer is needed */
-                    nSector = (nSector & ~7) | ATAPI_INT_REASON_IO;
-                    int byteCountLimit = (0xff & lcyl) | (0xff00 & (hcyl << 8));
+                    nSector = nSector & ~7 | ATAPI_INT_REASON_IO;
+                    int byteCountLimit = 0xff & lcyl | 0xff00 & hcyl << 8;
                     if (byteCountLimit == 0xffff) {
                         byteCountLimit--;
                     }
@@ -1900,10 +1907,10 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             while (size > 0) {
                 if (packetTransferSize <= 0)
                     break;
-                int length = drive.SECTOR_SIZE - ioBufferIndex;
+                int length = BlockDevice.SECTOR_SIZE - ioBufferIndex;
                 if (length <= 0) {
                     ioBufferIndex = 0;
-                    length = drive.SECTOR_SIZE;
+                    length = BlockDevice.SECTOR_SIZE;
                 }
                 if (length > size)
                     length = size;
@@ -1919,7 +1926,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
 
             if (packetTransferSize <= 0) {
                 status = READY_STAT | SEEK_STAT;
-                nSector = (nSector & ~0x7);
+                nSector = nSector & ~0x7;
                 setIRQ();
                 return 0;
             }
@@ -1953,7 +1960,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
 
             if (packetTransferSize <= 0) {
                 status = READY_STAT;
-                nSector = (nSector & ~0x7) | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
+                nSector = nSector & ~0x7 | ATAPI_INT_REASON_IO | ATAPI_INT_REASON_CD;
                 setIRQ();
                 return 0;
             }
@@ -1962,11 +1969,11 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         }
 
         private int cdromReadTOC(int nbSectors, byte[] buffer, int msf, int startTrack) {
-            if ((startTrack > 1) && (startTrack != 0xaa)) {
+            if (startTrack > 1 && startTrack != 0xaa) {
                 return -1;
             }
             int bufferOffset = 2;
-            buffer[bufferOffset++] = 1; // first session 
+            buffer[bufferOffset++] = 1; // first session
             buffer[bufferOffset++] = 1; // last session
 
             if (startTrack <= 1) {
@@ -2004,7 +2011,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
 
         private int cdromReadTOCRaw(int nbSectors, byte[] buffer, int msf, int sessionNumber) {
             int bufferOffset = 2;
-            buffer[bufferOffset++] = 1; // first session 
+            buffer[bufferOffset++] = 1; // first session
             buffer[bufferOffset++] = 1; // last session
 
             buffer[bufferOffset++] = 1; /* session number */
@@ -2077,10 +2084,10 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         private void cdReadSector(int lba, byte[] buffer, int sectorSize) {
             switch (sectorSize) {
             case 2048:
-                drive.read((0xffffffffl & lba) << 2, buffer, 4);
+                drive.read((0xffffffffL & lba) << 2, buffer, 4);
                 break;
             case 2352:
-                drive.read((0xffffffffl & lba) << 2, buffer, 4);
+                drive.read((0xffffffffL & lba) << 2, buffer, 4);
                 System.arraycopy(buffer, 0, buffer, 16, 2048);
 
                 /* sync bytes */
@@ -2102,6 +2109,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public String toString() {
         if (ioBaseTwo == 0) {
             return "IDE Channel @ 0x" + Integer.toHexString(ioBase) + "-0x" + Integer.toHexString(ioBase + 7) + " on irq " + irq;

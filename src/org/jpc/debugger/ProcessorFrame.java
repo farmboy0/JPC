@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,13 +33,20 @@
 
 package org.jpc.debugger;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 
-import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 
-import org.jpc.debugger.util.*;
-import org.jpc.emulator.processor.Processor;
+import org.jpc.debugger.util.BasicTableModel;
+import org.jpc.debugger.util.UtilityFrame;
+import org.jpc.debugger.util.ValidatingTextField;
 
 public class ProcessorFrame extends UtilityFrame implements PCListener {
     private ProcessorAccess access;
@@ -60,9 +67,9 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
         ValidatingTextField binary = new ValidatingTextField("01", '0', 8);
         ValidatingTextField hex = new ValidatingTextField("0123456789abcdefABCDEF", '0', 8);
         binary.setFont(f);
-        binary.setHorizontalAlignment(JLabel.RIGHT);
+        binary.setHorizontalAlignment(SwingConstants.RIGHT);
         hex.setFont(f);
-        hex.setHorizontalAlignment(JLabel.RIGHT);
+        hex.setHorizontalAlignment(SwingConstants.RIGHT);
 
         registerTable.setDefaultEditor(Object.class, new DefaultCellEditor(binary));
         registerTable.getColumnModel().getColumn(5).setCellEditor(new DefaultCellEditor(hex));
@@ -79,10 +86,12 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
         access = (ProcessorAccess)JPC.getObject(ProcessorAccess.class);
     }
 
+    @Override
     public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
 
+    @Override
     public void pcCreated() {
         access = (ProcessorAccess)JPC.getObject(ProcessorAccess.class);
 
@@ -90,19 +99,23 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
         refreshDetails();
     }
 
+    @Override
     public void pcDisposed() {
         access = null;
         model.recreateWrappers();
         refreshDetails();
     }
 
+    @Override
     public void executionStarted() {
     }
 
+    @Override
     public void executionStopped() {
         refreshDetails();
     }
 
+    @Override
     public void refreshDetails() {
         model.fireTableDataChanged();
     }
@@ -167,10 +180,12 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
             registers[23] = new FieldWrapper("IDTR", "idtr");
         }
 
+        @Override
         public int getRowCount() {
             return registers.length;
         }
 
+        @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             if (rowIndex >= 8)
                 return columnIndex > 2;
@@ -179,19 +194,20 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
         }
 
         private String getZeroExtendedBinaryString(int value) {
-            StringBuffer buf = new StringBuffer(Integer.toBinaryString(value));
+            StringBuilder buf = new StringBuilder(Integer.toBinaryString(value));
             while (buf.length() < 8)
                 buf.insert(0, "0");
             return buf.toString();
         }
 
         private String getZeroExtendedHexString(int value) {
-            StringBuffer buf = new StringBuffer(Integer.toHexString(value).toUpperCase());
+            StringBuilder buf = new StringBuilder(Integer.toHexString(value).toUpperCase());
             while (buf.length() < 8)
                 buf.insert(0, "0");
             return buf.toString();
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             int value = registers[row].getValue();
 
@@ -199,13 +215,13 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
             case 0:
                 return registers[row].title;
             case 1:
-                return getZeroExtendedBinaryString((0xFF & (value >> 24)));
+                return getZeroExtendedBinaryString(0xFF & value >> 24);
             case 2:
-                return getZeroExtendedBinaryString((0xFF & (value >> 16)));
+                return getZeroExtendedBinaryString(0xFF & value >> 16);
             case 3:
-                return getZeroExtendedBinaryString((0xFF & (value >> 8)));
+                return getZeroExtendedBinaryString(0xFF & value >> 8);
             case 4:
-                return getZeroExtendedBinaryString((0xFF & (value)));
+                return getZeroExtendedBinaryString(0xFF & value);
             case 5:
                 return getZeroExtendedHexString(value);
             default:
@@ -213,6 +229,7 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
             }
         }
 
+        @Override
         public void setValueAt(Object obj, int row, int column) {
             try {
                 if (column == 5) {
@@ -224,10 +241,10 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
 
                     int shift = 8 * (4 - column);
                     long mask = 0xFF << shift;
-                    current &= (0xFFFFFFFF ^ mask);
+                    current &= 0xFFFFFFFF ^ mask;
                     current |= value << shift;
 
-                    if ((row >= 8) && (row < 14))
+                    if (row >= 8 && row < 14)
                         current = 0xFFFF & current;
 
                     registers[row].setValue((int)current);
@@ -242,6 +259,7 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
     class CellRenderer extends DefaultTableCellRenderer {
         Color bg = new Color(0xFFF0F0);
 
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
             int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -249,12 +267,12 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
 
             setBackground(Color.white);
             setForeground(Color.black);
-            setHorizontalAlignment(JLabel.RIGHT);
+            setHorizontalAlignment(SwingConstants.RIGHT);
 
             if (column == 0) {
                 setBackground(Color.blue);
                 setForeground(Color.white);
-                setHorizontalAlignment(JLabel.CENTER);
+                setHorizontalAlignment(SwingConstants.CENTER);
             } else {
                 if (row < 8)
                     setBackground(bg);
@@ -265,7 +283,7 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
                     setForeground(Color.magenta);
             }
 
-            if ((row >= 8) && (row < 14) && ((column == 1) || (column == 2))) {
+            if (row >= 8 && row < 14 && (column == 1 || column == 2)) {
                 setBackground(Color.lightGray);
                 setForeground(Color.blue);
             } else if (row == 14) {
@@ -275,7 +293,7 @@ public class ProcessorFrame extends UtilityFrame implements PCListener {
                 }
             } else if (row == 15)
                 setBackground(Color.cyan);
-            else if ((row > 15) && (row < 21)) {
+            else if (row > 15 && row < 21) {
                 setBackground(Color.green);
                 setForeground(Color.black);
             } else if (row >= 21) {

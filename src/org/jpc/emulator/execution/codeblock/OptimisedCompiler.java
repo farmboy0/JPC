@@ -36,15 +36,18 @@ public class OptimisedCompiler implements CodeBlockCompiler {
 
     }
 
+    @Override
     public RealModeCodeBlock getRealModeCodeBlock(CodeBlock source) {
         return (RealModeCodeBlock)source;
     }
 
+    @Override
     public ProtectedModeCodeBlock getProtectedModeCodeBlock(CodeBlock block) {
 
         return (ProtectedModeCodeBlock)block;
     }
 
+    @Override
     public Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(CodeBlock block) {
 
         return (Virtual8086ModeCodeBlock)block;

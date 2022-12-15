@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -35,6 +35,7 @@ package org.jpc.emulator.processor;
 
 import java.io.DataOutput;
 import java.io.IOException;
+
 import org.jpc.emulator.memory.AddressSpace;
 
 /**
@@ -68,6 +69,7 @@ public class Virtual8086ModeSegment extends Segment {
         limit = 0xffffffffL & ancestor.getLimit();
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(1);
         output.writeInt(selector);
@@ -78,22 +80,27 @@ public class Virtual8086ModeSegment extends Segment {
         output.writeInt(rpl);
     }
 
+    @Override
     public boolean getDefaultSizeFlag() {
         return false;
     }
 
+    @Override
     public int getLimit() {
         return (int)limit;
     }
 
+    @Override
     public int getBase() {
         return base;
     }
 
+    @Override
     public int getSelector() {
         return selector;
     }
 
+    @Override
     public boolean setSelector(int selector) {
         this.selector = selector;
         base = selector << 4;
@@ -101,45 +108,55 @@ public class Virtual8086ModeSegment extends Segment {
         return true;
     }
 
+    @Override
     public void checkAddress(int offset) {
         if ((0xffffffffL & offset) > limit)
             throw ProcessorException.GENERAL_PROTECTION_0;
     }
 
+    @Override
     public int translateAddressRead(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public int translateAddressWrite(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public int getRPL() {
         return rpl;
     }
 
+    @Override
     public int getType() {
         return type;
     }
 
+    @Override
     public boolean isPresent() {
         return true;
     }
 
+    @Override
     public boolean isSystem() {
         return false;
     }
 
+    @Override
     public int getDPL() {
         return dpl;
     }
 
+    @Override
     public void setRPL(int cpl) {
         rpl = cpl;
     }
 
+    @Override
     public void printState() {
         System.out.println("VM86 Segment");
         System.out.println("selector: " + Integer.toHexString(selector));

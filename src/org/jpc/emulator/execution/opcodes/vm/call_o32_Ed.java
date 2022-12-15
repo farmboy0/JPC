@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,12 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
+import org.jpc.emulator.processor.ProcessorException;
 
 public class call_o32_Ed extends Executable {
     final int op1Index;
@@ -46,10 +47,11 @@ public class call_o32_Ed extends Executable {
         blockLength = eip - blockStart + instructionLength;
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         cpu.eip += blockLength;
-        if ((cpu.r_esp.get32() < 4) && (cpu.r_esp.get32() > 0))
+        if (cpu.r_esp.get32() < 4 && cpu.r_esp.get32() > 0)
             throw ProcessorException.STACK_SEGMENT_0;
         int target = op1.get32();
         cpu.push32(cpu.eip);
@@ -57,10 +59,12 @@ public class call_o32_Ed extends Executable {
         return Branch.Call_Unknown;
     }
 
+    @Override
     public boolean isBranch() {
         return true;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

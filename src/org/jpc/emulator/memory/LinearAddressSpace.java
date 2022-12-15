@@ -27,12 +27,17 @@
 
 package org.jpc.emulator.memory;
 
-import java.io.*;
-import java.util.logging.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jpc.emulator.HardwareComponent;
-import org.jpc.emulator.execution.codeblock.*;
-import org.jpc.emulator.processor.*;
+import org.jpc.emulator.execution.codeblock.SpanningCodeBlock;
+import org.jpc.emulator.execution.codeblock.SpanningDecodeException;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
 
 public final class LinearAddressSpace extends AddressSpace implements HardwareComponent {
     private static final Logger LOGGING = Logger.getLogger(LinearAddressSpace.class.getName());
@@ -68,6 +73,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         tlb = new FastTLB();
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeBoolean(isSupervisor);
         output.writeBoolean(tlb.globalPagesEnabled());
@@ -80,6 +86,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         tlb.saveState(output);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         reset();
         isSupervisor = input.readBoolean();
@@ -227,7 +234,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
 
         lastAddress = offset;
 
-        int directoryAddress = baseAddress | (0xFFC & (offset >>> 20)); // This should be (offset >>> 22) << 2.
+        int directoryAddress = baseAddress | 0xFFC & offset >>> 20; // This should be (offset >>> 22) << 2.
         int directoryRawBits = target.getDoubleWord(directoryAddress);
 
         boolean directoryPresent = (0x1 & directoryRawBits) != 0;
@@ -238,10 +245,10 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
                 return PF_NOT_PRESENT_RU;
         }
 
-        boolean directoryGlobal = tlb.globalPagesEnabled() && ((0x100 & directoryRawBits) != 0);
+        boolean directoryGlobal = tlb.globalPagesEnabled() && (0x100 & directoryRawBits) != 0;
 //        boolean directoryReadWrite = (0x2 & directoryRawBits) != 0;
         boolean directoryUser = (0x4 & directoryRawBits) != 0;
-        boolean directoryIs4MegPage = ((0x80 & directoryRawBits) != 0) && pageSizeExtensions;
+        boolean directoryIs4MegPage = (0x80 & directoryRawBits) != 0 && pageSizeExtensions;
 
         if (directoryIs4MegPage) {
             if (!directoryUser && !isSupervisor)
@@ -255,7 +262,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             int fourMegPageStartAddress = 0xFFC00000 & directoryRawBits;
 
             if (!pageCacheEnabled)
-                return target.getReadMemoryBlockAt(fourMegPageStartAddress | (offset & 0x3FFFFF));
+                return target.getReadMemoryBlockAt(fourMegPageStartAddress | offset & 0x3FFFFF);
 
             int mapAddress = 0xFFC00000 & offset;
             for (int i = 0; i < 1024; i++, fourMegPageStartAddress += BLOCK_SIZE, mapAddress += BLOCK_SIZE) {
@@ -271,11 +278,11 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             return tlb.getReadMemoryBlockAt(isSupervisor, offset);
         } else {
             int directoryBaseAddress = directoryRawBits & 0xFFFFF000;
-//	    boolean directoryPageLevelWriteThrough = (0x8 & directoryRawBits) != 0; 
-//	    boolean directoryPageCacheDisable = (0x10 & directoryRawBits) != 0; 
+//	    boolean directoryPageLevelWriteThrough = (0x8 & directoryRawBits) != 0;
+//	    boolean directoryPageCacheDisable = (0x10 & directoryRawBits) != 0;
 //	    boolean directoryDirty = (0x40 & directoryRawBits) != 0;
 
-            int tableAddress = directoryBaseAddress | ((offset >>> 10) & 0xFFC);
+            int tableAddress = directoryBaseAddress | offset >>> 10 & 0xFFC;
             int tableRawBits = target.getDoubleWord(tableAddress);
 
             boolean tablePresent = (0x1 & tableRawBits) != 0;
@@ -286,7 +293,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
                     return PF_NOT_PRESENT_RU;
             }
 
-            boolean tableGlobal = tlb.globalPagesEnabled() && ((0x100 & tableRawBits) != 0);
+            boolean tableGlobal = tlb.globalPagesEnabled() && (0x100 & tableRawBits) != 0;
 //            boolean tableReadWrite = (0x2 & tableRawBits) != 0;
             boolean tableUser = (0x4 & tableRawBits) != 0;
 
@@ -324,7 +331,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
 
         lastAddress = offset;
 
-        int directoryAddress = baseAddress | (0xFFC & (offset >>> 20)); // This should be (offset >>> 22) << 2.
+        int directoryAddress = baseAddress | 0xFFC & offset >>> 20; // This should be (offset >>> 22) << 2.
         int directoryRawBits = target.getDoubleWord(directoryAddress);
 
         boolean directoryPresent = (0x1 & directoryRawBits) != 0;
@@ -335,10 +342,10 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
                 return PF_NOT_PRESENT_WU;
         }
 
-        boolean directoryGlobal = tlb.globalPagesEnabled() && ((0x100 & directoryRawBits) != 0);
+        boolean directoryGlobal = tlb.globalPagesEnabled() && (0x100 & directoryRawBits) != 0;
         boolean directoryReadWrite = (0x2 & directoryRawBits) != 0;
         boolean directoryUser = (0x4 & directoryRawBits) != 0;
-        boolean directoryIs4MegPage = ((0x80 & directoryRawBits) != 0) && pageSizeExtensions;
+        boolean directoryIs4MegPage = (0x80 & directoryRawBits) != 0 && pageSizeExtensions;
 
         if (directoryIs4MegPage) {
             if (directoryUser) {
@@ -371,7 +378,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             int fourMegPageStartAddress = 0xFFC00000 & directoryRawBits;
 
             if (!pageCacheEnabled)
-                return target.getWriteMemoryBlockAt(fourMegPageStartAddress | (offset & 0x3FFFFF));
+                return target.getWriteMemoryBlockAt(fourMegPageStartAddress | offset & 0x3FFFFF);
 
             int mapAddress = 0xFFC00000 & offset;
             for (int i = 0; i < 1024; i++, fourMegPageStartAddress += BLOCK_SIZE, mapAddress += BLOCK_SIZE) {
@@ -388,11 +395,11 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             return tlb.getWriteMemoryBlockAt(isSupervisor, offset);
         } else {
             int directoryBaseAddress = directoryRawBits & 0xFFFFF000;
-//	    boolean directoryPageLevelWriteThrough = (0x8 & directoryRawBits) != 0; 
-//	    boolean directoryPageCacheDisable = (0x10 & directoryRawBits) != 0; 
+//	    boolean directoryPageLevelWriteThrough = (0x8 & directoryRawBits) != 0;
+//	    boolean directoryPageCacheDisable = (0x10 & directoryRawBits) != 0;
 //	    boolean directoryDirty = (0x40 & directoryRawBits) != 0;
 
-            int tableAddress = directoryBaseAddress | ((offset >>> 10) & 0xFFC);
+            int tableAddress = directoryBaseAddress | offset >>> 10 & 0xFFC;
             int tableRawBits = target.getDoubleWord(tableAddress);
 
             boolean tablePresent = (0x1 & tableRawBits) != 0;
@@ -403,7 +410,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
                     return PF_NOT_PRESENT_WU;
             }
 
-            boolean tableGlobal = tlb.globalPagesEnabled() && ((0x100 & tableRawBits) != 0);
+            boolean tableGlobal = tlb.globalPagesEnabled() && (0x100 & tableRawBits) != 0;
             boolean tableReadWrite = (0x2 & tableRawBits) != 0;
             boolean tableUser = (0x4 & tableRawBits) != 0;
 
@@ -453,10 +460,12 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         }
     }
 
+    @Override
     protected Memory getReadMemoryBlockAt(int offset) {
         return tlb.getReadMemoryBlockAt(isSupervisor, offset);
     }
 
+    @Override
     protected Memory getWriteMemoryBlockAt(int offset) {
         return tlb.getWriteMemoryBlockAt(isSupervisor, offset);
     }
@@ -466,10 +475,12 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
      * @param oldBlock block to be replaced.
      * @param newBlock new block to be added.
      */
+    @Override
     protected void replaceBlocks(Memory oldBlock, Memory newBlock) {
         tlb.replaceBlocks(oldBlock, newBlock);
     }
 
+    @Override
     public byte getByte(int offset) {
         try {
             return getReadMemoryBlockAt(offset).getByte(offset & BLOCK_MASK);
@@ -480,6 +491,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         return validateTLBEntryRead(offset).getByte(offset & BLOCK_MASK);
     }
 
+    @Override
     public short getWord(int offset) {
         try {
             try {
@@ -499,6 +511,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         }
     }
 
+    @Override
     public int getDoubleWord(int offset) {
         try {
             try {
@@ -518,6 +531,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         }
     }
 
+    @Override
     public void setByte(int offset, byte data) {
         try {
             getWriteMemoryBlockAt(offset).setByte(offset & BLOCK_MASK, data);
@@ -529,6 +543,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         validateTLBEntryWrite(offset).setByte(offset & BLOCK_MASK, data);
     }
 
+    @Override
     public void setWord(int offset, short data) {
         try {
             try {
@@ -549,6 +564,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         }
     }
 
+    @Override
     public void setDoubleWord(int offset, int data) {
         try {
             try {
@@ -572,14 +588,17 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
     /**
      * Clears the underlying <code>PhysicalAddressSpace of this object.</code>
      */
+    @Override
     public void clear() {
         target.clear();
     }
 
+    @Override
     public int executeReal(Processor cpu, int offset) {
         throw new IllegalStateException("Cannot execute a Real Mode block in linear memory");
     }
 
+    @Override
     public int executeProtected(Processor cpu, int offset) {
         Memory memory = getReadMemoryBlockAt(offset);
 
@@ -623,6 +642,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         }
     }
 
+    @Override
     public int executeVirtual8086(Processor cpu, int offset) {
         Memory memory = getReadMemoryBlockAt(offset);
 
@@ -670,12 +690,15 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             pageFault = new ProcessorException(ProcessorException.Type.PAGE_FAULT, errorCode, true);
         }
 
+        @Override
         public void lock(int addr) {
         }
 
+        @Override
         public void unlock(int addr) {
         }
 
+        @Override
         public void addSpanningBlock(SpanningCodeBlock span, int lengthRemaining) {
         }
 
@@ -687,113 +710,137 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             pageFault.fillInStackTrace();
         }
 
+        @Override
         public boolean isAllocated() {
             return false;
         }
 
+        @Override
         public void clear() {
         }
 
+        @Override
         public void clear(int start, int length) {
         }
 
+        @Override
         public void copyContentsIntoArray(int address, byte[] buffer, int off, int len) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public void copyArrayIntoContents(int address, byte[] buffer, int off, int len) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public long getSize() {
             return 0;
         }
 
+        @Override
         public byte getByte(int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public short getWord(int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public int getDoubleWord(int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public long getQuadWord(int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public long getLowerDoubleQuadWord(int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public long getUpperDoubleQuadWord(int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public void setByte(int offset, byte data) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public void setWord(int offset, short data) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public void setDoubleWord(int offset, int data) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public void setQuadWord(int offset, long data) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public void setLowerDoubleQuadWord(int offset, long data) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public void setUpperDoubleQuadWord(int offset, long data) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public int executeReal(Processor cpu, int offset) {
             throw new IllegalStateException("Cannot execute a Real Mode block in linear memory");
         }
 
+        @Override
         public int executeProtected(Processor cpu, int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public int executeVirtual8086(Processor cpu, int offset) {
             fill();
             throw pageFault;
         }
 
+        @Override
         public String toString() {
             return "PF " + pageFault;
         }
 
+        @Override
         public void loadInitialContents(int address, byte[] buf, int off, int len) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 
+    @Override
     public void reset() {
         tlb.flush();
 
@@ -805,26 +852,32 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         pageSizeExtensions = false;
     }
 
+    @Override
     public boolean updated() {
         return target.updated();
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
     }
 
+    @Override
     public boolean initialised() {
-        return (target != null);
+        return target != null;
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
         if (component instanceof PhysicalAddressSpace)
             target = (PhysicalAddressSpace)component;
     }
 
+    @Override
     public String toString() {
         return "Linear Pointer Space";
     }
 
+    @Override
     public void loadInitialContents(int address, byte[] buf, int off, int len) {
         throw new UnsupportedOperationException("Not supported yet.");
     }

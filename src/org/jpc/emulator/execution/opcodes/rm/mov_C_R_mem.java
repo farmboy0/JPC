@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
 
 public class mov_C_R_mem extends Executable {
     final int op1Index;
@@ -48,6 +48,7 @@ public class mov_C_R_mem extends Executable {
         blockLength = eip - blockStart + instructionLength;
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
         cpu.eip += blockLength;
@@ -55,10 +56,12 @@ public class mov_C_R_mem extends Executable {
         return Branch.T1;
     }
 
+    @Override
     public boolean isBranch() {
         return true;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

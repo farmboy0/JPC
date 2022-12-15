@@ -1,6 +1,7 @@
 package tools;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Operand {
     String type;
@@ -9,6 +10,7 @@ public abstract class Operand {
         this.type = type;
     }
 
+    @Override
     public String toString() {
         return type;
     }
@@ -71,30 +73,37 @@ public abstract class Operand {
             this.size = size;
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "    final int " + getVal(arg) + ";\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        " + getVal(arg) + " = Processor.getRegIndex(parent.operand[" + (arg - 1) + "].toString());";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        " + getVal(arg) + " = Modrm." + type + "(modrm);";
         }
 
+        @Override
         public String load(int arg) {
             return "        Reg op" + arg + " = cpu.regs[" + getVal(arg) + "];";
         }
 
+        @Override
         public String set(int arg) {
             return "op" + arg + ".set" + getSize() + "(";
         }
 
+        @Override
         public String get(int arg) {
             return "op" + arg + ".get" + getSize() + "()";
         }
@@ -103,18 +112,22 @@ public abstract class Operand {
             return "op" + arg + "Index";
         }
 
+        @Override
         public String get16(int arg) {
             return "op" + arg + ".get16(";
         }
 
+        @Override
         public String get32(int arg) {
             return "op" + arg + ".get32(";
         }
 
+        @Override
         public String set16(int arg) {
             return "op" + arg + ".set16(";
         }
 
+        @Override
         public String set32(int arg) {
             return "op" + arg + ".set32(";
         }
@@ -126,26 +139,32 @@ public abstract class Operand {
             super(name);
         }
 
+        @Override
         public String define(int arg) {
             return "    final int " + getVal(arg) + ";\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        " + getVal(arg) + " = Processor.getCRIndex(parent.operand[" + (arg - 1) + "].toString());";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        " + getVal(arg) + " = Modrm.reg(modrm);";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "cpu.setCR(" + getVal(arg) + ", ";
         }
 
+        @Override
         public String get(int arg) {
             return "cpu.getCR(" + getVal(arg) + ")";
         }
@@ -154,6 +173,7 @@ public abstract class Operand {
             return "op" + arg + "Index";
         }
 
+        @Override
         public int getSize() {
             return 32;
         }
@@ -165,26 +185,32 @@ public abstract class Operand {
             super(name);
         }
 
+        @Override
         public String define(int arg) {
             return "    final int " + getVal(arg) + ";\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        " + getVal(arg) + " = Processor.getDRIndex(parent.operand[" + (arg - 1) + "].toString());";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        " + getVal(arg) + " = Modrm.reg(modrm);";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "cpu.setDR(" + getVal(arg) + ", ";
         }
 
+        @Override
         public String get(int arg) {
             return "cpu.getDR(" + getVal(arg) + ")";
         }
@@ -193,6 +219,7 @@ public abstract class Operand {
             return "op" + arg + "Index";
         }
 
+        @Override
         public int getSize() {
             return 32;
         }
@@ -206,30 +233,37 @@ public abstract class Operand {
             this.num = Integer.parseInt(name.substring(2));
         }
 
+        @Override
         public String define(int arg) {
             return "";
         }
 
+        @Override
         public String construct(int arg) {
             return "";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "cpu.fpu.setST(" + num + ", ";
         }
 
+        @Override
         public String get(int arg) {
             return "cpu.fpu.ST(" + num + ")";
         }
 
+        @Override
         public int getSize() {
             return 64;
         }
@@ -245,30 +279,37 @@ public abstract class Operand {
             this.name = name;
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "";
         }
 
+        @Override
         public String construct(int arg) {
             return "";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return name + ".set" + getSize() + "(";
         }
 
+        @Override
         public String get(int arg) {
             return name + ".get" + getSize() + "()";
         }
@@ -282,28 +323,31 @@ public abstract class Operand {
             this.size = size;
         }
 
+        @Override
         public boolean needsModrm() {
-            if (type.startsWith("E"))
-                return true;
-            if (type.startsWith("M"))
+            if (type.startsWith("E") || type.startsWith("M"))
                 return true;
             if (type.startsWith("O"))
                 return false;
             throw new IllegalStateException("Does Mem type " + type + " need modrm?");
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "    final Pointer op" + arg + ";\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        op" + arg + " = new Pointer(parent.operand[" + (arg - 1) + "], parent.adr_mode);";
         }
 
+        @Override
         public String directConstruct(int arg) {
             if (needsModrm())
                 return "        op" + arg + " = Modrm.getPointer(prefices, modrm, input);";
@@ -311,46 +355,57 @@ public abstract class Operand {
                 return "        op" + arg + " = Modrm." + type + "(prefices, input);";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "op" + arg + ".set" + getSize() + "(cpu, ";
         }
 
+        @Override
         public String get(int arg) {
             return "op" + arg + ".get" + getSize() + "(cpu)";
         }
 
+        @Override
         public String setF(int arg) {
             return "op" + arg + ".setF" + getSize() + "(cpu, ";
         }
 
+        @Override
         public String getF(int arg) {
             return "op" + arg + ".getF" + getSize() + "(cpu)";
         }
 
+        @Override
         public String setA(int arg) {
             return "op" + arg + ".set" + getSize() + "(cpu, ";
         }
 
+        @Override
         public String getA(int arg) {
             return "op" + arg + ".get" + getSize() + "(cpu, ";
         }
 
+        @Override
         public String get16(int arg) {
             return "op" + arg + ".get16(cpu, ";
         }
 
+        @Override
         public String get32(int arg) {
             return "op" + arg + ".get32(cpu, ";
         }
 
+        @Override
         public String set16(int arg) {
             return "op" + arg + ".set16(cpu, ";
         }
 
+        @Override
         public String set32(int arg) {
             return "op" + arg + ".set32(cpu, ";
         }
@@ -363,22 +418,27 @@ public abstract class Operand {
             super(name);
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "    public final int segIndex;\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        segIndex = Processor.getSegmentIndex(parent.operand[" + (arg - 1) + "].toString());";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        segIndex = Modrm.reg(modrm);";
         }
 
+        @Override
         public String load(int arg) {
             if (arg != 1)
                 return "        Segment seg = cpu.segs[segIndex];";
@@ -386,10 +446,12 @@ public abstract class Operand {
                 return "";
         }
 
+        @Override
         public String set(int arg) {
             return "cpu.setSeg(segIndex, ";
         }
 
+        @Override
         public String get(int arg) {
             return "seg.getSelector()";
         }
@@ -404,30 +466,37 @@ public abstract class Operand {
             this.name = name;
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "";
         }
 
+        @Override
         public String construct(int arg) {
             return "";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "cpu." + name + "(";
         }
 
+        @Override
         public String get(int arg) {
             return "cpu." + name + "()";
         }
@@ -438,46 +507,57 @@ public abstract class Operand {
             super(name);
         }
 
+        @Override
         public int getSize() {
             return 0;
         }
 
+        @Override
         public String define(int arg) {
             return "    final Pointer op" + arg + ";\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        op" + arg + " = new Address();//won't work any more delete soon";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        op" + arg + " = Modrm.getPointer(prefices, modrm, input);";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "";
         }
 
+        @Override
         public String get(int arg) {
             return "op" + arg + ".get(cpu)";
         }
 
+        @Override
         public String get16(int arg) {
             return "op" + arg + ".get16(cpu, ";
         }
 
+        @Override
         public String get32(int arg) {
             return "op" + arg + ".get32(cpu, ";
         }
 
+        @Override
         public String set16(int arg) {
             return "op" + arg + ".set16(cpu, ";
         }
 
+        @Override
         public String set32(int arg) {
             return "op" + arg + ".set32(cpu, ";
         }
@@ -493,18 +573,22 @@ public abstract class Operand {
             var = "imm" + name.charAt(name.length() - 1);
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "    final int " + var + ";\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        " + var + " = (" + cast() + ")parent.operand[" + (arg - 1) + "].lval;";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        " + var + " = Modrm." + type + "(input);";
         }
@@ -519,14 +603,17 @@ public abstract class Operand {
             throw new IllegalStateException("Unknown immediate size " + size);
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "";
         }
 
+        @Override
         public String get(int arg) {
             return var;
         }
@@ -540,30 +627,37 @@ public abstract class Operand {
             this.val = val;
         }
 
+        @Override
         public int getSize() {
             return 0;
         }
 
+        @Override
         public String define(int arg) {
             return "";
         }
 
+        @Override
         public String construct(int arg) {
             return "";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "";
         }
 
+        @Override
         public String get(int arg) {
             return "" + val;
         }
@@ -577,18 +671,22 @@ public abstract class Operand {
             this.size = size;
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "    final int jmp;\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        jmp = (" + cast() + ")parent.operand[" + (arg - 1) + "].lval;";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        jmp = Modrm." + type + "(input);";
         }
@@ -603,14 +701,17 @@ public abstract class Operand {
             throw new IllegalStateException("Unknown immediate size " + size);
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "";
         }
 
+        @Override
         public String get(int arg) {
             return "imm";
         }
@@ -621,31 +722,38 @@ public abstract class Operand {
             super(name);
         }
 
+        @Override
         public int getSize() {
             return 0;
         }
 
+        @Override
         public String define(int arg) {
             return "    final int cs, targetEip;\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        targetEip = parent.operand[" + (arg - 1) + "].ptr.off;\n        cs = parent.operand[" + (arg - 1)
                 + "].ptr.seg;";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        targetEip = Modrm.jmpOffset(prefices, input);\n        cs = Modrm.jmpCs(input);";
         }
 
+        @Override
         public String load(int arg) {
             return "";
         }
 
+        @Override
         public String set(int arg) {
             return "op" + arg + ".set" + getSize() + "(cpu, ";
         }
 
+        @Override
         public String get(int arg) {
             return "op" + arg + ".get" + getSize() + "(cpu)";
         }
@@ -659,30 +767,37 @@ public abstract class Operand {
             this.size = size;
         }
 
+        @Override
         public int getSize() {
             return size;
         }
 
+        @Override
         public String define(int arg) {
             return "        final Pointer offset;\n";
         }
 
+        @Override
         public String construct(int arg) {
             return "        offset = new Pointer(parent.operand[" + (arg - 1) + "], parent.adr_mode);";
         }
 
+        @Override
         public String directConstruct(int arg) {
             return "        offset = Modrm.getPointer(prefices, modrm, input);";
         }
 
+        @Override
         public String load(int arg) {
-            return "        int cs = offset.get16(cpu, " + (size / 8) + ");\n        int targetEip = offset.get" + size + "(cpu);";
+            return "        int cs = offset.get16(cpu, " + size / 8 + ");\n        int targetEip = offset.get" + size + "(cpu);";
         }
 
+        @Override
         public String set(int arg) {
             return "";
         }
 
+        @Override
         public String get(int arg) {
             return "";
         }

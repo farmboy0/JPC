@@ -27,7 +27,7 @@
 
 package org.jpc.debugger;
 
-import org.jpc.emulator.processor.*;
+import org.jpc.emulator.processor.Processor;
 
 public abstract class ProcessorAccess {
     public static ProcessorAccess create(boolean timetravel, Processor cpu) {

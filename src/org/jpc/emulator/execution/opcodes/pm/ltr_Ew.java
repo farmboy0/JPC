@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,13 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
+import org.jpc.emulator.processor.ProcessorException;
+import org.jpc.emulator.processor.Segment;
 
 public class ltr_Ew extends Executable {
     final int op1Index;
@@ -42,6 +44,7 @@ public class ltr_Ew extends Executable {
         op1Index = Modrm.Ew(modrm);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         int selector = op1.get16();
@@ -50,13 +53,10 @@ public class ltr_Ew extends Executable {
 
         Segment tempSegment = cpu.getSegment(selector);
 
-        if ((tempSegment.getType() != 0x01) && (tempSegment.getType() != 0x09))
+        if ((tempSegment.getType() != 0x01 && tempSegment.getType() != 0x09) || !tempSegment.isPresent())
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
 
-        if (!(tempSegment.isPresent()))
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
-
-        long descriptor = cpu.readSupervisorQuadWord(cpu.gdtr, (selector & 0xfff8)) | (0x1L << 41); // set busy flag in segment descriptor
+        long descriptor = cpu.readSupervisorQuadWord(cpu.gdtr, selector & 0xfff8) | 0x1L << 41; // set busy flag in segment descriptor
         cpu.setSupervisorQuadWord(cpu.gdtr, selector & 0xfff8, descriptor);
 
         //reload segment
@@ -64,10 +64,12 @@ public class ltr_Ew extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

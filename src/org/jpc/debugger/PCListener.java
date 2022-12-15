@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -34,13 +34,13 @@
 package org.jpc.debugger;
 
 public interface PCListener {
-    public void pcCreated();
+    void pcCreated();
 
-    public void pcDisposed();
+    void pcDisposed();
 
-    public void executionStarted();
+    void executionStarted();
 
-    public void executionStopped();
+    void executionStopped();
 
-    public void refreshDetails();
+    void refreshDetails();
 }

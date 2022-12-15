@@ -27,9 +27,13 @@
 
 package org.jpc.emulator.execution.decoder;
 
-import org.jpc.j2se.Option;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import org.jpc.j2se.Option;
 
 public class Instruction {
     private static Set<String> invalid = new HashSet();
@@ -112,7 +116,7 @@ public class Instruction {
     public long eip;
     ZygoteInstruction zygote;
     public String operator = "invalid";
-    public Operand[] operand = new Operand[0];
+    public Operand[] operand = {};
     public Prefix pfx = new Prefix();
     public int opr_mode, adr_mode;
     String branch_dist;
@@ -122,8 +126,8 @@ public class Instruction {
     }
 
     public String getGeneralClassName(boolean includeOperandSize, boolean includeAddressSize) {
-        StringBuffer b = new StringBuffer();
-        if ((pfx.rep != 0) && reps.contains(operator)) // what happens if a scas has a rep and repne prefix...
+        StringBuilder b = new StringBuilder();
+        if (pfx.rep != 0 && reps.contains(operator)) // what happens if a scas has a rep and repne prefix...
             b.append("rep_");
         if (pfx.repne != 0) {
             if (repnes.contains(operator))
@@ -141,7 +145,7 @@ public class Instruction {
                 b.append("_" + getOperandType(zygote.operand[i], operand[i]));
         boolean mem = false;
         for (Operand o : operand)
-            if ((o.type != null) && o.type.equals("OP_MEM"))
+            if (o.type != null && o.type.equals("OP_MEM"))
                 mem = true;
         if (mem)
             b.append("_mem");
@@ -222,8 +226,9 @@ public class Instruction {
         public int rex, opr, adr, lock, rep, repe, repne, insn;
         public String seg;
 
+        @Override
         public String toString() {
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             if (lock != 0)
                 b.append("lock ");
             if (rep != 0)
@@ -285,6 +290,7 @@ public class Instruction {
             }
         }
 
+        @Override
         public String toString() {
             return toString(false);
         }
@@ -295,7 +301,7 @@ public class Instruction {
             if (type.equals("OP_REG"))
                 return base;
             boolean first = true;
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             //if (cast == 1)
             //    b.append(intel_size(size));
             if (type.equals("OP_MEM")) {
@@ -303,9 +309,9 @@ public class Instruction {
 
                 if (seg != null)
                     b.append(seg + ":");
-                else if ((base == null) && (index == null))
+                else if (base == null && index == null)
                     b.append("ds:");
-                if ((base != null) || (index != null))
+                if (base != null || index != null)
                     b.append("[");
 
                 if (base != null) {
@@ -320,15 +326,15 @@ public class Instruction {
                 }
                 if (scale != 0)
                     b.append("*" + scale);
-                if ((offset == 8) || (offset == 16) || (offset == 32) || (offset == 64)) {
+                if (offset == 8 || offset == 16 || offset == 32 || offset == 64) {
                     if (!pattern) {
-                        if ((lval < 0) && ((base != null) || (index != null)))
+                        if (lval < 0 && (base != null || index != null))
                             b.append("-" + String.format("0x%x", -lval));
                         else {
                             if (!first)
-                                b.append("+" + String.format("0x%x", lval & ((1L << offset) - 1)));
+                                b.append("+" + String.format("0x%x", lval & (1L << offset) - 1));
                             else
-                                b.append(String.format("0x%x", lval & ((1L << offset) - 1)));
+                                b.append(String.format("0x%x", lval & (1L << offset) - 1));
                         }
                     } else {
                         b.append("$");
@@ -337,15 +343,15 @@ public class Instruction {
 
                     }
                 }
-                if ((base != null) || (index != null))
+                if (base != null || index != null)
                     b.append("]");
             } else if (type.equals("OP_IMM")) {
                 if (!pattern) {
                     if (lval < 0) {
                         if (sign_extends.contains(parent.operator)) // these are sign extended
-                            b.append(String.format("0x%x", lval & ((1L << maxSize) - 1)));
+                            b.append(String.format("0x%x", lval & (1L << maxSize) - 1));
                         else
-                            b.append(String.format("0x%x", lval & ((1L << size) - 1)));
+                            b.append(String.format("0x%x", lval & (1L << size) - 1));
                     } else
                         b.append(String.format("0x%x", lval));
                 } else {
@@ -363,11 +369,11 @@ public class Instruction {
                 if (!pattern) {
                     if (Option.debug_blocks.value()) {
                         if (lval < 0)
-                            b.append(String.format("0x%x", (lval) & ((1L << maxSize) - 1)));
+                            b.append(String.format("0x%x", lval & (1L << maxSize) - 1));
                         else
                             b.append(String.format("0x%x", lval));
                     } else if (eip + x86Length + lval < 0)
-                        b.append(String.format("0x%x", (eip + x86Length + lval) & ((1L << maxSize) - 1)));
+                        b.append(String.format("0x%x", eip + x86Length + lval & (1L << maxSize) - 1));
                     else
                         b.append(String.format("0x%x", eip + x86Length + lval));
                 } else {
@@ -413,6 +419,7 @@ public class Instruction {
         return toString(true);
     }
 
+    @Override
     public String toString() {
         return toString(false);
     }
@@ -459,7 +466,7 @@ public class Instruction {
     }
 
     public boolean usesControlReg(int op) {
-        return (zygote.operand[op].name.equals("C")) | operator.startsWith("lmsw");
+        return zygote.operand[op].name.equals("C") | operator.startsWith("lmsw");
     }
 
     public boolean isJcc() {

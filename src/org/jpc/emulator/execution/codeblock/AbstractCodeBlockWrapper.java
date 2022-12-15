@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -52,22 +52,27 @@ public abstract class AbstractCodeBlockWrapper implements CodeBlock {
         actualBlock = target;
     }
 
+    @Override
     public final int getX86Length() {
         return actualBlock.getX86Length();
     }
 
+    @Override
     public final int getX86Count() {
         return actualBlock.getX86Count();
     }
 
+    @Override
     public Executable.Branch execute(Processor cpu) {
         return actualBlock.execute(cpu);
     }
 
+    @Override
     public String getDisplayString() {
         return actualBlock.getDisplayString();
     }
 
+    @Override
     public boolean handleMemoryRegionChange(int startAddress, int endAddress) {
         return actualBlock.handleMemoryRegionChange(startAddress, endAddress);
     }
@@ -88,6 +93,7 @@ public abstract class AbstractCodeBlockWrapper implements CodeBlock {
         return actualBlock;
     }
 
+    @Override
     public Instruction getInstructions() {
         return actualBlock.getInstructions();
     }

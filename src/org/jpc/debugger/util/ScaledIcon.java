@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,11 @@
 
 package org.jpc.debugger.util;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+
 import javax.swing.Icon;
 
 public class ScaledIcon implements Icon {
@@ -51,7 +54,7 @@ public class ScaledIcon implements Icon {
         if (source != null) {
             int w = source.getIconWidth();
             int h = source.getIconHeight();
-            if ((w == 0) || (h == 0))
+            if (w == 0 || h == 0)
                 return;
             scaleX = width * 1.0 / w;
             scaleY = height * 1.0 / h;
@@ -59,16 +62,19 @@ public class ScaledIcon implements Icon {
             height = width = 0;
     }
 
+    @Override
     public int getIconHeight() {
         return height;
     }
 
+    @Override
     public int getIconWidth() {
         return width;
     }
 
+    @Override
     public void paintIcon(Component c, Graphics g, int x, int y) {
-        if ((scaleX == 0) || (scaleY == 0) || (source == null))
+        if (scaleX == 0 || scaleY == 0 || source == null)
             return;
         Graphics2D g2 = (Graphics2D)g;
         AffineTransform original = g2.getTransform();

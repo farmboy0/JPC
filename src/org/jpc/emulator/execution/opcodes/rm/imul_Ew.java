@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
 
 public class imul_Ew extends Executable {
     final int op1Index;
@@ -42,11 +42,12 @@ public class imul_Ew extends Executable {
         op1Index = Modrm.Ew(modrm);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-        int iop1 = (short)op1.get16();
-        int iop2 = (short)cpu.r_eax.get16();
-        int res32 = (((int)(short)iop1) * ((short)iop2));
+        int iop1 = op1.get16();
+        int iop2 = cpu.r_eax.get16();
+        int res32 = (short)iop1 * (short)iop2;
         cpu.r_eax.set16((short)res32);
         cpu.r_edx.set16((short)(res32 >> 16));
         cpu.setOSZAPC_Logic16(res32);
@@ -57,10 +58,12 @@ public class imul_Ew extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

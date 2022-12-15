@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -38,17 +38,17 @@ public interface CodeBlockCompiler {
      * Create a real-mode codeblock from the given instruction source.
      * @param block@return codeblock instance
      */
-    public RealModeCodeBlock getRealModeCodeBlock(CodeBlock block);
+    RealModeCodeBlock getRealModeCodeBlock(CodeBlock block);
 
     /**
      * Create a protected-mode codeblock from the given instruction source.
      * @param block@return codeblock instance
      */
-    public ProtectedModeCodeBlock getProtectedModeCodeBlock(CodeBlock block);
+    ProtectedModeCodeBlock getProtectedModeCodeBlock(CodeBlock block);
 
     /**
      * Create a virtual8086-mode codeblock from the given instruction source.
      * @param block@return codeblock instance
      */
-    public Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(CodeBlock block);
+    Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(CodeBlock block);
 }

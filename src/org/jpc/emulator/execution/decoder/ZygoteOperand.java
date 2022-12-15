@@ -27,7 +27,10 @@
 
 package org.jpc.emulator.execution.decoder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ZygoteOperand {
 
@@ -39,179 +42,95 @@ public class ZygoteOperand {
 
     static {
         GPR.put("T_NONE", null);
-        GPR.put("8",
-            Arrays.asList(new String[] {
-                "al",
-                "cl",
-                "dl",
-                "bl",
-                "ah",
-                "ch",
-                "dh",
-                "bh",
-                "spl",
-                "bpl",
-                "sil",
-                "dil",
-                "r8b",
-                "r9b",
-                "r10b",
-                "r11b",
-                "r12b",
-                "r13b",
-                "r14b",
-                "r15b" }));
-        GPR.put("16", Arrays.asList(
-            new String[] { "ax", "cx", "dx", "bx", "sp", "bp", "si", "di", "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w" }));
-        GPR.put("32",
-            Arrays.asList(new String[] {
-                "eax",
-                "ecx",
-                "edx",
-                "ebx",
-                "esp",
-                "ebp",
-                "esi",
-                "edi",
-                "r8d",
-                "r9d",
-                "r10d",
-                "r11d",
-                "r12d",
-                "r13d",
-                "r14d",
-                "r15d" }));
-        GPR.put("64", Arrays.asList(
-            new String[] { "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15" }));
-        GPR.put("T_SEG", Arrays.asList(new String[] { "es", "cs", "ss", "ds", "fs", "gs" }));
-        GPR.put("T_CRG",
-            Arrays.asList(new String[] {
-                "cr0",
-                "cr1",
-                "cr2",
-                "cr3",
-                "cr4",
-                "cr5",
-                "cr6",
-                "cr7",
-                "cr8",
-                "cr9",
-                "cr10",
-                "cr11",
-                "cr12",
-                "cr13",
-                "cr14",
-                "cr15" }));
-        GPR.put("T_DBG",
-            Arrays.asList(new String[] {
-                "dr0",
-                "dr1",
-                "dr2",
-                "dr3",
-                "dr4",
-                "dr5",
-                "dr6",
-                "dr7",
-                "dr8",
-                "dr9",
-                "dr10",
-                "dr11",
-                "dr12",
-                "dr13",
-                "dr14",
-                "dr15" }));
-        GPR.put("T_MMX", Arrays.asList(new String[] { "mm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7" }));
-        GPR.put("T_ST", Arrays.asList(new String[] { "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7" }));
-        GPR.put("T_XMM",
-            Arrays.asList(new String[] {
-                "xmm0",
-                "xmm1",
-                "xmm2",
-                "xmm3",
-                "xmm4",
-                "xmm5",
-                "xmm6",
-                "xmm7",
-                "xmm8",
-                "xmm9",
-                "xmm10",
-                "xmm11",
-                "xmm12",
-                "xmm13",
-                "xmm14",
-                "xmm15" }));
-        GPR.put("IP", Arrays.asList(new String[] { "rip" }));
-        GPR.put("OP", Arrays.asList(new String[] { "OP_REG", "OP_MEM", "OP_PTR", "OP_IMM", "OP_JIMM", "OP_CONST" }));
+        GPR.put("8", Arrays.asList("al", "cl", "dl", "bl", "ah", "ch", "dh", "bh", "spl", "bpl", "sil", "dil", "r8b", "r9b", "r10b", "r11b",
+            "r12b", "r13b", "r14b", "r15b"));
+        GPR.put("16",
+            Arrays.asList("ax", "cx", "dx", "bx", "sp", "bp", "si", "di", "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w"));
+        GPR.put("32", Arrays.asList("eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi", "r8d", "r9d", "r10d", "r11d", "r12d", "r13d",
+            "r14d", "r15d"));
+        GPR.put("64",
+            Arrays.asList("rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"));
+        GPR.put("T_SEG", Arrays.asList("es", "cs", "ss", "ds", "fs", "gs"));
+        GPR.put("T_CRG", Arrays.asList("cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "cr8", "cr9", "cr10", "cr11", "cr12", "cr13",
+            "cr14", "cr15"));
+        GPR.put("T_DBG", Arrays.asList("dr0", "dr1", "dr2", "dr3", "dr4", "dr5", "dr6", "dr7", "dr8", "dr9", "dr10", "dr11", "dr12", "dr13",
+            "dr14", "dr15"));
+        GPR.put("T_MMX", Arrays.asList("mm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7"));
+        GPR.put("T_ST", Arrays.asList("st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7"));
+        GPR.put("T_XMM", Arrays.asList("xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11",
+            "xmm12", "xmm13", "xmm14", "xmm15"));
+        GPR.put("IP", Arrays.asList("rip"));
+        GPR.put("OP", Arrays.asList("OP_REG", "OP_MEM", "OP_PTR", "OP_IMM", "OP_JIMM", "OP_CONST"));
     }
 
-    public static final int P_none = (0);
-    public static final int P_c1 = (1 << 0);
-    public static final int P_rexb = (1 << 1);
-    public static final int P_depM = (1 << 2);
-    public static final int P_c3 = (1 << 3);
-    public static final int P_inv64 = (1 << 4);
-    public static final int P_rexw = (1 << 5);
-    public static final int P_c2 = (1 << 6);
-    public static final int P_def64 = (1 << 7);
-    public static final int P_rexr = (1 << 8);
-    public static final int P_oso = (1 << 9);
-    public static final int P_aso = (1 << 10);
-    public static final int P_rexx = (1 << 11);
-    public static final int P_ImpAddr = (1 << 12);
+    public static final int P_none = 0;
+    public static final int P_c1 = 1 << 0;
+    public static final int P_rexb = 1 << 1;
+    public static final int P_depM = 1 << 2;
+    public static final int P_c3 = 1 << 3;
+    public static final int P_inv64 = 1 << 4;
+    public static final int P_rexw = 1 << 5;
+    public static final int P_c2 = 1 << 6;
+    public static final int P_def64 = 1 << 7;
+    public static final int P_rexr = 1 << 8;
+    public static final int P_oso = 1 << 9;
+    public static final int P_aso = 1 << 10;
+    public static final int P_rexx = 1 << 11;
+    public static final int P_ImpAddr = 1 << 12;
 
     public static int P_C0(int n) {
-        return (n >> 0) & 1;
+        return n >> 0 & 1;
     }
 
     public static int P_REXB(int n) {
-        return (n >> 1) & 1;
+        return n >> 1 & 1;
     }
 
     public static int P_DEPM(int n) {
-        return (n >> 2) & 1;
+        return n >> 2 & 1;
     }
 
     public static int P_C2(int n) {
-        return (n >> 3) & 1;
+        return n >> 3 & 1;
     }
 
     public static int P_INV64(int n) {
-        return (n >> 4) & 1;
+        return n >> 4 & 1;
     }
 
     public static int P_REXW(int n) {
-        return (n >> 5) & 1;
+        return n >> 5 & 1;
     }
 
     public static int P_C1(int n) {
-        return (n >> 6) & 1;
+        return n >> 6 & 1;
     }
 
     public static int P_DEF64(int n) {
-        return (n >> 7) & 1;
+        return n >> 7 & 1;
     }
 
     public static int P_REXR(int n) {
-        return (n >> 8) & 1;
+        return n >> 8 & 1;
     }
 
     public static int P_OSO(int n) {
-        return (n >> 9) & 1;
+        return n >> 9 & 1;
     }
 
     public static int P_ASO(int n) {
-        return (n >> 10) & 1;
+        return n >> 10 & 1;
     }
 
     public static int P_REXX(int n) {
-        return (n >> 11) & 1;
+        return n >> 11 & 1;
     }
 
     public static int P_IMPADDR(int n) {
-        return (n >> 12) & 1;
+        return n >> 12 & 1;
     }
 
-    // rex prefix bits 
+    // rex prefix bits
     public static int REX_W(int r) {
         return (0xF & r) >> 3;
     }
@@ -229,33 +148,33 @@ public class ZygoteOperand {
     }
 
     public static int REX_PFX_MASK(int n) {
-        return ((P_REXW(n) << 3) | (P_REXR(n) << 2) | (P_REXX(n) << 1) | (P_REXB(n) << 0));
+        return P_REXW(n) << 3 | P_REXR(n) << 2 | P_REXX(n) << 1 | P_REXB(n) << 0;
     }
 
-    // scable-index-base bits 
+    // scable-index-base bits
     public static int SIB_S(int b) {
         return b >> 6;
     }
 
     public static int SIB_I(int b) {
-        return (b >> 3) & 7;
+        return b >> 3 & 7;
     }
 
     public static int SIB_B(int b) {
         return b & 7;
     }
 
-    // modrm bits 
+    // modrm bits
     public static int MODRM_REG(int b) {
-        return (b >> 3) & 7;
+        return b >> 3 & 7;
     }
 
     public static int MODRM_NNN(int b) {
-        return (b >> 3) & 7;
+        return b >> 3 & 7;
     }
 
     public static int MODRM_MOD(int b) {
-        return (b >> 6) & 3;
+        return b >> 6 & 3;
     }
 
     public static int MODRM_RM(int b) {
@@ -356,7 +275,7 @@ public class ZygoteOperand {
     public static final int OP_VR = 80;
     public static final int OP_PR = 81;
 
-    // operand size constants 
+    // operand size constants
     public static final int SZ_NA = 0;
     public static final int SZ_Z = 1;
     public static final int SZ_V = 2;

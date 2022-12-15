@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,22 @@
 
 package org.jpc.j2se;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import javax.swing.*;
-import javax.swing.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * @author Rhys Newman
@@ -51,7 +62,7 @@ public class KeyTypingPanel extends JPanel {
 
         JPanel p1 = new JPanel(new GridLayout(1, 0, 10, 10));
 
-        KeyPress[] l1 = new KeyPress[] {
+        KeyPress[] l1 = {
             new KeyPress(" : ", KeyEvent.VK_SEMICOLON, true),
             new KeyPress(" \\ ", KeyEvent.VK_BACK_SLASH),
             new KeyPress(" / ", KeyEvent.VK_SLASH),
@@ -68,7 +79,7 @@ public class KeyTypingPanel extends JPanel {
 
         p1.add(new KeyPanel("Miscellaneous Keys", l1));
 
-        KeyPress[] l2 = new KeyPress[] {
+        KeyPress[] l2 = {
             new KeyPress(" F1 ", KeyEvent.VK_F1),
             new KeyPress(" F2 ", KeyEvent.VK_F2),
             new KeyPress(" F3 ", KeyEvent.VK_F3),
@@ -114,6 +125,7 @@ public class KeyTypingPanel extends JPanel {
             type.addActionListener(this);
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             KeyPress kp = (KeyPress)choices.getSelectedItem();
             if (kp != null)
@@ -147,6 +159,7 @@ public class KeyTypingPanel extends JPanel {
                 monitor.keyReleased(KeyEvent.VK_SHIFT);
         }
 
+        @Override
         public String toString() {
             return display;
         }
@@ -166,6 +179,7 @@ public class KeyTypingPanel extends JPanel {
             add("Center", slider);
         }
 
+        @Override
         public void stateChanged(ChangeEvent e) {
             double val = 1.0 * slider.getValue() / 50.0;
             if (monitor != null)

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -37,10 +37,17 @@
  */
 package org.jpc.j2se;
 
-import java.io.*;
-import java.lang.management.*;
-import java.util.*;
-import java.util.logging.*;
+import java.io.IOException;
+import java.lang.management.ClassLoadingMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Chris Dennis
@@ -75,6 +82,7 @@ public class JPCStatisticsMonitor extends TimerTask {
         }
     }
 
+    @Override
     public void run() {
         List params = new ArrayList();
         StringBuilder line = new StringBuilder();

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,13 @@
 
 package org.jpc.emulator.pci.peripheral;
 
-import org.jpc.emulator.Hibernatable;
-import org.jpc.emulator.pci.IOPortIORegion;
-import org.jpc.emulator.memory.Memory;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-import java.io.*;
+import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.memory.Memory;
+import org.jpc.emulator.pci.IOPortIORegion;
 
 /**
  * @author Chris Dennis
@@ -67,6 +69,7 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         this.next = next;
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(baseAddress);
         output.writeLong(size);
@@ -78,6 +81,7 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
             ideDevice.saveState(output);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         baseAddress = input.readInt();
         size = input.readLong();
@@ -108,14 +112,17 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         status |= BM_STATUS_INT;
     }
 
+    @Override
     public int getAddress() {
         return baseAddress;
     }
 
+    @Override
     public long getSize() {
         return 0x10;
     }
 
+    @Override
     public int getType() {
         return PCI_ADDRESS_SPACE_IO;
     }
@@ -124,6 +131,7 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         return status;
     }
 
+    @Override
     public int getRegionNumber() {
         return 4;
     }
@@ -136,14 +144,16 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         return command;
     }
 
+    @Override
     public void setAddress(int address) {
         this.baseAddress = address;
         if (next != null)
             next.setAddress(address + 8);
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
-        if ((address - this.baseAddress) > 7)
+        if (address - this.baseAddress > 7)
             next.ioPortWrite8(address, data);
         switch (address - this.baseAddress) {
         case 0:
@@ -156,13 +166,15 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         this.ioPortWrite8(address, 0xff & data);
-        this.ioPortWrite8(address + 1, 0xff & (data >>> 8));
+        this.ioPortWrite8(address + 1, 0xff & data >>> 8);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
-        if ((address - this.baseAddress) > 7)
+        if (address - this.baseAddress > 7)
             next.ioPortWrite32(address, data);
         switch (address - this.baseAddress) {
         case 4:
@@ -177,8 +189,9 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         }
     }
 
+    @Override
     public int ioPortRead8(int address) {
-        if ((address - this.baseAddress) > 7)
+        if (address - this.baseAddress > 7)
             return next.ioPortRead8(address);
         switch (address - this.baseAddress) {
         case 0:
@@ -190,12 +203,14 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         }
     }
 
+    @Override
     public int ioPortRead16(int address) {
-        return (ioPortRead8(address) & 0xff) | (0xff00 & (ioPortRead8(address + 1) << 8));
+        return ioPortRead8(address) & 0xff | 0xff00 & ioPortRead8(address + 1) << 8;
     }
 
+    @Override
     public int ioPortRead32(int address) {
-        if ((address - this.baseAddress) > 7)
+        if (address - this.baseAddress > 7)
             return next.ioPortRead32(address);
         switch (address - this.baseAddress) {
         case 4:
@@ -204,10 +219,11 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         case 7:
             return this.address;
         default:
-            return (ioPortRead16(address) & 0xffff) | (0xffff0000 & (ioPortRead16(address + 1) << 8));
+            return ioPortRead16(address) & 0xffff | 0xffff0000 & ioPortRead16(address + 1) << 8;
         }
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] {
             baseAddress,
@@ -239,7 +255,7 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
     }
 
     private void writeStatus(int data) {
-        status = (byte)((data & 0x60) | (status & 1) | (status & ~data & 0x06));
+        status = (byte)(data & 0x60 | status & 1 | status & ~data & 0x06);
     }
 
     private void writeAddress(int data) {

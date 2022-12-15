@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -34,6 +34,7 @@
 package org.jpc.debugger.util;
 
 import java.io.File;
+
 import javax.swing.filechooser.FileFilter;
 
 public class FileExtensionFilter extends FileFilter {
@@ -53,6 +54,7 @@ public class FileExtensionFilter extends FileFilter {
         this.caseSensitive = caseSensitive;
     }
 
+    @Override
     public boolean accept(File f) {
         if (f.isDirectory())
             return acceptDirectories;
@@ -64,6 +66,7 @@ public class FileExtensionFilter extends FileFilter {
             return name.endsWith(extension);
     }
 
+    @Override
     public String getDescription() {
         return description;
     }

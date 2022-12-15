@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,18 +33,37 @@
 
 package org.jpc.debugger;
 
-import java.lang.reflect.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.logging.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+import javax.swing.AbstractSpinnerModel;
+import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.JTextComponent;
 
-import org.jpc.debugger.util.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.memory.*;
+import org.jpc.debugger.util.UtilityFrame;
+import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.memory.Memory;
+import org.jpc.emulator.memory.PhysicalAddressSpace;
+import org.jpc.emulator.processor.Processor;
 
 public class MemoryViewer extends UtilityFrame implements PCListener {
     private static final Logger LOGGING = Logger.getLogger(MemoryViewer.class.getName());
@@ -88,6 +107,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
         JPC.getInstance().refresh();
     }
 
+    @Override
     public void frameClosed() {
         JPC.getInstance().objects().removeObject(this);
     }
@@ -100,12 +120,14 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
         return new MemoryViewPanel();
     }
 
+    @Override
     public void pcCreated() {
         processor = (Processor)JPC.getObject(Processor.class);
         access = (ProcessorAccess)JPC.getObject(ProcessorAccess.class);
         refreshDetails();
     }
 
+    @Override
     public void pcDisposed() {
         processor = null;
         memory = null;
@@ -113,9 +135,11 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
         refreshDetails();
     }
 
+    @Override
     public void executionStarted() {
     }
 
+    @Override
     public void executionStopped() {
         refreshDetails();
     }
@@ -128,20 +152,24 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
             ceiling = max;
         }
 
+        @Override
         public Object getNextValue() {
             value = Math.min(value + 1, ceiling);
             return getValue();
         }
 
+        @Override
         public Object getPreviousValue() {
             value = Math.max(0, value - 1);
             return getValue();
         }
 
+        @Override
         public Object getValue() {
             return Long.toHexString(value).toUpperCase();
         }
 
+        @Override
         public void setValue(Object val) {
             try {
                 value = Long.parseLong(val.toString().toLowerCase().trim(), 16);
@@ -182,7 +210,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
 
         void refresh() {
             text.setColumns(textCols);
-            StringBuffer buffer = new StringBuffer(textCols * textRows + textRows + 100);
+            StringBuilder buffer = new StringBuilder(textCols * textRows + textRows + 100);
 
             if (memory != null) {
                 for (int i = 0; i < textRows; i++) {
@@ -253,6 +281,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
             return model.value;
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             try {
                 int rows = Integer.parseInt(textRows.getText().trim());
@@ -271,6 +300,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
             refresh();
         }
 
+        @Override
         public void stateChanged(ChangeEvent e) {
             memoryView.setCurrentAddress(memory, (int)getMemoryOffset());
             asciiView.setAddressOffset((int)getMemoryOffset());
@@ -297,6 +327,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
         return access.getValue(name + "L", 0);
     }
 
+    @Override
     public void refreshDetails() {
         controllable.refresh();
 
@@ -311,7 +342,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
     private static final Method getMemoryBlock;
     static {
         try {
-            getMemoryBlock = AddressSpace.class.getDeclaredMethod("getReadMemoryBlockAt", new Class[] { int.class });
+            getMemoryBlock = AddressSpace.class.getDeclaredMethod("getReadMemoryBlockAt", int.class);
             getMemoryBlock.setAccessible(true);
         } catch (NoSuchMethodException e) {
             LOGGING.log(Level.SEVERE, "method does not exist", e);
@@ -321,7 +352,7 @@ public class MemoryViewer extends UtilityFrame implements PCListener {
 
     public static Memory getReadMemoryBlockAt(AddressSpace addr, int offset) {
         try {
-            return (Memory)getMemoryBlock.invoke(addr, new Object[] { Integer.valueOf(offset) });
+            return (Memory)getMemoryBlock.invoke(addr, Integer.valueOf(offset));
         } catch (InvocationTargetException e) {
             LOGGING.log(Level.WARNING, "failed to get memory block", e);
             return null;

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -40,7 +40,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
+
 import org.jpc.j2se.PCMonitor;
 
 /**
@@ -72,12 +74,14 @@ public final class DefaultVGACard extends VGACard {
         return ymax;
     }
 
+    @Override
     protected int rgbToPixel(int red, int green, int blue) {
-        return ((0xFF & red) << 16) | ((0xFF & green) << 8) | (0xFF & blue);
+        return (0xFF & red) << 16 | (0xFF & green) << 8 | 0xFF & blue;
     }
 
+    @Override
     public void resizeDisplay(int width, int height) {
-        if ((width == 0) || (height == 0))
+        if (width == 0 || height == 0)
             return;
         this.width = width;
         this.height = height;
@@ -89,6 +93,7 @@ public final class DefaultVGACard extends VGACard {
         monitor.resizeDisplay(width, height);
     }
 
+    @Override
     public void saveScreenshot() {
         File out = new File("Screenshot.png");
         try {
@@ -98,18 +103,22 @@ public final class DefaultVGACard extends VGACard {
         }
     }
 
+    @Override
     public void setMonitor(PCMonitor mon) {
         this.monitor = mon;
     }
 
+    @Override
     public Dimension getDisplaySize() {
         return new Dimension(width, height);
     }
 
+    @Override
     public int[] getDisplayBuffer() {
         return rawImageData;
     }
 
+    @Override
     protected void dirtyDisplayRegion(int x, int y, int w, int h) {
         xmin = Math.min(x, xmin);
         xmax = Math.max(x + w, xmax);
@@ -124,7 +133,7 @@ public final class DefaultVGACard extends VGACard {
         g.drawImage(buffer, 0, 0, s.width, s.height, 0, 0, width, height, null);
     }
 
-    public final void prepareUpdate() {
+    public void prepareUpdate() {
         xmin = width;
         xmax = 0;
         ymin = height;

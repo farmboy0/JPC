@@ -1,8 +1,17 @@
 package tools;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SourceConverter {
 
@@ -10,7 +19,7 @@ public class SourceConverter {
         String outputDir = ".";
         String outputPackage = "org.jpc.emulator.peripheral";
         String inputFile = "/home/ian/jpc/bochs/bochs-2.6.1/iodev/floppy.cc";
-        String[] inputHeader = new String[] { "/home/ian/jpc/bochs/bochs-2.6.1/iodev/floppy.h", "floppy_include.txt" };
+        String[] inputHeader = { "/home/ian/jpc/bochs/bochs-2.6.1/iodev/floppy.h", "floppy_include.txt" };
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-output")) {
                 outputDir = args[i + 1];
@@ -72,9 +81,9 @@ public class SourceConverter {
         return reg;
     }
 
-    private static String[] complex_types = new String[] { "floppy_t", "floppy_type_t" };
-    private static String[] primitives = new String[] { "int" };
-    private static String[] functionsToDelete = new String[] {
+    private static String[] complex_types = { "floppy_t", "floppy_type_t" };
+    private static String[] primitives = { "int" };
+    private static String[] functionsToDelete = {
         "int libfloppy_LTX_plugin_init",
         "void libfloppy_LTX_plugin_fini",
         "bx_floppy_ctrl_c",

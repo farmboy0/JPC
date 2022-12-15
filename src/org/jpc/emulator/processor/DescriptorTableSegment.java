@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,8 @@
 
 package org.jpc.emulator.processor;
 
-import java.io.*;
+import java.io.DataOutput;
+import java.io.IOException;
 
 import org.jpc.emulator.memory.AddressSpace;
 
@@ -50,28 +51,34 @@ class DescriptorTableSegment extends Segment {
         this.limit = 0xffffffffL & limit;
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(2);
         output.writeInt(base);
         output.writeInt((int)limit);
     }
 
+    @Override
     public int getLimit() {
         return (int)limit;
     }
 
+    @Override
     public int getBase() {
         return base;
     }
 
+    @Override
     public int getSelector() {
         throw new IllegalStateException("No selector for a descriptor table segment");
     }
 
+    @Override
     public boolean setSelector(int selector) {
         throw new IllegalStateException("Cannot set a selector for a descriptor table segment");
     }
 
+    @Override
     public void checkAddress(int offset) {
         if ((0xffffffffL & offset) > limit) {
             System.out.println("Offset beyond end of Descriptor Table Segment: Offset=" + Integer.toHexString(offset) + ", limit="
@@ -80,44 +87,54 @@ class DescriptorTableSegment extends Segment {
         }
     }
 
+    @Override
     public int translateAddressRead(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public int translateAddressWrite(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public int getDPL() {
         throw new IllegalStateException(getClass().toString());
     }
 
+    @Override
     public int getRPL() {
         throw new IllegalStateException(getClass().toString());
     }
 
+    @Override
     public void setRPL(int cpl) {
         throw new IllegalStateException(getClass().toString());
     }
 
+    @Override
     public boolean getDefaultSizeFlag() {
         throw new IllegalStateException(getClass().toString());
     }
 
+    @Override
     public int getType() {
         throw new IllegalStateException(getClass().toString());
     }
 
+    @Override
     public boolean isPresent() {
         return true;
     }
 
+    @Override
     public boolean isSystem() {
         return true;
     }
 
+    @Override
     public void printState() {
         System.out.println("Descriptor Table Segment");
         System.out.print("base: " + Integer.toHexString(base));

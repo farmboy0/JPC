@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,21 @@
 
 package org.jpc.debugger;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 
-import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
-import org.jpc.debugger.util.*;
+import org.jpc.debugger.util.BasicTableModel;
+import org.jpc.debugger.util.ValidatingTextField;
 import org.jpc.emulator.memory.AddressSpace;
 
 public class MemoryViewPanel extends JPanel {
@@ -69,7 +78,7 @@ public class MemoryViewPanel extends JPanel {
         memoryBlockTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
         ValidatingTextField hex = new ValidatingTextField("0123456789abcdefABCDEF", '0', 8);
-        hex.setHorizontalAlignment(JLabel.LEFT);
+        hex.setHorizontalAlignment(SwingConstants.LEFT);
         hex.setFont(f);
 
         memoryBlockTable.setDefaultRenderer(Object.class, new CellRenderer());
@@ -98,7 +107,7 @@ public class MemoryViewPanel extends JPanel {
     }
 
     protected Object formatMemoryDisplay(int address) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i = 0; i < 4; i++) {
             int val = memory.getByte(address + i);
             buf.append(zeroPadHex(0xFF & val, 2));
@@ -108,7 +117,7 @@ public class MemoryViewPanel extends JPanel {
     }
 
     protected Object formatAsciiDisplay(int address) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < 16; i++) {
             byte b = memory.getByte(address + i);
             buffer.append(getASCII(b));
@@ -122,10 +131,12 @@ public class MemoryViewPanel extends JPanel {
             super(new String[] { "Absolute Address", "0-3", "4-7", "8-B", "C-F", "ASCII" }, new int[] { 100, 80, 80, 80, 80, 140 });
         }
 
+        @Override
         public int getRowCount() {
             return tableSize / 16;
         }
 
+        @Override
         public Object getValueAt(int row, int column) {
             if (memory == null)
                 return null;
@@ -145,10 +156,12 @@ public class MemoryViewPanel extends JPanel {
             }
         }
 
+        @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return (columnIndex > 0) && (columnIndex < 5);
+            return columnIndex > 0 && columnIndex < 5;
         }
 
+        @Override
         public void setValueAt(Object obj, int row, int column) {
             if (memory == null)
                 return;
@@ -157,13 +170,13 @@ public class MemoryViewPanel extends JPanel {
 
             int address = 16 * row + (column - 1) * 4 + startAddress;
             try {
-                StringBuffer buf = new StringBuffer(obj.toString());
+                StringBuilder buf = new StringBuilder(obj.toString());
                 while (buf.length() < 8)
                     buf.append('0');
 
                 long value = Long.parseLong(buf.toString(), 16);
                 for (int i = 0; i < 4; i++)
-                    memory.setByte(address + i, (byte)(value >> (24 - 8 * i)));
+                    memory.setByte(address + i, (byte)(value >> 24 - 8 * i));
             } catch (Exception e) {
             }
 
@@ -172,11 +185,12 @@ public class MemoryViewPanel extends JPanel {
     }
 
     public static class CellRenderer extends DefaultTableCellRenderer {
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
             int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             setFont(f);
-            setHorizontalAlignment(JLabel.LEFT);
+            setHorizontalAlignment(SwingConstants.LEFT);
 
             if (column == 0) {
                 setBackground(Color.pink);
@@ -215,7 +229,7 @@ public class MemoryViewPanel extends JPanel {
     }
 
     public static String zeroPadHex(int value, int size) {
-        StringBuffer result = new StringBuffer(Integer.toHexString(value).toUpperCase());
+        StringBuilder result = new StringBuilder(Integer.toHexString(value).toUpperCase());
         while (result.length() < size)
             result.insert(0, '0');
 
@@ -223,7 +237,7 @@ public class MemoryViewPanel extends JPanel {
     }
 
     public static char getASCII(byte b) {
-        if ((b >= 32) && (b < 127))
+        if (b >= 32 && b < 127)
             return (char)b;
         return ' ';
     }

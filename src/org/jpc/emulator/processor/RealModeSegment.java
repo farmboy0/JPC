@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,7 +33,9 @@
 
 package org.jpc.emulator.processor;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 import org.jpc.emulator.memory.AddressSpace;
 
@@ -71,6 +73,7 @@ final class RealModeSegment extends Segment {
         rpl = ancestor.getRPL();
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(0);
         output.writeInt(selector);
@@ -82,6 +85,7 @@ final class RealModeSegment extends Segment {
         output.writeBoolean(present);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         type = input.readInt();
         rpl = input.readInt();
@@ -91,22 +95,27 @@ final class RealModeSegment extends Segment {
         present = input.readBoolean();
     }
 
+    @Override
     public boolean getDefaultSizeFlag() {
         return defaultSize;
     }
 
+    @Override
     public int getLimit() {
         return (int)limit;
     }
 
+    @Override
     public int getBase() {
         return base;
     }
 
+    @Override
     public int getSelector() {
         return selector;
     }
 
+    @Override
     public boolean setSelector(int selector) {
         this.selector = selector;
         base = selector << 4;
@@ -114,6 +123,7 @@ final class RealModeSegment extends Segment {
         return true;
     }
 
+    @Override
     public void checkAddress(int offset) {
         if ((0xffffffffL & offset) > limit) {
             System.out.println("RM Segment Limit exceeded: offset=" + Integer.toHexString(offset) + ", limit=" + Long.toHexString(limit));
@@ -121,40 +131,49 @@ final class RealModeSegment extends Segment {
         }
     }
 
+    @Override
     public int translateAddressRead(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public int translateAddressWrite(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public int getRPL() {
         return rpl;
     }
 
+    @Override
     public int getType() {
         return type;
     }
 
+    @Override
     public boolean isPresent() {
         return present;
     }
 
+    @Override
     public boolean isSystem() {
         return !segment;
     }
 
+    @Override
     public int getDPL() {
         throw new IllegalStateException(getClass().toString());
     }
 
+    @Override
     public void setRPL(int cpl) {
         throw new IllegalStateException(getClass().toString());
     }
 
+    @Override
     public void printState() {
         System.out.println("RM Segment");
         System.out.println("selector: " + Integer.toHexString(selector));

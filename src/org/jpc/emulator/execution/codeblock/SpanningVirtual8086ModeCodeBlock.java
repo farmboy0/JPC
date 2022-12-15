@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,8 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.processor.Processor;
 
 /**
  * @author Chris Dennis
@@ -48,11 +48,12 @@ class SpanningVirtual8086ModeCodeBlock extends SpanningCodeBlock implements Virt
         this.factories = factories;
     }
 
+    @Override
     public CodeBlock decode(Processor cpu) {
         Virtual8086ModeCodeBlock block = null;
         AddressSpace memory = cpu.linearMemory;
         int address = cpu.getInstructionPointer();
-        for (int i = 0; (i < factories.length) && (block == null); i++) {
+        for (int i = 0; i < factories.length && block == null; i++) {
             try {
                 byteSourceStream.set(memory, address);
                 block = factories[i].getVirtual8086ModeCodeBlock(byteSourceStream);
@@ -64,6 +65,7 @@ class SpanningVirtual8086ModeCodeBlock extends SpanningCodeBlock implements Virt
         return block;
     }
 
+    @Override
     public String toString() {
         return "Spanning Virtual8086 Mode CodeBlock";
     }

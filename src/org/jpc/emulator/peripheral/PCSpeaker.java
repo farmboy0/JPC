@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,14 +33,28 @@
 
 package org.jpc.emulator.peripheral;
 
-import org.jpc.emulator.motherboard.*;
-import org.jpc.emulator.*;
-
-import javax.sound.midi.*;
-
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.net.URI;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.sound.midi.Instrument;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiChannel;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Soundbank;
+import javax.sound.midi.Synthesizer;
+
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.motherboard.IODevice;
+import org.jpc.emulator.motherboard.IOPortHandler;
+import org.jpc.emulator.motherboard.IntervalTimer;
 
 /**
  * @author Ian Preston
@@ -154,7 +168,7 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice {
 
     public synchronized void play() {
         waitingForPit++;
-        if ((enabled) && (waitingForPit == 2)) {
+        if (enabled && waitingForPit == 2) {
             if (pit.getMode(2) != 3)
                 return;
 
@@ -173,39 +187,46 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice {
         cc.programChange(program);
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(dummyRefreshClock);
         output.writeInt(speakerOn);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         ioportRegistered = false;
         dummyRefreshClock = input.readInt();
         speakerOn = input.readInt();
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] { 0x61 };
     }
 
+    @Override
     public int ioPortRead8(int address) {
         int out = pit.getOut(2);
         dummyRefreshClock ^= 1;
-        return (speakerOn << 1) | (pit.getGate(2) ? 1 : 0) | (out << 5) | (dummyRefreshClock << 4);
+        return speakerOn << 1 | (pit.getGate(2) ? 1 : 0) | out << 5 | dummyRefreshClock << 4;
     }
 
+    @Override
     public int ioPortRead16(int address) {
-        return (0xff & ioPortRead8(address)) | (0xff00 & (ioPortRead8(address + 1) << 8));
+        return 0xff & ioPortRead8(address) | 0xff00 & ioPortRead8(address + 1) << 8;
     }
 
+    @Override
     public int ioPortRead32(int address) {
-        return (0xffff & ioPortRead16(address)) | (0xffff0000 & (ioPortRead16(address + 2) << 16));
+        return 0xffff & ioPortRead16(address) | 0xffff0000 & ioPortRead16(address + 2) << 16;
     }
 
+    @Override
     public synchronized void ioPortWrite8(int address, int data) {
         if (!enabled)
             return;
-        speakerOn = (data >> 1) & 1;
+        speakerOn = data >> 1 & 1;
         pit.setGate(2, (data & 1) != 0);
         if ((data & 1) == 1) {
             if (speakerOn == 1) {
@@ -227,41 +248,48 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice {
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         this.ioPortWrite8(address, data);
         this.ioPortWrite8(address + 1, data >> 8);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         this.ioPortWrite16(address, data);
         this.ioPortWrite16(address + 2, data >> 16);
     }
 
+    @Override
     public boolean initialised() {
-        return ioportRegistered && (pit != null);
+        return ioportRegistered && pit != null;
     }
 
+    @Override
     public void reset() {
         pit = null;
         ioportRegistered = false;
     }
 
+    @Override
     public boolean updated() {
         return ioportRegistered && pit.updated();
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
-        if ((component instanceof IOPortHandler) && component.updated()) {
+        if (component instanceof IOPortHandler && component.updated()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof IntervalTimer) && component.initialised()) {
+        if (component instanceof IntervalTimer && component.initialised()) {
             pit = (IntervalTimer)component;
         }
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }

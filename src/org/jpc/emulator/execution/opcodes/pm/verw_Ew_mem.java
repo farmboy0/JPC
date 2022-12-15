@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,14 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
+import org.jpc.emulator.processor.ProtectedModeSegment;
+import org.jpc.emulator.processor.Segment;
 
 public class verw_Ew_mem extends Executable {
     final Pointer op1;
@@ -42,25 +45,28 @@ public class verw_Ew_mem extends Executable {
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         try {
             Segment test = cpu.getSegment(op1.get16(cpu) & 0xffff);
             int type = test.getType();
-            if (((type & ProtectedModeSegment.DESCRIPTOR_TYPE_CODE_DATA) == 0) || (((type & ProtectedModeSegment.TYPE_CODE_CONFORMING) == 0)
-                && ((cpu.getCPL() > test.getDPL()) || (test.getRPL() > test.getDPL()))))
+            if ((type & ProtectedModeSegment.DESCRIPTOR_TYPE_CODE_DATA) == 0 || (type & ProtectedModeSegment.TYPE_CODE_CONFORMING) == 0
+                && (cpu.getCPL() > test.getDPL() || test.getRPL() > test.getDPL()))
                 cpu.zf(false);
             else
-                cpu.zf(((type & ProtectedModeSegment.TYPE_CODE) == 0) && ((type & ProtectedModeSegment.TYPE_DATA_WRITABLE) != 0));
+                cpu.zf((type & ProtectedModeSegment.TYPE_CODE) == 0 && (type & ProtectedModeSegment.TYPE_DATA_WRITABLE) != 0);
         } catch (ProcessorException e) {
             cpu.zf(false);
         }
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

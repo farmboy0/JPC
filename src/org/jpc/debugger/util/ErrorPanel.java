@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -34,8 +34,16 @@
 package org.jpc.debugger.util;
 
 import java.awt.BorderLayout;
-import javax.swing.*;
-import javax.swing.tree.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 
 public class ErrorPanel extends JPanel {
     public ErrorPanel(Throwable error) {
@@ -73,7 +81,7 @@ public class ErrorPanel extends JPanel {
     }
 
     public boolean refreshDisplay(Object src) {
-        if ((src != null) && (src instanceof Throwable)) {
+        if (src != null && src instanceof Throwable) {
             setError((Throwable)src);
             return true;
         }
@@ -85,8 +93,8 @@ public class ErrorPanel extends JPanel {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(message + ": " + err);
 
         StackTraceElement[] trace = err.getStackTrace();
-        for (int i = 0; i < trace.length; i++)
-            root.add(new DefaultMutableTreeNode(String.valueOf(trace[i])));
+        for (StackTraceElement element : trace)
+            root.add(new DefaultMutableTreeNode(String.valueOf(element)));
 
         Throwable cause = err.getCause();
         if (cause != null)
@@ -96,7 +104,7 @@ public class ErrorPanel extends JPanel {
     }
 
     public static ErrorPanel createDisplayable(Object data) {
-        if ((data == null) || !(data instanceof Throwable))
+        if (data == null || !(data instanceof Throwable))
             return null;
         return new ErrorPanel((Throwable)data);
     }

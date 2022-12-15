@@ -1,6 +1,6 @@
 package org.jpc.emulator.processor;
 
-import java.util.*;
+import java.util.Formatter;
 
 public final class State {
     public static void print(Processor cpu) {

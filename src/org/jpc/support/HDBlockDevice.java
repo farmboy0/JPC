@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,9 +33,10 @@
 
 package org.jpc.support;
 
-import org.jpc.j2se.Option;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.util.logging.*;
+import org.jpc.j2se.Option;
 
 /**
  * Hard-drive block device implementation.
@@ -68,10 +69,10 @@ public class HDBlockDevice extends RawBlockDevice {
         int detectedSectors = 0;
 
         byte[] mbr = new byte[512];
-        if ((read(0, mbr, 1) >= 0) && (mbr[PART_MAGIC] == (byte)0x55) && (mbr[PART_MAGIC + 1] == (byte)0xaa)) {
+        if (read(0, mbr, 1) >= 0 && mbr[PART_MAGIC] == (byte)0x55 && mbr[PART_MAGIC + 1] == (byte)0xaa) {
             for (int i = PART_1; i < PART_MAGIC; i += 0x10) {
-                int numberSectors = (mbr[i + PART_SIZE] & 0xff) | ((mbr[i + PART_SIZE + 1] & 0xff) << 8)
-                    | ((mbr[i + PART_SIZE + 2] & 0xff) << 16) | ((mbr[i + PART_SIZE + 3] & 0xff) << 24);
+                int numberSectors = mbr[i + PART_SIZE] & 0xff | (mbr[i + PART_SIZE + 1] & 0xff) << 8 | (mbr[i + PART_SIZE + 2] & 0xff) << 16
+                    | (mbr[i + PART_SIZE + 3] & 0xff) << 24;
                 if (numberSectors != 0) {
                     detectedHeads = 1 + (mbr[i + PART_END_CHS] & 0xff);
                     detectedSectors = mbr[i + PART_END_CHS + 1] & 0x3f;
@@ -106,29 +107,36 @@ public class HDBlockDevice extends RawBlockDevice {
         sectors = detectedSectors;
     }
 
+    @Override
     public boolean isLocked() {
         return false;
     }
 
+    @Override
     public void setLock(boolean locked) {
     }
 
+    @Override
     public int getCylinders() {
         return cylinders;
     }
 
+    @Override
     public int getHeads() {
         return heads;
     }
 
+    @Override
     public int getSectors() {
         return sectors;
     }
 
+    @Override
     public Type getType() {
         return Type.HARDDRIVE;
     }
 
+    @Override
     public String toString() {
         return "HD: " + super.toString();
     }

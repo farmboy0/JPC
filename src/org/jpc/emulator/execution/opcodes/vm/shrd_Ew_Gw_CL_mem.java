@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,13 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.UCodes;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.Processor.Reg;
 
 public class shrd_Ew_Gw_CL_mem extends Executable {
     final Pointer op1;
@@ -44,6 +46,7 @@ public class shrd_Ew_Gw_CL_mem extends Executable {
         op2Index = Modrm.Gw(modrm);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
         if (cpu.r_cl.get8() != 0) {
@@ -53,8 +56,8 @@ public class shrd_Ew_Gw_CL_mem extends Executable {
             else
                 cpu.flagOp1 = op2.get16();
             cpu.flagOp2 = shift;
-            long rot = ((long)op1.get16(cpu) << (2 * 16)) | ((0xFFFF & op2.get16()) << 16) | (0xFFFF & op1.get16(cpu));
-            cpu.flagResult = (short)((int)(rot >> shift));
+            long rot = (long)op1.get16(cpu) << 2 * 16 | (0xFFFF & op2.get16()) << 16 | 0xFFFF & op1.get16(cpu);
+            cpu.flagResult = (short)(int)(rot >> shift);
             op1.set16(cpu, (short)cpu.flagResult);
             cpu.flagIns = UCodes.SHRD16;
             cpu.flagStatus = OSZAPC;
@@ -62,10 +65,12 @@ public class shrd_Ew_Gw_CL_mem extends Executable {
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

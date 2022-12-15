@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,14 @@
 
 package org.jpc.emulator.processor.fpu64;
 
-import org.jpc.emulator.processor.*;
-import org.jpc.j2se.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.util.logging.*;
+import org.jpc.emulator.processor.Processor;
+import org.jpc.emulator.processor.ProcessorException;
+import org.jpc.j2se.Option;
 
 public class FpuState64 extends FpuState {
     private static final Logger LOGGING = Logger.getLogger(FpuState64.class.getName());
@@ -71,6 +74,7 @@ public class FpuState64 extends FpuState {
     private boolean precision;
     private boolean stackFault;
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(statusWord);
         output.writeInt(maskWord);
@@ -84,16 +88,17 @@ public class FpuState64 extends FpuState {
         output.writeBoolean(precision);
         output.writeBoolean(stackFault);
         output.writeInt(data.length);
-        for (int i = 0; i < data.length; i++)
-            output.writeDouble(data[i]);
+        for (double element : data)
+            output.writeDouble(element);
         output.writeInt(tag.length);
-        for (int i = 0; i < tag.length; i++)
-            output.writeInt(tag[i]);
+        for (int element : tag)
+            output.writeInt(element);
         output.writeInt(specialTag.length);
-        for (int i = 0; i < specialTag.length; i++)
-            output.writeInt(specialTag[i]);
+        for (int element : specialTag)
+            output.writeInt(element);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         statusWord = input.readInt();
         maskWord = input.readInt();
@@ -120,73 +125,89 @@ public class FpuState64 extends FpuState {
             specialTag[i] = input.readInt();
     }
 
+    @Override
     public boolean getInvalidOperation() {
-        return ((statusWord & 0x01) != 0);
+        return (statusWord & 0x01) != 0;
     }
 
+    @Override
     public boolean getDenormalizedOperand() {
-        return ((statusWord & 0x02) != 0);
+        return (statusWord & 0x02) != 0;
     }
 
+    @Override
     public boolean getZeroDivide() {
-        return ((statusWord & 0x04) != 0);
+        return (statusWord & 0x04) != 0;
     }
 
+    @Override
     public boolean getOverflow() {
-        return ((statusWord & 0x08) != 0);
+        return (statusWord & 0x08) != 0;
     }
 
+    @Override
     public boolean getUnderflow() {
-        return ((statusWord & 0x10) != 0);
+        return (statusWord & 0x10) != 0;
     }
 
+    @Override
     public boolean getPrecision() {
-        return ((statusWord & 0x20) != 0);
+        return (statusWord & 0x20) != 0;
     }
 
+    @Override
     public boolean getStackFault() {
-        return ((statusWord & 0x40) != 0);
+        return (statusWord & 0x40) != 0;
     }
 
+    @Override
     public void setInvalidOperation() {
         statusWord |= 0x01;
     }
 
+    @Override
     public void setDenormalizedOperand() {
         statusWord |= 0x02;
     }
 
+    @Override
     public void setZeroDivide() {
         statusWord |= 0x04;
     }
 
+    @Override
     public void setOverflow() {
         statusWord |= 0x08;
     }
 
+    @Override
     public void setUnderflow() {
         statusWord |= 0x10;
     }
 
+    @Override
     public void setPrecision() {
         statusWord |= 0x20;
     }
 
+    @Override
     public void setStackFault() {
         statusWord |= 0x40;
     }
 
     private static final boolean checkPendingExceptions = true;
 
+    @Override
     public void prepareFPU(Processor cpu, boolean checkExceptions) {
-        if (((cpu.getCR0() & Processor.CR0_FPU_EMULATION) != 0)
-            || (((cpu.getCR0() & Processor.CR0_MONITOR_COPROCESSOR) != 0) && ((cpu.getCR0() & Processor.CR0_TASK_SWITCHED) != 0)))
+        if ((cpu.getCR0() & Processor.CR0_FPU_EMULATION) != 0
+            || (cpu.getCR0() & Processor.CR0_MONITOR_COPROCESSOR) != 0 && (cpu.getCR0() & Processor.CR0_TASK_SWITCHED) != 0)
             throw ProcessorException.NO_FPU;
 
         if (checkExceptions)
             checkExceptions();
     }
 
+    @Override
     public void setC0(boolean val) {
         if (val)
             conditionCode |= 1;
@@ -194,6 +215,7 @@ public class FpuState64 extends FpuState {
             conditionCode &= ~0x1;
     }
 
+    @Override
     public void setC1(boolean val) {
         if (val)
             conditionCode |= 2;
@@ -201,6 +223,7 @@ public class FpuState64 extends FpuState {
             conditionCode &= ~2;
     }
 
+    @Override
     public void setC2(boolean val) {
         if (val)
             conditionCode |= 4;
@@ -208,6 +231,7 @@ public class FpuState64 extends FpuState {
             conditionCode &= ~4;
     }
 
+    @Override
     public void setC3(boolean val) {
         if (val)
             conditionCode |= 8;
@@ -215,20 +239,24 @@ public class FpuState64 extends FpuState {
             conditionCode &= ~8;
     }
 
+    @Override
     public boolean getBusy() {
         return getErrorSummaryStatus();
     }
 
+    @Override
     public boolean getErrorSummaryStatus() {
         // (note stack fault is a subset of invalid operation)
-        return (((statusWord & 0x3f) & ~maskWord) != 0);
+        return (statusWord & 0x3f & ~maskWord) != 0;
     }
 
+    @Override
     public void checkExceptions() throws ProcessorException {
         if (getErrorSummaryStatus())
             cpu.reportFPUException();
     }
 
+    @Override
     public void clearExceptions() {
         statusWord = 0;
     }
@@ -239,38 +267,47 @@ public class FpuState64 extends FpuState {
     private int precisionControl;
     private int roundingControl;
 
+    @Override
     public boolean getInvalidOperationMask() {
-        return ((maskWord & 1) != 0);
+        return (maskWord & 1) != 0;
     }
 
+    @Override
     public boolean getDenormalizedOperandMask() {
-        return ((maskWord & 2) != 0);
+        return (maskWord & 2) != 0;
     }
 
+    @Override
     public boolean getZeroDivideMask() {
-        return ((maskWord & 4) != 0);
+        return (maskWord & 4) != 0;
     }
 
+    @Override
     public boolean getOverflowMask() {
-        return ((maskWord & 8) != 0);
+        return (maskWord & 8) != 0;
     }
 
+    @Override
     public boolean getUnderflowMask() {
-        return ((maskWord & 0x10) != 0);
+        return (maskWord & 0x10) != 0;
     }
 
+    @Override
     public boolean getPrecisionMask() {
-        return ((maskWord & 0x20) != 0);
+        return (maskWord & 0x20) != 0;
     }
 
+    @Override
     public int getPrecisionControl() {
         return precisionControl;
     }
 
+    @Override
     public int getRoundingControl() {
         return roundingControl;
     }
 
+    @Override
     public void setInvalidOperationMask(boolean value) {
         if (value)
             maskWord |= 1;
@@ -278,6 +315,7 @@ public class FpuState64 extends FpuState {
             maskWord &= ~1;
     }
 
+    @Override
     public void setDenormalizedOperandMask(boolean value) {
         if (value)
             maskWord |= 2;
@@ -285,6 +323,7 @@ public class FpuState64 extends FpuState {
             maskWord &= ~2;
     }
 
+    @Override
     public void setZeroDivideMask(boolean value) {
         if (value)
             maskWord |= 4;
@@ -292,6 +331,7 @@ public class FpuState64 extends FpuState {
             maskWord &= ~4;
     }
 
+    @Override
     public void setOverflowMask(boolean value) {
         if (value)
             maskWord |= 8;
@@ -299,6 +339,7 @@ public class FpuState64 extends FpuState {
             maskWord &= ~8;
     }
 
+    @Override
     public void setUnderflowMask(boolean value) {
         if (value)
             maskWord |= 0x10;
@@ -306,6 +347,7 @@ public class FpuState64 extends FpuState {
             maskWord &= ~0x10;
     }
 
+    @Override
     public void setPrecisionMask(boolean value) {
         if (value)
             maskWord |= 0x20;
@@ -313,6 +355,7 @@ public class FpuState64 extends FpuState {
             maskWord &= ~0x20;
     }
 
+    @Override
     public void setAllMasks(boolean value) {
         if (value)
             maskWord |= 0x3f;
@@ -320,10 +363,12 @@ public class FpuState64 extends FpuState {
             maskWord = 0;
     }
 
+    @Override
     public void setPrecisionControl(int value) {
         precisionControl = value & 3;
     }
 
+    @Override
     public void setRoundingControl(int value) {
         roundingControl = value & 3;
     }
@@ -335,6 +380,7 @@ public class FpuState64 extends FpuState {
         specialTag = new int[STACK_DEPTH];
     }
 
+    @Override
     public void init() {
         //Bochs does these checks, but they stop many things booting!
         if (Option.useBochs.isSet())
@@ -367,10 +413,10 @@ public class FpuState64 extends FpuState {
 
     public static boolean isDenormal(double x) {
         long n = Double.doubleToRawLongBits(x);
-        int exponent = (int)((n >> 52) & 0x7ff);
+        int exponent = (int)(n >> 52 & 0x7ff);
         if (exponent != 0)
             return false;
-        long fraction = (n & ~(0xfffL << 52));
+        long fraction = n & ~(0xfffL << 52);
         if (fraction == 0L)
             return false;
         return true;
@@ -379,13 +425,13 @@ public class FpuState64 extends FpuState {
     public static boolean isSNaN(long n) {
         // have to determine this based on 64-bit bit pattern,
         // since reassignment might cause Java to rationalize it to infinity
-        int exponent = (int)((n >> 52) & 0x7ff);
+        int exponent = (int)(n >> 52 & 0x7ff);
         if (exponent != 0x7ff)
             return false;
-        long fraction = (n & ~(0xfffL << 52));
-        if ((fraction & (1L << 51)) != 0)
+        long fraction = n & ~(0xfffL << 52);
+        if ((fraction & 1L << 51) != 0)
             return false;
-        return (fraction != 0L);
+        return fraction != 0L;
     }
 
     // SNaN's aren't generated internally by x87.  Instead, they are
@@ -405,6 +451,7 @@ public class FpuState64 extends FpuState {
             return FPU_SPECIAL_TAG_NONE;
     }
 
+    @Override
     public void push(double x) throws ProcessorException {
         if (--top < 0)
             top = STACK_DEPTH - 1;
@@ -425,6 +472,7 @@ public class FpuState64 extends FpuState {
 //         push(x.doubleValue());
 //     }
 
+    @Override
     public double pop() throws ProcessorException {
         if (tag[top] == FPU_TAG_EMPTY) {
             setInvalidOperation();
@@ -450,20 +498,23 @@ public class FpuState64 extends FpuState {
 //     {
 //         return new BigDecimal(pop());
 //     }
+    @Override
     public double[] getStack() {
         double[] res = new double[8];
         for (int i = 0; i < 8; i++)
-            res[i] = data[(i + top) & 7];
+            res[i] = data[i + top & 7];
         return res;
     }
 
+    @Override
     public void setStack(double[] s) {
         for (int i = 0; i < 8; i++)
-            data[(i + top) & 7] = s[i];
+            data[i + top & 7] = s[i];
     }
 
+    @Override
     public double ST(int index) throws ProcessorException {
-        int i = ((top + index) & 0x7);
+        int i = top + index & 0x7;
         if (tag[i] == FPU_TAG_EMPTY) {
             // an attempt to read an empty register is technically
             // a "stack underflow"
@@ -484,78 +535,87 @@ public class FpuState64 extends FpuState {
 //         return new BigDecimal(ST(index));
 //     }
 
+    @Override
     public int getTag(int index) {
-        int i = ((top + index) & 0x7);
+        int i = top + index & 0x7;
         return tag[i];
     }
 
     public int getSpecialTag(int index) {
-        int i = ((top + index) & 0x7);
+        int i = top + index & 0x7;
         return specialTag[i];
     }
 
+    @Override
     public void setTagEmpty(int index) {
         // used by FFREE
-        int i = ((top + index) & 0x7);
+        int i = top + index & 0x7;
         tag[i] = FpuState.FPU_TAG_EMPTY;
     }
 
+    @Override
     public void setST(int index, double value) {
-        int i = ((top + index) & 0x7);
+        int i = top + index & 0x7;
         data[i] = value;
         tag[i] = tagCode(value);
         specialTag[i] = specialTagCode(value);
     }
 
+    @Override
     public int getStatus() {
         int w = statusWord;
         if (getErrorSummaryStatus())
             w |= 0x80;
         if (getBusy())
             w |= 0x8000;
-        w |= (top << 11);
-        w |= ((conditionCode & 0x7) << 8);
-        w |= ((conditionCode & 0x8) << 11);
+        w |= top << 11;
+        w |= (conditionCode & 0x7) << 8;
+        w |= (conditionCode & 0x8) << 11;
         return w;
     }
 
+    @Override
     public void setStatus(int w) {
         statusWord &= ~0x7f;
-        statusWord |= (w & 0x7f);
-        top = ((w >> 11) & 0x7);
-        conditionCode = ((w >> 8) & 0x7);
-        conditionCode |= ((w >>> 14) & 1);
+        statusWord |= w & 0x7f;
+        top = w >> 11 & 0x7;
+        conditionCode = w >> 8 & 0x7;
+        conditionCode |= w >>> 14 & 1;
     }
 
+    @Override
     public int getControl() {
         int w = maskWord;
-        w |= ((precisionControl & 0x3) << 8);
-        w |= ((roundingControl & 0x3) << 10);
+        w |= (precisionControl & 0x3) << 8;
+        w |= (roundingControl & 0x3) << 10;
         w |= 0x40; // reserved bit
         if (infinityControl)
             w |= 0x1000;
         return w;
     }
 
+    @Override
     public void setControl(int w) {
         maskWord &= ~0x3f;
-        maskWord |= (w & 0x3f);
+        maskWord |= w & 0x3f;
 
-        infinityControl = ((w & 0x1000) != 0);
-        setPrecisionControl((w >> 8) & 3);
-        setRoundingControl((w >> 10) & 3);
+        infinityControl = (w & 0x1000) != 0;
+        setPrecisionControl(w >> 8 & 3);
+        setRoundingControl(w >> 10 & 3);
     }
 
+    @Override
     public int getTagWord() {
         int w = 0;
         for (int i = STACK_DEPTH - 1; i >= 0; --i)
-            w = ((w << 2) | (tag[i] & 0x3));
+            w = w << 2 | tag[i] & 0x3;
         return w;
     }
 
+    @Override
     public void setTagWord(int w) {
         for (int i = 0; i < tag.length; ++i) {
-            int t = (w & 0x3);
+            int t = w & 0x3;
             if (t == FPU_TAG_EMPTY) {
                 tag[i] = FPU_TAG_EMPTY;
             } else {
@@ -568,6 +628,7 @@ public class FpuState64 extends FpuState {
         }
     }
 
+    @Override
     public double round(double in) {
         if (!Double.isInfinite(in)) // preserve infinities
         {
@@ -596,14 +657,14 @@ public class FpuState64 extends FpuState {
             fraction = 0xc000000000000000L;
         } else {
             long n = Double.doubleToRawLongBits(x);
-            fraction = (n & ~(0xfffL << 52));
-            iexp = ((int)(n >> 52) & 0x7ff);
-            boolean sgn = ((n & (1L << 63)) != 0);
+            fraction = n & ~(0xfffL << 52);
+            iexp = (int)(n >> 52) & 0x7ff;
+            boolean sgn = (n & 1L << 63) != 0;
             // insert implicit 1
-            fraction |= (1L << 52);
+            fraction |= 1L << 52;
             fraction <<= 11;
             // re-bias exponent
-            iexp += (16383 - 1023);
+            iexp += 16383 - 1023;
             if (sgn)
                 iexp |= 0x8000;
         }
@@ -619,13 +680,13 @@ public class FpuState64 extends FpuState {
     public static int specialTagCode(byte[] b) {
         long fraction = 0;
         for (int i = 7; i >= 0; --i) {
-            long w = ((long)b[i] & 0xff);
+            long w = (long)b[i] & 0xff;
             fraction |= w;
             fraction <<= 8;
         }
-        int iexp = (((int)b[8] & 0xff) | (((int)b[9] & 0x7f) << 8));
-        boolean sgn = ((b[9] & 0x80) != 0);
-        boolean integ = ((b[7] & 0x80) != 0); // explicit integer bit
+        int iexp = b[8] & 0xff | (b[9] & 0x7f) << 8;
+        boolean sgn = (b[9] & 0x80) != 0;
+        boolean integ = (b[7] & 0x80) != 0; // explicit integer bit
 
         if (iexp == 0) {
             if (integ) {
@@ -640,12 +701,12 @@ public class FpuState64 extends FpuState {
                 // "pseudo-infinity"
                 return FPU_SPECIAL_TAG_UNSUPPORTED;
             } else if (integ) {
-                if ((fraction << 1) == 0) {
+                if (fraction << 1 == 0) {
                     // infinity
                     return FPU_SPECIAL_TAG_INFINITY;
                 } else {
                     // NaN's
-                    if ((fraction >>> 62) == 0)
+                    if (fraction >>> 62 == 0)
                         return FPU_SPECIAL_TAG_SNAN;
                     else
                         return FPU_SPECIAL_TAG_NAN;
@@ -668,13 +729,13 @@ public class FpuState64 extends FpuState {
     public static double extendedToDouble(byte[] b) {
         long fraction = 0;
         for (int i = 7; i >= 0; --i) {
-            long w = ((long)b[i] & 0xff);
+            long w = (long)b[i] & 0xff;
             fraction |= w;
             fraction <<= 8;
         }
-        int iexp = (((int)b[8] & 0xff) | (((int)b[9] & 0x7f) << 8));
-        boolean sgn = ((b[9] & 0x80) != 0);
-        boolean integ = ((b[7] & 0x80) != 0); // explicit integer bit
+        int iexp = b[8] & 0xff | (b[9] & 0x7f) << 8;
+        boolean sgn = (b[9] & 0x80) != 0;
+        boolean integ = (b[7] & 0x80) != 0; // explicit integer bit
 
         if (iexp == 0) {
             if (integ) {
@@ -695,8 +756,8 @@ public class FpuState64 extends FpuState {
                 // "QNaN floating-point indefinite"
                 return Double.NaN;
             } else if (integ) {
-                if ((fraction << 1) == 0) {
-                    return (sgn) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+                if (fraction << 1 == 0) {
+                    return sgn ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
                 } else {
                     // a conventional NaN
                     return Double.NaN;
@@ -712,16 +773,16 @@ public class FpuState64 extends FpuState {
                 fraction >>>= 11; // truncate rounding (is this the right way?)
                 if (iexp > 0x7ff) {
                     // too big an exponent
-                    return (sgn) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+                    return sgn ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
                 } else if (iexp < 0) {
                     // denormal (from normal)
-                    fraction >>>= (-iexp);
+                    fraction >>>= -iexp;
                     iexp = 0;
                 }
                 fraction &= ~(0xfffL << 52); // this cuts off explicit 1
-                fraction |= (((long)iexp & 0x7ff) << 52);
+                fraction |= ((long)iexp & 0x7ff) << 52;
                 if (sgn)
-                    fraction |= (1L << 63);
+                    fraction |= 1L << 63;
                 return Double.longBitsToDouble(fraction);
             } else {
                 // "unnormal":  if #IA masked, return QNaN FP indefinite

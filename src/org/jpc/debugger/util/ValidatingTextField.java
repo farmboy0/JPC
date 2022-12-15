@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -34,7 +34,10 @@
 package org.jpc.debugger.util;
 
 import javax.swing.JTextField;
-import javax.swing.text.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
 public class ValidatingTextField extends JTextField {
     private int lengthLimit;
@@ -55,7 +58,7 @@ public class ValidatingTextField extends JTextField {
 
     class CharFilter extends DocumentFilter {
         String validate(String text) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             for (int i = 0; i < text.length(); i++)
                 if (allowedChars.indexOf(text.charAt(i)) < 0) {
                     if (replacementChar > 0)
@@ -66,13 +69,15 @@ public class ValidatingTextField extends JTextField {
             return buf.toString();
         }
 
+        @Override
         public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException {
-            if ((lengthLimit >= 0) && (getText().length() >= lengthLimit))
+            if (lengthLimit >= 0 && getText().length() >= lengthLimit)
                 text = "";
             text = validate(text);
             super.insertString(fb, offset, text, attrs);
         }
 
+        @Override
         public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
             throws BadLocationException {
             if (lengthLimit >= 0) {

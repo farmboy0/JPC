@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,10 @@
 
 package org.jpc.emulator.processor;
 
-import java.io.*;
-import java.util.logging.*;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jpc.emulator.memory.AddressSpace;
 import org.jpc.emulator.memory.LinearAddressSpace;
@@ -72,19 +74,20 @@ public abstract class ProtectedModeSegment extends Segment {
         granularity = (descriptor & 0x80000000000000L) != 0;
 
         if (granularity)
-            limit = ((descriptor << 12) & 0xffff000L) | ((descriptor >>> 20) & 0xf0000000L) | 0xfffL;
+            limit = descriptor << 12 & 0xffff000L | descriptor >>> 20 & 0xf0000000L | 0xfffL;
         else
-            limit = (descriptor & 0xffffL) | ((descriptor >>> 32) & 0xf0000L);
+            limit = descriptor & 0xffffL | descriptor >>> 32 & 0xf0000L;
 
-        base = (int)((0xffffffL & (descriptor >> 16)) | ((descriptor >> 32) & 0xffffffffff000000L));
+        base = (int)(0xffffffL & descriptor >> 16 | descriptor >> 32 & 0xffffffffff000000L);
         rpl = selector & 0x3;
-        dpl = (int)((descriptor >> 45) & 0x3);
+        dpl = (int)(descriptor >> 45 & 0x3);
 
-        defaultSize = (descriptor & (1L << 54)) != 0;
-        present = (descriptor & (1L << 47)) != 0;
-        system = (descriptor & (1L << 44)) != 0;
+        defaultSize = (descriptor & 1L << 54) != 0;
+        present = (descriptor & 1L << 47) != 0;
+        system = (descriptor & 1L << 44) != 0;
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(3);
         output.writeInt(selector);
@@ -92,10 +95,12 @@ public abstract class ProtectedModeSegment extends Segment {
         output.writeInt(rpl);
     }
 
+    @Override
     public boolean isPresent() {
         return present;
     }
 
+    @Override
     public boolean isSystem() {
         return !system;
     }
@@ -117,19 +122,22 @@ public abstract class ProtectedModeSegment extends Segment {
     }
 
     public boolean isDataWritable() {
-        return !isCode() && ((getType() & TYPE_DATA_WRITABLE) != 0);
+        return !isCode() && (getType() & TYPE_DATA_WRITABLE) != 0;
     }
 
+    @Override
     public int translateAddressRead(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public int translateAddressWrite(int offset) {
         checkAddress(offset);
         return base + offset;
     }
 
+    @Override
     public void checkAddress(int offset) {
         if ((0xffffffffL & offset) > limit) {
             LOGGING.log(Level.INFO, this + "segment limit exceeded: 0x{0} > 0x{1}",
@@ -139,30 +147,37 @@ public abstract class ProtectedModeSegment extends Segment {
         }
     }
 
+    @Override
     public boolean getDefaultSizeFlag() {
         return defaultSize;
     }
 
+    @Override
     public int getLimit() {
         return (int)limit;
     }
 
+    @Override
     public int getBase() {
         return base;
     }
 
+    @Override
     public int getSelector() {
-        return (selector & 0xFFFC) | rpl;
+        return selector & 0xFFFC | rpl;
     }
 
+    @Override
     public int getRPL() {
         return rpl;
     }
 
+    @Override
     public int getDPL() {
         return dpl;
     }
 
+    @Override
     public void setRPL(int cpl) {
         rpl = cpl;
     }
@@ -172,6 +187,7 @@ public abstract class ProtectedModeSegment extends Segment {
         rpl = selector & 3;
     }
 
+    @Override
     public boolean setSelector(int selector) {
         throw new IllegalStateException("Cannot set a selector for a descriptor table segment");
     }
@@ -181,6 +197,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public void checkAddress(int offset) {
             if ((0xffffffffL & offset) > limit) {
                 LOGGING.log(Level.INFO, this + "Stack segment limit exceeded: 0x{0} > 0x{1}",
@@ -199,18 +216,22 @@ public abstract class ProtectedModeSegment extends Segment {
             throw new IllegalStateException();
         }
 
+        @Override
         public final void setByte(int offset, byte data) {
             writeAttempted();
         }
 
+        @Override
         public final void setWord(int offset, short data) {
             writeAttempted();
         }
 
+        @Override
         public final void setDoubleWord(int offset, int data) {
             writeAttempted();
         }
 
+        @Override
         public final void setQuadWord(int offset, long data) {
             writeAttempted();
         }
@@ -225,18 +246,22 @@ public abstract class ProtectedModeSegment extends Segment {
             throw new IllegalStateException();
         }
 
+        @Override
         public final void setByte(int offset, byte data) {
             writeAttempted();
         }
 
+        @Override
         public final void setWord(int offset, short data) {
             writeAttempted();
         }
 
+        @Override
         public final void setDoubleWord(int offset, int data) {
             writeAttempted();
         }
 
+        @Override
         public final void setQuadWord(int offset, long data) {
             writeAttempted();
         }
@@ -247,10 +272,12 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA;
         }
 
+        @Override
         void writeAttempted() {
             throw ProcessorException.GENERAL_PROTECTION_0;
         }
@@ -261,10 +288,12 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA;
         }
 
+        @Override
         void writeAttempted() {
             throw ProcessorException.GENERAL_PROTECTION_0;
         }
@@ -275,10 +304,12 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_ACCESSED;
         }
 
+        @Override
         void writeAttempted() {
             throw ProcessorException.GENERAL_PROTECTION_0;
         }
@@ -289,10 +320,12 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_ACCESSED;
         }
 
+        @Override
         void writeAttempted() {
             throw ProcessorException.GENERAL_PROTECTION_0;
         }
@@ -303,6 +336,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_DATA_WRITABLE;
         }
@@ -313,6 +347,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_DATA_WRITABLE;
         }
@@ -323,21 +358,25 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_DATA_WRITABLE;
         }
 
-        public final int translateAddressRead(int offset) {
+        @Override
+        public int translateAddressRead(int offset) {
             checkAddress(offset);
             return super.base + offset;
         }
 
-        public final int translateAddressWrite(int offset) {
+        @Override
+        public int translateAddressWrite(int offset) {
             checkAddress(offset);
             return super.base + offset;
         }
 
-        public final void checkAddress(int offset) {
+        @Override
+        public void checkAddress(int offset) {
             if ((0xffffffffL & offset) > super.limit) {
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
             }
@@ -349,6 +388,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_DATA_WRITABLE | TYPE_ACCESSED;
         }
@@ -359,6 +399,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_DATA_WRITABLE | TYPE_ACCESSED;
         }
@@ -369,6 +410,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_CODE;
         }
@@ -379,6 +421,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_CODE | TYPE_CODE_READABLE | TYPE_ACCESSED;
         }
@@ -389,6 +432,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_CODE | TYPE_CODE_READABLE;
         }
@@ -399,6 +443,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_CODE | TYPE_CODE_CONFORMING | TYPE_ACCESSED;
         }
@@ -409,6 +454,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_CODE | TYPE_CODE_CONFORMING | TYPE_CODE_READABLE | TYPE_ACCESSED;
         }
@@ -419,6 +465,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return DESCRIPTOR_TYPE_CODE_DATA | TYPE_CODE | TYPE_CODE_CONFORMING | TYPE_CODE_READABLE;
         }
@@ -468,6 +515,7 @@ public abstract class ProtectedModeSegment extends Segment {
                 cpu.setCR3(memory.getDoubleWord(initialAddress + 28));
         }
 
+        @Override
         public byte getByte(int offset) {
             boolean isSup = ((LinearAddressSpace)memory).isSupervisor();
             try {
@@ -478,6 +526,7 @@ public abstract class ProtectedModeSegment extends Segment {
             }
         }
 
+        @Override
         public short getWord(int offset) {
             boolean isSup = ((LinearAddressSpace)memory).isSupervisor();
             try {
@@ -488,6 +537,7 @@ public abstract class ProtectedModeSegment extends Segment {
             }
         }
 
+        @Override
         public int getDoubleWord(int offset) {
             boolean isSup = ((LinearAddressSpace)memory).isSupervisor();
             try {
@@ -498,6 +548,7 @@ public abstract class ProtectedModeSegment extends Segment {
             }
         }
 
+        @Override
         public long getQuadWord(int offset) {
             boolean isSup = ((LinearAddressSpace)memory).isSupervisor();
             try {
@@ -514,6 +565,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return TYPE_AVAILABLE_32_TSS;
         }
@@ -524,6 +576,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return TYPE_BUSY_32_TSS;
         }
@@ -534,6 +587,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return 0x02;
         }
@@ -545,8 +599,8 @@ public abstract class ProtectedModeSegment extends Segment {
         public GateSegment(AddressSpace memory, int selector, long descriptor) {
             super(memory, selector, descriptor);
 
-            targetSegment = (int)((descriptor >> 16) & 0xffff);
-            targetOffset = (int)((descriptor & 0xffff) | ((descriptor >>> 32) & 0xffff0000));
+            targetSegment = (int)(descriptor >> 16 & 0xffff);
+            targetOffset = (int)(descriptor & 0xffff | descriptor >>> 32 & 0xffff0000);
         }
 
         public int getTargetSegment() {
@@ -563,10 +617,12 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
-        public final int getTargetOffset() {
+        @Override
+        public int getTargetOffset() {
             throw new IllegalStateException();
         }
 
+        @Override
         public int getType() {
             return 0x05;
         }
@@ -577,6 +633,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return 0x0e;
         }
@@ -587,6 +644,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return 0x06;
         }
@@ -597,6 +655,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return 0x0f;
         }
@@ -607,6 +666,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return 0x07;
         }
@@ -617,14 +677,15 @@ public abstract class ProtectedModeSegment extends Segment {
 
         public CallGate32Bit(AddressSpace memory, int selector, long descriptor) {
             super(memory, selector, descriptor);
-            parameterCount = (int)((descriptor >> 32) & 0xF);
+            parameterCount = (int)(descriptor >> 32 & 0xF);
         }
 
+        @Override
         public int getType() {
             return 0x0c;
         }
 
-        public final int getParameterCount() {
+        public int getParameterCount() {
             return parameterCount;
         }
     }
@@ -634,14 +695,15 @@ public abstract class ProtectedModeSegment extends Segment {
 
         public CallGate16Bit(AddressSpace memory, int selector, long descriptor) {
             super(memory, selector, descriptor);
-            parameterCount = (int)((descriptor >> 32) & 0xF);
+            parameterCount = (int)(descriptor >> 32 & 0xF);
         }
 
+        @Override
         public int getType() {
             return 0x04;
         }
 
-        public final int getParameterCount() {
+        public int getParameterCount() {
             return parameterCount;
         }
     }
@@ -651,6 +713,7 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return 0x01;
         }
@@ -661,11 +724,13 @@ public abstract class ProtectedModeSegment extends Segment {
             super(memory, selector, descriptor);
         }
 
+        @Override
         public int getType() {
             return 0x03;
         }
     }
 
+    @Override
     public void printState() {
         System.out.println("PM Mode segment");
         System.out.println("selector: " + Integer.toHexString(selector));

@@ -52,6 +52,7 @@ public class SlowTLB extends TLB {
             pageSize[i] = FOUR_K;
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(pageSize.length);
         output.write(pageSize);
@@ -60,6 +61,7 @@ public class SlowTLB extends TLB {
             output.writeInt(value.intValue());
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         int len = input.readInt();
         pageSize = new byte[len];
@@ -67,9 +69,10 @@ public class SlowTLB extends TLB {
         nonGlobalPages.clear();
         int count = input.readInt();
         for (int i = 0; i < count; i++)
-            nonGlobalPages.add(Integer.valueOf(input.readInt()));
+            nonGlobalPages.add(input.readInt());
     }
 
+    @Override
     public void setSupervisor(boolean isSupervisor) {
         if (isSupervisor) {
             readIndex = readSupervisorIndex;
@@ -80,6 +83,7 @@ public class SlowTLB extends TLB {
         }
     }
 
+    @Override
     public void setWriteProtectPages(boolean value) {
         if (value) {
             if (writeSupervisorIndex != null)
@@ -90,16 +94,16 @@ public class SlowTLB extends TLB {
 
     private Memory[] createReadIndex(boolean isSupervisor) {
         if (isSupervisor)
-            return (readIndex = readSupervisorIndex = new Memory[AddressSpace.INDEX_SIZE]);
+            return readIndex = readSupervisorIndex = new Memory[AddressSpace.INDEX_SIZE];
         else
-            return (readIndex = readUserIndex = new Memory[AddressSpace.INDEX_SIZE]);
+            return readIndex = readUserIndex = new Memory[AddressSpace.INDEX_SIZE];
     }
 
     private Memory[] createWriteIndex(boolean isSupervisor) {
         if (isSupervisor)
-            return (writeIndex = writeSupervisorIndex = new Memory[AddressSpace.INDEX_SIZE]);
+            return writeIndex = writeSupervisorIndex = new Memory[AddressSpace.INDEX_SIZE];
         else
-            return (writeIndex = writeUserIndex = new Memory[AddressSpace.INDEX_SIZE]);
+            return writeIndex = writeUserIndex = new Memory[AddressSpace.INDEX_SIZE];
     }
 
     /**
@@ -109,6 +113,7 @@ public class SlowTLB extends TLB {
      * translation tables in memory.
      * @param offset address within the page to be invalidated.
      */
+    @Override
     public void invalidateTLBEntry(int offset) {
         int index = offset >>> AddressSpace.INDEX_SHIFT;
         if (pageSize[index] == FOUR_K) {
@@ -136,6 +141,7 @@ public class SlowTLB extends TLB {
         }
     }
 
+    @Override
     public void flush() {
         for (int i = 0; i < AddressSpace.INDEX_SIZE; i++)
             pageSize[i] = FOUR_K;
@@ -150,6 +156,7 @@ public class SlowTLB extends TLB {
         writeIndex = null;
     }
 
+    @Override
     public void flushNonGlobal() {
         if (globalPagesEnabled) {
             for (Integer value : nonGlobalPages) {
@@ -170,6 +177,7 @@ public class SlowTLB extends TLB {
         globalPagesEnabled = enabled;
     }
 
+    @Override
     public void addNonGlobalPage(int addr) {
         nonGlobalPages.add(addr >>> AddressSpace.INDEX_SHIFT);
     }
@@ -225,10 +233,12 @@ public class SlowTLB extends TLB {
         }
     }
 
+    @Override
     protected void setPageSize(int addr, byte type) {
         pageSize[addr >>> AddressSpace.INDEX_SHIFT] = type;
     }
 
+    @Override
     protected void replaceBlocks(Memory oldBlock, Memory newBlock) {
         try {
             for (int i = 0; i < AddressSpace.INDEX_SIZE; i++)

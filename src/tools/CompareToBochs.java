@@ -27,11 +27,26 @@
 
 package tools;
 
-import javax.swing.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 public class CompareToBochs {
     public static String newJar = "JPCApplication.jar";
@@ -151,14 +166,14 @@ public class CompareToBochs {
 
     public static void main(String[] args) throws Exception {
         boolean mem = false;
-        if ((args.length > 0) && args[0].equals("-mem")) {
+        if (args.length > 0 && args[0].equals("-mem")) {
             mem = true;
             String[] temp = new String[args.length];
             System.arraycopy(args, 1, temp, 0, temp.length - 1);
             temp[temp.length - 1] = "-track-writes"; // Force JPC Physical memory to track dirty pages
             args = temp;
         }
-        URL[] urls1 = new URL[] { new File(newJar).toURL() };
+        URL[] urls1 = { new File(newJar).toURL() };
         ClassLoader cl1 = new URLClassLoader(urls1, Comparison.class.getClassLoader());
 
         Class opts = cl1.loadClass("org.jpc.j2se.Option");
@@ -175,7 +190,7 @@ public class CompareToBochs {
 
         Class c1 = cl1.loadClass("org.jpc.emulator.PC");
         Constructor ctor = c1.getConstructor(String[].class, Calendar.class);
-        Object newpc = ctor.newInstance((Object)pcargs, start1);
+        Object newpc = ctor.newInstance(pcargs, start1);
 
         EmulatorControl bochs = new Bochs(args[0] + ".cfg");
 
@@ -250,22 +265,22 @@ public class CompareToBochs {
                     boolean irq = (Boolean)pitIrq1.invoke(newpc);
                     if (irq) // need to lower first
                     {
-                        pitExpiry1.invoke(newpc, new Long(bochsState[16] - 10));
+                        pitExpiry1.invoke(newpc, Long.valueOf(bochsState[16] - 10));
                         // triggger PIT irq lower
-                        ints1.invoke(newpc, new Integer(0), new Boolean(false));
+                        ints1.invoke(newpc, Integer.valueOf(0), Boolean.valueOf(false));
                     }
-                    pitExpiry1.invoke(newpc, new Long(bochsState[16] - 10));
+                    pitExpiry1.invoke(newpc, Long.valueOf(bochsState[16] - 10));
                     bochsEnteredPitInt = true;
                 } else if (currentInstruction().contains("hlt")) {
                     // assume PIT caused timeout
                     boolean irq = (Boolean)pitIrq1.invoke(newpc);
                     if (irq) // need to lower first
                     {
-                        pitExpiry1.invoke(newpc, new Long(bochsState[16] - 10));
+                        pitExpiry1.invoke(newpc, Long.valueOf(bochsState[16] - 10));
                         // triggger PIT irq lower
-                        ints1.invoke(newpc, new Integer(0), new Boolean(false));
+                        ints1.invoke(newpc, Integer.valueOf(0), Boolean.valueOf(false));
                     }
-                    pitExpiry1.invoke(newpc, new Long(bochsState[16] + 10));
+                    pitExpiry1.invoke(newpc, Long.valueOf(bochsState[16] + 10));
                 } else if (nextBochs.contains("spurious interrupt")) // modify pic.cc
                 {
                     spurious1.invoke(newpc);
@@ -280,34 +295,34 @@ public class CompareToBochs {
             }
             try {
                 // increment time and check ints first to mirror bochs' behaviour of checking for an interrupt prior to execution
-                boolean jpcInInt = (Boolean)ints1.invoke(newpc, new Integer(1), new Boolean(bochsEnteredPitInt));
+                boolean jpcInInt = (Boolean)ints1.invoke(newpc, Integer.valueOf(1), Boolean.valueOf(bochsEnteredPitInt));
                 if (bochsEnteredNonPitInt && !jpcInInt && !currentInstruction().contains("int_Ib"))
                     System.out.println("Missed a spurious interrupt?");
-                if ((!jpcInInt && bochsEnteredPitInt) && !previousInstruction().contains("hlt")) {
+                if (!jpcInInt && bochsEnteredPitInt && !previousInstruction().contains("hlt")) {
                     System.out.println("Failed to force JPC to enter PIT interrupt!");
                     boolean irq = (Boolean)pitIrq1.invoke(newpc);
                     if (irq) // need to lower first
                     {
-                        pitExpiry1.invoke(newpc, new Long(bochsState[16] - 10));
+                        pitExpiry1.invoke(newpc, Long.valueOf(bochsState[16] - 10));
                         // triggger PIT irq lower
-                        ints1.invoke(newpc, new Integer(0), new Boolean(false));
+                        ints1.invoke(newpc, Integer.valueOf(0), Boolean.valueOf(false));
                     }
-                    pitExpiry1.invoke(newpc, new Long(bochsState[16] - 10));
-                    jpcInInt = (Boolean)ints1.invoke(newpc, new Integer(1), new Boolean(bochsEnteredPitInt));
+                    pitExpiry1.invoke(newpc, Long.valueOf(bochsState[16] - 10));
+                    jpcInInt = (Boolean)ints1.invoke(newpc, Integer.valueOf(1), Boolean.valueOf(bochsEnteredPitInt));
                 }
                 int blockLength = (Integer)execute1.invoke(newpc);
                 if (blockLength > 1) {
                     int index = (historyIndex - 1 + history.length) % history.length;
-                    if ((blockLength == 2) && (history[index] != null) && (((String)history[index][2]).contains("sti"))) {
+                    if (blockLength == 2 && history[index] != null && ((String)history[index][2]).contains("sti")) {
                         // don't trigger any interrupts until the next instruction, but still update clock
                         fast = (int[])state1.invoke(newpc);
                         fast[16]++;
-                        setState1.invoke(newpc, (int[])fast);
+                        setState1.invoke(newpc, fast);
                     } else
                         for (int i = 0; i < blockLength - 1; i++) {
                             fast = (int[])state1.invoke(newpc);
                             fast[16]++;
-                            setState1.invoke(newpc, (int[])fast);
+                            setState1.invoke(newpc, fast);
                             //ints1.invoke(newpc, new Integer(1));
                         }
                 }
@@ -321,7 +336,7 @@ public class CompareToBochs {
             fast = (int[])state1.invoke(newpc);
 
             try {
-                line = instructionInfo.invoke(newpc, new Integer(1)) + " == " + nextBochs; // instructions per block
+                line = instructionInfo.invoke(newpc, Integer.valueOf(1)) + " == " + nextBochs; // instructions per block
             } catch (Exception e) {
                 if (!e.toString().contains("PAGE_FAULT")) {
                     e.printStackTrace();
@@ -336,7 +351,7 @@ public class CompareToBochs {
                 throw e1;
             // account for repeated strings
             boolean missedIntDuringRep = false;
-            if ((fast[8] != bochsState[8]) && (currentInstruction().contains("rep"))) {
+            if (fast[8] != bochsState[8] && currentInstruction().contains("rep")) {
                 String bnext = "";
                 while (fast[8] != bochsState[8]) {
                     bnext = bochs.executeInstruction();
@@ -349,16 +364,16 @@ public class CompareToBochs {
                 nextBochs += bnext;
                 // now update ticks
                 fast[16] = bochsState[16];
-                setState1.invoke(newpc, (int[])fast);
+                setState1.invoke(newpc, fast);
             }
             // adjust ticks elapsed during halts
             if (fast[16] != bochsState[16]) {
                 if (currentInstruction().contains("hlt")) {
                     fast[16] = bochsState[16];
-                    setState1.invoke(newpc, (int[])fast);
+                    setState1.invoke(newpc, fast);
                 } else if (previousInstruction().contains("hlt")) {
                     fast[16] = bochsState[16] + 1;
-                    setState1.invoke(newpc, (int[])fast);
+                    setState1.invoke(newpc, fast);
                 }
             }
             // sometimes JPC does 2 instructions at once for atomicity relative to interrupts
@@ -387,7 +402,7 @@ public class CompareToBochs {
                     }
             }
             // after an exception bochs does 1 more instruction, like with interrupts, need to catch JPC up
-            if ((fast[8] != bochsState[8]) && nextBochs.contains("PMvector=0xd")) {
+            if (fast[8] != bochsState[8] && nextBochs.contains("PMvector=0xd")) {
                 execute1.invoke(newpc);
                 // don't update ticks, as bochs doesn't
                 fast = (int[])state1.invoke(newpc);
@@ -442,41 +457,41 @@ public class CompareToBochs {
             int[] prevBochs = previousBochsState();
             int[] prevFast = previousState();
             if (!sameStates(fast, bochsState, prevFast, prevBochs, compareFlags, diff)) {
-                if ((diff.size() == 1) && diff.contains(9)) {
+                if (diff.size() == 1 && diff.contains(9)) {
                     // adopt flags
                     String prevInstr = previousInstruction().split(" ")[0];
                     String secondPrevInstr = previousInstruction(2).split(" ")[0];
                     if (prevInstr.startsWith("rep"))
-                        prevInstr += ((String)(history[(historyIndex - 2) & (history.length - 1)][2])).split(" ")[1];
+                        prevInstr += ((String)history[historyIndex - 2 & history.length - 1][2]).split(" ")[1];
                     if (prevInstr.startsWith("cli") || secondPrevInstr.startsWith("cli")) {
                         if ((fast[9] ^ bochsState[9]) == 0x200) {
                             fast[9] = bochsState[9];
-                            setState1.invoke(newpc, (int[])fast);
+                            setState1.invoke(newpc, fast);
                         }
                     }
 
                     if (previousLss) {
                         previousLss = false;
                         fast[9] = bochsState[9];
-                        setState1.invoke(newpc, (int[])fast);
+                        setState1.invoke(newpc, fast);
                     } else if (flagIgnores.containsKey(prevInstr)) {
                         int mask = flagIgnores.get(prevInstr);
                         if ((fast[9] & mask) == (bochsState[9] & mask)) {
                             fast[9] = bochsState[9];
-                            setState1.invoke(newpc, (int[])fast);
+                            setState1.invoke(newpc, fast);
                         }
                     } else if ((fast[9] & flagAdoptMask) == (bochsState[9] & flagAdoptMask)) {
                         fast[9] = bochsState[9];
-                        setState1.invoke(newpc, (int[])fast);
+                        setState1.invoke(newpc, fast);
                     }
                     if (prevInstr.equals("lss"))
                         previousLss = true;
 
-                } else if ((diff.size() == 1) && diff.contains(0)) {
+                } else if (diff.size() == 1 && diff.contains(0)) {
                     if ((fast[0] ^ bochsState[0]) == 0x10) {
                         //often eax is loaded with flags which contain arbitrary AF values, ignore these
                         fast[0] = bochsState[0];
-                        setState1.invoke(newpc, (int[])fast);
+                        setState1.invoke(newpc, fast);
                     } else if (previousInstruction().startsWith("in ")) // IO port read
                     {
                         // print before and after state, then adopt reg
@@ -487,17 +502,17 @@ public class CompareToBochs {
                             //printLast2();
                         }
                         fast[0] = bochsState[0];
-                        setState1.invoke(newpc, (int[])fast);
+                        setState1.invoke(newpc, fast);
                     } else if (previousInstruction().contains("ds:0x46c")) // a read from a CMOS counter to eax
                     {
                         fast[0] = bochsState[0];
-                        setState1.invoke(newpc, (int[])fast);
+                        setState1.invoke(newpc, fast);
                     }
-                } else if ((fast[0] >= 0xa8000) && (fast[0] < 0xb0000) && previousInstruction(1).startsWith("movzx edx,BYTE PTR [eax]")) // see smm_init in rombios32.c
+                } else if (fast[0] >= 0xa8000 && fast[0] < 0xb0000 && previousInstruction(1).startsWith("movzx edx,BYTE PTR [eax]")) // see smm_init in rombios32.c
                 {
                     fast[2] = bochsState[2];
-                    setState1.invoke(newpc, (int[])fast);
-                } else if ((previousState()[2] == 0xb2) && previousInstruction(2).startsWith("out dx")) // entered SMM
+                    setState1.invoke(newpc, fast);
+                } else if (previousState()[2] == 0xb2 && previousInstruction(2).startsWith("out dx")) // entered SMM
                 {
                     String bochsDisam = nextBochs;
                     String prev = null;
@@ -507,7 +522,7 @@ public class CompareToBochs {
                         bochsState = bochs.getState();
                     }
                     fast[16] = bochsState[16];
-                    setState1.invoke(newpc, (int[])fast);
+                    setState1.invoke(newpc, fast);
                     System.out.println("Remote returned from SMM with: " + prev + " and ticks: " + fast[16]);
                 }
                 diff.clear();
@@ -516,7 +531,7 @@ public class CompareToBochs {
                     for (int diffIndex : diff)
                         System.out.printf("Difference: %s %08x - %08x : ^ %08x\n", EmulatorControl.names[diffIndex], fast[diffIndex],
                             bochsState[diffIndex], fast[diffIndex] ^ bochsState[diffIndex]);
-                    setState1.invoke(newpc, (int[])bochsState);
+                    setState1.invoke(newpc, bochsState);
                     if (diff.contains(8)) {
 
                         System.out.println("going to STOP!!");
@@ -588,7 +603,7 @@ public class CompareToBochs {
             dirty1.invoke(newpc, dirtyPages);
             // relevant to win311 RM
             if (missedIntDuringRep) // add stack to catch changes due to interrupts during the rep X
-                dirtyPages.add((bochsState[32] + bochsState[4]) >> 12);
+                dirtyPages.add(bochsState[32] + bochsState[4] >> 12);
             // relevant to win311 PM
             if ((bochsState[36] & 1) != 0) {
                 dirtyPages.add(0x1fa);
@@ -597,13 +612,13 @@ public class CompareToBochs {
 //                dirtyPages.add(0x1f8);
             }
             for (int i : dirtyPages) {
-                Integer l1 = (Integer)save1.invoke(newpc, new Integer(i << 12), sdata1);
-                Integer l2 = bochs.getPhysicalPage(new Integer(i << 12), sdata2);
-                if ((l2 > 0) && (l1 > 0)) {
+                Integer l1 = (Integer)save1.invoke(newpc, Integer.valueOf(i << 12), sdata1);
+                Integer l2 = bochs.getPhysicalPage(i << 12, sdata2);
+                if (l2 > 0 && l1 > 0) {
                     List<Integer> addrs = new ArrayList<Integer>();
                     if (!samePage(i, sdata1, sdata2, addrs)) {
-                        if (missedIntDuringRep && (i == (bochsState[32] + bochsState[4]) >> 12)) {
-                            load1.invoke(newpc, new Integer(i << 12), sdata2, false);
+                        if (missedIntDuringRep && i == bochsState[32] + bochsState[4] >> 12) {
+                            load1.invoke(newpc, Integer.valueOf(i << 12), sdata2, false);
                             System.out.println(
                                 "Adopted stack page after rep instruction (assuming difference came from pit int during rep in bochs): "
                                     + nextBochs);
@@ -612,16 +627,16 @@ public class CompareToBochs {
                         for (int j : dirtyPages)
                             System.out.printf(" %08x", j << 12);
                         System.out.println(" after " + previousInstruction());
-                        if ((addrs.size() != 1) || !addrs.contains(0x46c)) {
+                        if (addrs.size() != 1 || !addrs.contains(0x46c)) {
                             printHistory();
                             System.out.println("Error here... look above for instruction causing diff");
                             printPage(sdata1, sdata2, i << 12);
                             if (continueExecution("memory"))
-                                load1.invoke(newpc, new Integer(i << 12), sdata2, false);
+                                load1.invoke(newpc, Integer.valueOf(i << 12), sdata2, false);
                             else
                                 System.exit(0);
                         } else
-                            load1.invoke(newpc, new Integer(i << 12), sdata2, false);
+                            load1.invoke(newpc, Integer.valueOf(i << 12), sdata2, false);
                     }
                 }
             }
@@ -635,7 +650,7 @@ public class CompareToBochs {
         int EIP = curr[8];
 //        if (Math.abs(ESP-prevESP) < 4) STI, POP would give =4
 //            return false;
-        if ((EIP == 0xfea5) || (EIP == 0xfea6) || (EIP == 0xfea8))
+        if (EIP == 0xfea5 || EIP == 0xfea6 || EIP == 0xfea8)
             return true;
         return false;
     }
@@ -651,7 +666,7 @@ public class CompareToBochs {
             lastPIT0Count = bochsPIT[0];
             boolean same = true;
             for (int i = 0; i < jpcPIT.length; i++) {
-                if ((jpcPIT[i] != bochsPIT[i]) && (i % 4 != 2) && (i % 4 != 3)) // ignore next_change_time slot, and outPin
+                if (jpcPIT[i] != bochsPIT[i] && i % 4 != 2 && i % 4 != 3) // ignore next_change_time slot, and outPin
                 {
                     same = false;
                     break;
@@ -680,30 +695,30 @@ public class CompareToBochs {
 
     private static void compareStacks(int espPageIndex, int esp, Method save1, Object newpc, byte[] sdata1, EmulatorControl bochs,
         byte[] sdata2, boolean pm, Method load1) throws Exception {
-        Integer sl1 = (Integer)save1.invoke(newpc, new Integer(espPageIndex), sdata1, pm);
+        Integer sl1 = (Integer)save1.invoke(newpc, Integer.valueOf(espPageIndex), sdata1, pm);
         Integer sl2;
         if (pm)
-            sl2 = bochs.getLinearPage(new Integer(espPageIndex), sdata2);
+            sl2 = bochs.getLinearPage(espPageIndex, sdata2);
         else
-            sl2 = bochs.getPhysicalPage(new Integer(espPageIndex), sdata2);
+            sl2 = bochs.getPhysicalPage(espPageIndex, sdata2);
         List<Integer> addrs = new ArrayList();
         if (sl2 > 0)
             if (!samePage(espPageIndex, sdata1, sdata2, addrs)) {
                 int addr = addrs.get(0);
-                if ((addrs.size() == 1) && ((sdata1[addr] ^ sdata2[addr]) == 0x10)) { // ignore differences from pushing different AF to stack
+                if (addrs.size() == 1 && (sdata1[addr] ^ sdata2[addr]) == 0x10) { // ignore differences from pushing different AF to stack
                     System.out.println("ignoring different AF on stack...");
-                    load1.invoke(newpc, new Integer(espPageIndex), sdata2, pm);
+                    load1.invoke(newpc, Integer.valueOf(espPageIndex), sdata2, pm);
                 } else {
                     printHistory();
                     System.out.println("Error here... look above");
                     printPage(sdata1, sdata2, esp);
-                    load1.invoke(newpc, new Integer(espPageIndex), sdata2, pm);
+                    load1.invoke(newpc, Integer.valueOf(espPageIndex), sdata2, pm);
                 }
             }
     }
 
     private static String currentInstruction() {
-        Object[] prev = history[(((historyIndex - 1) % history.length) + history.length) % history.length];
+        Object[] prev = history[((historyIndex - 1) % history.length + history.length) % history.length];
         if (prev == null)
             return "null";
         return (String)prev[2];
@@ -714,21 +729,21 @@ public class CompareToBochs {
     }
 
     private static String previousInstruction(int i) {
-        Object[] prev = history[(((historyIndex - (1 + i)) % history.length) + history.length) % history.length];
+        Object[] prev = history[((historyIndex - (1 + i)) % history.length + history.length) % history.length];
         if (prev == null)
             return "null";
         return (String)prev[2];
     }
 
     private static int[] previousState() {
-        Object[] prev = history[(((historyIndex - 2) % history.length) + history.length) % history.length];
+        Object[] prev = history[((historyIndex - 2) % history.length + history.length) % history.length];
         if (prev == null)
             return null;
         return (int[])prev[0];
     }
 
     private static int[] previousBochsState() {
-        Object[] prev = history[(((historyIndex - 2) % history.length) + history.length) % history.length];
+        Object[] prev = history[((historyIndex - 2) % history.length + history.length) % history.length];
         if (prev == null)
             return null;
         return (int[])prev[1];
@@ -809,19 +824,19 @@ public class CompareToBochs {
     }
 
     public static int getInt(byte[] data, int offset) {
-        return ((data[offset] & 0xff) << 24) | ((data[offset + 1] & 0xff) << 16) | ((data[offset + 2] & 0xff) << 8)
-            | ((data[offset + 3] & 0xff) << 0);
+        return (data[offset] & 0xff) << 24 | (data[offset + 1] & 0xff) << 16 | (data[offset + 2] & 0xff) << 8
+            | (data[offset + 3] & 0xff) << 0;
     }
 
     public static void printIntChars(int i, int c) {
-        int[] ia = new int[] { ((i >> 24) & 0xFF), ((i >> 16) & 0xFF), ((i >> 8) & 0xFF), ((i >> 0) & 0xFF) };
-        int[] ca = new int[] { ((c >> 24) & 0xFF), ((c >> 16) & 0xFF), ((c >> 8) & 0xFF), ((c >> 0) & 0xFF) };
+        int[] ia = { i >> 24 & 0xFF, i >> 16 & 0xFF, i >> 8 & 0xFF, i >> 0 & 0xFF };
+        int[] ca = { c >> 24 & 0xFF, c >> 16 & 0xFF, c >> 8 & 0xFF, c >> 0 & 0xFF };
 
         for (int a = 0; a < 4; a++)
             if (ia[a] == ca[a])
-                System.out.printf("%c", (ia[a] == 0 ? ' ' : (char)ia[a]));
+                System.out.printf("%c", ia[a] == 0 ? ' ' : (char)ia[a]);
             else
-                System.out.printf("\u001b[1;44m%c\u001b[1;49m", (ia[a] == 0 ? ' ' : (char)ia[a]));
+                System.out.printf("\u001b[1;44m%c\u001b[1;49m", ia[a] == 0 ? ' ' : (char)ia[a]);
         System.out.printf(" ");
     }
 
@@ -846,13 +861,13 @@ public class CompareToBochs {
         boolean same = true;
         for (int i = 0; i < fast.length; i++)
             if (i != 9) {
-                if ((fast[i] != old[i]) && ((old[i] != prevOld[i]) || (prevFast[i] != fast[i]))) // don't keep reporting the same thing
+                if (fast[i] != old[i] && (old[i] != prevOld[i] || prevFast[i] != fast[i])) // don't keep reporting the same thing
                 {
                     diff.add(i);
                     same = false;
                 }
             } else {
-                if (compareFlags && ((fast[i] & flagMask) != (old[i] & flagMask))) {
+                if (compareFlags && (fast[i] & flagMask) != (old[i] & flagMask)) {
                     if (same) {
                         same = false;
                         diff.add(i);
@@ -899,6 +914,7 @@ public class CompareToBochs {
             this.buttons = buttons;
         }
 
+        @Override
         public int compareTo(MouseEvent o) {
             return (int)(time - o.time);
         }
@@ -913,6 +929,7 @@ public class CompareToBochs {
             this.text = text;
         }
 
+        @Override
         public int compareTo(KeyBoardEvent o) {
             return (int)(time - o.time);
         }

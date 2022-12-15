@@ -1,12 +1,10 @@
 package tools;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.jpc.emulator.execution.decoder.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class TestGenerator {
     public static void main(String[] args) throws Exception {
@@ -41,8 +39,8 @@ public class TestGenerator {
         for (byte b : raw)
             out.append(String.format("%02x ", b));
         out.newLine();
-        for (int i = 0; i < inputState.length; i++)
-            out.append(String.format("%08x ", inputState[i]));
+        for (int element : inputState)
+            out.append(String.format("%08x ", element));
         // memory input values
 
         out.append("\n*****\n");

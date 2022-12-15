@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,34 @@
 
 package org.jpc.j2se;
 
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.logging.*;
+import java.awt.AWTError;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.HeadlessException;
+import java.awt.KeyboardFocusManager;
+import java.awt.LayoutManager;
+import java.awt.Point;
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 
 /**
  * @author Rhys Newman
@@ -73,7 +95,6 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
     }
 
     public KeyHandlingPanel() {
-        super();
         init();
     }
 
@@ -95,7 +116,7 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
     }
 
     public boolean mouseCaptureEnabled() {
-        return mouseCaptureEnabled && (robot != null);
+        return mouseCaptureEnabled && robot != null;
     }
 
     protected void init() {
@@ -124,9 +145,11 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
     protected void repeatedKeyPress(int keyCode) {
     }
 
+    @Override
     public void focusGained(FocusEvent e) {
     }
 
+    @Override
     public void focusLost(FocusEvent e) {
         Set<Integer> keysDown;
 
@@ -139,11 +162,12 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
             keyReleased(code.intValue());
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
         boolean isRepeat;
 
         synchronized (this) {
-            isRepeat = !keyPressedSet.add(Integer.valueOf(e.getKeyCode()));
+            isRepeat = !keyPressedSet.add(e.getKeyCode());
         }
 
         if (isRepeat)
@@ -154,6 +178,7 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
         e.consume();
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
         synchronized (this) {
             keyPressedSet.remove(Integer.valueOf(e.getKeyCode()));
@@ -163,6 +188,7 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
         e.consume();
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {
         e.consume();
     }
@@ -172,6 +198,7 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
             comp.setFocusable(true);
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
             if (e.getButton() == MouseEvent.BUTTON1)
@@ -183,8 +210,9 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
         requestFocusInWindow();
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
-        if (!inputsLocked || (robot != null))
+        if (!inputsLocked || robot != null)
             return;
 
         int tolerance = 20;
@@ -204,11 +232,13 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
             mouseEventReceived(0, rate, 0, currentButtons);
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
-        if (!inputsLocked || (robot != null))
-            return;
+        if (!inputsLocked || robot != null) {
+        }
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
         if (!inputsLocked)
             return;
@@ -227,11 +257,12 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
 
         mouseEventReceived(0, 0, 0, currentButtons);
 
-        int mask = e.BUTTON3_DOWN_MASK | e.CTRL_DOWN_MASK;
+        int mask = InputEvent.BUTTON3_DOWN_MASK | InputEvent.CTRL_DOWN_MASK;
         if ((e.getModifiersEx() & mask) == mask)
             unlockInputs();
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
         if (!inputsLocked)
             return;
@@ -251,14 +282,17 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
         mouseEventReceived(0, 0, 0, currentButtons);
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
         movedMouse(e);
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
         movedMouse(e);
     }
 
+    @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         if (!inputsLocked)
             return;
@@ -309,7 +343,7 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
             mx = e.getX() - win_w2;
             my = e.getY() - win_h2;
 
-            if ((mx == 0) && (my == 0))
+            if (mx == 0 && my == 0)
                 return;
             robot.mouseMove(win_x + win_w2, win_y + win_h2);
         }

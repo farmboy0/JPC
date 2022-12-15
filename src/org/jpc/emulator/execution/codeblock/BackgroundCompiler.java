@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,11 +33,10 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.BasicBlock;
-import org.jpc.emulator.processor.*;
+import org.jpc.emulator.processor.Processor;
 
 /**
  * @author Rhys Newman
@@ -64,7 +63,7 @@ class BackgroundCompiler implements CodeBlockCompiler {
 //            compilerCount = 1;
 //        else if (compilerCount > MAX_COMPILER_THREADS)
 //            compilerCount = MAX_COMPILER_THREADS;
-//        
+//
 //        while (compilerCount-- > 0) {
 //        Thread t = new Thread(new Compiler(), "Background CodeBlock Compiler Thread " + compilerCount);
 //        try {
@@ -74,11 +73,12 @@ class BackgroundCompiler implements CodeBlockCompiler {
 //        }
 //        t.setDaemon(true);
 //        t.start();
-//        }        
+//        }
     }
 
     private class Compiler implements Runnable {
 
+        @Override
         public void run() {
             while (true) {
                 ExecuteCountingCodeBlockWrapper target = compilerQueue.getBlock();
@@ -99,9 +99,9 @@ class BackgroundCompiler implements CodeBlockCompiler {
                 if (src instanceof ReplacementBlockTrigger) {
                     continue;
                 } else if (src instanceof RealModeCodeBlock) {
-                    result = delayed.getRealModeCodeBlock((BasicBlock)src);
+                    result = delayed.getRealModeCodeBlock(src);
                 } else if (src instanceof ProtectedModeCodeBlock) {
-                    result = delayed.getProtectedModeCodeBlock((BasicBlock)src);
+                    result = delayed.getProtectedModeCodeBlock(src);
                 }
 
                 if (result == null) {
@@ -113,16 +113,19 @@ class BackgroundCompiler implements CodeBlockCompiler {
         }
     }
 
+    @Override
     public RealModeCodeBlock getRealModeCodeBlock(CodeBlock block) {
         RealModeCodeBlock imm = immediate.getRealModeCodeBlock(block);
         return new RealModeCodeBlockWrapper(imm);
     }
 
+    @Override
     public ProtectedModeCodeBlock getProtectedModeCodeBlock(CodeBlock block) {
         ProtectedModeCodeBlock imm = immediate.getProtectedModeCodeBlock(block);
         return new ProtectedModeCodeBlockWrapper(imm);
     }
 
+    @Override
     public Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(CodeBlock block) {
         Virtual8086ModeCodeBlock imm = immediate.getVirtual8086ModeCodeBlock(block);
         return new Virtual8086ModeCodeBlockWrapper(imm);
@@ -137,9 +140,10 @@ class BackgroundCompiler implements CodeBlockCompiler {
             super(block);
         }
 
+        @Override
         public Executable.Branch execute(Processor cpu) {
             executeCount++;
-            if ((executeCount % COMPILE_REQUEST_THRESHOLD) == 0) {
+            if (executeCount % COMPILE_REQUEST_THRESHOLD == 0) {
                 if (!queued)
                     queued = compilerQueue.addBlock(this);
             }
@@ -197,7 +201,7 @@ class BackgroundCompiler implements CodeBlockCompiler {
             int index = 0;
             int maxCount = 0;
             for (int i = 0; i < queue.length; i++) {
-                if ((queue[i] != null) && (queue[i].executeCount > maxCount)) {
+                if (queue[i] != null && queue[i].executeCount > maxCount) {
                     maxCount = queue[i].executeCount;
                     index = i;
                 }

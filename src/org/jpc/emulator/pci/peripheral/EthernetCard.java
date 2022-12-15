@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,15 +33,23 @@
 
 package org.jpc.emulator.pci.peripheral;
 
-import org.jpc.emulator.pci.*;
-import org.jpc.emulator.motherboard.IOPortHandler;
-import org.jpc.emulator.AbstractHardwareComponent;
-
-import java.io.*;
-import java.net.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Random;
-import java.util.logging.*;
-import org.jpc.support.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.motherboard.IOPortHandler;
+import org.jpc.emulator.pci.AbstractPCIDevice;
+import org.jpc.emulator.pci.IOPortIORegion;
+import org.jpc.emulator.pci.IORegion;
+import org.jpc.support.EthernetOutput;
+import org.jpc.support.EthernetProxy;
 
 /**
  * Realtek 8029 (AS) Emulation based on the Bochs ne2000 emulation
@@ -125,9 +133,9 @@ public class EthernetCard extends AbstractPCIDevice {
     private static final byte ENTSR_FU = (byte)0x20; // A "FIFO underrun" occurred during transmit. */
     private static final byte ENTSR_CDH = (byte)0x40; // The collision detect "heartbeat" signal was lost. */
     private static final byte ENTSR_OWC = (byte)0x80; // There was an out-of-window collision. */
-    private static final int NE2000_PMEM_SIZE = (32 * 1024);
-    private static final int NE2000_PMEM_START = (16 * 1024);
-    private static final int NE2000_PMEM_END = (NE2000_PMEM_SIZE + NE2000_PMEM_START);
+    private static final int NE2000_PMEM_SIZE = 32 * 1024;
+    private static final int NE2000_PMEM_START = 16 * 1024;
+    private static final int NE2000_PMEM_END = NE2000_PMEM_SIZE + NE2000_PMEM_START;
     private static final int NE2000_MEM_SIZE = NE2000_PMEM_END;
 
     //Instance (State) Properties
@@ -187,6 +195,7 @@ public class EthernetCard extends AbstractPCIDevice {
         internalReset();
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeByte(command);
         output.writeInt(start);
@@ -213,6 +222,7 @@ public class EthernetCard extends AbstractPCIDevice {
         //let's ignore it for now
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         command = input.readByte();
         start = input.readInt();
@@ -255,6 +265,7 @@ public class EthernetCard extends AbstractPCIDevice {
         ioportHandler.registerIOPortCapable(ioRegion);
     }
 
+    @Override
     public void reset() {
         putConfigWord(PCI_CONFIG_VENDOR_ID, (short)0x10ec); // Realtek
         putConfigWord(PCI_CONFIG_DEVICE_ID, (short)0x8029); // 8029
@@ -299,10 +310,12 @@ public class EthernetCard extends AbstractPCIDevice {
 
     //PCIDevice Methods
     //IOPort Registration Aids
+    @Override
     public IORegion[] getIORegions() {
         return new IORegion[] { ioRegion };
     }
 
+    @Override
     public IORegion getIORegion(int index) {
         if (index == 0)
             return ioRegion;
@@ -318,37 +331,45 @@ public class EthernetCard extends AbstractPCIDevice {
             address = -1;
         }
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(address);
         }
 
+        @Override
         public void loadState(DataInput input) throws IOException {
             address = input.readInt();
         }
 
         //IORegion Methods
+        @Override
         public int getAddress() {
             return address;
         }
 
+        @Override
         public long getSize() {
             return 0x100;
         }
 
+        @Override
         public int getType() {
             return PCI_ADDRESS_SPACE_IO;
         }
 
+        @Override
         public int getRegionNumber() {
             return 0;
         }
 
+        @Override
         public void setAddress(int address) {
             this.address = address;
             LOGGING.log(Level.FINE, "Ethernet IO address is " + Integer.toHexString(address));
         }
 
         //IODevice Methods
+        @Override
         public void ioPortWrite8(int address, int data) {
             switch (address - this.getAddress()) {
             case 0x00:
@@ -381,6 +402,7 @@ public class EthernetCard extends AbstractPCIDevice {
             }
         }
 
+        @Override
         public void ioPortWrite16(int address, int data) {
             switch (address - this.getAddress()) {
             case 0x10:
@@ -393,6 +415,7 @@ public class EthernetCard extends AbstractPCIDevice {
             }
         }
 
+        @Override
         public void ioPortWrite32(int address, int data) {
             switch (address - this.getAddress()) {
             case 0x10:
@@ -406,6 +429,7 @@ public class EthernetCard extends AbstractPCIDevice {
             }
         }
 
+        @Override
         public int ioPortRead8(int address) {
             switch (address - this.getAddress()) {
             case 0x00:
@@ -434,6 +458,7 @@ public class EthernetCard extends AbstractPCIDevice {
             }
         }
 
+        @Override
         public int ioPortRead16(int address) {
             switch (address - this.getAddress()) {
             case 0x10:
@@ -444,6 +469,7 @@ public class EthernetCard extends AbstractPCIDevice {
             }
         }
 
+        @Override
         public int ioPortRead32(int address) {
             switch (address - this.getAddress()) {
             case 0x10:
@@ -456,6 +482,7 @@ public class EthernetCard extends AbstractPCIDevice {
             }
         }
 
+        @Override
         public int[] ioPortsRequested() {
             int addr = this.getAddress();
             int[] temp = new int[32];
@@ -483,24 +510,24 @@ public class EthernetCard extends AbstractPCIDevice {
             }
 
             //update remote DMA command
-            command = (byte)((data & 0x38) | (command & ~0x38));
-            if (((command & E8390_START) == 0) && (0 != (data & E8390_START))) {
+            command = (byte)(data & 0x38 | command & ~0x38);
+            if ((command & E8390_START) == 0 && 0 != (data & E8390_START)) {
                 isr = (byte)(isr & ~ENISR_RESET);
             }
             //set start, and page select
-            command = (byte)((command & ~0xc2) | (data & 0xc2));
+            command = (byte)(command & ~0xc2 | data & 0xc2);
 
             //check for send packet command
             if ((command & 0x38) == 0x18) {
                 //setup dma read from receive ring
-                rsar = ((short)boundary) << 8;
-                rcnt = (short)(2);
+                rsar = boundary << 8;
+                rcnt = (short)2;
                 System.out.println("After send packet command, setting rcnt to " + 2);
             }
 
             //check for start tx
-            if ((0 != (data & E8390_TRANS)) && ((txcr & 0x6) != 0)) {
-                int loop_control = (txcr & 0x6);
+            if (0 != (data & E8390_TRANS) && (txcr & 0x6) != 0) {
+                int loop_control = txcr & 0x6;
                 if (loop_control != 2) {
                     System.out.println("ETH: Loop mode " + (loop_control >> 1) + " not supported.");
                 } else {
@@ -509,7 +536,7 @@ public class EthernetCard extends AbstractPCIDevice {
                     receivePacket(packet);
                 }
             } else if (0 != (data & E8390_TRANS)) {
-                if ((0 != (command & E8390_STOP)) || ((0 == (command & E8390_START)) && (!initialised()))) {
+                if (0 != (command & E8390_STOP) || 0 == (command & E8390_START) && !initialised()) {
                     if (tcnt == 0) {
                         return;
                     }
@@ -520,7 +547,7 @@ public class EthernetCard extends AbstractPCIDevice {
                 }
                 //now send the packet
                 command |= 0x4;
-                int index = ((tpsr & 0xFF) << 8);
+                int index = (tpsr & 0xFF) << 8;
                 outputDevice.sendPacket(memory, index, tcnt);
                 /* signal end of transfer */
                 tsr = ENTSR_PTX;
@@ -529,7 +556,7 @@ public class EthernetCard extends AbstractPCIDevice {
 
                 //linux probes for an interrupt by setting up a remote dma read of 0 bytes
                 //with remote dma completion interrupts enabled
-                if ((rcnt == 0) && (0 != (command & E8390_START)) && ((command & 0x38) == 0x8)) {
+                if (rcnt == 0 && 0 != (command & E8390_START) && (command & 0x38) == 0x8) {
                     isr = (byte)(isr | ENISR_RDC);
                     this.updateIRQ();
                 }
@@ -551,7 +578,7 @@ public class EthernetCard extends AbstractPCIDevice {
 //                }
         } else {
             int page = command >> 6;
-            int offset = address | (page << 4);
+            int offset = address | page << 4;
             switch (offset) {
             case EN0_STARTPG:
                 start = data & 0xFF;
@@ -566,26 +593,26 @@ public class EthernetCard extends AbstractPCIDevice {
                 tpsr = data;
                 break;
             case EN0_TCNTLO:
-                tcnt = (short)((tcnt & 0xff00) | data);
+                tcnt = (short)(tcnt & 0xff00 | data);
                 break;
             case EN0_TCNTHI:
-                tcnt = (short)((tcnt & 0x00ff) | (((short)data) << 8));
+                tcnt = (short)(tcnt & 0x00ff | data << 8);
                 break;
             case EN0_ISR:
                 isr = (byte)(isr & ~(data & 0x7f));
                 this.updateIRQ();
                 break;
             case EN0_RSARLO:
-                rsar = ((rsar & 0xff00) | data);
+                rsar = rsar & 0xff00 | data;
                 break;
             case EN0_RSARHI:
-                rsar = ((rsar & 0x00ff) | (data << 8));
+                rsar = rsar & 0x00ff | data << 8;
                 break;
             case EN0_RCNTLO:
-                rcnt = (short)((rcnt & 0xff00) | data);
+                rcnt = (short)(rcnt & 0xff00 | data);
                 break;
             case EN0_RCNTHI:
-                rcnt = (short)((rcnt & 0x00ff) | (((short)data) << 8));
+                rcnt = (short)(rcnt & 0x00ff | data << 8);
                 break;
             case EN0_RXCR:
                 if ((data & 0xc0) != 0)
@@ -598,7 +625,7 @@ public class EthernetCard extends AbstractPCIDevice {
                 //test loop mode (not supported)
                 if ((data & 0x6) != 0) {
                     System.out.println("ETH: Loop mode " + ((data & 0x6) >> 1) + " not supported.");
-                    txcr |= (data & 0x6);
+                    txcr |= data & 0x6;
                 } else {
                     txcr &= ~0x6;
                 }
@@ -688,7 +715,7 @@ public class EthernetCard extends AbstractPCIDevice {
         if (address == E8390_CMD)
             return command;
         int page = command >> 6;
-        int offset = address | (page << 4);
+        int offset = address | page << 4;
         switch (offset) {
         case EN0_BOUNDARY:
             return boundary;
@@ -744,7 +771,7 @@ public class EthernetCard extends AbstractPCIDevice {
             this.dmaUpdate(2);
         } else {
             /* 8 bit access */
-            ret = (short)this.memoryReadByte(rsar);
+            ret = this.memoryReadByte(rsar);
             ret &= 0xff;
             this.dmaUpdate(1);
         }
@@ -759,7 +786,7 @@ public class EthernetCard extends AbstractPCIDevice {
             this.dmaUpdate(2);
         } else {
             /* 8 bit access */
-            ret = (short)this.memoryReadByte(rsar);
+            ret = this.memoryReadByte(rsar);
             ret &= 0xff;
             this.dmaUpdate(1);
         }
@@ -822,7 +849,7 @@ public class EthernetCard extends AbstractPCIDevice {
     }
 
     private byte memoryReadByte(int address) {
-        if (address < 32 || (address >= NE2000_PMEM_START && address < NE2000_MEM_SIZE)) {
+        if (address < 32 || address >= NE2000_PMEM_START && address < NE2000_MEM_SIZE) {
             return memory[address];
         } else {
             System.out.println("Out of bounds ETH chip memory read: " + Integer.toHexString(address));
@@ -832,7 +859,7 @@ public class EthernetCard extends AbstractPCIDevice {
 
     private short memoryReadWord(int address) {
         address &= ~1;
-        if (address < 32 || (address >= NE2000_PMEM_START && address < NE2000_MEM_SIZE)) {
+        if (address < 32 || address >= NE2000_PMEM_START && address < NE2000_MEM_SIZE) {
             short val = (short)(0xff & memory[address]);
             val |= memory[address + 1] << 8;
             return val;
@@ -844,8 +871,8 @@ public class EthernetCard extends AbstractPCIDevice {
 
     private int memoryReadLong(int address) {
         address &= ~1;
-        if (address < 32 || (address >= NE2000_PMEM_START && address < NE2000_MEM_SIZE)) {
-            int val = (0xff & memory[address]);
+        if (address < 32 || address >= NE2000_PMEM_START && address < NE2000_MEM_SIZE) {
+            int val = 0xff & memory[address];
             val |= (0xff & memory[address + 1]) << 8;
             val |= (0xff & memory[address + 2]) << 16;
             val |= (0xff & memory[address + 3]) << 24;
@@ -873,11 +900,11 @@ public class EthernetCard extends AbstractPCIDevice {
         for (int i = 0; i < 6; i++) {
             b = buf[index++];
             for (int j = 0; j < 8; j++) {
-                carry = (((crc & 0x80000000L) != 0) ? 1 : 0) ^ (b & 0x01);
+                carry = ((crc & 0x80000000L) != 0 ? 1 : 0) ^ b & 0x01;
                 crc = crc << 1;
                 b = (byte)(b >>> 1);
                 if (carry > 0)
-                    crc = ((crc ^ POLYNOMIAL) | carry);
+                    crc = crc ^ POLYNOMIAL | carry;
             }
         }
         return crc >>> 26;
@@ -913,8 +940,8 @@ public class EthernetCard extends AbstractPCIDevice {
         if ((rxcr & 0x10) != 0) {
             System.out.println("Receiving packet in prom mode");
             //promiscuous: receive all
-        } else if ((packet[0] == 0xFF) && (packet[1] == 0xFF) && (packet[2] == 0xFF) && (packet[3] == 0xFF) && (packet[4] == 0xFF)
-            && (packet[5] == 0xFF)) {
+        } else if (packet[0] == 0xFF && packet[1] == 0xFF && packet[2] == 0xFF && packet[3] == 0xFF && packet[4] == 0xFF
+            && packet[5] == 0xFF) {
             //broadcast address
             if ((rxcr & 0x04) == 0)
                 return;
@@ -925,8 +952,8 @@ public class EthernetCard extends AbstractPCIDevice {
             //mcastIdx = computeCRC(packet);
             //if ((mult[mcastIdx >>> 3] & (1 << (mcastIdx & 7))) == 0)
             //    return;
-        } else if ((memory[0] == packet[0]) && (memory[2] == packet[1]) && (memory[4] == packet[2]) && (memory[6] == packet[3])
-            && (memory[8] == packet[4]) && (memory[10] == packet[5])) {
+        } else if (memory[0] == packet[0] && memory[2] == packet[1] && memory[4] == packet[2] && memory[6] == packet[3]
+            && memory[8] == packet[4] && memory[10] == packet[5]) {
             //this is us!
         } else {
             System.out.println("Weird ETH packet recieved");
@@ -948,7 +975,7 @@ public class EthernetCard extends AbstractPCIDevice {
 //            return;
 
         if (next >= stop)
-            next -= (stop - start);
+            next -= stop - start;
         //prepare packet header
         rsr = ENRSR_RXOK; // receive status
         //check this
@@ -957,17 +984,17 @@ public class EthernetCard extends AbstractPCIDevice {
         memory[index] = 1;// (was rsr)
         if ((packet[0] & 1) != 0)
             memory[index] |= 0x20;
-        memory[index + 1] = (byte)(next);
+        memory[index + 1] = (byte)next;
         memory[index + 2] = (byte)totalLen;
         memory[index + 3] = (byte)(totalLen >>> 8);
         index += 4;
 
         //write packet data
-        if ((next > curpag) || (curpag + pages == stop)) {
+        if (next > curpag || curpag + pages == stop) {
             System.arraycopy(packet, 0, memory, index, packet.length);
             System.arraycopy(phys, 0, memory, index, 6);
         } else {
-            int endSize = (stop - curpag) << 8;
+            int endSize = stop - curpag << 8;
             System.arraycopy(packet, 0, memory, index, endSize - 4);
             int startIndex = start * 256;
             System.arraycopy(packet, endSize - 4, memory, startIndex, packet.length + 4 - (endSize - 4));
@@ -981,6 +1008,7 @@ public class EthernetCard extends AbstractPCIDevice {
     private class DefaultOutput extends EthernetOutput {
         DataOutputStream dos;
 
+        @Override
         public void sendPacket(byte[] data, int offset, int length) {
             LOGGING.log(Level.FINE, "Sent packet on default output");
             try {
@@ -996,6 +1024,7 @@ public class EthernetCard extends AbstractPCIDevice {
             }
         }
 
+        @Override
         public byte[] getPacket() {
             return null;
         }

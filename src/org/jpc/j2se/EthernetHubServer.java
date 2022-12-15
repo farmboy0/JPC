@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -40,7 +40,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,6 +62,7 @@ public class EthernetHubServer implements Runnable {
         System.out.println("Started EthernetHub Server on port " + port);
     }
 
+    @Override
     public void run() {
         //wait for connections
         Socket client;
@@ -97,6 +97,7 @@ public class EthernetHubServer implements Runnable {
             in = us.getIn();
         }
 
+        @Override
         public void run() {
             while (them == null)
                 if (us.getPartner() != null)
@@ -128,7 +129,7 @@ public class EthernetHubServer implements Runnable {
                         }
                     }
                     long end = System.currentTimeMillis();
-                    System.out.println("Bandwith " + (total * 1000 / (end - start)) + " bytes/second");
+                    System.out.println("Bandwith " + total * 1000 / (end - start) + " bytes/second");
                 }
             } catch (IOException e) {
                 Logger.getLogger(EthernetHubServer.class.getName()).log(Level.SEVERE, null, e);

@@ -33,9 +33,20 @@
 
 package org.jpc.j2se;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 public abstract class Option {
     private static final Hashtable<String, Option> names2options = new Hashtable();
@@ -130,8 +141,7 @@ public abstract class Option {
 
     public static String[] parse(String[] source) {
         ArrayList<String> tmp = new ArrayList<String>();
-        for (Iterator<Option> iterator = names2options.values().iterator(); iterator.hasNext();) {
-            Option next = iterator.next();
+        for (Option next : names2options.values()) {
             next.set = false;
         }
         int index = 0;
@@ -143,7 +153,7 @@ public abstract class Option {
             Option opt = names2options.get(arg);
             if (opt == null) {
                 tmp.add(source[index]);
-            } else if ((opt == config) && (config.value() != null)) {
+            } else if (opt == config && config.value() != null) {
                 // exit recursion
                 opt.set = false;
                 index = opt.update(source, index);
@@ -296,8 +306,7 @@ public abstract class Option {
 
         public OptSet(String name, String... defaults) {
             super(name);
-            for (int i = 0; i < defaults.length; i++) {
-                String s = defaults[i];
+            for (String s : defaults) {
                 values.add(s);
             }
         }
@@ -473,6 +482,7 @@ public abstract class Option {
             return this;
         }
 
+        @Override
         public Object getInstance() {
             Object o = getValue();
             Class clazz = null;

@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,8 +33,11 @@
 
 package org.jpc.support;
 
-import java.io.*;
-import java.util.logging.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <code>SeekableIODevice</code> that loads its data from a resource, and then backs itself with an
@@ -76,6 +79,7 @@ public class ArrayBackedSeekableIODevice implements SeekableIODevice {
      * @param spec resource to load
      * @throws java.io.IOException if the resource cannot be found or loaded
      */
+    @Override
     public void configure(String spec) throws IOException {
         resource = spec;
         imageOffset = 0;
@@ -164,13 +168,15 @@ public class ArrayBackedSeekableIODevice implements SeekableIODevice {
         length = bout.getPosition();
     }
 
+    @Override
     public void seek(long offset) throws IOException {
-        if ((offset >= 0) && (offset < length))
+        if (offset >= 0 && offset < length)
             imageOffset = (int)offset;
         else
             throw new IOException("seek offset out of range: " + offset + " not in [0," + length + "]");
     }
 
+    @Override
     public int write(byte[] data, int off, int len) throws IOException {
         int space = Math.min(data.length - off, length - imageOffset);
         int count = Math.min(len, space);
@@ -178,6 +184,7 @@ public class ArrayBackedSeekableIODevice implements SeekableIODevice {
         return count;
     }
 
+    @Override
     public int read(byte[] data, int off, int len) throws IOException {
         int space = Math.min(data.length - off, length - imageOffset);
         int count = Math.min(len, space);
@@ -185,17 +192,21 @@ public class ArrayBackedSeekableIODevice implements SeekableIODevice {
         return count;
     }
 
+    @Override
     public long length() {
-        return (long)length;
+        return length;
     }
 
+    @Override
     public boolean readOnly() {
         return false;
     }
 
+    @Override
     public void close() {
     }
 
+    @Override
     public String toString() {
         return resource;
     }

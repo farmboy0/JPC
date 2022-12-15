@@ -27,7 +27,6 @@
 
 package tools;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -36,6 +35,10 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 public class JPCControl extends EmulatorControl {
     private final Object pc;
@@ -60,7 +63,7 @@ public class JPCControl extends EmulatorControl {
     }
 
     public JPCControl(String jar, String[] args, boolean showScreen, boolean disablePIT) throws IOException {
-        URL[] urls1 = new URL[] { new File(jar).toURL() };
+        URL[] urls1 = { new File(jar).toURL() };
         cl1 = new URLClassLoader(urls1, EmulatorControl.class.getClassLoader());
 
         try {
@@ -109,6 +112,7 @@ public class JPCControl extends EmulatorControl {
         }
     }
 
+    @Override
     public String disam(byte[] code, Integer ops, Boolean is32Bit) {
         try {
             return (String)disam.invoke(pc, code, ops, is32Bit);
@@ -121,6 +125,7 @@ public class JPCControl extends EmulatorControl {
         }
     }
 
+    @Override
     public int x86Length(byte[] code, Boolean is32Bit) {
         try {
             return (Integer)x86Length.invoke(pc, code, is32Bit);
@@ -131,18 +136,19 @@ public class JPCControl extends EmulatorControl {
         }
     }
 
+    @Override
     public String executeInstruction() throws IOException {
         try {
-            ints.invoke(pc, new Integer(1), new Boolean(false));
+            ints.invoke(pc, Integer.valueOf(1), Boolean.valueOf(false));
             int blockLength = (Integer)execute.invoke(pc);
             if (blockLength > 1)
-                ints.invoke(pc, new Integer(blockLength - 1), new Boolean(false));
-            return (String)instructionInfo.invoke(pc, new Integer(blockLength));
+                ints.invoke(pc, Integer.valueOf(blockLength - 1), Boolean.valueOf(false));
+            return (String)instructionInfo.invoke(pc, Integer.valueOf(blockLength));
         } catch (InvocationTargetException e) {
             Throwable c = e.getCause();
             if (c instanceof IllegalStateException)
                 return c.getMessage();
-            if ((c != null) && c.toString().contains("PAGE_FAULT"))
+            if (c != null && c.toString().contains("PAGE_FAULT"))
                 return c.toString();
             throw new RuntimeException(e.getMessage());
         } catch (IllegalAccessException e) {
@@ -150,6 +156,7 @@ public class JPCControl extends EmulatorControl {
         }
     }
 
+    @Override
     public int[] getState() throws IOException {
         try {
             return (int[])state.invoke(pc);
@@ -160,9 +167,10 @@ public class JPCControl extends EmulatorControl {
         }
     }
 
+    @Override
     public void setPhysicalMemory(int addr, byte[] data) throws IOException {
         try {
-            setPhysicalMemory.invoke(pc, new Integer(addr), data);
+            setPhysicalMemory.invoke(pc, Integer.valueOf(addr), data);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e.getMessage());
         } catch (IllegalAccessException e) {
@@ -178,6 +186,7 @@ public class JPCControl extends EmulatorControl {
     //    catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
     //}
 
+    @Override
     public void destroy() {
         try {
             destroy.invoke(pc);
@@ -188,9 +197,10 @@ public class JPCControl extends EmulatorControl {
         }
     }
 
+    @Override
     public Integer getPhysicalPage(Integer page, byte[] data) throws IOException {
         try {
-            return (Integer)getPage.invoke(pc, page, data, new Boolean(false));
+            return (Integer)getPage.invoke(pc, page, data, Boolean.valueOf(false));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -199,9 +209,10 @@ public class JPCControl extends EmulatorControl {
         return 0;
     }
 
+    @Override
     public Integer getLinearPage(Integer page, byte[] data) throws IOException {
         try {
-            return (Integer)getPage.invoke(pc, page, data, new Boolean(true));
+            return (Integer)getPage.invoke(pc, page, data, Boolean.valueOf(true));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -210,26 +221,32 @@ public class JPCControl extends EmulatorControl {
         return 0;
     }
 
+    @Override
     public byte[] getCMOS() throws IOException {
         throw new IllegalStateException("Unimplemented!");
     }
 
+    @Override
     public int[] getPit() throws IOException {
         throw new IllegalStateException("Unimplemented!");
     }
 
+    @Override
     public int getPITIntTargetEIP() throws IOException {
         throw new IllegalStateException("Unimplemented!");
     }
 
+    @Override
     public void keysDown(String keys) {
         throw new IllegalStateException("Unimplemented!");
     }
 
+    @Override
     public void keysUp(String keys) {
         throw new IllegalStateException("Unimplemented!");
     }
 
+    @Override
     public void sendMouse(Integer dx, Integer dy, Integer dz, Integer buttons) {
         throw new IllegalStateException("Unimplemented!");
     }

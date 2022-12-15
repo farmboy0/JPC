@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,20 +33,32 @@
 
 package org.jpc.emulator.peripheral;
 
-import org.jpc.emulator.motherboard.*;
-import org.jpc.j2se.*;
-import org.jpc.support.*;
-import org.jpc.emulator.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.util.logging.*;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.Timer;
+import org.jpc.emulator.TimerResponsive;
+import org.jpc.emulator.motherboard.DMAController;
+import org.jpc.emulator.motherboard.DMATransferCapable;
+import org.jpc.emulator.motherboard.IODevice;
+import org.jpc.emulator.motherboard.IOPortHandler;
+import org.jpc.emulator.motherboard.InterruptController;
+import org.jpc.j2se.Option;
+import org.jpc.support.BlockDevice;
+import org.jpc.support.Clock;
+import org.jpc.support.DriveSet;
 
 /**
  * @author Chris Dennis
  */
 public class FloppyController implements IODevice, DMATransferCapable, HardwareComponent, TimerResponsive {
 
-    public static enum DriveType {
+    public enum DriveType {
         DRIVE_144, DRIVE_288, DRIVE_120, DRIVE_NONE
     }
 
@@ -125,6 +137,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         fifo = new byte[SECTOR_LENGTH];
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         output.writeInt(state);
         output.writeBoolean(dmaEnabled);
@@ -149,6 +162,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         resultTimer.saveState(output);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         drivesUpdated = false;
         ioportRegistered = false;
@@ -174,13 +188,15 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         drives[0].loadState(input);
         drives[1].loadState(input);
         resultTimer.loadState(input);
-        ioportRegistered = false; //make sure the drives aren't reset when driveset is passed in. 
+        ioportRegistered = false; //make sure the drives aren't reset when driveset is passed in.
     }
 
+    @Override
     public int getType() {
         return 1;
     }
 
+    @Override
     public void callback() {
         stopTransfer((byte)0x00, (byte)0x00, (byte)0x00);
     }
@@ -189,10 +205,12 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         return drives[number].drive;
     }
 
+    @Override
     public int[] ioPortsRequested() {
         return new int[] { IOPORT_BASE + 1, IOPORT_BASE + 2, IOPORT_BASE + 3, IOPORT_BASE + 4, IOPORT_BASE + 5, IOPORT_BASE + 7 };
     }
 
+    @Override
     public int ioPortRead8(int address) {
         switch (address & 0x07) {
         case 0x01:
@@ -212,14 +230,17 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         }
     }
 
+    @Override
     public int ioPortRead16(int address) {
-        return (ioPortRead8(address) & 0xff) | ((ioPortRead8(address + 1) << 8) & 0xff00);
+        return ioPortRead8(address) & 0xff | ioPortRead8(address + 1) << 8 & 0xff00;
     }
 
+    @Override
     public int ioPortRead32(int address) {
-        return (ioPortRead16(address) & 0xffff) | ((ioPortRead16(address + 2) << 16) & 0xffff0000);
+        return ioPortRead16(address) & 0xffff | ioPortRead16(address + 2) << 16 & 0xffff0000;
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         switch (address & 0x07) {
         case 0x02:
@@ -239,14 +260,16 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         ioPortWrite8(address, data & 0xff);
-        ioPortWrite8(address + 1, (data >>> 8) & 0xff);
+        ioPortWrite8(address + 1, data >>> 8 & 0xff);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         ioPortWrite16(address, data & 0xffff);
-        ioPortWrite16(address + 2, (data >>> 16) & 0xffff);
+        ioPortWrite16(address + 2, data >>> 16 & 0xffff);
     }
 
     private void reset(boolean doIRQ) {
@@ -274,7 +297,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
     private void resetFIFO() {
         dataDirection = DIRECTION_WRITE;
         dataOffset = 0;
-        dataState = (dataState & ~STATE_STATE) | STATE_COMMAND;
+        dataState = dataState & ~STATE_STATE | STATE_COMMAND;
     }
 
     private void resetIRQ() {
@@ -366,7 +389,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
 
     private int readDirection() {
         int retval = 0;
-        if (((getDrive(0).driveFlags & FloppyDrive.REVALIDATE) != 0) || ((getDrive(1).driveFlags & FloppyDrive.REVALIDATE) != 0))
+        if ((getDrive(0).driveFlags & FloppyDrive.REVALIDATE) != 0 || (getDrive(1).driveFlags & FloppyDrive.REVALIDATE) != 0)
             retval |= 0x80;
 
         getDrive(0).driveFlags &= ~FloppyDrive.REVALIDATE;
@@ -377,7 +400,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
 
     private void writeDOR(int data) {
         /* Reset mode */
-        if (((state & CONTROL_RESET) != 0) && ((data & 0x04) == 0))
+        if ((state & CONTROL_RESET) != 0 && (data & 0x04) == 0)
             return;
 
         /* Drive motors state indicators */
@@ -396,7 +419,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         if ((data & 0x04) == 0)
             if ((state & CONTROL_RESET) == 0)
                 state |= CONTROL_RESET;
-            else if ((state & CONTROL_RESET) != 0) {
+            else {
                 reset(true);
                 state &= ~(CONTROL_RESET | CONTROL_SLEEP);
             }
@@ -410,7 +433,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             return;
 
         /* Disk boot selection indicator */
-        bootSelect = (data >>> 2) & 1;
+        bootSelect = data >>> 2 & 1;
         /* Tape indicators: never allow */
     }
 
@@ -449,7 +472,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         if ((dataState & STATE_STATE) == STATE_DATA) {
             /* FIFO data write */
             fifo[dataOffset++] = (byte)data;
-            if (dataOffset % SECTOR_LENGTH == (SECTOR_LENGTH - 1) || dataOffset == dataLength)
+            if (dataOffset % SECTOR_LENGTH == SECTOR_LENGTH - 1 || dataOffset == dataLength)
                 drive.write(drive.currentSector(), fifo, SECTOR_LENGTH);
 
             /* Switch from transfer mode to status mode
@@ -498,7 +521,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                 enqueue(drive, data);
                 return;
             case 0x08:
-                fifo[0] = (byte)(0x20 | (drive.head << 2) | currentDrive);
+                fifo[0] = (byte)(0x20 | drive.head << 2 | currentDrive);
                 fifo[1] = (byte)drive.track;
                 setFIFO(2, false);
                 resetIRQ();
@@ -514,7 +537,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                 fifo[4] = timer0;
                 fifo[5] = dmaEnabled ? (byte)(timer1 << 1) : (byte)0;
                 fifo[6] = (byte)drive.sectorCount;
-                fifo[7] = (byte)((lock << 7) | (drive.perpendicular << 2));
+                fifo[7] = (byte)(lock << 7 | drive.perpendicular << 2);
                 fifo[8] = config;
                 fifo[9] = preCompensationTrack;
                 setFIFO(10, false);
@@ -552,7 +575,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                 fifo[6] = timer0;
                 fifo[7] = timer1;
                 fifo[8] = (byte)drive.sectorCount;
-                fifo[9] = (byte)((lock << 7) | (drive.perpendicular << 2));
+                fifo[9] = (byte)(lock << 7 | drive.perpendicular << 2);
                 fifo[10] = config;
                 fifo[11] = preCompensationTrack;
                 fifo[12] = pwrd;
@@ -632,16 +655,16 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             }
             switch (fifo[0]) {
             case 0x03:
-                timer0 = (byte)((fifo[1] >>> 4) & 0xf);
+                timer0 = (byte)(fifo[1] >>> 4 & 0xf);
                 timer1 = (byte)(fifo[2] >>> 1);
-                dmaEnabled = ((fifo[2] & 1) != 1);
+                dmaEnabled = (fifo[2] & 1) != 1;
                 resetFIFO();
                 break;
             case 0x04:
                 currentDrive = fifo[1] & 1;
                 drive = getCurrentDrive();
-                drive.head = ((fifo[1] >>> 2) & 1);
-                fifo[0] = (byte)((drive.readOnly << 6) | (drive.track == 0 ? 0x10 : 0x00) | (drive.head << 2) | currentDrive | 0x28);
+                drive.head = fifo[1] >>> 2 & 1;
+                fifo[0] = (byte)(drive.readOnly << 6 | (drive.track == 0 ? 0x10 : 0x00) | drive.head << 2 | currentDrive | 0x28);
                 setFIFO(1, false);
                 break;
             case 0x07:
@@ -697,8 +720,8 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                 break;
             case 0x4A:
                 /* XXX: should set main status register to busy */
-                drive.head = (fifo[1] >>> 2) & 1;
-                resultTimer.setExpiry(clock.getEmulatedNanos() + (clock.getTickRate() / 50));
+                drive.head = fifo[1] >>> 2 & 1;
+                resultTimer.setExpiry(clock.getEmulatedNanos() + clock.getTickRate() / 50);
                 break;
             case 0x4C:
                 /* RESTORE */
@@ -710,7 +733,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                 timer1 = fifo[8];
                 drive.sectorCount = fifo[9];
                 lock = (byte)(fifo[10] >>> 7);
-                drive.perpendicular = (fifo[10] >>> 2) & 0xf;
+                drive.perpendicular = fifo[10] >>> 2 & 0xf;
                 config = fifo[11];
                 preCompensationTrack = fifo[12];
                 pwrd = fifo[13];
@@ -726,7 +749,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                 else
                     dataState &= ~STATE_MULTI;
                 dataState &= ~STATE_SEEK;
-                drive.bps = fifo[2] > 7 ? 0x4000 : (0x80 << fifo[2]);
+                drive.bps = fifo[2] > 7 ? 0x4000 : 0x80 << fifo[2];
                 drive.sectorCount = fifo[3];
 
                 /* Bochs BIOS is buggy and don't send format informations
@@ -748,7 +771,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                         resetFIFO();
                 else if (dataLength > 7) {
                     /* ERROR */
-                    fifo[0] = (byte)(0x80 | (drive.head << 2) | currentDrive);
+                    fifo[0] = (byte)(0x80 | drive.head << 2 | currentDrive);
                     setFIFO(1, true);
                 }
                 break;
@@ -792,7 +815,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         dataDirection = DIRECTION_READ;
         dataLength = fifoLength;
         dataOffset = 0;
-        dataState = (dataState & ~STATE_STATE) | STATE_STATUS;
+        dataState = dataState & ~STATE_STATE | STATE_STATUS;
         if (doIRQ)
             raiseIRQ(0x00);
     }
@@ -852,7 +875,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
 
         dataDirection = direction;
         dataOffset = 0;
-        dataState = (dataState & ~STATE_STATE) | STATE_DATA;
+        dataState = dataState & ~STATE_STATE | STATE_DATA;
 
         if ((fifo[0] & 0x80) != 0)
             dataState |= STATE_MULTI;
@@ -874,9 +897,9 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         eot = fifo[6];
         if (dmaEnabled) {
             int dmaMode = dma.getChannelMode(DMA_CHANNEL & 3);
-            dmaMode = (dmaMode >>> 2) & 3;
-            if (((direction == DIRECTION_SCANE || direction == DIRECTION_SCANL || direction == DIRECTION_SCANH) && dmaMode == 0)
-                || (direction == DIRECTION_WRITE && dmaMode == 2) || (direction == DIRECTION_READ && dmaMode == 1)) {
+            dmaMode = dmaMode >>> 2 & 3;
+            if ((direction == DIRECTION_SCANE || direction == DIRECTION_SCANL || direction == DIRECTION_SCANH) && dmaMode == 0
+                || direction == DIRECTION_WRITE && dmaMode == 2 || direction == DIRECTION_READ && dmaMode == 1) {
                 // No access is allowed until DMA transfer has completed
                 state |= CONTROL_BUSY;
                 // simulate a data transfer rate of a spinning platter at 300 rpm (each sector should take 200,000/sectorPerTrack micro seconds
@@ -898,7 +921,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
     private void stopTransfer(byte status0, byte status1, byte status2) {
         FloppyDrive drive = getCurrentDrive();
 
-        fifo[0] = (byte)(status0 | (drive.head << 2) | currentDrive);
+        fifo[0] = (byte)(status0 | drive.head << 2 | currentDrive);
         fifo[1] = status1;
         fifo[2] = status2;
         fifo[3] = (byte)drive.track;
@@ -928,6 +951,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         return 0;
     }
 
+    @Override
     public int handleTransfer(DMAController.DMAChannel channel, int pos, int size) {
         byte status0 = 0x00, status1 = 0x00, status2 = 0x00;
 
@@ -936,7 +960,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
 
         FloppyDrive drive = getCurrentDrive();
 
-        if ((dataDirection == DIRECTION_SCANE) || (dataDirection == DIRECTION_SCANL) || (dataDirection == DIRECTION_SCANH))
+        if (dataDirection == DIRECTION_SCANE || dataDirection == DIRECTION_SCANL || dataDirection == DIRECTION_SCANH)
             status2 = 0x04;
         size = Math.min(size, dataLength);
         if (drive.device == null) {
@@ -951,7 +975,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         int startOffset;
         for (startOffset = dataOffset; dataOffset < size;) {
             int length = Math.min(size - dataOffset, SECTOR_LENGTH - relativeOffset);
-            if ((dataDirection != DIRECTION_WRITE) || (length < SECTOR_LENGTH) || (relativeOffset != 0))
+            if (dataDirection != DIRECTION_WRITE || length < SECTOR_LENGTH || relativeOffset != 0)
                 /* READ & SCAN commands and realign to a sector for WRITE */
                 if (drive.read(drive.currentSector(), fifo, 1) < 0)
                     /* Sure, image size is too small... */
@@ -989,7 +1013,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                     return length;
 
                 }
-                if ((ret < 0 && dataDirection == DIRECTION_SCANL) || (ret > 0 && dataDirection == DIRECTION_SCANH)) {
+                if (ret < 0 && dataDirection == DIRECTION_SCANL || ret > 0 && dataDirection == DIRECTION_SCANH) {
                     status2 = 0x00;
 
                     length = dataOffset - startOffset;
@@ -1012,10 +1036,10 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                 /* Seek to next sector */
                 /* XXX: drive.sect >= drive.last_sect should be an
                 error in fact */
-                if ((drive.sector >= drive.sectorCount) || (drive.sector == eot)) {
+                if (drive.sector >= drive.sectorCount || drive.sector == eot) {
                     drive.sector = 1;
                     if ((dataState & STATE_MULTI) != 0)
-                        if ((drive.head == 0) && (drive.headCount > 0))
+                        if (drive.head == 0 && drive.headCount > 0)
                             drive.head = 1;
                         else {
                             drive.head = 0;
@@ -1071,6 +1095,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             maxTrack = 0;
         }
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(drive.ordinal());
             output.writeInt(driveFlags);
@@ -1088,6 +1113,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             output.writeInt(readOnly);
         }
 
+        @Override
         public void loadState(DataInput input) throws IOException {
             drive = DriveType.values()[input.readInt()];
             driveFlags = input.readInt();
@@ -1119,7 +1145,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         }
 
         private int seek(int seekHead, int seekTrack, int seekSector, int enableSeek) {
-            if ((seekTrack > maxTrack) || (seekHead != 0 && (headCount == 0)))
+            if (seekTrack > maxTrack || seekHead != 0 && headCount == 0)
                 return 2;
 
             if (seekSector > sectorCount)
@@ -1147,7 +1173,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         }
 
         private int calculateSector(int track, int head, int headCount, int sector, int sectorCount) {
-            return ((((0xff & track) * headCount) + (0xff & head)) * (0xff & sectorCount)) + (0xff & sector) - 1;
+            return ((0xff & track) * headCount + (0xff & head)) * (0xff & sectorCount) + (0xff & sector) - 1;
         }
 
         private void recalibrate() {
@@ -1159,11 +1185,11 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         }
 
         private int read(int sector, byte[] buffer, int length) {
-            return device.read(0xffffffffl & sector, buffer, length);
+            return device.read(0xffffffffL & sector, buffer, length);
         }
 
         private int write(int sector, byte[] buffer, int length) {
-            return device.write(0xffffffffl & sector, buffer, length);
+            return device.write(0xffffffffL & sector, buffer, length);
         }
 
         private void reset() {
@@ -1192,8 +1218,9 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             driveFlags |= REVALIDATE;
         }
 
+        @Override
         public String toString() {
-            return (device == null) ? "<none>" : format.toString();
+            return device == null ? "<none>" : format.toString();
         }
     }
 
@@ -1225,6 +1252,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
 
     private boolean ioportRegistered;
 
+    @Override
     public void reset() {
         irqDevice = null;
         clock = null;
@@ -1238,25 +1266,27 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         state = CONTROL_ACTIVE;
     }
 
+    @Override
     public boolean initialised() {
-        return ((irqDevice != null) && (clock != null) && (dma != null) && (drives[0] != null) && ioportRegistered);
+        return irqDevice != null && clock != null && dma != null && drives[0] != null && ioportRegistered;
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
-        if ((component instanceof InterruptController) && component.initialised())
+        if (component instanceof InterruptController && component.initialised())
             irqDevice = (InterruptController)component;
 
-        if ((component instanceof Clock) && component.initialised()) {
+        if (component instanceof Clock && component.initialised()) {
             clock = (Clock)component;
             resultTimer = clock.newTimer(this);
         }
 
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
 
-        if ((component instanceof DMAController) && component.initialised())
+        if (component instanceof DMAController && component.initialised())
             if (((DMAController)component).isPrimary())
                 if (DMA_CHANNEL != -1) {
                     dma = (DMAController)component;
@@ -1264,7 +1294,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                     dma.registerChannel(DMA_CHANNEL & 3, this);
                 }
 
-        if ((component instanceof DriveSet) && component.initialised()) {
+        if (component instanceof DriveSet && component.initialised()) {
             drives[0] = new FloppyDrive(((DriveSet)component).getFloppyDrive(0));
             drives[1] = new FloppyDrive(((DriveSet)component).getFloppyDrive(1));
             //Change CB (like in hard drive)
@@ -1278,39 +1308,41 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         }
     }
 
+    @Override
     public boolean updated() {
-        return (irqDevice.updated() && clock.updated() && dma.updated() && drivesUpdated && ioportRegistered);
+        return irqDevice.updated() && clock.updated() && dma.updated() && drivesUpdated && ioportRegistered;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
-        //	if ((component instanceof Clock)  && component.updated()) 
+        //	if ((component instanceof Clock)  && component.updated())
         //        {
         //	    clock = (Clock)component;
         //	    resultTimer = clock.newTimer(this);
         //	}
-        if ((component instanceof IOPortHandler) && component.updated()) {
+        if (component instanceof IOPortHandler && component.updated()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
-        if ((component instanceof DMAController) && component.updated())
+        if (component instanceof DMAController && component.updated())
             if (((DMAController)component).isPrimary())
                 if (DMA_CHANNEL != -1) {
                     dma = (DMAController)component;
                     dmaEnabled = true;
                     dma.registerChannel(DMA_CHANNEL & 3, this);
                 }
-        if ((component instanceof DriveSet) && component.updated()) {
+        if (component instanceof DriveSet && component.updated()) {
             drives[0].changeDisk(((DriveSet)component).getFloppyDrive(0));
             drives[1].changeDisk(((DriveSet)component).getFloppyDrive(1));
             drivesUpdated = true;
 
         }
 
-        if ((component instanceof Clock) && component.initialised()) {
+        if (component instanceof Clock && component.initialised()) {
             clock = (Clock)component;
             clock.update(resultTimer);
         }
-        //	if (initialised()) 
+        //	if (initialised())
         //        {
         //	    reset(false);
         //	    for (int i = 0; i < 2; i++)
@@ -1318,6 +1350,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         //	}
     }
 
+    @Override
     public String toString() {
         return "Intel 82078 Floppy Controller [" + drives[0].toString() + ", " + drives[1].toString() + "]";
     }

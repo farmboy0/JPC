@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,33 +33,35 @@
 
 package org.jpc.support;
 
-import org.jpc.emulator.*;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.Timer;
+import org.jpc.emulator.TimerResponsive;
 
 /**
  * Interface providing an external time source to the emulator for the provision of timed callbacks.
  * @author Ian Preston
  */
 public interface Clock extends HardwareComponent {
-    public void update(int instructions);
+    void update(int instructions);
 
-    public void updateAndProcess(int instructions);
+    void updateAndProcess(int instructions);
 
-    public void updateNowAndProcess(boolean sleep);
+    void updateNowAndProcess(boolean sleep);
 
-    public long getTicks();
+    long getTicks();
 
-    public long getEmulatedNanos();
+    long getEmulatedNanos();
 
-    public long getEmulatedMicros();
+    long getEmulatedMicros();
 
-    public long getRealMillis();
+    long getRealMillis();
 
     /**
      * @return tick rate per second
      */
-    public long getTickRate();
+    long getTickRate();
 
-    public long getIPS();
+    long getIPS();
 
     /**
      * Constructs a new <code>Timer</code> which will fire <code>callback</code> on the given object
@@ -67,7 +69,7 @@ public interface Clock extends HardwareComponent {
      * @param object callback object
      * @return <code>Timer</code> instance
      */
-    public Timer newTimer(TimerResponsive object);
+    Timer newTimer(TimerResponsive object);
 
     /**
      * Update the internal state of this clock to account for the change in state of the supplied child
@@ -79,10 +81,10 @@ public interface Clock extends HardwareComponent {
     /**
      * Pauses this clock instance. Does nothing if this clock is already paused.
      */
-    public void pause();
+    void pause();
 
     /**
      * Resumes this clock instance. Does nothing if this clock is already running.
      */
-    public void resume();
+    void resume();
 }

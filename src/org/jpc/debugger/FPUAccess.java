@@ -1,10 +1,10 @@
 
 package org.jpc.debugger;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.jpc.emulator.processor.*;
 import org.jpc.emulator.processor.fpu64.FpuState64;
 
 public class FPUAccess {

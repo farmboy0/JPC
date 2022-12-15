@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -39,30 +39,30 @@ package org.jpc.emulator.pci;
  * @author Chris Dennis
  */
 public interface PCIDevice {
-    public static final int PCI_ROM_SLOT = 6;
-    public static final int PCI_NUM_REGIONS = 7;
+    int PCI_ROM_SLOT = 6;
+    int PCI_NUM_REGIONS = 7;
 
-    public static final int PCI_CONFIG_VENDOR_ID = 0x00;
-    public static final int PCI_CONFIG_DEVICE_ID = 0x02;
-    public static final int PCI_CONFIG_COMMAND = 0x04;
-    public static final int PCI_CONFIG_STATUS = 0x06;
-    public static final int PCI_CONFIG_REVISION = 0x08;
-    public static final int PCI_CONFIG_CLASS_DEVICE = 0x0a;
-    public static final int PCI_CONFIG_CLS = 0x0c;
-    public static final int PCI_CONFIG_LATENCY = 0x0d;
-    public static final int PCI_CONFIG_HEADER = 0x0e;
-    public static final int PCI_CONFIG_BIST = 0x0f;
-    public static final int PCI_CONFIG_BASE_ADDRESS = 0x10;
-    public static final int PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS = 0x30;
-    public static final int PCI_CONFIG_INTERRUPT_LINE = 0x3c;
-    public static final int PCI_CONFIG_INTERRUPT_PIN = 0x3d;
-    public static final int PCI_CONFIG_MIN_GNT = 0x3e;
-    public static final int PCI_CONFIG_MAX_LATENCY = 0x3f;
-    public static final int PCI_COMMAND_IO = 0x1;
-    public static final int PCI_COMMAND_MEMORY = 0x2;
-    public static final int PCI_HEADER_PCI_PCI_BRIDGE = 0x01;
-    public static final int PCI_HEADER_SINGLE_FUNCTION = 0x00;
-    public static final int PCI_HEADER_MULTI_FUNCTION = 0x80;
+    int PCI_CONFIG_VENDOR_ID = 0x00;
+    int PCI_CONFIG_DEVICE_ID = 0x02;
+    int PCI_CONFIG_COMMAND = 0x04;
+    int PCI_CONFIG_STATUS = 0x06;
+    int PCI_CONFIG_REVISION = 0x08;
+    int PCI_CONFIG_CLASS_DEVICE = 0x0a;
+    int PCI_CONFIG_CLS = 0x0c;
+    int PCI_CONFIG_LATENCY = 0x0d;
+    int PCI_CONFIG_HEADER = 0x0e;
+    int PCI_CONFIG_BIST = 0x0f;
+    int PCI_CONFIG_BASE_ADDRESS = 0x10;
+    int PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS = 0x30;
+    int PCI_CONFIG_INTERRUPT_LINE = 0x3c;
+    int PCI_CONFIG_INTERRUPT_PIN = 0x3d;
+    int PCI_CONFIG_MIN_GNT = 0x3e;
+    int PCI_CONFIG_MAX_LATENCY = 0x3f;
+    int PCI_COMMAND_IO = 0x1;
+    int PCI_COMMAND_MEMORY = 0x2;
+    int PCI_HEADER_PCI_PCI_BRIDGE = 0x01;
+    int PCI_HEADER_SINGLE_FUNCTION = 0x00;
+    int PCI_HEADER_MULTI_FUNCTION = 0x80;
 
     //PCI Bus Registering
 
@@ -70,7 +70,7 @@ public interface PCIDevice {
      * Returns this devices device/function number.
      * @return device/function number.
      */
-    public int getDeviceFunctionNumber();
+    int getDeviceFunctionNumber();
 
     /**
      * Returns <code>true</code> if this device's device/function number can be chosen for it.
@@ -80,7 +80,7 @@ public interface PCIDevice {
      * them.
      * @return <code>true</code> if this devices number can be assigned by the PCI bus.
      */
-    public boolean autoAssignDeviceFunctionNumber();
+    boolean autoAssignDeviceFunctionNumber();
 
     /**
      * Attempt to assign this device's device/function number.
@@ -89,7 +89,7 @@ public interface PCIDevice {
      * the host bridge.
      * @param number new device/function number.
      */
-    public void assignDeviceFunctionNumber(int number);
+    void assignDeviceFunctionNumber(int number);
 
     /**
      * Deassign this devices device/function number.
@@ -97,7 +97,7 @@ public interface PCIDevice {
      * Currently this happens when a PCI device is removed. That can only happen if a new device
      * specifically requests the same device/function number.
      */
-    public void deassignDeviceFunctionNumber();
+    void deassignDeviceFunctionNumber();
 
     /**
      * Writes a byte into this PCI devices configuration space.
@@ -111,7 +111,7 @@ public interface PCIDevice {
      * @param data byte value to be written.
      * @return <code>true</code> if the device needs remapping.
      */
-    public boolean configWriteByte(int address, byte data);
+    boolean configWriteByte(int address, byte data);
 
     /**
      * Writes a word in little-endian format into this PCI devices configuration space.
@@ -125,7 +125,7 @@ public interface PCIDevice {
      * @param data short value to be written.
      * @return <code>true</code> if this device needs remapping.
      */
-    public boolean configWriteWord(int address, short data);
+    boolean configWriteWord(int address, short data);
 
     /**
      * Writes a long in little-endian format into this PCI devices configuration space.
@@ -139,28 +139,28 @@ public interface PCIDevice {
      * @param data int value to be written.
      * @return <code>true</code> if this device needs remapping.
      */
-    public boolean configWriteLong(int address, int data);
+    boolean configWriteLong(int address, int data);
 
     /**
      * Reads a byte from this PCI devices configuration space.
      * @param address offset to read from.
      * @return byte value read.
      */
-    public byte configReadByte(int address);
+    byte configReadByte(int address);
 
     /**
      * Reads a little-endian word from this PCI devices configuration space.
      * @param address offset of the first byte to be read.
      * @return short value read.
      */
-    public short configReadWord(int address);
+    short configReadWord(int address);
 
     /**
      * Reads a little-endian long from this PCI devices configuration space.
      * @param address offset of the first byte to be read.
      * @return int value read.
      */
-    public int configReadLong(int address);
+    int configReadLong(int address);
 
     /**
      * Forces the writes of a byte into this PCI devices configuration space.
@@ -170,7 +170,7 @@ public interface PCIDevice {
      * @param address offset to write to.
      * @param data byte value to be written.
      */
-    public void putConfigByte(int address, byte data);
+    void putConfigByte(int address, byte data);
 
     /**
      * Forces the writes of a little-endian word into this PCI device's configuration space.
@@ -180,7 +180,7 @@ public interface PCIDevice {
      * @param address offset of the first byte to be written.
      * @param data short value to be written.
      */
-    public void putConfigWord(int address, short data);
+    void putConfigWord(int address, short data);
 
     /**
      * Forces the writes of a little-endian long into this PCI device's configuration space.
@@ -190,7 +190,7 @@ public interface PCIDevice {
      * @param address offset of the first byte to be written.
      * @param data int value to be written.
      */
-    public void putConfigLong(int address, int data);
+    void putConfigLong(int address, int data);
 
     /**
      * Returns a list of all of this PCI devices configurable <code>IORegions</code>
@@ -199,7 +199,7 @@ public interface PCIDevice {
      * <code>IORegion</code>'s region number.
      * @return device's set of <code>IORegions</code>
      */
-    public IORegion[] getIORegions();
+    IORegion[] getIORegions();
 
     /**
      * Returns the <code>IORegion</code> with region number <code>number</code>
@@ -211,13 +211,13 @@ public interface PCIDevice {
      * @param number <code>IORegion</code> number.
      * @return <code>IORegion</code> with number <code>number</code>.
      */
-    public IORegion getIORegion(int number);
+    IORegion getIORegion(int number);
 
-    public void setIRQIndex(int irqIndex);
+    void setIRQIndex(int irqIndex);
 
-    public int getIRQIndex();
+    int getIRQIndex();
 
-    public void addIRQBouncer(IRQBouncer bouncer);
+    void addIRQBouncer(IRQBouncer bouncer);
 
-    public IRQBouncer getIRQBouncer();
+    IRQBouncer getIRQBouncer();
 }

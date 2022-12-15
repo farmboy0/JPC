@@ -18,8 +18,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -33,12 +33,16 @@
 
 package org.jpc.emulator.motherboard;
 
-import org.jpc.emulator.*;
-import org.jpc.emulator.processor.Processor;
-import org.jpc.j2se.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.util.logging.*;
+import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.HardwareComponent;
+import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.processor.Processor;
 
 /**
  * i8259 Programmable Interrupt Controller emulation.
@@ -66,11 +70,13 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         slave = new InterruptControllerElement(false);
     }
 
+    @Override
     public void saveState(DataOutput output) throws IOException {
         master.saveState(output);
         slave.saveState(output);
     }
 
+    @Override
     public void loadState(DataInput input) throws IOException {
         ioportRegistered = false;
         master.loadState(input);
@@ -198,7 +204,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         private int[] ioPorts;
 
         public InterruptControllerElement(boolean master) {
-            if (master == true) {
+            if (master) {
                 ioPorts = new int[] { 0x20, 0x21, 0x4d0 };
                 elcrMask = 0xf8;
             } else {
@@ -207,6 +213,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
             }
         }
 
+        @Override
         public void saveState(DataOutput output) throws IOException {
             output.writeInt(lastInterruptRequestRegister);
             output.writeInt(interruptRequestRegister);
@@ -229,6 +236,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                 output.writeInt(port);
         }
 
+        @Override
         public void loadState(DataInput input) throws IOException {
             lastInterruptRequestRegister = input.readInt();
             interruptRequestRegister = input.readInt();
@@ -289,7 +297,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                     connectedCPU.clearInterrupt();
 
                     initState = 1;
-                    fourByteInit = ((data & 1) != 0);
+                    fourByteInit = (data & 1) != 0;
                     if (0 != (data & 0x02))
                         LOGGING.log(Level.INFO, "single mode not supported");
                     if (0 != (data & 0x08))
@@ -298,24 +306,24 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                     if (0 != (data & 0x04))
                         poll = true;
                     if (0 != (data & 0x02))
-                        readRegisterSelect = ((data & 0x01) != 0);
+                        readRegisterSelect = (data & 0x01) != 0;
                     if (0 != (data & 0x40))
-                        specialMask = (((data >>> 5) & 1) != 0);
+                        specialMask = (data >>> 5 & 1) != 0;
                 } else {
                     command = data >>> 5;
                     switch (command) {
                     case 0:
                     case 4:
-                        rotateOnAutoEOI = ((command >>> 2) != 0);
+                        rotateOnAutoEOI = command >>> 2 != 0;
                         break;
                     case 1: // end of interrupt
                     case 5:
                         priority = this.getPriority(interruptServiceRegister);
                         if (priority != 8) {
-                            irq = (priority + priorityAdd) & 7;
+                            irq = priority + priorityAdd & 7;
                             interruptServiceRegister &= ~(1 << irq);
                             if (command == 5)
-                                priorityAdd = (irq + 1) & 7;
+                                priorityAdd = irq + 1 & 7;
                             return true;
                         }
                         break;
@@ -324,12 +332,12 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                         interruptServiceRegister &= ~(1 << irq);
                         return true;
                     case 6:
-                        priorityAdd = (data + 1) & 7;
+                        priorityAdd = data + 1 & 7;
                         return true;
                     case 7:
                         irq = data & 7;
                         interruptServiceRegister &= ~(1 << irq);
-                        priorityAdd = (irq + 1) & 7;
+                        priorityAdd = irq + 1 & 7;
                         return true;
                     default:
                         /* no operation */
@@ -354,8 +362,8 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                     }
                     break;
                 case 3:
-                    specialFullyNestedMode = (((data >>> 4) & 1) != 0);
-                    autoEOI = (((data >>> 1) & 1) != 0);
+                    specialFullyNestedMode = (data >>> 4 & 1) != 0;
+                    autoEOI = (data >>> 1 & 1) != 0;
                     initState = 0;
                     break;
                 }
@@ -375,12 +383,12 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                 return 0x07;
             }
 
-            if (0 != (address >>> 7)) {
+            if (0 != address >>> 7) {
                 InterruptController.this.masterPollCode();
             }
             interruptRequestRegister &= ~(1 << ret);
             interruptServiceRegister &= ~(1 << ret);
-            if (0 != (address >>> 7) || ret != 2)
+            if (0 != address >>> 7 || ret != 2)
                 InterruptController.this.updateIRQ();
             return ret;
         }
@@ -388,7 +396,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         public void setIRQ(int irqNumber, int level) {
 
             int mask;
-            mask = (1 << irqNumber);
+            mask = 1 << irqNumber;
             if (0 != (elcr & mask)) {
                 /* level triggered */
                 if (0 != level) {
@@ -416,7 +424,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                 return 8;
             }
             int priority = 0;
-            while ((mask & (1 << ((priority + priorityAdd) & 7))) == 0) {
+            while ((mask & 1 << (priority + priorityAdd & 7)) == 0) {
                 priority++;
             }
             return priority;
@@ -441,7 +449,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
 
             if (priority < currentPriority) {
                 /* higher priority found: an irq should be generated */
-                return (priority + priorityAdd) & 7;
+                return priority + priorityAdd & 7;
             } else {
                 return -1;
             }
@@ -450,12 +458,12 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         private void intAck(int irqNumber) {
             if (autoEOI) {
                 if (rotateOnAutoEOI)
-                    priorityAdd = (irqNumber + 1) & 7;
+                    priorityAdd = irqNumber + 1 & 7;
             } else {
-                interruptServiceRegister |= (1 << irqNumber);
+                interruptServiceRegister |= 1 << irqNumber;
             }
             /* We don't clear a level sensitive interrupt here */
-            if (0 == (elcr & (1 << irqNumber)))
+            if (0 == (elcr & 1 << irqNumber))
                 interruptRequestRegister &= ~(1 << irqNumber);
         }
 
@@ -486,16 +494,18 @@ public class InterruptController extends AbstractHardwareComponent implements IO
             elcr = 0x0; //(elcr) PIIX3 edge/level trigger selection
         }
 
+        @Override
         public String toString() {
             if (isMaster()) {
-                return (InterruptController.this).toString() + ": [Master Element]";
+                return InterruptController.this.toString() + ": [Master Element]";
             } else {
-                return (InterruptController.this).toString() + ": [Slave  Element]";
+                return InterruptController.this.toString() + ": [Slave  Element]";
             }
         }
     }
 
     /* BEGIN IODevice Defined Methods */
+    @Override
     public int[] ioPortsRequested() {
         int[] masterIOPorts = master.ioPortsRequested();
         int[] slaveIOPorts = slave.ioPortsRequested();
@@ -507,6 +517,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         return temp;
     }
 
+    @Override
     public int ioPortRead8(int address) {
         switch (address) {
         case 0x20:
@@ -524,14 +535,17 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         return 0;
     }
 
+    @Override
     public int ioPortRead16(int address) {
-        return (0xff & ioPortRead8(address)) | (0xff00 & (ioPortRead8(address + 1) << 8));
+        return 0xff & ioPortRead8(address) | 0xff00 & ioPortRead8(address + 1) << 8;
     }
 
+    @Override
     public int ioPortRead32(int address) {
-        return (0xffff & ioPortRead16(address)) | (0xffff0000 & (ioPortRead16(address + 2) << 16));
+        return 0xffff & ioPortRead16(address) | 0xffff0000 & ioPortRead16(address + 2) << 16;
     }
 
+    @Override
     public void ioPortWrite8(int address, int data) {
         switch (address) {
         case 0x20:
@@ -554,11 +568,13 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         }
     }
 
+    @Override
     public void ioPortWrite16(int address, int data) {
         this.ioPortWrite8(address, data);
         this.ioPortWrite8(address + 1, data >>> 8);
     }
 
+    @Override
     public void ioPortWrite32(int address, int data) {
         this.ioPortWrite16(address, data);
         this.ioPortWrite16(address + 2, data >>> 16);
@@ -573,6 +589,7 @@ public class InterruptController extends AbstractHardwareComponent implements IO
 
     private boolean ioportRegistered;
 
+    @Override
     public void reset() {
         master.reset();
         slave.reset();
@@ -581,14 +598,17 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         connectedCPU = null;
     }
 
+    @Override
     public boolean initialised() {
-        return ((connectedCPU != null) && ioportRegistered);
+        return connectedCPU != null && ioportRegistered;
     }
 
+    @Override
     public boolean updated() {
         return ioportRegistered;
     }
 
+    @Override
     public void updateComponent(HardwareComponent component) {
         if (component instanceof IOPortHandler) {
             ((IOPortHandler)component).registerIOPortCapable(this);
@@ -596,15 +616,17 @@ public class InterruptController extends AbstractHardwareComponent implements IO
         }
     }
 
+    @Override
     public void acceptComponent(HardwareComponent component) {
         if (component instanceof Processor)
             connectedCPU = (Processor)component;
-        if ((component instanceof IOPortHandler) && component.initialised()) {
+        if (component instanceof IOPortHandler && component.initialised()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
         }
     }
 
+    @Override
     public String toString() {
         return "Intel i8259 Programmable Interrupt Controller";
     }

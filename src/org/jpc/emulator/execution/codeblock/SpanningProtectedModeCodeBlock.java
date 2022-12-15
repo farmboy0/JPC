@@ -27,8 +27,8 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.processor.Processor;
 
 class SpanningProtectedModeCodeBlock extends SpanningCodeBlock implements ProtectedModeCodeBlock {
     private PeekableMemoryStream byteSourceStream = new PeekableMemoryStream();
@@ -41,17 +41,19 @@ class SpanningProtectedModeCodeBlock extends SpanningCodeBlock implements Protec
         this.factories = factories;
     }
 
+    @Override
     public int getX86Length() {
         return length;
     }
 
+    @Override
     public CodeBlock decode(Processor cpu) {
         decodes++;
         ProtectedModeCodeBlock block = null;
         AddressSpace memory = cpu.linearMemory;
         int address = cpu.getInstructionPointer();
         boolean opSize = cpu.cs.getDefaultSizeFlag();
-        for (int i = 0; (i < factories.length) && (block == null); i++) {
+        for (int i = 0; i < factories.length && block == null; i++) {
             try {
                 byteSourceStream.set(memory, address);
                 block = factories[i].getProtectedModeCodeBlock(byteSourceStream, opSize);
@@ -66,6 +68,7 @@ class SpanningProtectedModeCodeBlock extends SpanningCodeBlock implements Protec
         return block;
     }
 
+    @Override
     public String toString() {
         return "Spanning Protected Mode CodeBlock";
     }

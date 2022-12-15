@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
-    Details (including contact information) can be found at: 
+
+    Details (including contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
-import org.jpc.emulator.execution.*;
-import org.jpc.emulator.execution.decoder.*;
-import org.jpc.emulator.processor.*;
-import org.jpc.emulator.processor.fpu64.*;
-import static org.jpc.emulator.processor.Processor.*;
+import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Pointer;
+import org.jpc.emulator.processor.Processor;
 
 public class mul_Ed_mem extends Executable {
     final Pointer op1;
@@ -42,20 +42,23 @@ public class mul_Ed_mem extends Executable {
         op1 = Modrm.getPointer(prefices, modrm, input);
     }
 
+    @Override
     public Branch execute(Processor cpu) {
         cpu.af = false;
         long res64 = (0xffffffffL & op1.get32(cpu)) * (0xffffffffL & cpu.r_eax.get32());
         cpu.r_eax.set32((int)res64);
         cpu.r_edx.set32((int)(res64 >> 32));
         cpu.setOSZAPC_Logic32((int)res64);
-        cpu.cf = cpu.of = (cpu.r_edx.get32() != 0);
+        cpu.cf = cpu.of = cpu.r_edx.get32() != 0;
         return Branch.None;
     }
 
+    @Override
     public boolean isBranch() {
         return false;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName();
     }

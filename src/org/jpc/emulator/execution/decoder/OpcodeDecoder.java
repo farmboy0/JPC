@@ -35,5 +35,5 @@ import org.jpc.emulator.execution.Executable;
  */
 public interface OpcodeDecoder {
     // source will be pointing at the modrm byte or the first byte after it
-    public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream source);
+    Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream source);
 }
