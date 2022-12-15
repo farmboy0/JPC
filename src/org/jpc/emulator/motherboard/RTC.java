@@ -40,7 +40,6 @@ import java.util.Calendar;
 
 import org.jpc.emulator.AbstractHardwareComponent;
 import org.jpc.emulator.HardwareComponent;
-import org.jpc.emulator.PC;
 import org.jpc.emulator.Timer;
 import org.jpc.emulator.TimerResponsive;
 import org.jpc.emulator.peripheral.FloppyController;
@@ -108,22 +107,27 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
     private boolean drivesInited;
     private boolean floppiesInited;
     private final Calendar startTime;
+    private final int ramSize;
 
     /**
      * Construct a new RTC which will register at ioports <code>ioPort</code> and <code>ioPort+1</code>.
      * Interrupt requests will be sent on the supplied channel number.
      * @param ioPort ioport base address.
      * @param irq interrupt channel number.
+     * @param start starting time of the system as Calendar
+     * @param ramSize size of system ram
      */
-    public RTC(int ioPort, int irq, Calendar start) {
+    public RTC(int ioPort, int irq, Calendar start, int ramSize) {
+        this.ioPortBase = ioPort;
+        this.irq = irq;
         this.startTime = start;
+        this.ramSize = ramSize;
+
         bootType = null;
         ioportRegistered = false;
         drivesInited = false;
         floppiesInited = false;
 
-        ioPortBase = ioPort;
-        this.irq = irq;
         cmosData = new byte[128];
         cmosData[RTC_REG_A] = 0x26;
         cmosData[RTC_REG_B] = 0x02;
@@ -140,9 +144,10 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
      * Interrupt requests will be sent on the supplied channel number.
      * @param ioPort ioport base address.
      * @param irq interrupt channel number.
+     * @param ramSize size of system ram
      */
-    public RTC(int ioPort, int irq) {
-        this(ioPort, irq, Calendar.getInstance());
+    public RTC(int ioPort, int irq, int ramSize) {
+        this(ioPort, irq, Calendar.getInstance(), ramSize);
     }
 
     @Override
@@ -215,7 +220,6 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
         cmosData[0x15] = (byte)val;
         cmosData[0x16] = (byte)(val >>> 8);
 
-        int ramSize = PC.SYS_RAM_SIZE;
         val = ramSize / 1024 - 1024;
         if (val > 65535)
             val = 65535;

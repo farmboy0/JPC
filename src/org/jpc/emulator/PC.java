@@ -112,8 +112,6 @@ import org.jpc.support.DriveSet;
  * @author Ian Preston
  */
 public class PC {
-
-    public static int SYS_RAM_SIZE;
     public static final int DEFAULT_RAM_SIZE = Option.ram.intValue(16) * 1024 * 1024;
     public static final int INSTRUCTIONS_BETWEEN_INTERRUPTS = 1;
     public static final boolean ETHERNET = Option.ethernet.isSet();
@@ -161,7 +159,6 @@ public class PC {
      * @throws java.io.IOException propagated from bios resource loading
      */
     public PC(Clock clock, DriveSet drives, int ramSize, Calendar startTime) throws IOException {
-        SYS_RAM_SIZE = ramSize;
         parts = new LinkedList<HardwareComponent>();
 
         vmClock = clock;
@@ -170,7 +167,7 @@ public class PC {
         parts.add(processor);
         manager = new CodeBlockManager();
 
-        physicalAddr = new PhysicalAddressSpace(manager);
+        physicalAddr = new PhysicalAddressSpace(manager, ramSize);
 
         parts.add(physicalAddr);
 
@@ -188,7 +185,7 @@ public class PC {
         parts.add(new DMAController(false, true));
         parts.add(new DMAController(false, false));
 
-        parts.add(new RTC(0x70, 8, startTime));
+        parts.add(new RTC(0x70, 8, startTime, ramSize));
         parts.add(new IntervalTimer(0x40, 0));
         parts.add(new GateA20Handler());
 

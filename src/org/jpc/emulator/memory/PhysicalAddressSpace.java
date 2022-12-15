@@ -40,7 +40,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jpc.emulator.HardwareComponent;
-import org.jpc.emulator.PC;
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 import org.jpc.emulator.execution.codeblock.SpanningCodeBlock;
 import org.jpc.emulator.execution.codeblock.SpanningDecodeException;
@@ -59,7 +58,6 @@ import org.jpc.j2se.Option;
 public final class PhysicalAddressSpace extends AddressSpace implements HardwareComponent {
 
     private static final int GATEA20_MASK = 0xffefffff;
-    private static final int QUICK_INDEX_SIZE = PC.SYS_RAM_SIZE >>> INDEX_SHIFT;
     private static final int TOP_INDEX_BITS = (32 - INDEX_SHIFT) / 2;
     private static final int BOTTOM_INDEX_BITS = 32 - INDEX_SHIFT - TOP_INDEX_BITS;
     private static final int TOP_INDEX_SHIFT = 32 - TOP_INDEX_BITS;
@@ -74,6 +72,8 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
     private Memory[][] nonA20MaskedIndex, a20MaskedIndex, index;
     private LinearAddressSpace linearAddr;
     private CodeBlockManager manager = null;
+    private final int ramSize;
+    private final int quickIndexSize;
     public static final boolean track_page_writes = Option.track_writes.value();
     private Set<Integer> dirtyPages = new HashSet();
 
@@ -81,11 +81,13 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
      * Constructs an address space which is initially empty. All addresses are mapped to an instance of
      * the inner class <code>UnconnectedMemoryBlock</code> whose data lines float high.
      */
-    public PhysicalAddressSpace(CodeBlockManager manager) {
+    public PhysicalAddressSpace(CodeBlockManager manager, int ramSize) {
         this.manager = manager;
-        quickNonA20MaskedIndex = new Memory[QUICK_INDEX_SIZE];
+        this.ramSize = ramSize;
+        this.quickIndexSize = ramSize >>> INDEX_SHIFT;
+        quickNonA20MaskedIndex = new Memory[quickIndexSize];
         clearArray(quickNonA20MaskedIndex, UNCONNECTED);
-        quickA20MaskedIndex = new Memory[QUICK_INDEX_SIZE];
+        quickA20MaskedIndex = new Memory[quickIndexSize];
         clearArray(quickA20MaskedIndex, UNCONNECTED);
 
         nonA20MaskedIndex = new Memory[TOP_INDEX_SIZE][];
@@ -202,7 +204,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
     }
 
     private void initialiseMemory() {
-        for (int i = 0; i < PC.SYS_RAM_SIZE; i += AddressSpace.BLOCK_SIZE) {
+        for (int i = 0; i < ramSize; i += AddressSpace.BLOCK_SIZE) {
             mapMemory(i, new LazyCodeBlockMemory(AddressSpace.BLOCK_SIZE, manager));
         }
         // memory hole, the last 64 K of this is replaced by BIOS shadow ram if the BIOS ROM is 128 K or greater
@@ -258,7 +260,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
 
         //fill in a20 masked quick array
         System.arraycopy(quickNonA20MaskedIndex, 0, quickA20MaskedIndex, 0, quickA20MaskedIndex.length);
-        for (int i = 0; i < QUICK_INDEX_SIZE; i++) {
+        for (int i = 0; i < quickIndexSize; i++) {
             if ((i & GATEA20_MASK >>> INDEX_SHIFT) == i) {
                 quickA20MaskedIndex[i] = quickNonA20MaskedIndex[i];
                 int modi = i | ~GATEA20_MASK >>> INDEX_SHIFT;
@@ -692,7 +694,7 @@ public final class PhysicalAddressSpace extends AddressSpace implements Hardware
         }
         unmap(start, length);
         if (Option.log_memory_maps.isSet())
-            if ((start & 0xffffffffL) > PC.SYS_RAM_SIZE || !(underlying instanceof LazyCodeBlockMemory))
+            if ((start & 0xffffffffL) > ramSize || !(underlying instanceof LazyCodeBlockMemory))
                 System.out.printf("Mapping %s into memory from %x to %x\n", underlying, start, start + length);
 
         long s = 0xFFFFFFFFL & start;
