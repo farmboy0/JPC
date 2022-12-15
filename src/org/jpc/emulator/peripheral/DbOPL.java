@@ -4,75 +4,75 @@ public class DbOPL {
     // :TODO: look for ~ and make sure they generate the mask of the right size
 
     // Java 1.4 does not have Math.log10
-    static private double log10(double d) {
+    private static double log10(double d) {
         return Math.log(d) / Math.log(10);
     }
 
     //Use 8 handlers based on a small logatirmic wavetabe and an exponential table for volume
-    static private final int WAVE_HANDLER = 10;
+    private static final int WAVE_HANDLER = 10;
     //Use a logarithmic wavetable with an exponential table for volume
-    static private final int WAVE_TABLELOG = 11;
+    private static final int WAVE_TABLELOG = 11;
     //Use a linear wavetable with a multiply table for volume
-    static private final int WAVE_TABLEMUL = 12;
+    private static final int WAVE_TABLEMUL = 12;
 
     //Select the type of wave generator routine
-    static private final int DBOPL_WAVE = WAVE_TABLEMUL;
+    private static final int DBOPL_WAVE = WAVE_TABLEMUL;
 
-    static private final double OPLRATE = 14318180.0 / 288.0;
-    static private final int TREMOLO_TABLE = 52;
+    private static final double OPLRATE = 14318180.0 / 288.0;
+    private static final int TREMOLO_TABLE = 52;
 
     //Try to use most precision for frequencies
     //Else try to keep different waves in synch
-    static private final boolean WAVE_PRECISION = false;
+    private static final boolean WAVE_PRECISION = false;
 
 //    #ifndef WAVE_PRECISION
 //    //Wave bits available in the top of the 32bit range
 //    //Original adlib uses 10.10, we use 10.22
-//    static private final int WAVE_BITS	10
+//    private static final int WAVE_BITS	10
 //    #else
 //    //Need some extra bits at the top to have room for octaves and frequency multiplier
 //    //We support to 8 times lower rate
 //    //128 * 15 * 8 = 15350, 2^13.9, so need 14 bits
-//    static private final int WAVE_BITS	14
+//    private static final int WAVE_BITS	14
 //    #endif
 
-    static private final int WAVE_BITS = WAVE_PRECISION ? 14 : 10;
+    private static final int WAVE_BITS = WAVE_PRECISION ? 14 : 10;
 
-    static private final int WAVE_SH = 32 - WAVE_BITS;
-    static private final int WAVE_MASK = (1 << WAVE_SH) - 1;
+    private static final int WAVE_SH = 32 - WAVE_BITS;
+    private static final int WAVE_MASK = (1 << WAVE_SH) - 1;
 
     //Use the same accuracy as the waves
-    static private final int LFO_SH = WAVE_SH - 10;
+    private static final int LFO_SH = WAVE_SH - 10;
     //LFO is controlled by our tremolo 256 sample limit
-    static private final int LFO_MAX = 256 << LFO_SH;
+    private static final int LFO_MAX = 256 << LFO_SH;
 
     //Maximum amount of attenuation bits
     //Envelope goes to 511, 9 bits
 //    #if (DBOPL_WAVE == WAVE_TABLEMUL )
 //    //Uses the value directly
-//    static private final int ENV_BITS	( 9 )
+//    private static final int ENV_BITS	( 9 )
 //    #else
 //    //Add 3 bits here for more accuracy and would have to be shifted up either way
-//    static private final int ENV_BITS	( 9 )
+//    private static final int ENV_BITS	( 9 )
 //    #endif
 
-    static private final int ENV_BITS = 9;
+    private static final int ENV_BITS = 9;
 
     //Limits of the envelope with those bits and when the envelope goes silent
-    static private final int ENV_MIN = 0;
-    static private final int ENV_EXTRA = ENV_BITS - 9;
-    static private final int ENV_MAX = 511 << ENV_EXTRA;
-    static private final int ENV_LIMIT = 12 * 256 >> 3 - ENV_EXTRA;
+    private static final int ENV_MIN = 0;
+    private static final int ENV_EXTRA = ENV_BITS - 9;
+    private static final int ENV_MAX = 511 << ENV_EXTRA;
+    private static final int ENV_LIMIT = 12 * 256 >> 3 - ENV_EXTRA;
 
-    static private boolean ENV_SILENT(int _X_) {
+    private static boolean ENV_SILENT(int _X_) {
         return _X_ >= ENV_LIMIT;
     }
 
     //Attack/decay/release rate counter shift
-    static private final int RATE_SH = 24;
-    static private final int RATE_MASK = (1 << RATE_SH) - 1;
+    private static final int RATE_SH = 24;
+    private static final int RATE_MASK = (1 << RATE_SH) - 1;
     //Has to fit within 16bit lookuptable
-    static private final int MUL_SH = 16;
+    private static final int MUL_SH = 16;
 
     //Check some ranges
 //    #if ENV_EXTRA > 3
@@ -80,7 +80,7 @@ public class DbOPL {
 //    #endif
 
     //How much to substract from the base value for the final attenuation
-    static private final /*Bit8u*/byte[] KslCreateTable = {
+    private static final /*Bit8u*/byte[] KslCreateTable = {
         //0 will always be be lower than 7 * 8
         64,
         32,
@@ -99,12 +99,12 @@ public class DbOPL {
         1,
         0, };
 
-    static final private /*Bit8u*/byte[] FreqCreateTable = { 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30 };
+    private static final /*Bit8u*/byte[] FreqCreateTable = { 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 20, 24, 24, 30, 30 };
 
     //We're not including the highest attack rate, that gets a special value
-    static final private /*Bit8u*/byte[] AttackSamplesTable = { 69, 55, 46, 40, 35, 29, 23, 20, 19, 15, 11, 10, 9 };
+    private static final /*Bit8u*/byte[] AttackSamplesTable = { 69, 55, 46, 40, 35, 29, 23, 20, 19, 15, 11, 10, 9 };
     //On a real opl these values take 8 samples to reach and are based upon larger tables
-    static final private /*Bit8u*/byte[] EnvelopeIncreaseTable = { 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, };
+    private static final /*Bit8u*/byte[] EnvelopeIncreaseTable = { 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, };
 
     static /*Bit16u*/int[] ExpTable;
     static /*Bit16u*/int[] SinTable;
@@ -130,33 +130,33 @@ public class DbOPL {
 
     //6 is just 0 shifted and masked
 
-    static private final/*Bit16s*/short[] WaveTable;
+    private static final/*Bit16s*/short[] WaveTable;
     //Distance into WaveTable the wave starts
-    static private final /*Bit16u*/short[] WaveBaseTable = { 0x000, 0x200, 0x200, 0x800, 0xa00, 0xc00, 0x100, 0x400,
+    private static final /*Bit16u*/short[] WaveBaseTable = { 0x000, 0x200, 0x200, 0x800, 0xa00, 0xc00, 0x100, 0x400,
 
     };
     //Mask the counter with this
-    static private final /*Bit16u*/short[] WaveMaskTable = { 1023, 1023, 511, 511, 1023, 1023, 512, 1023, };
+    private static final /*Bit16u*/short[] WaveMaskTable = { 1023, 1023, 511, 511, 1023, 1023, 512, 1023, };
 
     //Where to start the counter on at keyon
-    static private final /*Bit16u*/short[] WaveStartTable = { 512, 0, 0, 0, 0, 512, 512, 256, };
+    private static final /*Bit16u*/short[] WaveStartTable = { 512, 0, 0, 0, 0, 512, 512, 256, };
 //    #endif
 
     //#if ( DBOPL_WAVE == WAVE_TABLEMUL )
-    private final static /*Bit16u*/int[] MulTable;
+    private static final /*Bit16u*/int[] MulTable;
     //#endif
 
-    private final static /*Bit8u*/short[] KslTable = new short[8 * 16];
-    private final static /*Bit8u*/short[] TremoloTable = new short[TREMOLO_TABLE];
+    private static final /*Bit8u*/short[] KslTable = new short[8 * 16];
+    private static final /*Bit8u*/short[] TremoloTable = new short[TREMOLO_TABLE];
     //Start of a channel behind the chip struct start
-    private final static /*Bit16u*/int[] ChanOffsetTable = new int[32];
+    private static final /*Bit16u*/int[] ChanOffsetTable = new int[32];
     //Start of an operator behind the chip struct start
-    private final static /*Bit16u*/int[] OpOffsetTable = new int[64];
+    private static final /*Bit16u*/int[] OpOffsetTable = new int[64];
 
     //The lower bits are the shift of the operator vibrato value
     //The highest bit is right shifted to generate -1 or 0 for negation
     //So taking the highest input value of 7 this gives 3, 7, 3, 0, -3, -7, -3, 0
-    static private final /*Bit8s*/byte[] VibratoTable = {
+    private static final /*Bit8s*/byte[] VibratoTable = {
         1 - 0x00,
         0 - 0x00,
         1 - 0x00,
@@ -167,7 +167,7 @@ public class DbOPL {
         30 - 0x80 };
 
     //Shift strength for the ksl value determined by ksl strength
-    static private final /*Bit8u*/byte[] KslShiftTable = { 31, 1, 2, 0 };
+    private static final /*Bit8u*/byte[] KslShiftTable = { 31, 1, 2, 0 };
 
 //    #if (DBOPL_WAVE == WAVE_HANDLER)
 //    typedef /*Bits*/int ( DB_FASTCALL *WaveHandler) ( /*Bitu*/long i, /*Bitu*/long volume );
@@ -177,44 +177,44 @@ public class DbOPL {
     }
 
 //    typedef /*Bits*/int ( DBOPL::Operator::*VolumeHandler) ( );
-//    static private interface VolumeHandler {
+//    private static interface VolumeHandler {
 //        public /*Bits*/int call();
 //    }
 
 //    typedef Channel* ( DBOPL::Channel::*SynthHandler) ( Chip* chip, /*Bit32u*/long samples, /*Bit32s*/int* output );
 
     //Different synth modes that can generate blocks of data
-    static private final int sm2AM = 0;
-    static private final int sm2FM = 1;
-    static private final int sm3AM = 2;
-    static private final int sm3FM = 3;
-    static private final int sm4Start = 4;
-    static private final int sm3FMFM = 5;
-    static private final int sm3AMFM = 6;
-    static private final int sm3FMAM = 7;
-    static private final int sm3AMAM = 8;
-    static private final int sm6Start = 9;
-    static private final int sm2Percussion = 10;
-    static private final int sm3Percussion = 11;
+    private static final int sm2AM = 0;
+    private static final int sm2FM = 1;
+    private static final int sm3AM = 2;
+    private static final int sm3FM = 3;
+    private static final int sm4Start = 4;
+    private static final int sm3FMFM = 5;
+    private static final int sm3AMFM = 6;
+    private static final int sm3FMAM = 7;
+    private static final int sm3AMAM = 8;
+    private static final int sm6Start = 9;
+    private static final int sm2Percussion = 10;
+    private static final int sm3Percussion = 11;
 
-    static private int SynthMode;
+    private static int SynthMode;
 
     //Shifts for the values contained in chandata variable
-    static private final int SHIFT_KSLBASE = 16;
-    static private final int SHIFT_KEYCODE = 24;
+    private static final int SHIFT_KSLBASE = 16;
+    private static final int SHIFT_KEYCODE = 24;
 
     private static class Operator {
         //Masks for operator 20 values
-        static public final int MASK_KSR = 0x10;
-        static public final int MASK_SUSTAIN = 0x20;
-        static public final int MASK_VIBRATO = 0x40;
-        static public final int MASK_TREMOLO = 0x80;
+        public static final int MASK_KSR = 0x10;
+        public static final int MASK_SUSTAIN = 0x20;
+        public static final int MASK_VIBRATO = 0x40;
+        public static final int MASK_TREMOLO = 0x80;
 
-        static public final int OFF = 0;
-        static public final int RELEASE = 1;
-        static public final int SUSTAIN = 2;
-        static public final int DECAY = 3;
-        static public final int ATTACK = 4;
+        public static final int OFF = 0;
+        public static final int RELEASE = 1;
+        public static final int SUSTAIN = 2;
+        public static final int DECAY = 3;
+        public static final int ATTACK = 4;
 
         public int State;
 
@@ -977,7 +977,7 @@ public class DbOPL {
         }
     }
 
-    static private class Chip {
+    private static class Chip {
         Chip() {
             reg08 = 0;
             reg04 = 0;
@@ -1123,7 +1123,7 @@ public class DbOPL {
                 chan[8].op[1].KeyOff(0x2);
             }
         }
-//        static private int REGOP( _FUNC_ ) {
+//        private static int REGOP( _FUNC_ ) {
 //            index = ( ( reg >> 3) & 0x20 ) | ( reg & 0x1f );
 //            if ( OpOffsetTable[ index ] ) {
 //                Operator* regOp = (Operator*)( ((char *)this ) + OpOffsetTable[ index ] );
@@ -1131,7 +1131,7 @@ public class DbOPL {
 //            }
 //        }
 
-//        static private final int REGCHAN( _FUNC_ )
+//        private static final int REGCHAN( _FUNC_ )
 //            index = ( ( reg >> 4) & 0x10 ) | ( reg & 0xf );
 //            if ( ChanOffsetTable[ index ] ) {
 //                Channel* regChan = (Channel*)( ((char *)this ) + ChanOffsetTable[ index ] );
@@ -1435,7 +1435,7 @@ public class DbOPL {
         }
     }
 
-    final public static class Handler implements Adlib.Handler {
+    public static final class Handler implements Adlib.Handler {
         Chip chip = new Chip();
 
         @Override
@@ -1471,13 +1471,13 @@ public class DbOPL {
         }
     }
 
-    static private final double PI = 3.14159265358979323846;
+    private static final double PI = 3.14159265358979323846;
 
 //    #if ( DBOPL_WAVE == WAVE_HANDLER )
     /*
         Generate the different waveforms out of the sine/exponetial table using handlers
     */
-    static private /*Bits*/int MakeVolume( /*Bitu*/int wave, /*Bitu*/int volume) {
+    private static /*Bits*/int MakeVolume( /*Bitu*/int wave, /*Bitu*/int volume) {
         /*Bitu*/int total = wave + volume;
         /*Bitu*/int index = total & 0xff;
         /*Bitu*/int sig = ExpTable[index];
@@ -1491,7 +1491,7 @@ public class DbOPL {
         return sig >> exp;
     }
 
-    static private final WaveHandler WaveForm0 = new WaveHandler() {
+    private static final WaveHandler WaveForm0 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             /*Bits*/int neg = 0 - (i >> 9 & 1);
@@ -1501,7 +1501,7 @@ public class DbOPL {
         }
     };
 
-    static private final WaveHandler WaveForm1 = new WaveHandler() {
+    private static final WaveHandler WaveForm1 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             /*Bit32u*/int wave = SinTable[i & 511];
@@ -1510,7 +1510,7 @@ public class DbOPL {
         }
     };
 
-    static private final WaveHandler WaveForm2 = new WaveHandler() {
+    private static final WaveHandler WaveForm2 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             /*Bitu*/int wave = SinTable[i & 511];
@@ -1518,7 +1518,7 @@ public class DbOPL {
         }
     };
 
-    static private final WaveHandler WaveForm3 = new WaveHandler() {
+    private static final WaveHandler WaveForm3 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             /*Bitu*/int wave = SinTable[i & 255];
@@ -1527,7 +1527,7 @@ public class DbOPL {
         }
     };
 
-    static private final WaveHandler WaveForm4 = new WaveHandler() {
+    private static final WaveHandler WaveForm4 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             //Twice as fast
@@ -1540,7 +1540,7 @@ public class DbOPL {
         }
     };
 
-    static private final WaveHandler WaveForm5 = new WaveHandler() {
+    private static final WaveHandler WaveForm5 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             //Twice as fast
@@ -1551,7 +1551,7 @@ public class DbOPL {
         }
     };
 
-    static private final WaveHandler WaveForm6 = new WaveHandler() {
+    private static final WaveHandler WaveForm6 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             /*Bits*/int neg = 0 - (i >> 9 & 1);//Create ~0 or 0
@@ -1559,7 +1559,7 @@ public class DbOPL {
         }
     };
 
-    static private final WaveHandler WaveForm7 = new WaveHandler() {
+    private static final WaveHandler WaveForm7 = new WaveHandler() {
         @Override
         public /*Bits*/int call(int i, int volume) {
             //Negative is reversed here
@@ -1571,7 +1571,7 @@ public class DbOPL {
         }
     };
 
-    static final private WaveHandler[] WaveHandlerTable = {
+    private static final WaveHandler[] WaveHandlerTable = {
         WaveForm0,
         WaveForm1,
         WaveForm2,
@@ -1585,7 +1585,7 @@ public class DbOPL {
 
     private static boolean doneTables = false;
 
-    static private void InitTables() {
+    private static void InitTables() {
         if (doneTables)
             return;
         doneTables = true;

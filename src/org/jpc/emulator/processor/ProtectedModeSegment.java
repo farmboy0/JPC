@@ -192,7 +192,7 @@ public abstract class ProtectedModeSegment extends Segment {
         throw new IllegalStateException("Cannot set a selector for a descriptor table segment");
     }
 
-    static abstract class StackSegment extends ProtectedModeSegment {
+    abstract static class StackSegment extends ProtectedModeSegment {
         public StackSegment(AddressSpace memory, int selector, long descriptor) {
             super(memory, selector, descriptor);
         }
@@ -207,7 +207,7 @@ public abstract class ProtectedModeSegment extends Segment {
         }
     }
 
-    static abstract class ReadOnlyProtectedModeSegment extends ProtectedModeSegment {
+    abstract static class ReadOnlyProtectedModeSegment extends ProtectedModeSegment {
         public ReadOnlyProtectedModeSegment(AddressSpace memory, int selector, long descriptor) {
             super(memory, selector, descriptor);
         }
@@ -237,7 +237,7 @@ public abstract class ProtectedModeSegment extends Segment {
         }
     }
 
-    static abstract class ReadOnlyStackSegment extends StackSegment {
+    abstract static class ReadOnlyStackSegment extends StackSegment {
         public ReadOnlyStackSegment(AddressSpace memory, int selector, long descriptor) {
             super(memory, selector, descriptor);
         }
@@ -471,7 +471,7 @@ public abstract class ProtectedModeSegment extends Segment {
         }
     }
 
-    static public abstract class AbstractTSS extends ReadOnlyProtectedModeSegment {
+    public abstract static class AbstractTSS extends ReadOnlyProtectedModeSegment {
         public AbstractTSS(AddressSpace memory, int selector, long descriptor) {
             super(memory, selector, descriptor);
         }
@@ -593,7 +593,7 @@ public abstract class ProtectedModeSegment extends Segment {
         }
     }
 
-    public static abstract class GateSegment extends ReadOnlyProtectedModeSegment {
+    public abstract static class GateSegment extends ReadOnlyProtectedModeSegment {
         private int targetSegment, targetOffset;
 
         public GateSegment(AddressSpace memory, int selector, long descriptor) {

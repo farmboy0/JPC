@@ -143,7 +143,7 @@ public class TreeBlockDevice implements BlockDevice {
 
     /* notes:
        Write Tree: to write a copy of the entire directory tree to disk, create a new folder and pass it as a File to writeNewTree(File file)
-
+    
        Synchronise: to continuously try to synchronise the virtual tree with the underlying tree set bufferWrites to false, otherwise all writes are buffered
        in an array
     */
@@ -1253,7 +1253,7 @@ public class TreeBlockDevice implements BlockDevice {
             for (int i = 0; i < dirEntry.length / 32; i++) {
                 int newStartCluster = (dirEntry[32 * i + 26] & 0xFF) + ((dirEntry[32 * i + 27] & 0xFF) << 8)
                     + ((dirEntry[32 * i + 20] & 0xFF) << 16) + ((dirEntry[32 * i + 21] & 0xFF) << 24);
-                 //skip LFN's for now
+                //skip LFN's for now
                 if (((dirEntry[32 * i] & 0xFF) == 0xE5) || ((dirEntry[32 * i + 11] & 0xFF) == 0xF) || ((dirEntry[32 * i] & 0xFF) == 0x00))
                     continue;
                 String name = new String(dirEntry, 32 * i, 8, US_ASCII).trim();

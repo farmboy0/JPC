@@ -126,7 +126,7 @@ public class CompareToBochs {
         ignoredIOPorts.add(0x61); // PC speaker
     }
 
-    public final static Map<String, Integer> flagIgnores = new HashMap();
+    public static final Map<String, Integer> flagIgnores = new HashMap();
     static {
         flagIgnores.put("test", ~0x10); // not defined in spec
         flagIgnores.put("and", ~0x10); // not defined in spec

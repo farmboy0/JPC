@@ -188,7 +188,7 @@ public class PCMonitor extends KeyHandlingPanel {
                 int xmax = (int)(vgaCard.getXMax() * scaleX);
                 int ymin = (int)((vgaCard.getYMin() - 1) * scaleY);
                 int ymax = (int)(vgaCard.getYMax() * scaleY);
-
+                
                 repaint(xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
                 */
                 repaint();

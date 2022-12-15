@@ -80,19 +80,19 @@ public class Ptr {
         return off - start;
     }
 
-    static public void memcpy(Ptr dest, Ptr source, int len) {
+    public static void memcpy(Ptr dest, Ptr source, int len) {
         System.arraycopy(source.p, source.off, dest.p, dest.off, len);
     }
 
-    static public void memcpy(Ptr dest, byte[] source, int len) {
+    public static void memcpy(Ptr dest, byte[] source, int len) {
         System.arraycopy(source, 0, dest.p, dest.off, len);
     }
 
-    static public void memcpy(byte[] dest, byte[] source, int len) {
+    public static void memcpy(byte[] dest, byte[] source, int len) {
         System.arraycopy(source, 0, dest, 0, len);
     }
 
-    static public int memcmp(Ptr b1, byte[] b2, int len) {
+    public static int memcmp(Ptr b1, byte[] b2, int len) {
         for (int i = 0; i < len; i++) {
             if (b1.p[i + b1.off] > b2[i])
                 return 1;

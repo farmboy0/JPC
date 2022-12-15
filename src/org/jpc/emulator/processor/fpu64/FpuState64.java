@@ -45,14 +45,14 @@ import org.jpc.j2se.Option;
 public class FpuState64 extends FpuState {
     private static final Logger LOGGING = Logger.getLogger(FpuState64.class.getName());
 
-    public final static int FPU_SPECIAL_TAG_NONE = 0;
-    public final static int FPU_SPECIAL_TAG_NAN = 1;
-    public final static int FPU_SPECIAL_TAG_UNSUPPORTED = 2;
-    public final static int FPU_SPECIAL_TAG_INFINITY = 3;
-    public final static int FPU_SPECIAL_TAG_DENORMAL = 4;
-    public final static int FPU_SPECIAL_TAG_SNAN = 5;
+    public static final int FPU_SPECIAL_TAG_NONE = 0;
+    public static final int FPU_SPECIAL_TAG_NAN = 1;
+    public static final int FPU_SPECIAL_TAG_UNSUPPORTED = 2;
+    public static final int FPU_SPECIAL_TAG_INFINITY = 3;
+    public static final int FPU_SPECIAL_TAG_DENORMAL = 4;
+    public static final int FPU_SPECIAL_TAG_SNAN = 5;
 
-    public final static double UNDERFLOW_THRESHOLD = Math.pow(2.0, -1022.0);
+    public static final double UNDERFLOW_THRESHOLD = Math.pow(2.0, -1022.0);
 
     public static final double DEFAULT_NAN = -1.5; // Double.longBitsToDouble(0xFFF8000000000000L);// to match Bochs' floatx80_default_nan truncation
 

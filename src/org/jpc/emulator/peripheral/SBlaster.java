@@ -32,81 +32,81 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
 
     private static final boolean DEBUG = false;
 
-    static final private int SB_PIC_EVENTS = 0;
+    private static final int SB_PIC_EVENTS = 0;
 
-    static final private int DSP_MAJOR = 3;
-    static final private int DSP_MINOR = 1;
+    private static final int DSP_MAJOR = 3;
+    private static final int DSP_MINOR = 1;
 
-    static final private int MIXER_INDEX = 0x04;
-    static final private int MIXER_DATA = 0x05;
+    private static final int MIXER_INDEX = 0x04;
+    private static final int MIXER_DATA = 0x05;
 
-    static final private int DSP_RESET = 0x06;
-    static final private int DSP_READ_DATA = 0x0A;
-    static final private int DSP_WRITE_DATA = 0x0C;
-    static final private int DSP_WRITE_STATUS = 0x0C;
-    static final private int DSP_READ_STATUS = 0x0E;
-    static final private int DSP_ACK_16BIT = 0x0f;
+    private static final int DSP_RESET = 0x06;
+    private static final int DSP_READ_DATA = 0x0A;
+    private static final int DSP_WRITE_DATA = 0x0C;
+    private static final int DSP_WRITE_STATUS = 0x0C;
+    private static final int DSP_READ_STATUS = 0x0E;
+    private static final int DSP_ACK_16BIT = 0x0f;
 
-    static final private int DSP_NO_COMMAND = 0;
+    private static final int DSP_NO_COMMAND = 0;
 
-    static final private int DMA_BUFSIZE = 1024;
-    static final private int DSP_BUFSIZE = 64;
-    static final private int DSP_DACSIZE = 512;
+    private static final int DMA_BUFSIZE = 1024;
+    private static final int DSP_BUFSIZE = 64;
+    private static final int DSP_DACSIZE = 512;
 
 //Should be enough for sound generated in millisecond blocks
-    static final private int SB_BUF_SIZE = 8096;
-    static final private int SB_SH = 14;
-    static final private int SB_SH_MASK = (1 << SB_SH) - 1;
+    private static final int SB_BUF_SIZE = 8096;
+    private static final int SB_SH = 14;
+    private static final int SB_SH_MASK = (1 << SB_SH) - 1;
 
-    static final private int DSP_S_RESET = 0;
-    static final private int DSP_S_RESET_WAIT = 1;
-    static final private int DSP_S_NORMAL = 2;
-    static final private int DSP_S_HIGHSPEED = 3;
+    private static final int DSP_S_RESET = 0;
+    private static final int DSP_S_RESET_WAIT = 1;
+    private static final int DSP_S_NORMAL = 2;
+    private static final int DSP_S_HIGHSPEED = 3;
 
     // SB_TYPES
-    static final private int SBT_NONE = 0;
-    static final private int SBT_1 = 1;
-    static final private int SBT_PRO1 = 2;
-    static final private int SBT_2 = 3;
-    static final private int SBT_PRO2 = 4;
-    static final private int SBT_16 = 6;
-    static final private int SBT_GB = 7;
+    private static final int SBT_NONE = 0;
+    private static final int SBT_1 = 1;
+    private static final int SBT_PRO1 = 2;
+    private static final int SBT_2 = 3;
+    private static final int SBT_PRO2 = 4;
+    private static final int SBT_16 = 6;
+    private static final int SBT_GB = 7;
 
     // SB_IRQS
-    static final private int SB_IRQ_8 = 0;
-    static final private int SB_IRQ_16 = 1;
-    static final private int SB_IRQ_MPU = 2;
+    private static final int SB_IRQ_8 = 0;
+    private static final int SB_IRQ_16 = 1;
+    private static final int SB_IRQ_MPU = 2;
 
     // DSP_MODES
-    static final private int MODE_NONE = 0;
-    static final private int MODE_DAC = 1;
-    static final private int MODE_DMA = 2;
-    static final private int MODE_DMA_PAUSE = 3;
-    static final private int MODE_DMA_MASKED = 4;
+    private static final int MODE_NONE = 0;
+    private static final int MODE_DAC = 1;
+    private static final int MODE_DMA = 2;
+    private static final int MODE_DMA_PAUSE = 3;
+    private static final int MODE_DMA_MASKED = 4;
 
     // DMA_MODES
-    static final private int DSP_DMA_NONE = 0;
-    static final private int DSP_DMA_2 = 1;
-    static final private int DSP_DMA_3 = 2;
-    static final private int DSP_DMA_4 = 3;
-    static final private int DSP_DMA_8 = 4;
-    static final private int DSP_DMA_16 = 5;
-    static final private int DSP_DMA_16_ALIASED = 6;
+    private static final int DSP_DMA_NONE = 0;
+    private static final int DSP_DMA_2 = 1;
+    private static final int DSP_DMA_3 = 2;
+    private static final int DSP_DMA_4 = 3;
+    private static final int DSP_DMA_8 = 4;
+    private static final int DSP_DMA_16 = 5;
+    private static final int DSP_DMA_16_ALIASED = 6;
 
-    static final private int PLAY_MONO = 0;
-    static final private int PLAY_STEREO = 1;
+    private static final int PLAY_MONO = 0;
+    private static final int PLAY_STEREO = 1;
 
-    static private class SB_INFO {
+    private static class SB_INFO {
         /*Bitu*/int freq;
 
-        static private class Dma {
+        private static class Dma {
             boolean stereo, sign, autoinit;
             /*DMA_MODES*/int mode;
             /*Bitu*/int rate, mul;
             /*Bitu*/int total, left, min;
             /*Bit64u*/long start;
 
-            static private class Buf {
+            private static class Buf {
                 /*Bit8u*/ byte[] b8 = new byte[DMA_BUFSIZE];
                 /*Bit16s*/ short[] b16 = new short[DMA_BUFSIZE];
                 byte[] b16tmp = new byte[2 * DMA_BUFSIZE];
@@ -126,21 +126,21 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         /*DSP_MODES*/int mode;
         /*SB_TYPES*/int type;
 
-        static private class Irq {
+        private static class Irq {
             boolean pending_8bit;
             boolean pending_16bit;
         }
 
         Irq irq = new Irq();
 
-        static private class Dsp {
+        private static class Dsp {
             /*Bit8u*/short state;
             /*Bit8u*/short cmd;
             /*Bit8u*/short cmd_len;
             /*Bit8u*/short cmd_in_pos;
             /*Bit8u*/short[] cmd_in = new short[DSP_BUFSIZE];
 
-            static private class Data {
+            private static class Data {
                 /*Bit8u*/short lastval;
                 /*Bit8u*/short[] data = new short[DSP_BUFSIZE];
                 /*Bitu*/int pos, used;
@@ -201,10 +201,10 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
 
     private static SB_INFO sb;
 
-    private final static String copyright_string = "COPYRIGHT (C) CREATIVE TECHNOLOGY LTD, 1992.";
+    private static final String copyright_string = "COPYRIGHT (C) CREATIVE TECHNOLOGY LTD, 1992.";
 
 // number of bytes in input for commands (sb/sbpro)
-    private final static /*Bit8u*/byte[] DSP_cmd_len_sb = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00
+    private static final /*Bit8u*/byte[] DSP_cmd_len_sb = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00
 //  1,0,0,0, 2,0,2,2, 0,0,0,0, 0,0,0,0,  // 0x10
         1,
         0,
@@ -452,7 +452,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
     };
 
 // number of bytes in input for commands (sb16)
-    private final static /*Bit8u*/byte[] DSP_cmd_len_sb16 = { 0, 0, 0, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 2, 1, // 0x00
+    private static final /*Bit8u*/byte[] DSP_cmd_len_sb16 = { 0, 0, 0, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 2, 1, // 0x00
 //  1,0,0,0, 2,0,2,2, 0,0,0,0, 0,0,0,0,  // 0x10
         1,
         0,
@@ -702,7 +702,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
     private static /*Bit8u*/short[] ASP_regs = new short[256];
     private static boolean ASP_init_in_progress = false;
 
-    private final static int[][] E2_incr_table = {
+    private static final int[][] E2_incr_table = {
         { 0x01, -0x02, -0x04, 0x08, -0x10, 0x20, 0x40, -0x80, -106 },
         { -0x01, 0x02, -0x04, 0x08, 0x10, -0x20, 0x40, -0x80, 165 },
         { -0x01, 0x02, 0x04, -0x08, 0x10, -0x20, -0x40, 0x80, -151 },
@@ -776,11 +776,11 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         }
     };
 
-    static final private int MIN_ADAPTIVE_STEP_SIZE = 0;
-    static final private int MAX_ADAPTIVE_STEP_SIZE = 32767;
-    static final private int DC_OFFSET_FADE = 254;
+    private static final int MIN_ADAPTIVE_STEP_SIZE = 0;
+    private static final int MAX_ADAPTIVE_STEP_SIZE = 32767;
+    private static final int DC_OFFSET_FADE = 254;
 
-    final private static /*Bit8s*/byte[] scaleMap1 = {
+    private static final /*Bit8s*/byte[] scaleMap1 = {
         0,
         1,
         2,
@@ -845,7 +845,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         -44,
         -52,
         -60 };
-    static final private /*Bit8u*/short[] adjustMap1 = {
+    private static final /*Bit8u*/short[] adjustMap1 = {
         0,
         0,
         0,
@@ -934,7 +934,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         return (byte)reference.value;
     }
 
-    static final private /*Bit8s*/byte[] scaleMap2 = {
+    private static final /*Bit8s*/byte[] scaleMap2 = {
         0,
         1,
         0,
@@ -959,7 +959,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         48,
         -16,
         -48 };
-    static final private /*Bit8u*/short[] adjustMap2 = {
+    private static final /*Bit8u*/short[] adjustMap2 = {
         0,
         4,
         0,
@@ -1007,7 +1007,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         return (byte)reference.value;
     }
 
-    static final private /*Bit8s*/byte[] scaleMap3 = {
+    private static final /*Bit8s*/byte[] scaleMap3 = {
         0,
         1,
         2,
@@ -1048,7 +1048,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         -15,
         -25,
         -35 };
-    static final private /*Bit8u*/short[] adjustMap3 = {
+    private static final /*Bit8u*/short[] adjustMap3 = {
         0,
         0,
         0,
@@ -1090,7 +1090,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         0,
         0 };
 
-    static private /*Bit8u*/byte decode_ADPCM_3_sample(/*Bit8u*/int sample, /*Bit8u*/ShortRef reference, /*Bits*/IntRef scale) {
+    private static /*Bit8u*/byte decode_ADPCM_3_sample(/*Bit8u*/int sample, /*Bit8u*/ShortRef reference, /*Bits*/IntRef scale) {
         /*Bits*/int samp = sample + scale.value;
         if (samp < 0 || samp > 39) {
             Log.log(Level.SEVERE, "Bad ADPCM-3 sample");
@@ -1228,7 +1228,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
                 for (int j = 0; j < size; j++)
                     sb.dma.buf.b16[j] = (short)(sb.dma.buf.b16tmp[2 * j] & 0xff | sb.dma.buf.b16tmp[2 * j + 1] << 8);
                 read = size >> (sb.dma.mode == DSP_DMA_16_ALIASED ? 1 : 0);
-//    #if static final private intd(WORDS_BIGENDIAN)
+//    #if private static final intd(WORDS_BIGENDIAN)
 //                if (sb.dma.sign) sb.chan.AddSamples_m16_nonnative(read,sb.dma.buf.b16);
 //                else sb.chan.AddSamples_m16u_nonnative(read,(Bit16u *)sb.dma.buf.b16);
 //    #else
@@ -1522,7 +1522,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         }
     };
 
-    static private boolean DSP_SB16_ONLY() {
+    private static boolean DSP_SB16_ONLY() {
         if (sb.type != SBT_16) {
             Log.log(Level.SEVERE, "DSP:Command " + Integer.toString(sb.dsp.cmd, 16) + " requires SB16");
             return true;
@@ -1530,7 +1530,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         return false;
     }
 
-    static private boolean DSP_SB2_ABOVE() {
+    private static boolean DSP_SB2_ABOVE() {
         if (sb.type <= SBT_1) {
             Log.log(Level.SEVERE, "DSP:Command " + Integer.toString(sb.dsp.cmd, 16) + " requires SB2 or above");
             return true;
@@ -1943,7 +1943,7 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
     }
 
 //The soundblaster manual says 2.0 Db steps but we'll go for a bit less
-    static private float CALCVOL(float _VAL) {
+    private static float CALCVOL(float _VAL) {
         return (float)Math.pow(10.0f, (31 - _VAL) * -1.3f / 20);
     }
 
@@ -1969,12 +1969,12 @@ public class SBlaster extends AbstractHardwareComponent implements IODevice {
         CTMIXER_UpdateVolumes();
     }
 
-    static private void SETPROVOL(short[] _WHICH_, int _VAL_) {
+    private static void SETPROVOL(short[] _WHICH_, int _VAL_) {
         _WHICH_[0] = (short)((_VAL_ & 0xf0) >> 3 | (sb.type == SBT_16 ? 1 : 3));
         _WHICH_[1] = (short)((_VAL_ & 0x0f) << 1 | (sb.type == SBT_16 ? 1 : 3));
     }
 
-    static private int MAKEPROVOL(short[] _WHICH_) {
+    private static int MAKEPROVOL(short[] _WHICH_) {
         return ((_WHICH_[0] & 0x1e) << 3 | (_WHICH_[1] & 0x1e) >> 1) & (sb.type == SBT_16 ? 0xff : 0xee);
     }
 

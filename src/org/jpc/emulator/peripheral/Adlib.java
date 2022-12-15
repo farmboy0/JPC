@@ -8,15 +8,15 @@ import org.jpc.j2se.Option;
 import org.jpc.support.Clock;
 
 public class Adlib extends AbstractHardwareComponent implements IODevice {
-    static private final int HW_OPL2 = 0;
-    static private final int HW_DUALOPL2 = 1;
-    static private final int HW_OPL3 = 2;
+    private static final int HW_OPL2 = 0;
+    private static final int HW_DUALOPL2 = 1;
+    private static final int HW_OPL3 = 2;
 
     private boolean ioportRegistered;
     private boolean single;
     private Clock timeSource;
 
-    static private class RawHeader {
+    private static class RawHeader {
         /*Bit8u*/byte[] id = new byte[8];
         /* 0x00, "DBRAWOPL" */
         /*Bit16u*/int versionHigh;
@@ -40,7 +40,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
         /*Bit8u*/short conversionTableSize; /* 0x191, Bit8u Raw Conversion Table size */
     }
 
-    static final private class Timer {
+    private static final class Timer {
         double start;
         double delay;
         boolean enabled, overflow, masked;
@@ -378,9 +378,9 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
     }
 
 //The type of handler this is
-    static final private int MODE_OPL2 = 0;
-    static final private int MODE_DUALOPL2 = 1;
-    static final private int MODE_OPL3 = 2;
+    private static final int MODE_OPL2 = 0;
+    private static final int MODE_DUALOPL2 = 1;
+    private static final int MODE_OPL3 = 2;
 
     public interface Handler {
         //Write an address to a chip, returns the address the chip sets

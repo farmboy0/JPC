@@ -344,7 +344,8 @@ public class Tasking {
 
             Segment ss = cpu.loadSegment(newSs, true);
 
-            if (!((ProtectedModeSegment)ss).isDataWritable() || ((ProtectedModeSegment)ss).isCode() || (ss.getDPL() != (newCs & 3)) || (ss.getDPL() != ss.getRPL()))
+            if (!((ProtectedModeSegment)ss).isDataWritable() || ((ProtectedModeSegment)ss).isCode() || (ss.getDPL() != (newCs & 3))
+                || (ss.getDPL() != ss.getRPL()))
                 throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, newSs & 0xfffc, true);
 
             if (touch_segment((ProtectedModeSegment)ss, cpu))

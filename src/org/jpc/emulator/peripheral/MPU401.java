@@ -20,34 +20,34 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
     private static Timer event;
     private static boolean ioportRegistered = false;
 
-    static final private int MPU401_VERSION = 0x15;
-    static final private int MPU401_REVISION = 0x01;
-    static final private int MPU401_QUEUE = 32;
-    static final private float MPU401_TIMECONSTANT = 60000000 / 1000.0f;
-    static final private float MPU401_RESETBUSY = 27.0f;
+    private static final int MPU401_VERSION = 0x15;
+    private static final int MPU401_REVISION = 0x01;
+    private static final int MPU401_QUEUE = 32;
+    private static final float MPU401_TIMECONSTANT = 60000000 / 1000.0f;
+    private static final float MPU401_RESETBUSY = 27.0f;
 
-    static final private int M_UART = 0;
-    static final private int M_INTELLIGENT = 1;
+    private static final int M_UART = 0;
+    private static final int M_INTELLIGENT = 1;
 
-    static final private int T_OVERFLOW = 0;
-    static final private int T_MARK = 1;
-    static final private int T_MIDI_SYS = 2;
-    static final private int T_MIDI_NORM = 3;
-    static final private int T_COMMAND = 4;
+    private static final int T_OVERFLOW = 0;
+    private static final int T_MARK = 1;
+    private static final int T_MIDI_SYS = 2;
+    private static final int T_MIDI_NORM = 3;
+    private static final int T_COMMAND = 4;
 
     /* Messages sent to MPU-401 from host */
-    static final private int MSG_EOX = 0xf7;
-    static final private int MSG_OVERFLOW = 0xf8;
-    static final private int MSG_MARK = 0xfc;
+    private static final int MSG_EOX = 0xf7;
+    private static final int MSG_OVERFLOW = 0xf8;
+    private static final int MSG_MARK = 0xfc;
 
     /* Messages sent to host from MPU-401 */
-    static final private int MSG_MPU_OVERFLOW = 0xf8;
-    static final private int MSG_MPU_COMMAND_REQ = 0xf9;
-    static final private int MSG_MPU_END = 0xfc;
-    static final private int MSG_MPU_CLOCK = 0xfd;
-    static final private int MSG_MPU_ACK = 0xfe;
+    private static final int MSG_MPU_OVERFLOW = 0xf8;
+    private static final int MSG_MPU_COMMAND_REQ = 0xf9;
+    private static final int MSG_MPU_END = 0xfc;
+    private static final int MSG_MPU_CLOCK = 0xfd;
+    private static final int MSG_MPU_ACK = 0xfe;
 
-    static final private class MPU {
+    private static final class MPU {
         public MPU() {
             for (int i = 0; i < playbuf.length; i++)
                 playbuf[i] = new track();
@@ -298,7 +298,7 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
         QueueByte(MSG_MPU_ACK);
     }
 
-    static private final int MPU401_ReadData(/*Bitu*/int port, /*Bitu*/int iolen) {
+    private static final int MPU401_ReadData(/*Bitu*/int port, /*Bitu*/int iolen) {
         /*Bit8u*/short ret = MSG_MPU_ACK;
         if (mpu.queue_used != 0) {
             if (mpu.queue_pos >= MPU401_QUEUE)
@@ -609,7 +609,7 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
         mpu.state.req_mask |= 1 << 9;
     }
 
-    static private final TimerResponsive MPU401_Event = new TimerResponsive() {
+    private static final TimerResponsive MPU401_Event = new TimerResponsive() {
         @Override
         public void callback() {
             if (mpu.mode == M_UART)
@@ -661,7 +661,7 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
     }
 
     //Updates counters and requests new data on "End of Input"
-    static private final TimerResponsive MPU401_EOIHandler = new TimerResponsive() {
+    private static final TimerResponsive MPU401_EOIHandler = new TimerResponsive() {
         @Override
         public void callback() {
             mpu.state.eoi_scheduled = false;
@@ -691,7 +691,7 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
         }
     };
 
-    static private final TimerResponsive MPU401_ResetDone = new TimerResponsive() {
+    private static final TimerResponsive MPU401_ResetDone = new TimerResponsive() {
         @Override
         public void callback() {
             mpu.state.reset = false;
@@ -848,7 +848,7 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
             MPU401_Init();
     }
 
-    static private MPU401 test;
+    private static MPU401 test;
 
     public static void MPU401_Destroy() {
         if (!test.installed || !Option.mpu401.value("intelligent").equalsIgnoreCase("intelligent"))

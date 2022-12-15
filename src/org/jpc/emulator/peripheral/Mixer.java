@@ -28,25 +28,25 @@ public class Mixer extends AbstractHardwareComponent {
         void call(/*Bitu*/int len);
     }
 
-    static private final class BlahModes {
-        static public final int MIXER_8MONO = 0;
-        static public final int MIXER_8STEREO = 1;
-        static public final int MIXER_16MONO = 2;
-        static public final int MIXER_16STEREO = 3;
+    private static final class BlahModes {
+        public static final int MIXER_8MONO = 0;
+        public static final int MIXER_8STEREO = 1;
+        public static final int MIXER_16MONO = 2;
+        public static final int MIXER_16STEREO = 3;
     }
 
-    static private final class MixerModes {
-        static public final int M_8M = 0;
-        static public final int M_8S = 1;
-        static public final int M_16M = 2;
-        static public final int M_16S = 3;
+    private static final class MixerModes {
+        public static final int M_8M = 0;
+        public static final int M_8S = 1;
+        public static final int M_16M = 2;
+        public static final int M_16S = 3;
     }
 
-    static private final int MIXER_BUFSIZE = 16 * 1024;
-    static private final int MIXER_BUFMASK = MIXER_BUFSIZE - 1;
+    private static final int MIXER_BUFSIZE = 16 * 1024;
+    private static final int MIXER_BUFMASK = MIXER_BUFSIZE - 1;
 
-    static public final int MAX_AUDIO = (1 << 16 - 1) - 1;
-    static public final int MIN_AUDIO = -(1 << 16 - 1);
+    public static final int MAX_AUDIO = (1 << 16 - 1) - 1;
+    public static final int MIN_AUDIO = -(1 << 16 - 1);
 
     public static class MixerChannel {
         public void SetVolume(float _left, float _right) {
@@ -88,7 +88,7 @@ public class Mixer extends AbstractHardwareComponent {
             }
         }
 
-        static public class Type {
+        public static class Type {
         }
 
         public void AddSamples(/*Bitu*/int len, Ptr data, boolean stereo, boolean signeddata, boolean nativeorder) {
@@ -542,11 +542,11 @@ public class Mixer extends AbstractHardwareComponent {
         /*Bit32u*/int blocksize;
     }
 
-    static private _Mixer mixer;
+    private static _Mixer mixer;
 
-    static public /*Bit8u*/byte[] MixTemp8 = new byte[MIXER_BUFSIZE];
-    static public short[] MixTemp16 = new short[MIXER_BUFSIZE >> 1];
-    static public int[] MixTemp32 = new int[MIXER_BUFSIZE >> 2];
+    public static /*Bit8u*/byte[] MixTemp8 = new byte[MIXER_BUFSIZE];
+    public static short[] MixTemp16 = new short[MIXER_BUFSIZE >> 1];
+    public static int[] MixTemp32 = new int[MIXER_BUFSIZE >> 2];
 
     public static MixerChannel MIXER_AddChannel(MIXER_Handler handler, /*Bitu*/int freq, String name) {
         MixerChannel chan = new MixerChannel();
@@ -585,14 +585,14 @@ public class Mixer extends AbstractHardwareComponent {
         }
     }
 
-    static private boolean Mixer_irq_important() {
+    private static boolean Mixer_irq_important() {
         /* In some states correct timing of the irqs is more important then
          * non stuttering audo */
         return false;
     }
 
     /* Mix a certain amount of new samples */
-    static private void MIXER_MixData(/*Bitu*/int needed) {
+    private static void MIXER_MixData(/*Bitu*/int needed) {
         MixerChannel chan = mixer.channels;
         while (chan != null) {
             chan.Mix(needed);
@@ -604,7 +604,7 @@ public class Mixer extends AbstractHardwareComponent {
         mixer.done = needed;
     }
 
-    static private TimerResponsive MIXER_Mix = new TimerResponsive() {
+    private static TimerResponsive MIXER_Mix = new TimerResponsive() {
         @Override
         public void callback() {
             synchronized (audioMutex) {
@@ -623,7 +623,7 @@ public class Mixer extends AbstractHardwareComponent {
         }
     };
 
-    static private TimerResponsive MIXER_Mix_NoSound = new TimerResponsive() {
+    private static TimerResponsive MIXER_Mix_NoSound = new TimerResponsive() {
         @Override
         public void callback() {
             MIXER_MixData(mixer.needed);
@@ -819,7 +819,7 @@ public class Mixer extends AbstractHardwareComponent {
         mixer = null;
     }
 
-    final static public Object audioMutex = new Object();
+    public static final Object audioMutex = new Object();
 
     public static void MIXER_Init() {
         mixer = new _Mixer();

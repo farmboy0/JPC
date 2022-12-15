@@ -17,10 +17,10 @@ import org.jpc.j2se.Option;
 
 public class Midi {
     private static final Logger Log = Logger.getLogger(Midi.class.getName());
-    static final private int SYSEX_SIZE = 1024;
-    static final private int RAWBUF = 1024;
+    private static final int SYSEX_SIZE = 1024;
+    private static final int RAWBUF = 1024;
 
-    static final private byte[] MIDI_evt_len = {
+    private static final byte[] MIDI_evt_len = {
         0,
         0,
         0,
@@ -283,7 +283,7 @@ public class Midi {
         0 // 0xf0
     };
 
-    static private class _midi {
+    private static class _midi {
         int status;
         int cmd_len;
         int cmd_pos;
@@ -302,11 +302,11 @@ public class Midi {
         MidiDevice device;
     }
 
-    static private _midi midi;
-    static private ShortMessage msg = new ShortMessage();
-    static private SysexMessage sysex_msg = new SysexMessage();
+    private static _midi midi;
+    private static ShortMessage msg = new ShortMessage();
+    private static SysexMessage sysex_msg = new SysexMessage();
 
-    static public void MIDI_RawOutByte(/*Bit8u*/int data) {
+    public static void MIDI_RawOutByte(/*Bit8u*/int data) {
         if (midi.sysex.start != 0) {
             /*Bit32u*/long passed_ticks = System.currentTimeMillis() - midi.sysex.start;
             if (passed_ticks < midi.sysex.delay)
@@ -387,7 +387,7 @@ public class Midi {
         }
     }
 
-    static public boolean MIDI_Available() {
+    public static boolean MIDI_Available() {
         return midi.device != null;
     }
 

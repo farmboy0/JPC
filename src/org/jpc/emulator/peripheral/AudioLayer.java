@@ -9,11 +9,11 @@ import javax.sound.sampled.SourceDataLine;
  * Handle the Music output, i.e. Midi Sound
  */
 public class AudioLayer {
-    static private byte[] audioBuffer;
-    static public SourceDataLine line;
-    static private boolean audioThreadExit = false;
+    private static byte[] audioBuffer;
+    public static SourceDataLine line;
+    private static boolean audioThreadExit = false;
 
-    static private Thread audioThread;
+    private static Thread audioThread;
 
     public static boolean open(int bufferSize, int freq) {
         AudioFormat format = new AudioFormat(freq, 16, 2, true, false);

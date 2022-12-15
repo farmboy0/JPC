@@ -39,7 +39,7 @@ import org.jpc.emulator.processor.ProcessorException;
 
 public abstract class FpuState implements Hibernatable {
     // stack depth (common to all x87 FPU's)
-    public final static int STACK_DEPTH = 8;
+    public static final int STACK_DEPTH = 8;
 
     public static final int FPU_PRECISION_CONTROL_SINGLE = 0;
     public static final int FPU_PRECISION_CONTROL_DOUBLE = 2;

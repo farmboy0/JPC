@@ -217,7 +217,7 @@ public class IconUtils {
         return createImageFromAsciiMap(map, width, height, Color.black, Color.white);
     }
 
-    public synchronized static BufferedImage createImageFromAsciiMap(String map, int width, int height, Color fg, Color bg) {
+    public static synchronized BufferedImage createImageFromAsciiMap(String map, int width, int height, Color fg, Color bg) {
         if (map == null || map.length() == 0)
             return null;
         double theta = 0;

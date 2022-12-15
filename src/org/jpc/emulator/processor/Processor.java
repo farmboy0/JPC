@@ -1417,7 +1417,8 @@ public class Processor implements HardwareComponent {
         if (getCPL() <= eflagsIOPrivilegeLevel && !isVirtual8086Mode())
             return true;
 
-        if ((tss.getType() != ProtectedModeSegment.TYPE_AVAILABLE_32_TSS && tss.getType() != ProtectedModeSegment.TYPE_BUSY_32_TSS) || (tss.getLimit() < 103))
+        if ((tss.getType() != ProtectedModeSegment.TYPE_AVAILABLE_32_TSS && tss.getType() != ProtectedModeSegment.TYPE_BUSY_32_TSS)
+            || (tss.getLimit() < 103))
             return false;
         int ioPermMapBaseAddress = 0xffff & tss.getWord(102);
         if (ioPermMapBaseAddress + port / 8 >= tss.getLimit())
@@ -1659,7 +1660,8 @@ public class Processor implements HardwareComponent {
 
                 Segment newStack = getSegment(tmpSS, true);
 
-                if ((newStack.getRPL() != returnSegment.getRPL()) || !((ProtectedModeSegment)newStack).isDataWritable() || ((ProtectedModeSegment)newStack).isCode() || (newStack.getDPL() != returnSegment.getRPL()))
+                if ((newStack.getRPL() != returnSegment.getRPL()) || !((ProtectedModeSegment)newStack).isDataWritable()
+                    || ((ProtectedModeSegment)newStack).isCode() || (newStack.getDPL() != returnSegment.getRPL()))
                     throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, tmpSS & 0xfffc, true);
 
                 if (!newStack.isPresent())
@@ -1996,7 +1998,8 @@ public class Processor implements HardwareComponent {
 
             ProtectedModeSegment returnStackSegment = (ProtectedModeSegment)getSegment(ssSelector, true);
 
-            if ((returnStackSegment.getRPL() != returnSegment.getRPL()) || returnStackSegment.isCode() || !returnStackSegment.isDataWritable() || (returnStackSegment.getDPL() != returnSegment.getRPL()))
+            if ((returnStackSegment.getRPL() != returnSegment.getRPL()) || returnStackSegment.isCode()
+                || !returnStackSegment.isDataWritable() || (returnStackSegment.getDPL() != returnSegment.getRPL()))
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, ssSelector & 0xfffc, true);
 
             if (!returnStackSegment.isPresent())
@@ -2271,7 +2274,8 @@ public class Processor implements HardwareComponent {
                 //load CS
                 if ((csSelector & 0xfffc) != 0) {
                     Segment newCS = getSegment(csSelector);
-                    if (newCS.isSystem() || ((ProtectedModeSegment)newCS).isDataWritable() || (!((ProtectedModeSegment)newCS).isConforming() && newCS.getDPL() != newCS.getRPL()))
+                    if (newCS.isSystem() || ((ProtectedModeSegment)newCS).isDataWritable()
+                        || (!((ProtectedModeSegment)newCS).isConforming() && newCS.getDPL() != newCS.getRPL()))
                         throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, csSelector & 0xfffc, true);
 
                     if (((ProtectedModeSegment)newCS).isConforming() && newCS.getDPL() > newCS.getRPL())
@@ -2495,7 +2499,8 @@ public class Processor implements HardwareComponent {
             } catch (ProcessorException e) {
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector & 0xfffc, true);
             }
-            if ((targetSegment == SegmentFactory.NULL_SEGMENT) || targetSegment.getDPL() > getCPL() || targetSegment.isSystem() || (targetSegment.getType() & 0x18) == 0x10)
+            if ((targetSegment == SegmentFactory.NULL_SEGMENT) || targetSegment.getDPL() > getCPL() || targetSegment.isSystem()
+                || (targetSegment.getType() & 0x18) == 0x10)
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector & 0xfffc, true);
 
             if (!targetSegment.isPresent())
@@ -4130,7 +4135,8 @@ public class Processor implements HardwareComponent {
                 throw new ProcessorException(ProcessorException.Type.TASK_SWITCH, tssSelector, true);
             }
 
-            if (!newTss.isSystem() || (!(newTss instanceof ProtectedModeSegment.Available16BitTSS) && !(newTss instanceof ProtectedModeSegment.Available32BitTSS)))
+            if (!newTss.isSystem() || (!(newTss instanceof ProtectedModeSegment.Available16BitTSS)
+                && !(newTss instanceof ProtectedModeSegment.Available32BitTSS)))
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector & 0xfffc, true);
 
             if (!newTss.isPresent())
