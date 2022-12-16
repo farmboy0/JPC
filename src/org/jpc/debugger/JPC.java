@@ -75,7 +75,7 @@ import org.jpc.debugger.util.ObjectDatabase;
 import org.jpc.emulator.PC;
 import org.jpc.emulator.memory.LinearAddressSpace;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
-import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.emulator.pci.VGACard;
 import org.jpc.emulator.peripheral.Keyboard;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.fpu64.FpuState64;

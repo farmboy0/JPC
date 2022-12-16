@@ -43,7 +43,6 @@ import org.jpc.emulator.AbstractHardwareComponent;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
 import org.jpc.emulator.motherboard.IOPortHandler;
-import org.jpc.emulator.pci.peripheral.VGACard;
 
 /**
  * Provides an implementation of a PCI bus to allow access to all PCI devices.

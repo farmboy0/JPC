@@ -43,7 +43,7 @@ import javax.swing.JScrollPane;
 
 import org.jpc.debugger.util.UtilityFrame;
 import org.jpc.emulator.PC;
-import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.emulator.pci.VGACard;
 import org.jpc.j2se.PCMonitor;
 
 public class PCMonitorFrame extends UtilityFrame implements PCListener {

@@ -45,17 +45,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.jpc.emulator.Monitor;
 import org.jpc.emulator.PC;
-import org.jpc.emulator.pci.peripheral.DefaultVGACard;
-import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.emulator.pci.VGACard;
 import org.jpc.emulator.peripheral.Keyboard;
 
 /**
  * @author Rhys Newman
  */
-public class PCMonitor extends KeyHandlingPanel {
+public class PCMonitor extends KeyHandlingPanel implements Monitor {
     private Keyboard keyboard;
-    private DefaultVGACard vgaCard;
+    private VGACard vgaCard;
     private Updater updater;
     private Component frame = null;
     private PC pc;
@@ -77,7 +77,7 @@ public class PCMonitor extends KeyHandlingPanel {
         setDoubleBuffered(false);
         requestFocusInWindow();
 
-        vgaCard = (DefaultVGACard)pc.getComponent(VGACard.class);
+        vgaCard = (VGACard)pc.getComponent(VGACard.class);
         vgaCard.setMonitor(this);
         vgaCard.resizeDisplay(720, 480);
         keyboard = (Keyboard)pc.getComponent(Keyboard.class);
@@ -204,6 +204,7 @@ public class PCMonitor extends KeyHandlingPanel {
         }
     }
 
+    @Override
     public void resizeDisplay(int width, int height) {
         resizeDisplayCommon((int)(width * scaleX), (int)(height * scaleY));
     }
@@ -256,6 +257,6 @@ public class PCMonitor extends KeyHandlingPanel {
                 g.fillRect(0, s2.height, s1.width, s1.height - s2.height);
             clearBackground = false;
         }
-        vgaCard.paintPCMonitor((Graphics2D)g, this);
+        vgaCard.paintOnMonitor((Graphics2D)g);
     }
 }

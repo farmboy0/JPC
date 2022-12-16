@@ -66,7 +66,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import org.jpc.emulator.PC;
-import org.jpc.emulator.pci.peripheral.VGACard;
+import org.jpc.emulator.pci.VGACard;
 import org.jpc.support.ArrayBackedSeekableIODevice;
 import org.jpc.support.BlockDevice;
 import org.jpc.support.CDROMBlockDevice;
