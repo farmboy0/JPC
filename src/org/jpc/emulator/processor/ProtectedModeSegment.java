@@ -142,8 +142,7 @@ public abstract class ProtectedModeSegment extends Segment {
         if ((0xffffffffL & offset) > limit) {
             LOGGING.log(Level.INFO, this + "segment limit exceeded: 0x{0} > 0x{1}",
                 new Object[] { Integer.toHexString(offset), Integer.toHexString((int)limit) });
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
-//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
     }
 
@@ -378,7 +377,7 @@ public abstract class ProtectedModeSegment extends Segment {
         @Override
         public void checkAddress(int offset) {
             if ((0xffffffffL & offset) > super.limit) {
-                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
             }
         }
     }
@@ -510,7 +509,6 @@ public abstract class ProtectedModeSegment extends Segment {
             cpu.r_esi.set32(memory.getDoubleWord(initialAddress + 64));
             cpu.r_edi.set32(memory.getDoubleWord(initialAddress + 68));
             // non dynamic fields
-            //cpu.ldtr = cpu.getSegment(0xFFFF & memory.getDoubleWord(initialAddress + 96));
             if (cpu.pagingEnabled())
                 cpu.setCR3(memory.getDoubleWord(initialAddress + 28));
         }

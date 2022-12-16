@@ -123,10 +123,7 @@ public class EPROMMemory extends LazyCodeBlockMemory {
 
     @Override
     public void copyArrayIntoContents(int address, byte[] buf, int off, int len) {
-//        if (writable)
         super.copyArrayIntoContents(address, buf, off, len);
-//        else
-//            writeAttempted(address, len);
     }
 
     @Override
@@ -140,6 +137,5 @@ public class EPROMMemory extends LazyCodeBlockMemory {
     }
 
     private void writeAttempted(int address, int size) {
-//        LOGGING.log(Level.INFO, "Write of {0,number,integer} {0,choice,1#byte|1<bytes} attempted at address 0x{1}", new Object[]{Integer.valueOf(size), Integer.toHexString(address)});
     }
 }

@@ -56,7 +56,7 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
     private int ioBase, ioBaseTwo, irq;
     private InterruptController irqDevice;
     private int nextDriveSerial;
-    public static final String CDLABEL = "CDROM";//"JPC CD-ROM";
+    public static final String CDLABEL = "CDROM";//"JPC CD-ROM"
 
     @Override
     public void saveState(DataOutput output) throws IOException {
@@ -567,7 +567,6 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
 
     private int readIDE(int address) {
         address &= 0x7;
-        //boolean hob = (currentDevice.select & (1 << 7)) != 0;
         boolean hob = false;
         switch (address) {
         case 0:
@@ -1049,14 +1048,12 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
         public int packetTransferSize;
         public int lba;
         public int cdSectorSize;
-        //public long numberOfSectors; //forwarded through to blockdevice, prevents need for cdrom callback
         public BlockDevice drive;
         public BMDMAIORegion bmdma;
 
         public IDEState(BlockDevice drive) {
             this.drive = drive;
             if (drive != null) {
-                //this.numberOfSectors = drive.getTotalSectors();
                 this.cylinders = drive.getCylinders();
                 this.heads = drive.getHeads();
                 this.sectors = drive.getSectors();
@@ -1177,8 +1174,6 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             switch (ideDMAFunction) {
             case IDF_ATAPI_READ_DMA_CB:
                 return atapiCommandReadDMACallback(address, size);
-//                case IDF_READ_DMA_CB:
-//                    return readDMACallback(address, size);
             default:
                 LOGGING.log(Level.WARNING, "Need DMA callback function {0,number,integer}", Integer.valueOf(ideDMAFunction));
                 return 0;
@@ -1379,11 +1374,9 @@ class IDEChannel extends AbstractHardwareComponent implements IODevice {
             putLE16InByte(ioBuffer, 162, 0x16); // conforms to ata5
             putLE16InByte(ioBuffer, 164, 1 << 14);
             putLE16InByte(ioBuffer, 166, 1 << 14 | 1 << 13 | 1 << 12);
-            //putLE16InByte(ioBuffer, 166, (1 << 14) | (1 << 13) | (1 << 12) | (1 << 10));
             putLE16InByte(ioBuffer, 168, 1 << 14);
             putLE16InByte(ioBuffer, 170, 1 << 14);
             putLE16InByte(ioBuffer, 172, 1 << 14 | 1 << 13 | 1 << 12);
-            //putLE16InByte(ioBuffer, 172, (1 << 14) | (1 << 13) | (1 << 12) | (1 << 10));
             putLE16InByte(ioBuffer, 174, 1 << 14);
             putLE16InByte(ioBuffer, 176, 0x3f | 1 << 13);
             putLE16InByte(ioBuffer, 186, 1 | 1 << 14 | 0x2000);

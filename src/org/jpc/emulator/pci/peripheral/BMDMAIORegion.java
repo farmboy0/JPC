@@ -89,7 +89,6 @@ class BMDMAIORegion implements IOPortIORegion, Hibernatable {
         status = input.readByte();
         address = input.readInt();
         ideDMAFunction = input.readInt();
-        //ideDevice.loadState(input);
     }
 
     void setAddressSpace(Memory memory) {

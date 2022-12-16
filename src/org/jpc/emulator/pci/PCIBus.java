@@ -179,7 +179,6 @@ public class PCIBus extends AbstractHardwareComponent {
                 ret = false;
                 continue;
             }
-            //region.setAddress(-1);
 
             if (region.getRegionNumber() == PCIDevice.PCI_ROM_SLOT) {
                 device.putConfigLong(PCIDevice.PCI_CONFIG_EXPANSION_ROM_BASE_ADDRESS, region.getType());
@@ -238,11 +237,9 @@ public class PCIBus extends AbstractHardwareComponent {
                     if (region instanceof IOPortIORegion) {
                         int deviceClass = device.configReadWord(PCIDevice.PCI_CONFIG_CLASS_DEVICE);
                         if (0x0101 == deviceClass && 4 == region.getSize()) {
-                            //r.unmap(); must actually be partial
                             LOGGING.log(Level.WARNING, "supposed to partially unmap");
                             ioports.deregisterIOPortCapable((IOPortIORegion)region);
-                        } else //r.unmap();
-                        {
+                        } else {
                             ioports.deregisterIOPortCapable((IOPortIORegion)region);
                         }
                     } else if (region instanceof MemoryMappedIORegion) {

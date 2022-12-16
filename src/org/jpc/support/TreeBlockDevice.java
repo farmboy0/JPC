@@ -1076,7 +1076,6 @@ public class TreeBlockDevice implements BlockDevice {
             long offset = clusterList.get(Long.valueOf(getClusterNumber(sectorNumber))).longValue() * SECTORS_PER_CLUSTER * SECTOR_SIZE;
             offset = offset + oddsectors * SECTOR_SIZE;
 
-            //   long clusterCount =  (sectorNumber - dataSectionStart -(super.getStartCluster()-2)*SECTORS_PER_CLUSTER) * SECTOR_SIZE;
             int length = Math.min(dirEntry.length - (int)offset, SECTOR_SIZE);
             length = Math.max(0, length);
             System.arraycopy(dirEntry, (int)offset, buffer, 0, length);

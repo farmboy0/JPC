@@ -170,10 +170,6 @@ public abstract class FpuState implements Hibernatable {
 
     public abstract void setST(int index, double value);
 
-//     public abstract void pushBig(BigDecimal x) throws ProcessorException;
-//     public abstract BigDecimal popBig() throws ProcessorException;
-//     public abstract BigDecimal bigST(int index) throws ProcessorException;
-//     public abstract void setBigST(int index, BigDecimal value);
     public abstract int getStatus();
 
     public abstract void setStatus(int w);

@@ -233,7 +233,6 @@ public class PCSpeaker extends AbstractHardwareComponent implements IODevice {
                 //connect speaker to PIT
                 mode = SPEAKER_PIT_ON;
                 waitingForPit = 0;
-                //play();
             } else {
                 //leave speaker disconnected from following PIT
                 mode = SPEAKER_PIT_OFF;

@@ -58,10 +58,6 @@ public class DecoderGenerator {
 
         public void addOpcode(Instruction in, byte[] raw) {
             String name = Disassembler.getExecutableName(modeType, in);
-            //try {
-            //    if (names.contains(name) && !name.contains("Unimplemented")&& !name.contains("Illegal"))
-            //        return;
-            //} catch (Exception s) {return;}
             names.add(name);
             namesSet.add(name);
             myops.put(in, raw);

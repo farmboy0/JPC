@@ -93,7 +93,6 @@ public class ReportPanel extends JPanel implements ActionListener {
         tools.setFloatable(false);
 
         tools.add(status);
-        //tools.add(stop);
         tools.add(Box.createRigidArea(new Dimension(5, 1)));
         JPanel buffer = new JPanel(new BorderLayout(10, 10));
         buffer.add("Center", statusText);
@@ -210,7 +209,6 @@ public class ReportPanel extends JPanel implements ActionListener {
         public ErrorDisplayDialog(Component parent, String message, Throwable err, long timeOfError, boolean canBeCleared) {
             super(UtilityFrame.getApplicationFrame(parent), "Error Information", true);
             showingDetails = false;
-            //setResizable(false);
             main = new JPanel(new BorderLayout(10, 10));
             main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             if (timeOfError >= 0)
@@ -222,7 +220,6 @@ public class ReportPanel extends JPanel implements ActionListener {
             description.setBorder(BorderFactory.createLoweredBevelBorder());
             description.setFont(new JLabel().getFont());
             ((JTextArea)description).setEditable(false);
-            //description.setBackground(getBackground());
             main.add("Center", description);
 
             ok = new JButton("OK");

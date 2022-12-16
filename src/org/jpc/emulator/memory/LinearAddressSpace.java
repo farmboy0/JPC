@@ -69,7 +69,6 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         pagingDisabled = true;
         writeProtectPages = false;
         pageSizeExtensions = false;
-//        tlb = new SlowTLB();
         tlb = new FastTLB();
     }
 
@@ -175,7 +174,7 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
      * @param value
      */
     public void setPageWriteThroughEnabled(boolean value) {
-        //System.err.println("ERR: Write Through Caching enabled for TLBs");
+
     }
 
     /**
@@ -246,7 +245,6 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
         }
 
         boolean directoryGlobal = tlb.globalPagesEnabled() && (0x100 & directoryRawBits) != 0;
-//        boolean directoryReadWrite = (0x2 & directoryRawBits) != 0;
         boolean directoryUser = (0x4 & directoryRawBits) != 0;
         boolean directoryIs4MegPage = (0x80 & directoryRawBits) != 0 && pageSizeExtensions;
 
@@ -278,10 +276,6 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             return tlb.getReadMemoryBlockAt(isSupervisor, offset);
         } else {
             int directoryBaseAddress = directoryRawBits & 0xFFFFF000;
-//	    boolean directoryPageLevelWriteThrough = (0x8 & directoryRawBits) != 0;
-//	    boolean directoryPageCacheDisable = (0x10 & directoryRawBits) != 0;
-//	    boolean directoryDirty = (0x40 & directoryRawBits) != 0;
-
             int tableAddress = directoryBaseAddress | offset >>> 10 & 0xFFC;
             int tableRawBits = target.getDoubleWord(tableAddress);
 
@@ -294,13 +288,8 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             }
 
             boolean tableGlobal = tlb.globalPagesEnabled() && (0x100 & tableRawBits) != 0;
-//            boolean tableReadWrite = (0x2 & tableRawBits) != 0;
             boolean tableUser = (0x4 & tableRawBits) != 0;
-
             boolean pageIsUser = tableUser && directoryUser;
-//            boolean pageIsReadWrite = tableReadWrite || directoryReadWrite;
-//            if (pageIsUser)
-//                pageIsReadWrite = tableReadWrite && directoryReadWrite;
 
             if (!pageIsUser && !isSupervisor)
                 return PF_PROTECTION_VIOLATION_RU;
@@ -395,10 +384,6 @@ public final class LinearAddressSpace extends AddressSpace implements HardwareCo
             return tlb.getWriteMemoryBlockAt(isSupervisor, offset);
         } else {
             int directoryBaseAddress = directoryRawBits & 0xFFFFF000;
-//	    boolean directoryPageLevelWriteThrough = (0x8 & directoryRawBits) != 0;
-//	    boolean directoryPageCacheDisable = (0x10 & directoryRawBits) != 0;
-//	    boolean directoryDirty = (0x40 & directoryRawBits) != 0;
-
             int tableAddress = directoryBaseAddress | offset >>> 10 & 0xFFC;
             int tableRawBits = target.getDoubleWord(tableAddress);
 

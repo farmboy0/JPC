@@ -49,17 +49,17 @@ class DefaultCodeBlockFactory implements CodeBlockFactory {
 
     @Override
     public RealModeCodeBlock getRealModeCodeBlock(PeekableInputStream source) {
-        return compiler.getRealModeCodeBlock(new InterpretedRealModeBlock(FastDecoder.decodeBlock(source, 16, 1)));//Disassembler.disassembleBlock(source, 16, 1)));
+        return compiler.getRealModeCodeBlock(new InterpretedRealModeBlock(FastDecoder.decodeBlock(source, 16, 1)));
     }
 
     @Override
     public ProtectedModeCodeBlock getProtectedModeCodeBlock(PeekableInputStream source, boolean operandSize) {
         return compiler
-            .getProtectedModeCodeBlock(new InterpretedProtectedModeBlock(FastDecoder.decodeBlock(source, operandSize ? 32 : 16, 2)));//Disassembler.disassembleBlock(source, operandSize?32:16, 2)));
+            .getProtectedModeCodeBlock(new InterpretedProtectedModeBlock(FastDecoder.decodeBlock(source, operandSize ? 32 : 16, 2)));
     }
 
     @Override
     public Virtual8086ModeCodeBlock getVirtual8086ModeCodeBlock(PeekableInputStream source) {
-        return compiler.getVirtual8086ModeCodeBlock(new InterpretedVM86ModeBlock(FastDecoder.decodeBlock(source, 16, 3)));//Disassembler.disassembleBlock(source, 16, 3)));
+        return compiler.getVirtual8086ModeCodeBlock(new InterpretedVM86ModeBlock(FastDecoder.decodeBlock(source, 16, 3)));
     }
 }

@@ -208,10 +208,6 @@ public class PCIISABridge extends AbstractPCIDevice {
 
     @Override
     public void updateComponent(HardwareComponent component) {
-        //	if ((component instanceof InterruptController)
-        //	    && component.updated())
-        //	    irqDevice = (InterruptController)component;
-
         super.acceptComponent(component);
     }
 

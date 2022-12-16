@@ -184,9 +184,9 @@ public class Disassembler {
                     int slash = file.lastIndexOf("/");
                     instructions.put(file.substring(slash + 1),
                         c.getConstructor(int.class, int.class, int.class, PeekableInputStream.class));
-                    //System.out.println("Loaded: "+mode+"/"+file.substring(slash+1));
+
                 } catch (Exception e) {
-                } //e.printStackTrace();}
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -214,7 +214,6 @@ public class Disassembler {
             if (instructions.containsKey(gen) || instructions.containsKey(in.getGeneralClassName(true, false))
                 || instructions.containsKey(in.getGeneralClassName(false, true))
                 || instructions.containsKey(in.getGeneralClassName(true, true))) {
-                //System.out.println("Found general class: " + gen);
                 Constructor<? extends Executable> c = instructions.get(gen);
                 if (c == null)
                     c = instructions.get(in.getGeneralClassName(true, false));
@@ -261,7 +260,6 @@ public class Disassembler {
         try {
             gen = in.getGeneralClassName(false, false);
         } catch (IllegalStateException e) {
-//            e.printStackTrace();
             return prefix + "InvalidOpcode/*(Disassembler.java line 189)*/";
         }
 
@@ -646,7 +644,6 @@ public class Disassembler {
             if (0x66 == inst.pfx.insn) {
                 if (!itab[ITAB__PFX_SSE66__0F][curr].operator.equals("invalid")) {
                     table = ITAB__PFX_SSE66__0F;
-                    //inst.pfx.opr = 0;
                 }
             } else if (0xF2 == inst.pfx.insn) {
                 if (!itab[ITAB__PFX_SSEF2__0F][curr].operator.equals("invalid")) {
@@ -735,9 +732,6 @@ public class Disassembler {
             else
                 throw new RuntimeException("invalid instruction operator constant");
         }
-        //inst.zygote = e;
-        //inst.operator = e.operator;
-        //return;
     }
 
     public static void do_mode(int mode, Instruction inst) {
@@ -928,12 +922,6 @@ public class Disassembler {
             }
         } else if (ops3.contains(mopt[0])) {
             int gpr = mopt[0] - OP_ALr8b + (REX_B(inst.pfx.rex) << 3);
-            /*if ((gpr in ["ah",	"ch",	"dh",	"bh",
-              "spl",	"bpl",	"sil",	"dil",
-              "r8b",	"r9b",	"r10b",	"r11b",
-              "r12b",	"r13b",	"r14b",	"r15b",
-                         ]) && (inst.pfx.rex != 0))
-                         gpr = gpr + 4;*/
             inst.operand[0].type = "OP_REG";
             inst.operand[0].base = GPR.get("8").get(gpr);
             if (mopt[1] == OP_I)

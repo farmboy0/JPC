@@ -151,7 +151,6 @@ public abstract class AddressSpace extends AbstractMemory {
 
     @Override
     public void setUpperDoubleQuadWord(int offset, long data) {
-//        System.out.println("Mem.setupperquad " + offset);
         try {
             getWriteMemoryBlockAt(offset).setUpperDoubleQuadWord(offset & BLOCK_MASK, data);
         } catch (ArrayIndexOutOfBoundsException e) {

@@ -51,13 +51,9 @@ public abstract class ProtectedModeExpandDownSegment extends ProtectedModeSegmen
         super(memory, selector, descriptor);
         rawLimit = (int)(descriptor & 0xffffL | descriptor >>> 32 & 0xf0000L);
         if (defaultSize) {
-            //base = (int) (tmpbase + tmplimit - 0x10000000L);
-            //limit = 0xFFFFFFFF - tmplimit;
             minOffset = (int)(base + limit - 1);
             maxOffset = 0xFFFFFFFF;
         } else {
-            //base = tmpbase + (int) tmplimit - 0x10000;
-            //limit = 0xFFFF-tmplimit;
             minOffset = (int)(base + limit - 1);
             maxOffset = 0xFFFF;
         }

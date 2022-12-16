@@ -82,8 +82,6 @@ public class LinearMemoryViewer extends MemoryViewer implements ActionListener {
         controlPanel.add(asWrite);
         controlPanel.add(asSupervisor);
         controlPanel.add(asUser);
-
-        //add("South", controlPanel);
     }
 
     @Override

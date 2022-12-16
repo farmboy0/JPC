@@ -167,7 +167,6 @@ public class InterruptController extends AbstractHardwareComponent implements IO
                 }
                 this.updateIRQ();
                 return slave.irqBase + slaveIRQ;
-                //masterIRQ = slaveIRQ + 8;
             } else {
                 this.updateIRQ();
                 return master.irqBase + masterIRQ;

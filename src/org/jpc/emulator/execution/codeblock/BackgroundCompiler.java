@@ -48,7 +48,7 @@ class BackgroundCompiler implements CodeBlockCompiler {
     private static final Logger LOGGING = Logger.getLogger(BackgroundCompiler.class.getName());
     private static final int COMPILER_QUEUE_SIZE = 256;
     private static final int COMPILE_REQUEST_THRESHOLD = 1024;
-//    private static final int MAX_COMPILER_THREADS = 10;
+
     private CodeBlockCompiler immediate, delayed;
     private CompilerQueue compilerQueue;
 
@@ -58,22 +58,6 @@ class BackgroundCompiler implements CodeBlockCompiler {
         compilerQueue = new CompilerQueue(COMPILER_QUEUE_SIZE);
 
         int compilerCount = 1;
-//        int compilerCount = Runtime.getRuntime().availableProcessors() - 1;
-//        if (compilerCount < 1)
-//            compilerCount = 1;
-//        else if (compilerCount > MAX_COMPILER_THREADS)
-//            compilerCount = MAX_COMPILER_THREADS;
-//
-//        while (compilerCount-- > 0) {
-//        Thread t = new Thread(new Compiler(), "Background CodeBlock Compiler Thread " + compilerCount);
-//        try {
-//            t.setPriority(Math.max(Thread.MIN_PRIORITY, Thread.currentThread().getPriority() - 3));
-//        } catch (SecurityException e) {
-//            LOGGING.log(Level.INFO, "security manager prevents setting thread priorities");
-//        }
-//        t.setDaemon(true);
-//        t.start();
-//        }
     }
 
     private class Compiler implements Runnable {

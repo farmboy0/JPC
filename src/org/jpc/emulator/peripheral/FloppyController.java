@@ -452,7 +452,6 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             state |= CONTROL_SLEEP;
             reset(true);
         }
-        //precomp = (data >>> 2) & 0x07;
     }
 
     private void writeData(int data) {
@@ -1008,7 +1007,6 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                     if ((dataState & STATE_SEEK) != 0)
                         status0 |= 0x20;
                     dataLength -= length;
-                    //    if (dataLength == 0)
                     stopTransfer(status0, status1, status2);
                     return length;
 
@@ -1022,7 +1020,6 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
                     if ((dataState & STATE_SEEK) != 0)
                         status0 |= 0x20;
                     dataLength -= length;
-                    //    if (dataLength == 0)
                     stopTransfer(status0, status1, status2);
 
                     return length;
@@ -1057,7 +1054,6 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         if ((dataState & STATE_SEEK) != 0)
             status0 |= 0x20;
         dataLength -= length;
-        //    if (dataLength == 0)
         stopTransfer(status0, status1, status2);
 
         return length;
@@ -1315,11 +1311,6 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
 
     @Override
     public void updateComponent(HardwareComponent component) {
-        //	if ((component instanceof Clock)  && component.updated())
-        //        {
-        //	    clock = (Clock)component;
-        //	    resultTimer = clock.newTimer(this);
-        //	}
         if (component instanceof IOPortHandler && component.updated()) {
             ((IOPortHandler)component).registerIOPortCapable(this);
             ioportRegistered = true;
@@ -1342,12 +1333,6 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             clock = (Clock)component;
             clock.update(resultTimer);
         }
-        //	if (initialised())
-        //        {
-        //	    reset(false);
-        //	    for (int i = 0; i < 2; i++)
-        //		if (drives[i] != null) drives[i].revalidate();
-        //	}
     }
 
     @Override

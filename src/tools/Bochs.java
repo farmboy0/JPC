@@ -207,7 +207,6 @@ public class Bochs extends EmulatorControl {
             regs[37 + 2 * findex + 1] = (int)val;
         }
         readLine(); // Mouse capture off
-        //print(regs);
         return regs;
     }
 

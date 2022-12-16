@@ -183,14 +183,7 @@ public class PCMonitor extends KeyHandlingPanel implements Monitor {
 
                 vgaCard.prepareUpdate();
                 vgaCard.updateDisplay();
-                /*
-                int xmin = (int)((vgaCard.getXMin() -1 ) * scaleX);
-                int xmax = (int)(vgaCard.getXMax() * scaleX);
-                int ymin = (int)((vgaCard.getYMin() - 1) * scaleY);
-                int ymax = (int)(vgaCard.getYMax() * scaleY);
-                
-                repaint(xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
-                */
+
                 repaint();
             }
         }
@@ -210,8 +203,6 @@ public class PCMonitor extends KeyHandlingPanel implements Monitor {
     }
 
     private void resizeDisplayCommon(int width, int height) {
-        //System.out.println("resized X="+width+" Y="+height);
-        //System.out.println("resized scaleX="+scaleX+" scaleY="+scaleY);
         setPreferredSize(new Dimension(width, height));
         setMaximumSize(new Dimension(width, height));
         setMinimumSize(new Dimension(width, height));
@@ -236,7 +227,6 @@ public class PCMonitor extends KeyHandlingPanel implements Monitor {
         } else {
             scaleY = 1.0;
         }
-        //System.out.println("scale display scaleX="+scaleX+" scaleY="+scaleY + "actual x="+displayWidth+" y="+displayHeight);
     }
 
     @Override

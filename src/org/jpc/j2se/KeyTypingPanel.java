@@ -97,8 +97,6 @@ public class KeyTypingPanel extends JPanel {
         p1.add(new MouseSensitivityPanel());
         add("Center", p1);
 
-        //JLabel help = new JLabel("Non-US Keyboards: Select character from drop-down menu and press 'Type Key'");
-        //if (monitor.mouseCaptureEnabled())
         JLabel help = new JLabel(
             "Non-US Keyboards, use overrides above. Mouse GRAB: Dbl Click left button. RELEASE: Dbl click right button");
 

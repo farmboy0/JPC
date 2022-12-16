@@ -158,7 +158,6 @@ public class EthernetCard extends AbstractPCIDevice {
 
     private byte curpag;
     private byte mult[]; /* multicast mask array */
-    //public volatile int ethPacketsWaiting = 0;
 
     EthernetOutput outputDevice;
     private byte[] memory;
@@ -274,8 +273,6 @@ public class EthernetCard extends AbstractPCIDevice {
         putConfigByte(PCI_CONFIG_INTERRUPT_PIN, (byte)0x01); // interrupt pin 0
 
         memory = new byte[NE2000_MEM_SIZE];
-//        phys = new byte[6];
-//        mult = new byte[8];
 
         internalReset();
 
@@ -393,9 +390,6 @@ public class EthernetCard extends AbstractPCIDevice {
             case 0x10:
                 // May do a 16 bit write, so must only narrow to short
                 EthernetCard.this.asicIOPortWriteByte(address, (short)data);
-                break;
-            case 0x1f:
-                //this.resetIOPortWrite(address); //end of reset pulse
                 break;
             default: //this is invalid, but happens under win 95 device detection
                 break;
@@ -561,21 +555,6 @@ public class EthernetCard extends AbstractPCIDevice {
                     this.updateIRQ();
                 }
             }
-//                /* test specific case: zero length transfer */
-//                if ((0 != (data & (E8390_RREAD | E8390_RWRITE))) && (rcnt == 0))
-//                { // check operators
-//                    isr = (byte) (isr | ENISR_RDC);
-//                    this.updateIRQ();
-//                }
-//                if (0 != (data & E8390_TRANS))
-//                {
-//                    int index = ((tpsr & 0xFF) << 8);
-//                    outputDevice.sendPacket(memory, index, tcnt);
-//                    /* signal end of transfer */
-//                    tsr = ENTSR_PTX;
-//                    isr = (byte) (isr | ENISR_TX);
-//                    this.updateIRQ();
-//                }
         } else {
             int page = command >> 6;
             int offset = address | page << 4;
@@ -946,12 +925,6 @@ public class EthernetCard extends AbstractPCIDevice {
             if ((rxcr & 0x04) == 0)
                 return;
         } else if ((packet[0] & 1) != 0) {
-            //multicast
-            //if ((rxcr & 0x08) == 0)
-            //    return;
-            //mcastIdx = computeCRC(packet);
-            //if ((mult[mcastIdx >>> 3] & (1 << (mcastIdx & 7))) == 0)
-            //    return;
         } else if (memory[0] == packet[0] && memory[2] == packet[1] && memory[4] == packet[2] && memory[6] == packet[3]
             && memory[8] == packet[4] && memory[10] == packet[5]) {
             //this is us!
@@ -962,17 +935,13 @@ public class EthernetCard extends AbstractPCIDevice {
         }
 
         //if buffer is too small expand it!!!!!!!!!!!!
-//        System.out.println("Packet got through");
         index = (curpag & 0xFF) << 8;
         //4 bytes for header
         totalLen = packet.length + 4;
         /* address for next packet (4 bytes for CRC) */
         int pages = (totalLen + 4 + 255) / 256;
         int next = curpag + pages;
-//        int avail;
         //don't emulate partial receives
-//        if (avail < pages)
-//            return;
 
         if (next >= stop)
             next -= stop - start;

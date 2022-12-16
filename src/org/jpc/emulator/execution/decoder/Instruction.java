@@ -45,8 +45,6 @@ public class Instruction {
     private static Set<String> reps = new HashSet();
     private static Set<String> repnes = new HashSet();
 
-    //public static enum Branch {None, T1, T2, Jmp_Unknown, Call, Call_Unknown, Ret, Exception};
-
     static {
         invalid.add("invalid");
         call.add("call");
@@ -233,12 +231,8 @@ public class Instruction {
                 b.append("lock ");
             if (rep != 0)
                 b.append("rep ");
-            //if (repe != 0)
-            //    b.append("repe ");
             if (repne != 0)
                 b.append("repne ");
-            //if (seg != null)
-            //    b.append(seg+" ");
 
             return b.toString();
         }
@@ -302,8 +296,6 @@ public class Instruction {
                 return base;
             boolean first = true;
             StringBuilder b = new StringBuilder();
-            //if (cast == 1)
-            //    b.append(intel_size(size));
             if (type.equals("OP_MEM")) {
                 b.append(intel_size(size));
 
@@ -356,10 +348,6 @@ public class Instruction {
                         b.append(String.format("0x%x", lval));
                 } else {
                     b.append("$");
-                    //if (sign_extends.contains(parent.operator)) // these are sign extended
-                    //    for (int i=0; i < maxSize/8; i++)
-                    //        b.append("I");
-                    //else
                     for (int i = 0; i < size / 8; i++)
                         b.append("I");
                     if (size == 0) // shr etc.
@@ -388,7 +376,6 @@ public class Instruction {
                     b.append("$SSSS:$DDDDDDDD");
             }
             return b.toString();
-            //return String.format("[%s %s %s %d %x %x %x]", type, base, index, size, lval, offset, scale);
         }
     }
 
@@ -397,7 +384,7 @@ public class Instruction {
     private static String intel_size(int size) {
         switch (size) {
         case 0:
-            return "";//XMMWORD PTR ";
+            return "";
         case 8:
             return "BYTE PTR ";
         case 16:

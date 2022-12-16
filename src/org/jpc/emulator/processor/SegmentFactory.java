@@ -94,7 +94,7 @@ public class SegmentFactory {
         case 0x08: //Reserved
         case 0x0a: //Reserved
         case 0x0d: //Reserved
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         case 0x01: //System Segment: 16-bit TSS (Available)
             return new ProtectedModeSegment.Available16BitTSS(memory, selector, descriptor);
         case 0x02: //System Segment: LDT
@@ -187,7 +187,7 @@ public class SegmentFactory {
 
         @Override
         public int getType() {
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
 
         @Override
@@ -197,21 +197,21 @@ public class SegmentFactory {
 
         @Override
         public void checkAddress(int offset) {
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
 
         @Override
         public int translateAddressRead(int offset) {
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
 
         @Override
         public int translateAddressWrite(int offset) {
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
 
         public void invalidateAddress(int offset) {
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
 
         @Override

@@ -295,7 +295,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
     private int latch;
     private int sequencerRegisterIndex, graphicsRegisterIndex, attributeRegisterIndex, crtRegisterIndex;
     private int[] sequencerRegister, graphicsRegister, attributeRegister, crtRegister;
-    //private int[] invalidatedYTable;
 
     private boolean attributeRegisterFlipFlop;
     private int miscellaneousOutputRegister;
@@ -557,8 +556,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
         updatingScreen = input.readBoolean();
         //load ioregion
         ioRegion.loadState(input);
-
-//        lowIORegion = new VGALowMemoryRegion();
     }
 
     public void saveScreenshot() {
@@ -1082,10 +1079,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
         lastScreenWidth = lastScreenHeight = 0;
         cursorStart = cursorEnd = 0;
         cursorOffset = 0;
-//         for (int i=0; i<lastPalette.length; i++)
-//             lastPalette[i] = new int[256];
-
-        //invalidatedYTable = new int[VGA_MAX_HEIGHT / 32];
         lastChar = new int[CH_ATTR_SIZE];
         fontOffset = new int[2];
         vbeRegs = new int[VBE_DISPI_INDEX_NB + 1];
@@ -1162,7 +1155,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
 
             if ((sequencerRegister[SR_INDEX_SEQ_MEMORY_MODE] & 0x08) != 0) {
                 /* chain 4 mode : simplest access */
-                //return vramPtr[address];
                 return ioRegion.getByte(offset);
             } else if ((graphicsRegister[GR_INDEX_GRAPHICS_MODE] & 0x10) != 0) {
                 /* odd/even mode (aka text mode mapping) */
@@ -1246,7 +1238,7 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
             default:
             case 3:
                 offset -= 0x18000;
-                //should be (unsigned) if (offset >= 0x8000) but anding above "offset &= 0x1ffff;" means <=> the below
+                //should be (offset >= 0x8000) but anding above "offset &= 0x1ffff" means <=> the below
                 if (offset < 0)
                     return;
                 break;
@@ -1283,7 +1275,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
                     intData |= intData << 8;
                     intData |= intData << 16;
                     intData = intData >>> b | intData << -b;
-                    //Integer.rotateRight(intData, b);
 
                     /* apply set/reset mask */
                     int setMask = mask16[graphicsRegister[GR_INDEX_ENABLE_SETRESET]];
@@ -1295,7 +1286,7 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
                     int mask = sequencerRegister[SR_INDEX_MAP_MASK];
                     planeUpdated |= mask; // only used to detect font change
                     int writeMask = mask16[mask];
-                    //check address being used here;
+                    //check address being used here
                     offset <<= 2;
                     ioRegion.setDoubleWord(offset, ioRegion.getDoubleWord(offset) & ~writeMask | intData & writeMask);
                     return;
@@ -1343,7 +1334,7 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
                 planeUpdated |= mask; // only used to detect font change
                 int writeMask = mask16[mask];
                 offset <<= 2;
-                //check address being used here;
+                //check address being used here
                 ioRegion.setDoubleWord(offset, ioRegion.getDoubleWord(offset) & ~writeMask | intData & writeMask);
             }
         }
@@ -1422,7 +1413,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
         private boolean[] dirtyPages;
 
         public VGARAMIORegion() {
-            // 	    buffer = new byte[VGA_RAM_SIZE];
             buffer = new byte[INIT_VGA_RAM_SIZE];
             dirtyPages = new boolean[(VGA_RAM_SIZE >>> PAGE_SHIFT) + 1];
             for (int i = 0; i < dirtyPages.length; i++)
@@ -1911,11 +1901,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
         void updateDisplay(int width, int height, int dispWidth, boolean fullUpdate, int multiScan) {
             int multiRun = multiScan;
             int addr1 = 4 * startAddress;
-            //int lineSize = width; // get the line size from the display device??
-
-            // if the "cursor_invalidate" function pointer is not null, then call it here.
-            //if (s->cursor_invalidate)
-            //s->cursor_invalidate(s);
 
             int y1 = 0;
             boolean addrMunge1 = (crtRegister[CR_INDEX_CRTC_MODE_CONTROL] & 1) == 0;
@@ -1947,9 +1932,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
                         pageMin = Math.min(pageMin, pageStart);
                         pageMax = Math.max(pageMax, pageEnd);
                         drawLine(addr, width, y, dispWidth);
-                        // if the "cursor_draw_line" function pointer is not null, then call it here.
-                        //if (s->cursor_draw_line)
-                        //   s->cursor_draw_line(s, d, y);
                         break;
                     }
                 }
@@ -2596,7 +2578,6 @@ public class DefaultVGACard extends AbstractPCIDevice implements VGACard {
         graphicsRegister = new int[256];
         attributeRegister = new int[256];
         crtRegister = new int[256];
-        //invalidatedYTable = new int[VGA_MAX_HEIGHT / 32];
 
         dacCache = new int[3];
         palette = new int[768];

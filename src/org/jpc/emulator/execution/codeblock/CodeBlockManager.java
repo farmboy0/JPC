@@ -60,8 +60,8 @@ public class CodeBlockManager {
         virtual8086ModeChain = new DefaultCodeBlockFactory(new OptimisedCompiler(), BLOCK_LIMIT);
 
         bgc = new BackgroundCompiler(new OptimisedCompiler(), null);
-        compilingRealModeChain = new DefaultCodeBlockFactory(bgc, BLOCK_LIMIT);//realModeChain;
-        compilingProtectedModeChain = new DefaultCodeBlockFactory(bgc, BLOCK_LIMIT);//protectedModeChain;
+        compilingRealModeChain = new DefaultCodeBlockFactory(bgc, BLOCK_LIMIT);// realModeChain
+        compilingProtectedModeChain = new DefaultCodeBlockFactory(bgc, BLOCK_LIMIT);// protectedModeChain
         compilingVirtual8086ModeChain = virtual8086ModeChain;
     }
 

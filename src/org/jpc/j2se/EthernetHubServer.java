@@ -118,12 +118,10 @@ public class EthernetHubServer implements Runnable {
                         total += size;
                         byte[] packet = new byte[size];
                         in.readFully(packet);
-//                    System.out.println("Received a packet from client " + us.id);
                         try {
                             out.writeInt(packet.length);
                             out.write(packet);
                             out.flush();
-//                      System.out.println("Forwarded a packet to client " + next.id);
                         } catch (IOException e) {
                             System.out.println("Client " + us.id + " couldn't contact partner.");
                         }

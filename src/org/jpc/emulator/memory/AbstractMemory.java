@@ -176,16 +176,6 @@ public abstract class AbstractMemory implements Memory {
         setQuadWordInBytes(offset + 8, data);
     }
 
-//    public static final short getWord(int offset, byte[] src)
-//    {
-//        return (short) ((0xFF & src[offset]) | (0xFF00 & (src[offset+1] << 8)));
-//    }
-//
-//    public static final int getDoubleWord(int offset, byte[] src)
-//    {
-//        return (0xFFFF & getWord(offset, src)) | (0xFFFF0000 & (getWord(offset+2, src) << 16));
-//    }
-
     /**
      * Set all references in <code>target</code> to <code>value</code>.
      * @param target array to be cleared.

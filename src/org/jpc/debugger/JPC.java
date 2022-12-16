@@ -149,8 +149,6 @@ public class JPC extends ApplicationFrame implements ActionListener {
         watchpoints.addActionListener(this);
         traceFrame = windows.add("Execution Trace Frame");
         traceFrame.addActionListener(this);
-//         frequencies = windows.add("Opcode Frequency Frame");
-//         frequencies.addActionListener(this);
 
         JMenu tools = new JMenu("Tools");
         tools.add("Create Blank Disk (file)").addActionListener(new ActionListener() {
@@ -610,17 +608,6 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 addInternalFrame(desktop, 10, 10, m);
             }
         }
-//         else if (src == frequencies)
-//         {
-//             OpcodeFrequencyFrame f = (OpcodeFrequencyFrame) objects.getObject(OpcodeFrequencyFrame.class);
-//             if (f != null)
-//                 bringToFront(f);
-//             else
-//             {
-//                 f = new OpcodeFrequencyFrame();
-//                 addInternalFrame(desktop, 550, 30, f);
-//             }
-//         }
 
         refresh();
     }

@@ -164,8 +164,6 @@ public class Comparison {
             history[historyIndex][1] = old;
             history[historyIndex][2] = line;
             historyIndex = (historyIndex + 1) % history.length;
-//            if (fast[16] == 0x1B3E656)
-//                System.out.println("Here comes the bug!");
             if (fast[8] + fast[31] == 0x80147130)
                 System.out.printf("80147130, ticks = %08x\n", fast[16]);
 
@@ -178,10 +176,6 @@ public class Comparison {
             if (!mem)
                 continue;
             Set<Integer> dirtyPages = new HashSet<Integer>();
-            //dirty1.invoke(newpc, dirtyPages);
-//            dirty2.invoke(oldpc, dirtyPages);
-            //for (int i=0; i < 2*1024; i++)
-            //    dirtyPages.add(i);
             if (dirtyPages.size() > 0) {
                 System.out.printf("Comparing");
                 for (int i : dirtyPages)

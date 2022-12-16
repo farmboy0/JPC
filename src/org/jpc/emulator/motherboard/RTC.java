@@ -195,8 +195,6 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
     }
 
     private static final long scale64(long input, int multiply, int divide) {
-        //return (BigInteger.valueOf(input).multiply(BigInteger.valueOf(multiply)).divide(BigInteger.valueOf(divide))).longValue();
-
         long rl = (0xffffffffL & input) * multiply;
         long rh = (input >>> 32) * multiply;
 
@@ -209,7 +207,6 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
     }
 
     private void init() {
-        //Calendar now = Calendar.getInstance();
         this.setTime(startTime);
         int val = this.toBCD(startTime.get(Calendar.YEAR) / 100);
         cmosData[RTC_REG_IBM_CENTURY_BYTE] = (byte)val;
@@ -446,7 +443,6 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
     }
 
     private void nextSecond() {
-        //currentTime = Calendar.getInstance();
         currentTime.add(Calendar.SECOND, 1);
     }
 
@@ -675,7 +671,7 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
             secondTimer = timeSource.newTimer(secondCallback);
             delayedSecondTimer = timeSource.newTimer(delayedSecondCallback);
 
-            nextSecondTime = timeSource.getEmulatedNanos() /*+ 1000000000L;/*/ + 99 * timeSource.getTickRate() / 100;
+            nextSecondTime = timeSource.getEmulatedNanos() + 99 * timeSource.getTickRate() / 100;
             delayedSecondTimer.setExpiry(nextSecondTime);
         }
     }

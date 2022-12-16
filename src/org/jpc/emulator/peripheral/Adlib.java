@@ -89,224 +89,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
             delay = 0.001 * (256 - counter) * scale;
             start = time + delay;
         }
-
     }
-
-//    static private final class Capture {
-//        //127 entries to go from raw data to registers
-//        /*Bit8u*/short ToReg[127];
-//        //How many entries in the ToPort are used
-//        /*Bit8u*/short RawUsed;
-//        //256 entries to go from port index to raw data
-//        /*Bit8u*/short ToRaw[256];
-//        /*Bit8u*/short delay256;
-//        /*Bit8u*/short delayShift8;
-//        RawHeader header;
-//
-//        FILE*	handle;				//File used for writing
-//        /*Bit32u*/long	startTicks;			//Start used to check total raw length on end
-//        /*Bit32u*/long	lastTicks;			//Last ticks when last last cmd was added
-//        /*Bit8u*/short	buf[1024];	//16 added for delay commands and what not
-//        /*Bit32u*/long	bufUsed;
-//        /*Bit8u*/short	cmd[2];				//Last cmd's sent to either ports
-//        boolean	doneOpl3;
-//        boolean	doneDualOpl2;
-//
-//        RegisterCache* cache;
-//
-//        void MakeEntry( /*Bit8u*/short reg, /*Bit8u*/short& raw ) {
-//            ToReg[ raw ] = reg;
-//            ToRaw[ reg ] = raw;
-//            raw++;
-//        }
-//        void MakeTables( void ) {
-//            /*Bit8u*/short index = 0;
-//            memset( ToReg, 0xff, sizeof ( ToReg ) );
-//            memset( ToRaw, 0xff, sizeof ( ToRaw ) );
-//            //Select the entries that are valid and the index is the mapping to the index entry
-//            MakeEntry( 0x01, index );					//0x01: Waveform select
-//            MakeEntry( 0x04, index );					//104: Four-Operator Enable
-//            MakeEntry( 0x05, index );					//105: OPL3 Mode Enable
-//            MakeEntry( 0x08, index );					//08: CSW / NOTE-SEL
-//            MakeEntry( 0xbd, index );					//BD: Tremolo Depth / Vibrato Depth / Percussion Mode / BD/SD/TT/CY/HH On
-//            //Add the 32 byte range that hold the 18 operators
-//            for ( int i = 0 ; i < 24; i++ ) {
-//                if ( (i & 7) < 6 ) {
-//                    MakeEntry(0x20 + i, index );		//20-35: Tremolo / Vibrato / Sustain / KSR / Frequency Multiplication Facto
-//                    MakeEntry(0x40 + i, index );		//40-55: Key Scale Level / Output Level
-//                    MakeEntry(0x60 + i, index );		//60-75: Attack Rate / Decay Rate
-//                    MakeEntry(0x80 + i, index );		//80-95: Sustain Level / Release Rate
-//                    MakeEntry(0xe0 + i, index );		//E0-F5: Waveform Select
-//                }
-//            }
-//            //Add the 9 byte range that hold the 9 channels
-//            for ( int i = 0 ; i < 9; i++ ) {
-//                MakeEntry(0xa0 + i, index );			//A0-A8: Frequency Number
-//                MakeEntry(0xb0 + i, index );			//B0-B8: Key On / Block Number / F-Number(hi /*Bits*/int)
-//                MakeEntry(0xc0 + i, index );			//C0-C8: FeedBack Modulation Factor / Synthesis Type
-//            }
-//            //Store the amount of bytes the table contains
-//            RawUsed = index;
-//    //		assert( RawUsed <= 127 );
-//            delay256 = RawUsed;
-//            delayShift8 = RawUsed+1;
-//        }
-//
-//        void ClearBuf( void ) {
-//            fwrite( buf, 1, bufUsed, handle );
-//            header.commands += bufUsed / 2;
-//            bufUsed = 0;
-//        }
-//        void AddBuf( /*Bit8u*/short raw, /*Bit8u*/short val ) {
-//            buf[bufUsed++] = raw;
-//            buf[bufUsed++] = val;
-//            if ( bufUsed >= sizeof( buf ) ) {
-//                ClearBuf();
-//            }
-//        }
-//        void AddWrite( /*Bit32u*/long regFull, /*Bit8u*/short val ) {
-//            /*Bit8u*/short regMask = regFull & 0xff;
-//            /*
-//                Do some special checks if we're doing opl3 or dualopl2 commands
-//                Although you could pretty much just stick to always doing opl3 on the player side
-//            */
-//            //Enabling opl3 4op modes will make us go into opl3 mode
-//            if ( header.hardware != HW_OPL3 && regFull == 0x104 && val && (*cache)[0x105] ) {
-//                header.hardware = HW_OPL3;
-//            }
-//            //Writing a keyon to a 2nd address enables dual opl2 otherwise
-//            //Maybe also check for rhythm
-//            if ( header.hardware == HW_OPL2 && regFull >= 0x1b0 && regFull <=0x1b8 && val ) {
-//                header.hardware = HW_DUALOPL2;
-//            }
-//            /*Bit8u*/short raw = ToRaw[ regMask ];
-//            if ( raw == 0xff )
-//                return;
-//            if ( regFull & 0x100 )
-//                raw |= 128;
-//            AddBuf( raw, val );
-//        }
-//        void WriteCache( void  ) {
-//            /*Bitu*/int i, val;
-//            /* Check the registers to add */
-//            for (i=0;i<256;i++) {
-//                //Skip the note on entries
-//                if (i>=0xb0 && i<=0xb8)
-//                    continue;
-//                val = (*cache)[ i ];
-//                if (val) {
-//                    AddWrite( i, val );
-//                }
-//                val = (*cache)[ 0x100 + i ];
-//                if (val) {
-//                    AddWrite( 0x100 + i, val );
-//                }
-//            }
-//        }
-//        void InitHeader( void ) {
-//            memset( &header, 0, sizeof( header ) );
-//            memcpy( header.id, "DBRAWOPL", 8 );
-//            header.versionLow = 0;
-//            header.versionHigh = 2;
-//            header.delay256 = delay256;
-//            header.delayShift8 = delayShift8;
-//            header.conversionTableSize = RawUsed;
-//        }
-//        void CloseFile( void ) {
-//            if ( handle ) {
-//                ClearBuf();
-//                /* Endianize the header and write it to beginning of the file */
-//                var_write( &header.versionHigh, header.versionHigh );
-//                var_write( &header.versionLow, header.versionLow );
-//                var_write( &header.commands, header.commands );
-//                var_write( &header.milliseconds, header.milliseconds );
-//                fseek( handle, 0, SEEK_SET );
-//                fwrite( &header, 1, sizeof( header ), handle );
-//                fclose( handle );
-//                handle = 0;
-//            }
-//        }
-//    public:
-//        boolean DoWrite( /*Bit32u*/long regFull, /*Bit8u*/short val ) {
-//            /*Bit8u*/short regMask = regFull & 0xff;
-//            //Check the raw index for this register if we actually have to save it
-//            if ( handle ) {
-//                /*
-//                    Check if we actually care for this to be logged, else just ignore it
-//                */
-//                /*Bit8u*/short raw = ToRaw[ regMask ];
-//                if ( raw == 0xff ) {
-//                    return true;
-//                }
-//                /* Check if this command will not just replace the same value
-//                   in a reg that doesn't do anything with it
-//                */
-//                if ( (*cache)[ regFull ] == val )
-//                    return true;
-//                /* Check how much time has passed */
-//                /*Bitu*/int passed = PIC_Ticks - lastTicks;
-//                lastTicks = PIC_Ticks;
-//                header.milliseconds += passed;
-//
-//                //if ( passed > 0 ) LOG_MSG( "Delay %d", passed ) ;
-//
-//                // If we passed more than 30 seconds since the last command, we'll restart the the capture
-//                if ( passed > 30000 ) {
-//                    CloseFile();
-//                    goto skipWrite;
-//                }
-//                while (passed > 0) {
-//                    if (passed < 257) {			//1-256 millisecond delay
-//                        AddBuf( delay256, passed - 1 );
-//                        passed = 0;
-//                    } else {
-//                        /*Bitu*/int shift = (passed >> 8);
-//                        passed -= shift << 8;
-//                        AddBuf( delayShift8, shift - 1 );
-//                    }
-//                }
-//                AddWrite( regFull, val );
-//                return true;
-//            }
-//    skipWrite:
-//            //Not yet capturing to a file here
-//            //Check for commands that would start capturing, if it's not one of them return
-//            if ( !(
-//                //note on in any channel
-//                ( regMask>=0xb0 && regMask<=0xb8 && (val&0x020) ) ||
-//                //Percussion mode enabled and a note on in any percussion instrument
-//                ( regMask == 0xbd && ( (val&0x3f) > 0x20 ) )
-//            )) {
-//                return true;
-//            }
-//            handle = OpenCaptureFile("Raw Opl",".dro");
-//            if (!handle)
-//                return false;
-//            InitHeader();
-//            //Prepare space at start of the file for the header
-//            fwrite( &header, 1, sizeof(header), handle );
-//            /* write the Raw To Reg table */
-//            fwrite( &ToReg, 1, RawUsed, handle );
-//            /* Write the cache of last commands */
-//            WriteCache( );
-//            /* Write the command that triggered this */
-//            AddWrite( regFull, val );
-//            //Init the timing information for the next commands
-//            lastTicks = PIC_Ticks;
-//            startTicks = PIC_Ticks;
-//            return true;
-//        }
-//        Capture( RegisterCache* _cache ) {
-//            cache = _cache;
-//            handle = 0;
-//            bufUsed = 0;
-//            MakeTables();
-//        }
-//        ~Capture() {
-//            CloseFile();
-//        }
-//
-//    };
 
     private final class Chip {
         //Last selected register
@@ -328,7 +111,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
                 timer[1].counter = val;
                 return true;
             case 0x04:
-                double time = timeSource.getEmulatedNanos();//Pic.PIC_FullIndex();
+                double time = timeSource.getEmulatedNanos();
                 if ((val & 0x80) != 0) {
                     timer[0].Reset(time);
                     timer[1].Reset(time);
@@ -360,7 +143,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
 
         //Read the current timer state, will use current double
         /*Bit8u*/short Read() {
-            double time = timeSource.getEmulatedNanos();//Pic.PIC_FullIndex();
+            double time = timeSource.getEmulatedNanos();
             timer[0].Update(time);
             timer[1].Update(time);
             /*Bit8u*/short ret = 0;
@@ -396,24 +179,14 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
         void Init( /*Bitu*/long rate);
     }
 
-//The cache for 2 chips or an opl3
-//    typedef /*Bit8u*/short RegisterCache[512];
-
     private class Module {
-//        private IoHandler.IO_ReadHandleObject[] ReadHandler = new IoHandler.IO_ReadHandleObject[3];
-//        private IoHandler.IO_WriteHandleObject[] WriteHandler = new IoHandler.IO_WriteHandleObject[3];
         private Mixer.MixerObject mixerObject = new Mixer.MixerObject();
 
         public Module() {
-//            for (int i=0;i<ReadHandler.length;i++)
-//                ReadHandler[i] = new IoHandler.IO_ReadHandleObject();
-//            for (int i=0;i<WriteHandler.length;i++)
-//                WriteHandler[i] = new IoHandler.IO_WriteHandleObject();
             for (int i = 0; i < chip.length; i++) {
                 chip[i] = new Chip();
             }
             reg.normal = 0;
-//            capture = null;
 
             /*Bitu*/int base = Option.sbbase.intValue(SBlaster.BASE, 16);
             /*Bitu*/int rate = Option.oplrate.intValue(SBlaster.OPL_RATE);
@@ -428,11 +201,6 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
                 handler = new DbOPL.Handler();
             } else if (oplemu.equals("compat")) {
                 System.out.println("OPLEMU compat not implemented");
-//                if ( oplmode == OPL_opl2 ) {
-//                    handler = new OPL2::Handler();
-//                } else {
-//                    handler = new OPL3::Handler();
-//                }
                 handler = new DbOPL.Handler();
             } else {
                 handler = new DbOPL.Handler();
@@ -454,19 +222,6 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
             default:
                 single = false;
             }
-            //0x388 range
-//            WriteHandler[0].Install(0x388,OPL_Write,IoHandler.IO_MB, 4 );
-//            ReadHandler[0].Install(0x388,OPL_Read,IoHandler.IO_MB, 4 );
-//            //0x220 range
-//            if ( !single ) {
-//                WriteHandler[1].Install(base,OPL_Write,IoHandler.IO_MB, 4 );
-//                ReadHandler[1].Install(base,OPL_Read,IoHandler.IO_MB, 4 );
-//            }
-//            //0x228 range
-//            WriteHandler[2].Install(base+8,OPL_Write,IoHandler.IO_MB, 2);
-//            ReadHandler[2].Install(base+8,OPL_Read,IoHandler.IO_MB, 1);
-
-//            MAPPER_AddHandler(OPL_SaveRawEvent,MK_f7,MMOD1|MMOD2,"caprawopl","Cap OPL");
         }
 
         //Mode we're running in
@@ -528,15 +283,13 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
         public /*Bit32u*/long lastUsed; //Ticks when adlib was last used to turn of mixing after a few second
 
         public Handler handler; //Handler that will generate the sound
-//        public RegisterCache cache;
         public short[] cache = new short[512];
-//        public Capture capture;
         public Chip[] chip = new Chip[2];
 
         //Handle port writes
         public void PortWrite(/*Bitu*/int port, /*Bitu*/short val) {
             //Keep track of last write time
-            lastUsed = timeSource.getEmulatedMicros();//Pic.PIC_Ticks;
+            lastUsed = timeSource.getEmulatedMicros();
             //Maybe only enable with a keyon?
             if (!mixerChan.enabled) {
                 mixerChan.Enable(true);
@@ -645,7 +398,7 @@ public class Adlib extends AbstractHardwareComponent implements IODevice {
                 if (i == 0xb9)
                     module.mixerChan.Enable(false);
                 else
-                    module.lastUsed = timeSource.getEmulatedMicros();//Pic.PIC_Ticks;
+                    module.lastUsed = timeSource.getEmulatedMicros();
             }
         }
     };

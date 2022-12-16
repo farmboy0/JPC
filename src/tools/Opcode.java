@@ -102,7 +102,6 @@ public class Opcode {
         }
         if (multiSize)
             b.append("    final int size;\n");
-        //b.append(getConstructor());
         b.append(getDirectConstructor());
         b.append(getExecute());
         b.append(getBranch());
@@ -236,20 +235,7 @@ public class Opcode {
             b.append("        segIndex = Processor.getSegmentIndex(parent.getSegment());\n");
         }
         if (multiSize) {
-            /*int vIndex = -1;
-            for (int i=operands.length-1; i >= 0; i--)
-            {
-                String arg = operands[i].toString();
-                if ((arg.length() > 1) && arg.charAt(1) == 'v')
-                    vIndex = i;
-                if ((arg.length() > 1) && arg.equals("Iz"))
-                    vIndex = i;
-                if (Operand.reg16.containsKey(arg) && (vIndex == -1))
-                    vIndex = i;
-            }
-            if (vIndex == -1)
-            throw new IllegalStateException("Couldn't find multisize operand "+toString());*/
-            b.append("        size = parent.opr_mode;\n");//parent.operand["+vIndex+"].size;\n");
+            b.append("        size = parent.opr_mode;\n");
         }
         if (isBranch) {
             b.append("        blockLength = parent.x86Length+(int)parent.eip-blockStart;\n");
@@ -271,9 +257,6 @@ public class Opcode {
             b.append("        int modrm = input.readU8();\n");
         if (needsSegment)
             b.append("        segIndex = Prefices.getSegment(prefices, Processor.DS_INDEX);\n");
-        if (multiSize) {
-            //b.append("        size = parent.opr_mode;\n");//parent.operand["+vIndex+"].size;\n");
-        }
         for (int i = 0; i < operands.length; i++) {
             String cons = operands[i].directConstruct(i + 1);
             if (cons.length() > 0)

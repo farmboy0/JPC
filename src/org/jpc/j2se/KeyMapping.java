@@ -357,12 +357,10 @@ public class KeyMapping {
             return new int[] { KeyEvent.VK_QUOTEDBL };
         case ',':
             return new int[] { KeyEvent.VK_COMMA };
-        //case '<': return new int[]{KeyEvent.VK_LESS};
         case '<':
             return new int[] { KeyEvent.VK_LEFT };
         case '.':
             return new int[] { KeyEvent.VK_PERIOD };
-        //case '>': return new int[]{KeyEvent.VK_GREATER};
         case '>':
             return new int[] { KeyEvent.VK_RIGHT };
         case '/':

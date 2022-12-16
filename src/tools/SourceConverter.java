@@ -110,7 +110,7 @@ public class SourceConverter {
                 for (int i = 0; i < lines.length; i++) {
                     if (lines[i].length() == 0)
                         continue;
-                    lines[i] = lines[i].substring(0, lines[i].indexOf(";")); // ignore comments after ;
+                    lines[i] = lines[i].substring(0, lines[i].indexOf(";")); // ignore comments after
                     lines[i] = lines[i].replaceAll("[\\s]+", " "); // contract spaces
                 }
 
@@ -210,7 +210,6 @@ public class SourceConverter {
                     }
                     end++;
                 }
-                //System.out.println("Removing: " + in.substring(start, end));
                 in = in.substring(0, start) + in.substring(end);
             }
         }

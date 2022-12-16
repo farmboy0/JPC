@@ -123,7 +123,6 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
         int len = input.readInt();
         channels = new TimerChannel[len];
         for (int i = 0; i < channels.length; i++) {
-            //if (i>10) System.exit(0);
             channels[i] = new TimerChannel(i);
             channels[i].loadState(input);
         }
@@ -621,7 +620,6 @@ public class IntervalTimer extends AbstractHardwareComponent implements IODevice
 
             int out = getOut(currentTime);
             irqDevice.setIRQ(irq, out);
-//            long nanos = convertCyclesToNanos(convertPitTicksToCycles(countStartCycles, nextChangeTime));
             long nanos = countStartCycles + scale64(nextChangeTime, 1000000000, PIT_FREQ);
 
             if (irqTimer.getExpiry() == nanos) // we need to trigger the next int now

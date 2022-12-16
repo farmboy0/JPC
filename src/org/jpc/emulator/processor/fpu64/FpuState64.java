@@ -444,7 +444,6 @@ public class FpuState64 extends FpuState {
             return FPU_SPECIAL_TAG_NAN; // QNaN by default
         else if (Double.isInfinite(x))
             return FPU_SPECIAL_TAG_INFINITY;
-        //else if (Math.abs(x) < UNDERFLOW_THRESHOLD)
         else if (isDenormal(x))
             return FPU_SPECIAL_TAG_DENORMAL;
         else
@@ -466,11 +465,6 @@ public class FpuState64 extends FpuState {
         tag[top] = tagCode(x);
         specialTag[top] = specialTagCode(x);
     }
-
-//     public void pushBig(BigDecimal x) throws ProcessorException
-//     {
-//         push(x.doubleValue());
-//     }
 
     @Override
     public double pop() throws ProcessorException {
@@ -494,10 +488,6 @@ public class FpuState64 extends FpuState {
         return x;
     }
 
-//     public BigDecimal popBig() throws ProcessorException
-//     {
-//         return new BigDecimal(pop());
-//     }
     @Override
     public double[] getStack() {
         double[] res = new double[8];
@@ -529,11 +519,6 @@ public class FpuState64 extends FpuState {
         }
         return data[i];
     }
-
-//     public BigDecimal bigST(int index) throws ProcessorException
-//     {
-//         return new BigDecimal(ST(index));
-//     }
 
     @Override
     public int getTag(int index) {

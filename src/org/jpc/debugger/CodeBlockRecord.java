@@ -121,7 +121,6 @@ public class CodeBlockRecord {
         }
         maxBlockSize = value;
         CodeBlockManager.BLOCK_LIMIT = value;
-//        LazyCodeBlockMemory.setMaxBlockSize(value);
         System.out.println("failed to set max block size");
     }
 

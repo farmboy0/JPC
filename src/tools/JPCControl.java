@@ -178,14 +178,6 @@ public class JPCControl extends EmulatorControl {
         }
     }
 
-    //public void setState(int[] state, int currentCSEIP) throws IOException
-    //{
-    //    try {
-    //    setState.invoke(pc, (int[])state);
-    //    } catch (InvocationTargetException e) {throw new RuntimeException(e.getMessage());}
-    //    catch (IllegalAccessException e) {throw new RuntimeException(e.getMessage());}
-    //}
-
     @Override
     public void destroy() {
         try {

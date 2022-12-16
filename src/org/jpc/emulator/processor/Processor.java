@@ -733,7 +733,7 @@ public class Processor implements HardwareComponent {
         Segment returnSegment = getSegment(newCS);
 
         if (returnSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (returnSegment.getType()) {
         default:
@@ -770,7 +770,6 @@ public class Processor implements HardwareComponent {
 
                 returnSegment.checkAddress(newEIP);
 
-                //esp += 20; //includes the 12 from earlier
                 eip = newEIP;
                 cs(returnSegment);
 
@@ -780,19 +779,15 @@ public class Processor implements HardwareComponent {
                 int eflags = getEFlags();
                 eflags &= ~0x4dd5;
                 eflags |= 0x4dd5 & newEFlags;
-                //overwrite: all; preserve: if, iopl, vm, vif, vip
 
                 if (getCPL() <= eflagsIOPrivilegeLevel) {
                     eflags &= ~0x200;
                     eflags |= 0x200 & newEFlags;
-                    //overwrite: all; preserve: iopl, vm, vif, vip
                 }
                 if (getCPL() == 0) {
                     eflags &= ~0x3000;
                     eflags |= 0x3000 & newEFlags;
-                    //overwrite: all;
                 }
-                // 			setEFlags(eflags);
 
                 setCPL(cs.getRPL());
 
@@ -869,7 +864,6 @@ public class Processor implements HardwareComponent {
                     eflags |= 0x3000 & newEFlags;
 
                 }
-                //  			setEFlags(eflags);
                 return eflags;
             }
         }
@@ -901,7 +895,6 @@ public class Processor implements HardwareComponent {
         int tmpeip = pop16() & 0xffff;
         int tmpcs = pop16() & 0xffff;
         int tmpflags = pop16() & 0xffff;
-        //cs.checkAddress(tmpeip);
         cs.setSelector(tmpcs);
         eip = tmpeip;
         setFlags((short)tmpflags);
@@ -1246,7 +1239,7 @@ public class Processor implements HardwareComponent {
                 r_ecx.set32(0);
 
                 int features = 0;
-                features |= 1; //Have an FPU;
+                features |= 1; //Have an FPU
 
                 features |= 1 << 31; // Pending break enable
                 r_edx.set32(features);
@@ -1274,21 +1267,16 @@ public class Processor implements HardwareComponent {
                 r_ebx.set32(0);
                 r_ecx.set32(0);
                 int features = 0;
-                features |= 1; //Have an FPU;
-                //features |= (1<< 1);  // VME - Virtual 8086 mode enhancements, CR4.VME and eflags.VIP and VIF
-                //features |= (1<< 2); // Debugging extensions CR4.DE and DR4 and DR5
+                features |= 1; //Have an FPU
                 features |= 1 << 3; // Support Page-Size Extension (4M pages)
                 features |= 1 << 4; // implement TSC
                 features |= 1 << 5; // support RDMSR/WRMSR
                 features |= 1 << 7; // Machine Check exception
                 features |= 1 << 8; // Support CMPXCHG8B instruction
-                //features |= (1<< 9);   // APIC on chip
-                //features |= (1<<11);  // SYSENTER/SYSEXIT
                 features |= 1 << 13; // Support Global pages.
                 features |= 1 << 14; // Machine check architecture
                 features |= 1 << 15; // Implement CMOV instructions.
                 features |= 1 << 23; // support MMX
-                //features |= (1<<28);  // max APIC ID (cpuid.1.ebx[23-16]) is valid
                 r_edx.set32(features);
                 return;
             case 0x02:
@@ -1297,13 +1285,6 @@ public class Processor implements HardwareComponent {
                 r_ecx.set32(0);
                 r_edx.set32(0);
                 return;
-//                case 0x80000000:
-//                case 0x80000001:
-//                    r_eax.set32(0);
-//                    r_ebx.set32(0);
-//                    r_ecx.set32(0);
-//                    r_edx.set32(0);
-//                    return;
             default:
                 System.err.printf("Unknown CPUID argument eax=%08x\n", r_eax.get32());
                 r_eax.set32(0);
@@ -1326,22 +1307,18 @@ public class Processor implements HardwareComponent {
                 r_ecx.set32(0);
 
                 int features = 0;
-                features |= 1; //Have an FPU;
+                features |= 1; //Have an FPU
                 features |= 1 << 1; // VME - Virtual 8086 mode enhancements, CR4.VME and eflags.VIP and VIF
                 features |= 1 << 2; // Debugging extensions CR4.DE and DR4 and DR5
                 features |= 1 << 3; // Support Page-Size Extension (4M pages)
 
                 features |= 1 << 4; // implement TSC
-                //features |= (1<< 5);  // support RDMSR/WRMSR
                 features |= 1 << 6; // Support PAE.
                 features |= 1 << 7; // Machine Check exception
 
                 features |= 1 << 8; // Support CMPXCHG8B instruction - Bochs doesn't have this!
-                //features |= (1<< 9);   // APIC on chip
-                // (1<<10) is reserved
                 features |= 1 << 11; // SYSENTER/SYSEXIT
 
-                //features |= (1<<12);  // Memory type range registers (MSR)
                 features |= 1 << 13; // Support Global pages.
                 features |= 1 << 14; // Machine check architecture
                 features |= 1 << 15; // Implement CMOV instructions.
@@ -1476,7 +1453,7 @@ public class Processor implements HardwareComponent {
 
         Segment returnSegment = getSegment(tempCS);
         if (returnSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         if (returnSegment.getRPL() < getCPL()) {
             System.out.println("RPL too small in far ret: RPL=" + returnSegment.getRPL() + ", CPL=" + getCPL() + ", new CS="
@@ -1611,7 +1588,6 @@ public class Processor implements HardwareComponent {
 
             if (returnSegment.getRPL() > getCPL()) {
                 //OUTER PRIVILEGE-LEVEL
-                //esp += 8;
                 LOGGING.log(Level.WARNING, "Conforming outer privilege level not implemented");
                 throw new IllegalStateException("Execute Failed");
             } else {
@@ -1633,7 +1609,7 @@ public class Processor implements HardwareComponent {
         Segment returnSegment = getSegment(tempCS);
 
         if (returnSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (returnSegment.getType()) {
         default:
@@ -1701,7 +1677,6 @@ public class Processor implements HardwareComponent {
 
             if (returnSegment.getRPL() > getCPL()) {
                 //OUTER PRIVILEGE-LEVEL
-                //esp += 8;
                 LOGGING.log(Level.WARNING, "Conforming outer privilege level not implemented");
                 throw new IllegalStateException("Execute Failed");
             } else {
@@ -1729,7 +1704,7 @@ public class Processor implements HardwareComponent {
         Segment returnSegment = getSegment(tempCS);
 
         if (returnSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (returnSegment.getType()) {
         default:
@@ -1748,7 +1723,6 @@ public class Processor implements HardwareComponent {
 
             if (returnSegment.getRPL() > getCPL()) {
                 //OUTER PRIVILEGE-LEVEL
-                //esp += 8;
                 LOGGING.log(Level.WARNING, "Non-conforming outer privilege level not implemented");
                 throw new IllegalStateException("Execute Failed");
             } else {
@@ -1774,7 +1748,6 @@ public class Processor implements HardwareComponent {
 
             if (returnSegment.getRPL() > getCPL()) {
                 //OUTER PRIVILEGE-LEVEL
-                //esp += 8;
                 LOGGING.log(Level.WARNING, "Conforming outer privilege level not implemented");
                 throw new IllegalStateException("Execute Failed");
             } else {
@@ -1802,7 +1775,7 @@ public class Processor implements HardwareComponent {
         Segment returnSegment = getSegment(tempCS);
 
         if (returnSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (returnSegment.getType()) {
         default:
@@ -1838,7 +1811,6 @@ public class Processor implements HardwareComponent {
 
                 returnSegment.checkAddress(tempEIP);
 
-                //esp += 20; //includes the 12 from earlier
                 eip = tempEIP;
                 cs(returnSegment);
 
@@ -1869,7 +1841,6 @@ public class Processor implements HardwareComponent {
 
             if (returnSegment.getRPL() > getCPL()) {
                 //OUTER PRIVILEGE-LEVEL
-                //esp += 8;
                 LOGGING.log(Level.WARNING, "Conforming outer privilege level not implemented");
                 throw new IllegalStateException("Execute Failed");
             } else {
@@ -1948,14 +1919,13 @@ public class Processor implements HardwareComponent {
         r_esp.set32(newESP);
         // throws ModeSwitchException
         setEFlags(newEFlags, EFLAGS_VALID_MASK);
-        //setCPL(3);
     }
 
     private final void iret32ProtectedMode(int newCS, int newEIP, int newEFlags, int tmpESP) {
         ProtectedModeSegment returnSegment = (ProtectedModeSegment)getSegment(newCS);
 
         if (returnSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         if (returnSegment.getRPL() < getCPL())
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, newCS & 0xfffc, true);
@@ -2083,9 +2053,8 @@ public class Processor implements HardwareComponent {
 
     public void jumpFar_pm(int targetSelector, int targetEIP) {
         Segment newSegment = getSegment(targetSelector);
-        //System.out.println("Far Jump: new CS: " + newSegment.getClass() + " at " + Integer.toHexString(newSegment.getBase()) + " with selector " + Integer.toHexString(newSegment.getSelector()) + " to address " + Integer.toHexString(targetEIP + newSegment.getBase()));
         if (newSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (newSegment.getType()) { // segment type
         default: // not a valid segment descriptor for a jump
@@ -2146,7 +2115,7 @@ public class Processor implements HardwareComponent {
             setSupervisorDoubleWord(gdtr, (targetSelector & 0xfff8) + 4, descriptorHigh);
 
             //commit new TSS
-            setCR0(getCR0() | 0x8); // set TS flag in CR0;
+            setCR0(getCR0() | 0x8); // set TS flag in CR0
             tss = getSegment(targetSelector); //includes updated busy flag
             ((ProtectedModeSegment.AbstractTSS)tss).restoreCPUState(this);
 
@@ -2333,7 +2302,6 @@ public class Processor implements HardwareComponent {
     }
 
     public void callFar(int targetSelector, short targetEIP) {
-        //System.out.printf("call far o16: %04x:%04x\n", targetSelector, targetEIP);
         if ((0xffff & r_sp.get16()) < 4 && r_esp.get16() != 0)
             throw ProcessorException.STACK_SEGMENT_0;
 
@@ -2348,8 +2316,7 @@ public class Processor implements HardwareComponent {
     public final void call_far_pm_o16_a32(int targetSelector, int targetEIP) {
         Segment newSegment = getSegment(targetSelector);
         if (newSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
-
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         switch (newSegment.getType()) { // segment type
         default: // not a valid segment descriptor for a jump
             LOGGING.log(Level.WARNING, "Invalid segment type {0,number,integer}", Integer.valueOf(newSegment.getType()));
@@ -2376,7 +2343,7 @@ public class Processor implements HardwareComponent {
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector, true);
             }
             if (targetSegment == SegmentFactory.NULL_SEGMENT)
-                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
             if (targetSegment.getDPL() > getCPL())
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSelector, true);
@@ -2404,7 +2371,6 @@ public class Processor implements HardwareComponent {
                 } else
                     throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector, true);
             }
-//                            break;
             case 0x1c: //Code: Execute-Only, Conforming
             case 0x1d: //Code: Execute-Only, Conforming, Accessed
             case 0x1e: //Code: Execute/Read, Conforming
@@ -2417,10 +2383,8 @@ public class Processor implements HardwareComponent {
                 throw new IllegalStateException("Execute Failed");
                 //SAME-PRIVILEGE
             }
-//                            break;
             }
         }
-//                break;
         case 0x05: // Task Gate
             LOGGING.log(Level.WARNING, "Task gate not implemented");
             throw new IllegalStateException("Execute Failed");
@@ -2465,11 +2429,11 @@ public class Processor implements HardwareComponent {
 
     public final void call_far_pm_o16_a16(int targetSelector, int targetEIP) {
         if ((targetSelector & 0xfffc) == 0)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         Segment newSegment = getSegment(targetSelector);
         if (newSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (newSegment.getType()) { // segment type
         default: // not a valid segment descriptor for a jump
@@ -2622,7 +2586,6 @@ public class Processor implements HardwareComponent {
                 throw new IllegalStateException("Execute Failed");
                 //SAME-PRIVILEGE
             }
-//                            break;
             }
         }
             break;
@@ -2676,7 +2639,7 @@ public class Processor implements HardwareComponent {
     public final void call_far_pm_o32_a16(int targetSelector, int targetEIP) {
         Segment newSegment = getSegment(targetSelector);
         if (newSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (newSegment.getType()) { // segment type
         default: // not a valid segment descriptor for a jump
@@ -2704,7 +2667,7 @@ public class Processor implements HardwareComponent {
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector, true);
             }
             if (targetSegment == SegmentFactory.NULL_SEGMENT)
-                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
             if (targetSegment.getDPL() > getCPL())
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSelector, true);
@@ -2732,7 +2695,6 @@ public class Processor implements HardwareComponent {
                 } else
                     throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector, true);
             }
-//                            break;
             case 0x1c: //Code: Execute-Only, Conforming
             case 0x1d: //Code: Execute-Only, Conforming, Accessed
             case 0x1e: //Code: Execute/Read, Conforming
@@ -2745,10 +2707,8 @@ public class Processor implements HardwareComponent {
                 throw new IllegalStateException("Execute Failed");
                 //SAME-PRIVILEGE
             }
-//                            break;
             }
         }
-//                break;
         case 0x05: // Task Gate
             LOGGING.log(Level.WARNING, "Task gate not implemented");
             throw new IllegalStateException("Execute Failed");
@@ -2794,7 +2754,7 @@ public class Processor implements HardwareComponent {
     public final void call_far_pm_o32_a32(int targetSelector, int targetEIP) {
         Segment newSegment = getSegment(targetSelector);
         if (newSegment == SegmentFactory.NULL_SEGMENT)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
         switch (newSegment.getType()) { // segment type
         default: // not a valid segment descriptor for a jump
@@ -2822,7 +2782,7 @@ public class Processor implements HardwareComponent {
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector, true);
             }
             if (targetSegment == SegmentFactory.NULL_SEGMENT)
-                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
 
             if (targetSegment.getDPL() > getCPL())
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSelector, true);
@@ -2850,7 +2810,6 @@ public class Processor implements HardwareComponent {
                 } else
                     throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, targetSegmentSelector, true);
             }
-//                            break;
             case 0x1c: //Code: Execute-Only, Conforming
             case 0x1d: //Code: Execute-Only, Conforming, Accessed
             case 0x1e: //Code: Execute/Read, Conforming
@@ -2863,10 +2822,8 @@ public class Processor implements HardwareComponent {
                 throw new IllegalStateException("Execute Failed");
                 //SAME-PRIVILEGE
             }
-//                            break;
             }
         }
-//                break;
         case 0x05: // Task Gate
             LOGGING.log(Level.WARNING, "Task gate not implemented");
             throw new IllegalStateException("Execute Failed");
@@ -2910,11 +2867,6 @@ public class Processor implements HardwareComponent {
     }
 
     public final void int_o16_a16(int vector) {
-        //System.out.println("Real Mode exception " + Integer.toHexString(vector));
-
-        //if (vector == 0)
-        //    throw new IllegalStateException("INT 0 allowed? 0x" + Integer.toHexString(getInstructionPointer()));
-
         if ((0xffff & r_sp.get16()) < 6 && r_sp.get16() != 0) {
             throw ProcessorException.STACK_SEGMENT_0;//?
             //maybe just change vector value
@@ -2925,9 +2877,7 @@ public class Processor implements HardwareComponent {
         eflagsAlignmentCheck = false;
         eflagsResume = false;
         esp = push16(esp, (short)cs.getSelector());
-        //System.out.printf("INT: saved cs=%04x to %04x\n", cs.getSelector(), esp);
         esp = push16(esp, (short)eip);
-        //System.out.printf("INT: saved eip=%04x to %04x\n", (short)eip, esp);
         int debug = getInstructionPointer();
 
         // read interrupt vector
@@ -2936,13 +2886,12 @@ public class Processor implements HardwareComponent {
         cs.setSelector(0xffff & idtr.getWord(4 * vector + 2));
         eip = neweip;
         r_esp.set32(esp);
-        //System.out.printf("INT: targeteip=%04x cs: %04x\n", (short)eip, cs());
     }
 
     public void sysenter() {
         int csSelector = (int)getMSR(Processor.SYSENTER_CS_MSR);
         if (csSelector == 0)
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         eflagsInterruptEnable = false;
         eflagsResume = false;
         eflagsVirtual8086Mode = false;
@@ -3465,7 +3414,7 @@ public class Processor implements HardwareComponent {
 
         if (pagingChanged) {
             if ((value & CR0_PROTECTION_ENABLE) == 0 && (value & CR0_PAGING) != 0)
-                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
 
         if (alignmentChanged)
@@ -3484,7 +3433,6 @@ public class Processor implements HardwareComponent {
                 convertSegmentsToProtectedMode();
                 throw ModeSwitchException.PROTECTED_MODE_EXCEPTION;
             } else {
-                // 		linearMemory.flush();
                 setCPL(0);
                 convertSegmentsToRealMode();
                 throw ModeSwitchException.REAL_MODE_EXCEPTION;
@@ -3722,11 +3670,6 @@ public class Processor implements HardwareComponent {
             Segment result = SegmentFactory.createProtectedModeSegment(linearMemory, segmentSelector, segmentDescriptor, isStack);
             if (isStack && !((ProtectedModeSegment)result).isDataWritable())
                 throw ProcessorException.GENERAL_PROTECTION_0;
-            // mark segment descriptor as accessed (somehow this stops doom working)
-//            if ((segmentSelector & 0x4) != 0)
-//                ldtr.VMsetByte((segmentSelector & 0xfff8) + 5, (byte) (ldtr.getByte((segmentSelector & 0xfff8) + 5) | 1));
-//            else
-//                gdtr.VMsetByte((segmentSelector & 0xfff8) + 5, (byte) (gdtr.getByte((segmentSelector & 0xfff8) + 5) | 1));
             if (alignmentChecking) {
                 if ((result.getType() & 0x18) == 0x10) // Should make this a data segment
                     result.setAddressSpace(alignmentCheckedMemory);
@@ -3781,7 +3724,6 @@ public class Processor implements HardwareComponent {
             r_edx.set32(0x00000513); // Pentium
         else
             r_edx.set32(0x00000634); // Pentium II
-//        r_edx.set32(0); // to comform with Bochs
 
         interruptFlags = 0;
         currentPrivilegeLevel = 0;
@@ -3882,7 +3824,6 @@ public class Processor implements HardwareComponent {
                 if ((interruptFlags & IFLAGS_HARDWARE_INTERRUPT) != 0) {
                     interruptFlags &= ~IFLAGS_HARDWARE_INTERRUPT;
                     int vec = interruptController.cpuGetInterrupt();
-                    //System.out.printf("JPC handling interrupt 0x%x\n", vec);
                     if (USEBOCHS && vec != interruptController.getIRQ0Vector() && vec != interruptController.getSpuriousVector()
                         && vec != interruptController.getSpuriousMasterVector())
                         lastPMVector = vec;
@@ -3945,13 +3886,11 @@ public class Processor implements HardwareComponent {
         // commit
         r_esp.set32(esp);
         eip = newEip;
-        //System.out.printf("RM HW int to cs:eip = %08x:%08x = %08x\n", cs.getBase(), eip, cs.getBase()+eip);
         if (!cs.setSelector(newSelector)) {
             System.out.println("Setting CS to RM in RM interrupt");
             cs(SegmentFactory.createRealModeSegment(physicalMemory, newSelector));
             setCPL(0);
         }
-        //System.out.printf("Hardware int with vector %d to %04x:%04x = %08x\n", vector/4, newSelector, newEip, cs.getBase()+newEip);
     }
 
     public final void handleProtectedModeException(ProcessorException pe) {
@@ -3998,11 +3937,6 @@ public class Processor implements HardwareComponent {
             //make eip point at INT instruction which threw an exception
             if (e.pointsToSelf())
                 eip -= instructionLength;
-
-            //if (e.getVector() == PROC_EXCEPTION_DF) {
-            //System.err.println("Triple-Fault: Unhandleable, machine will halt!");
-            //throw new IllegalStateException("Triple Fault");
-            //else
             handleProtectedModeException(e);
         }
     }
@@ -4021,11 +3955,6 @@ public class Processor implements HardwareComponent {
             eip = savedEIP;
             cs(savedCS);
             ss(savedSS);
-
-            //if (e.getVector() == PROC_EXCEPTION_DF) {
-            //System.err.println("Triple-Fault: Unhandleable, machine will halt!");
-            //throw new IllegalStateException("Triple Fault");
-            //else
             handleProtectedModeException(e);
         }
     }
@@ -4087,8 +4016,6 @@ public class Processor implements HardwareComponent {
     }
 
     private final void followProtectedModeException(int vector, boolean hasErrorCode, int errorCode, boolean hardware, boolean software) {
-        //        System.out.println();
-        //	System.out.println("protected Mode PF exception " + Integer.toHexString(vector) + (hasErrorCode ? "errorCode = " + errorCode:"") + ", hardware = " + hardware + ", software = " + software);
         if (USEBOCHS)
             System.out.printf("PM Exception vector=%x hw=%d sw=%d\n", vector, hardware ? 1 : 0, software ? 1 : 0);
         if (vector == ProcessorException.Type.PAGE_FAULT.vector()) {
@@ -4368,7 +4295,7 @@ public class Processor implements HardwareComponent {
         if ((getCR4() & 0x1) != 0) {
             throw new IllegalStateException("VME not supported");
         } else if (eflagsIOPrivilegeLevel < 3) {
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         } else {
             try {
                 followVirtual8086ModeException(vector, false, 0, false, true);
@@ -4407,18 +4334,11 @@ public class Processor implements HardwareComponent {
             cs(savedCS);
             ss(savedSS);
 
-            //if (e.getVector() == PROC_EXCEPTION_DF) {
-            //System.err.println("Triple-Fault: Unhandleable, machine will halt!");
-            //throw new IllegalStateException("Triple Fault");
-            //else
             handleVirtual8086ModeException(e);
         }
     }
 
     private final void followVirtual8086ModeException(int vector, boolean hasErrorCode, int errorCode, boolean hardware, boolean software) {
-        //System.out.println();
-        //System.out.println("VM8086 Mode exception " + Integer.toHexString(vector) + (hasErrorCode ? ", errorCode = " + errorCode:"") + ", hardware = " + hardware + ", software = " + software);
-        //System.out.println("CS:EIP " + Integer.toHexString(cs.getBase()) +":" +Integer.toHexString(eip));
         if (vector == ProcessorException.Type.PAGE_FAULT.vector())
             setCR2(linearMemory.getLastWalkedAddress());
 
@@ -4980,13 +4900,9 @@ public class Processor implements HardwareComponent {
         case SHLD32:
             return getCarryFlag(op1, op2, result, instr) ^ result >> 31 != 0;
         case SHRD16:
-//            if (op2 == 1) commented because despite the Intel spec, this is what Bochs does
             return ((result << 1 ^ result) & 1 << 15) != 0;
-//            return false;
         case SHRD32:
-//            if (op2 == 1) commented because despite the Intel spec, this is what Bochs does
             return (result << 1 ^ result) >> 31 != 0;
-//            return false;
         case SHR8:
             return (result << 1 ^ result) >> 7 != 0;
         case SHR16:

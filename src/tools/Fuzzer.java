@@ -67,24 +67,10 @@ public class Fuzzer {
         ClassLoader cl2 = new URLClassLoader(urls2, tools.Fuzzer.class.getClassLoader());
         PCHandle pc2 = new PCHandle(cl2, false, args);
 
-        // will succeed
-        //byte[] add_ah_al = new byte[] {(byte)0, (byte)0xc4};
-        //int[] input = new int[16];
-        //executeCase(add_ah_al, input, pc1, pc2, false, true);
-
-        // will fail
-        //byte[] imul_bx = new byte[] {(byte)0xf7, (byte)0xeb};
-        //int[] input2 = new int[16];
-        //input2[0] = 0x50;
-        //input2[1] = 0x19;
-        //input2[9] = 0x46;
-        //executeCase(imul_bx, input2, pc1, pc2, false, true);
-
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
         DefaultHandler rmhandler = new TestParser("rm", pc1, pc2, false, true);
         System.out.println("Starting Real Mode fuzzing...");
-        //saxParser.parse("tests/rm.tests", rmhandler);
 
         // set PCs to protected mode
         pc1.setPM(true);
@@ -215,12 +201,10 @@ public class Fuzzer {
             if (i != 9) {
                 if (fast[i] != old[i]) {
                     b.append(String.format("Difference: %d=%s %08x - %08x\n", i, names[i], fast[i], old[i]));
-                    //continueExecution();
                 }
             } else {
                 if (compareFlags && (fast[i] & FLAG_MASK) != (old[i] & FLAG_MASK)) {
                     b.append(String.format("Difference: %d=%s %08x - %08x\n", i, names[i], fast[i], old[i]));
-                    //continueExecution();
                 }
             }
         if (b.length() > 0) {
@@ -243,7 +227,7 @@ public class Fuzzer {
             System.exit(0);
     }
 
-    public static final int FLAG_MASK = -1;//~0x10;
+    public static final int FLAG_MASK = -1;
 
     public static final int gdtBase = 0xfb632;
     public static byte[] gdt = {
@@ -324,19 +308,11 @@ public class Fuzzer {
         public void setPM(boolean pm) throws Exception {
             byte[] setcr0 = { (byte)0x0f, (byte)0x22, (byte)0xc0 };
             if (pm) {
-                // setup gdt data
-                /*int[] regs0 = new int[16];
-                regs0[10] = 0xf000;// set cs
-                regs0[8] = 0xb632; // cheat and set eip to where the gdt will be to load gdt
-                setState.invoke(pc, regs0);
-                setCode(gdt); // refers to BIOS - data is already there*/
-
                 // lgdt
                 int[] regs0 = new int[16];
                 regs0[10] = 0xf000;// set cs
                 regs0[8] = 0xb599; // set eip to point to lgdt
                 setState.invoke(pc, regs0);
-                //setCode(lgdt);
                 executeBlock(); // relies on single instruction length block
                 // set cr0
                 executeBlock();
@@ -354,13 +330,6 @@ public class Fuzzer {
                 int[] newregs = getState();
                 testEip = newregs[8];
                 testCS = newregs[10];
-                // load cr0
-                /*int[] regs = new int[16];
-                regs[0] = 0x60000011; // new cr0 value is in eax
-                regs0[10] = 0xf000;// set cs
-                setState.invoke(pc, regs);
-                setCode(setcr0);
-                executeBlock();*/
             } else {
                 int[] regs = new int[16];
                 regs[0] = 0x60000010;
@@ -454,7 +423,6 @@ public class Fuzzer {
                     input[i] = Integer.parseInt(inputArr[i], 16);
                 // set eip
                 // eip will be 0 which is fine
-                //input[8] = testEip;
                 input[10] = testCS;
                 input[11] = 0x18; // ds
                 input[12] = 0x18; // es

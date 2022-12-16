@@ -8,7 +8,6 @@ public final class State {
         Formatter formatter = new Formatter(builder);
         registersImpl(cpu, formatter);
         segmentsImpl(cpu, formatter);
-        //extrasImpl(cpu, formatter);
         System.out.flush();
         System.err.println(builder);
     }

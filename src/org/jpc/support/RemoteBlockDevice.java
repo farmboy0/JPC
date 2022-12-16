@@ -88,7 +88,6 @@ public class RemoteBlockDevice implements BlockDevice {
     @Override
     public synchronized int read(long sectorNumber, byte[] buffer, int size) {
         try {
-            //          System.out.println("trying to read " + sectorNumber);
             out.write(Protocol.READ.ordinal());
             out.writeLong(sectorNumber);
             out.writeInt(size);
@@ -111,7 +110,6 @@ public class RemoteBlockDevice implements BlockDevice {
     @Override
     public synchronized int write(long sectorNumber, byte[] buffer, int size) {
         try {
-            //          System.out.println("trying to write " + sectorNumber);
             out.write(Protocol.WRITE.ordinal());
             out.writeLong(sectorNumber);
             out.writeInt(size * 512);
@@ -243,22 +241,4 @@ public class RemoteBlockDevice implements BlockDevice {
         }
         return null;
     }
-
-//     public static void main(String[] args) throws Exception
-//     {
-//         PipedOutputStream out1 = new PipedOutputStream();
-//         PipedInputStream in1 = new PipedInputStream(out1);
-
-//         PipedOutputStream out2 = new PipedOutputStream();
-//         PipedInputStream in2 = new PipedInputStream(out2);
-
-//         RemoteBlockDevice remote = new RemoteBlockDevice(in1, out2);
-
-//         RemoteBlockDeviceImpl remoteImpl = new RemoteBlockDeviceImpl(in2, out1, new TreeBlockDevice(new File(args[0])));
-
-//         byte[] buffer = new byte[512];
-//         for (int i=0;i<5;i++)
-//         System.out.println(remote.read(63, buffer, 1));
-
-//     }
 }

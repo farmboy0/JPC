@@ -89,7 +89,7 @@ public class Tasking {
         }
 
         // STEP 4: If the task switch was initiated with an IRET instruction,
-        //         clears the NT flag in a temporarily saved EFLAGS image;
+        //         clears the NT flag in a temporarily saved EFLAGS image
         //         if initiated with a CALL or JMP instruction, an exception, or
         //         an interrupt, the NT flag is left unchanged.
         int oldEFlags = cpu.getEFlags();
@@ -287,12 +287,6 @@ public class Tasking {
         cpu.setEFlags(newEflags, Processor.EFLAGS_VALID_MASK);
 
         // Set selectors TODO
-//        cpu.cs(newCs);
-//        cpu.ss(newSs);
-//        cpu.ds(newDs);
-//        cpu.es(newEs);
-//        cpu.fs(newFs);
-//        cpu.gs(newGs);
 
         if (newLdt == 0) {
             cpu.ldtr = SegmentFactory.NULL_SEGMENT;
@@ -308,9 +302,7 @@ public class Tasking {
 
                 if (Processor.cpuLevel >= 6) {
                     if (cpu.pagingEnabled() && cpu.physicalAddressExtension()) {
-                        // TODO
-                        // clear PDPTRs before raising task switch exception
-
+                        // TODO clear PDPTRs before raising task switch exception
                     }
                 }
             }

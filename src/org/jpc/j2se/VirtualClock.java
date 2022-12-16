@@ -220,13 +220,12 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
             if (sleep)
                 try {
                     long toSleep = Math.min((expiry - getTime()) / 1000000, 100);
-//                    System.out.printf("Sleeping for %x millis", toSleep);
                     Thread.sleep(toSleep);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(VirtualClock.class.getName()).log(Level.SEVERE, null, ex);
                 }
             // cast time difference to microseconds, then convert to cycles
-            totalTicks = (long)((double)expiry * IPS / getTickRate());//totalTicks += ((expiry - getEmulatedNanos())/1000)*1000 * IPS / getTickRate();
+            totalTicks = (long)((double)expiry * IPS / getTickRate());
             if (totalTicks < 0) {
                 System.out.println(printTimerQueue());
                 throw new IllegalStateException(
@@ -247,12 +246,10 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
 
     public long convertNanosToTicks(long nanos) {
         return (long)((double)nanos * IPS / 1000000000);
-//        return nanos * IPS / 1000000000L;
     }
 
     public long convertTicksToNanos(long ticks) {
         return (long)((double)ticks * 1000000000 / IPS);
-//        return ticks * 1000000000L / IPS;
     }
 
     @Override

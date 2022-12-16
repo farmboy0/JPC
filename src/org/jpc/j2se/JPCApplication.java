@@ -300,7 +300,6 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         p1.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         p1.add("Center", keys);
         p1.add("East", pp);
-        //getContentPane().add("South", p1);
 
         setSize(monitor.getPreferredSize());
         LICENCE.setPreferredSize(monitor.getPreferredSize());
@@ -313,7 +312,6 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
                 Dimension newSize = c.getSize();
                 int width = (int)newSize.getWidth();
                 int height = (int)newSize.getHeight();
-                //System.out.println("new width="+width+" new height="+height);
                 monitor.scaleDisplay(width, height);
             }
         });

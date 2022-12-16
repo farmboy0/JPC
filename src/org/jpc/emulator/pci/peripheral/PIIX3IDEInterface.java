@@ -191,9 +191,6 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
     @Override
     public void updateComponent(HardwareComponent component) {
         if (component instanceof IOPortHandler && irqDevice.updated() && drivesUpdated) {
-            //Run IDEChannel Constructors
-            //            channels[0] = new IDEChannel(14, irqDevice, 0x1f0, 0x3f6, new BlockDevice[]{drives[0], drives[1]}, bmdmaRegions[0]);
-            //            channels[1] = new IDEChannel(15, irqDevice, 0x170, 0x376, new BlockDevice[]{drives[2], drives[3]}, bmdmaRegions[1]);
             channels[0].setDrives(new BlockDevice[] { drives[0], drives[1] });
             channels[1].setDrives(new BlockDevice[] { drives[2], drives[3] });
             ((IOPortHandler)component).registerIOPortCapable(channels[0]);
@@ -211,7 +208,6 @@ public class PIIX3IDEInterface extends AbstractPCIDevice {
         }
 
         if (component instanceof DriveSet && component.updated()) {
-            //	    drives = new BlockDevice[4];
             drives[0] = ((DriveSet)component).getHardDrive(0);
             drives[1] = ((DriveSet)component).getHardDrive(1);
             drives[2] = ((DriveSet)component).getHardDrive(2);

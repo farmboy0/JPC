@@ -108,7 +108,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
         }
         if (mpu.queue_used == 0 && mpu.intelligent) {
             mpu.state.irq_pending = true;
-            //Pic.PIC_ActivateIRQ(mpu.irq);
             irqDevice.setIRQ(mpu.irq, 1);
         }
         if (mpu.queue_used < MPU401_QUEUE) {
@@ -161,7 +160,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
                 Log.log(Level.SEVERE, "MPU-401:Unhandled Recording Command " + Integer.toString(val, 16));
             switch (val & 0xc) {
             case 0x4: /* Stop */
-                //Pic.PIC_RemoveEvents(MPU401_Event);
                 mpu.state.playing = false;
                 for (/*Bitu*/int i = 0xb0; i < 0xbf; i++) { /* All notes off */
                     Midi.MIDI_RawOutByte(i);
@@ -172,8 +170,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
             case 0x8: /* Play */
                 Log.log(Level.INFO, "MPU-401:Intelligent mode playback started");
                 mpu.state.playing = true;
-                //Pic.PIC_RemoveEvents(MPU401_Event);
-                //Pic.PIC_AddEvent(MPU401_Event,MPU401_TIMECONSTANT/(mpu.clock.tempo*mpu.clock.timebase));
                 event.setExpiry((long)(timeSource.getRealMillis() + MPU401_TIMECONSTANT / (mpu.clock.tempo * mpu.clock.timebase)));
                 ClrQueue();
                 break;
@@ -281,7 +277,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
                 break;
             case 0xff: /* Reset MPU-401 */
                 Log.log(Level.INFO, "MPU-401:Reset " + Integer.toString(val, 16));
-                //Pic.PIC_AddEvent(MPU401_ResetDone,MPU401_RESETBUSY);
                 MPU401_ResetDone.callback();
                 mpu.state.reset = true;
                 MPU401_Reset();
@@ -293,7 +288,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
                 mpu.mode = M_UART;
                 break;
             default:
-                //Log.log(LogType.LOG_MISC, LogSeverity.LOG_NORMALS,"MPU-401:Unhandled command %X",val);
             }
         QueueByte(MSG_MPU_ACK);
     }
@@ -311,7 +305,7 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
             return ret;
 
         if (mpu.queue_used == 0)
-            irqDevice.setIRQ(mpu.irq, 0);//Pic.PIC_DeActivateIRQ(mpu.irq);
+            irqDevice.setIRQ(mpu.irq, 0);
 
         if (ret >= 0xf0 && ret <= 0xf7) { /* MIDI data request */
             mpu.state.channel = (short)(ret & 7);
@@ -637,11 +631,9 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
                 if (!mpu.state.irq_pending && mpu.state.req_mask != 0)
                     MPU401_EOIHandler.callback();
             }
-            //Pic.PIC_RemoveEvents(MPU401_Event);
             /*Bitu*/int new_time;
             if ((new_time = mpu.clock.tempo * mpu.clock.timebase) == 0)
                 return;
-            //Pic.PIC_AddEvent(MPU401_Event,MPU401_TIMECONSTANT/new_time);
             event.setExpiry((long)(timeSource.getEmulatedNanos() + MPU401_TIMECONSTANT / new_time));
         }
 
@@ -708,10 +700,8 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
     };
 
     private static void MPU401_Reset() {
-        //Pic.PIC_DeActivateIRQ(mpu.irq);
         irqDevice.setIRQ(mpu.irq, 0);
         mpu.mode = mpu.intelligent ? M_INTELLIGENT : M_UART;
-        //Pic.PIC_RemoveEvents(MPU401_EOIHandler);
         mpu.state.eoi_scheduled = false;
         mpu.state.wsd = false;
         mpu.state.wsm = false;
@@ -744,8 +734,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
         }
     }
 
-//    private IoHandler.IO_ReadHandleObject[] ReadHandler=new IoHandler.IO_ReadHandleObject[2];
-//    private IoHandler.IO_WriteHandleObject[] WriteHandler=new IoHandler.IO_WriteHandleObject[2];
     private boolean installed; /*as it can fail to install by 2 ways (config and no midi)*/
 
     public MPU401() {
@@ -755,17 +743,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
             return;
         /*Enabled and there is a Midi */
         installed = true;
-
-//        for (int i=0;i<WriteHandler.length;i++) {
-//            WriteHandler[i] = new IoHandler.IO_WriteHandleObject();
-//        }
-//        for (int i=0;i<ReadHandler.length;i++) {
-//            ReadHandler[i] = new IoHandler.IO_ReadHandleObject();
-//        }
-//        WriteHandler[0].Install(0x330,MPU401_WriteData,IoHandler.IO_MB);
-//        WriteHandler[1].Install(0x331,MPU401_WriteCommand,IoHandler.IO_MB);
-//        ReadHandler[0].Install(0x330,MPU401_ReadData,IoHandler.IO_MB);
-//        ReadHandler[1].Install(0x331,MPU401_ReadStatus,IoHandler.IO_MB);
 
         mpu.queue_used = 0;
         mpu.queue_pos = 0;
@@ -853,7 +830,6 @@ public class MPU401 extends AbstractHardwareComponent implements IODevice {
     public static void MPU401_Destroy() {
         if (!test.installed || !Option.mpu401.value("intelligent").equalsIgnoreCase("intelligent"))
             return;
-        //Pic.PIC_SetIRQMask(mpu.irq,true);
         irqDevice.setIRQ(mpu.irq, 0);
     }
 

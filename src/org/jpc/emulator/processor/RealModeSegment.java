@@ -127,7 +127,7 @@ final class RealModeSegment extends Segment {
     public void checkAddress(int offset) {
         if ((0xffffffffL & offset) > limit) {
             System.out.println("RM Segment Limit exceeded: offset=" + Integer.toHexString(offset) + ", limit=" + Long.toHexString(limit));
-            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
+            throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
         }
     }
 

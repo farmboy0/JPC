@@ -79,12 +79,6 @@ public class EthernetProxy extends EthernetOutput {
         if (protocol == 6) {
             //TCP Protocol
             int port = 0;
-//            try {
-//                Socket sock = new Socket(new Inet4Address(), port);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                return;
-//            }
             System.out.println("Sent TCP packet");
             printPacket(packet);
         } else if (protocol == 17) {

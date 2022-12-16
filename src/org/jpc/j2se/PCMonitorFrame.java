@@ -160,7 +160,6 @@ public class PCMonitorFrame extends JFrame implements Runnable {
         if (t2 - time < 100)
             return false;
 
-        //count = COUNTDOWN - count;
         float mhz = count * 1000.0F / (t2 - time) / 1000000;
 
         speedDisplay.setValue((int)(mhz / 1000));
@@ -257,7 +256,6 @@ public class PCMonitorFrame extends JFrame implements Runnable {
     }
 
     public static void main(String[] args) throws Exception {
-        //JPCStatisticsMonitor.install();
         Option.parse(args);
 
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

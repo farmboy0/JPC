@@ -299,7 +299,6 @@ public class PCIHostBridge extends AbstractPCIDevice implements IODevice {
     @Override
     public void updateComponent(HardwareComponent component) {
         if (component instanceof PCIBus && component.updated() && !pciRegistered) {
-            //	    attachedBus = (PCIBus)component;
             pciRegistered = attachedBus.registerDevice(this);
         }
 
