@@ -11,19 +11,23 @@ debugger: build_core
 	echo "Author: Ian Preston" >> debugger.manifest
 	echo "Main-Class: org.jpc.debugger.JPC" >> debugger.manifest
 	echo "Build-Date: " `date` >> debugger.manifest
-	echo "Default-Args: -fda mem:resources/images/floppy.img -hda mem:resources/images/dosgames.img -boot fda" >> debugger.manifest
+	echo "Default-Args: -fda mem:-C resources images/floppy.img -hda mem:-C resources images/dosgames.img -boot fda" >> debugger.manifest
 	echo "" >> debugger.manifest
 
 	jar -cfm JPCDebugger.jar debugger.manifest \
-	    resources/bios/vgabios.bin \
-	    resources/bios/bios.bin resources/images/dosgames.img \
-	    resources/images/floppy.img resources/icon.png \
-	    resources/licence.html resources/jpc.png \
-	    resources/smallpause.png \
-	    resources/smallplay.png \
-	    resources/tick.png \
+	    -C resources bios/vgabios.bin \
+	    -C resources bios/bios.bin \
+	    -C resources images/dosgames.img \
+	    -C resources images/floppy.img \
+	    -C resources icon.png \
+	    -C resources licence.html \
+	    -C resources jpc.png \
+	    -C resources smallpause.png \
+	    -C resources smallplay.png \
+	    -C resources tick.png \
 	    -C build org/jpc/emulator \
-	    -C build org/jpc/support -C build org/jpc/j2se \
+	    -C build org/jpc/support \
+	    -C build org/jpc/j2se \
 	    -C build org/jpc/debugger
 	rm -f debugger.manifest
 	jar -i JPCDebugger.jar
@@ -60,7 +64,8 @@ tests: build_core
 	echo "Class-Path: Tools.jar:." >> jpc.manifest
 
 	jar -cfm TestGen.jar jpc.manifest \
-	    -C build tools -C build org/jpc/emulator/execution/decoder \
+	    -C build tools \
+	    -C build org/jpc/emulator/execution/decoder \
 	    -C build org/jpc/emulator/execution/Executable.class \
 	    -C build org/jpc/j2se
 	rm -f jpc.manifest
@@ -81,20 +86,24 @@ fast: build_core
 	echo "Author: Ian Preston" >> jpc.manifest
 	echo "Main-Class: org.jpc.j2se.JPCApplication" >> jpc.manifest
 	echo "Build-Date: " `date` >> jpc.manifest
-	echo "Default-Args: -fda mem:resources/images/floppy.img -hda mem:resources/images/dosgames.img -boot fda" >> jpc.manifest
+	echo "Default-Args: -fda mem:-C resources images/floppy.img -hda mem:-C resources images/dosgames.img -boot fda" >> jpc.manifest
 	echo "" >> jpc.manifest
 
 	jar -cfm JPCApplication.jar jpc.manifest \
-	    resources/bios/vgabios.bin \
-	    resources/bios/bios.bin  \
-	    resources/images/floppy.img resources/icon.png \
-	    resources/licence.html resources/jpc.png \
-	    resources/smallpause.png \
-	    resources/smallplay.png \
-	    resources/tick.png \
-	    resources/soundbank-min.gm \
+	    -C resources bios/vgabios.bin \
+	    -C resources bios/bios.bin  \
+	    -C resources images/floppy.img \
+	    -C resources icon.png \
+	    -C resources licence.html \
+	    -C resources jpc.png \
+	    -C resources smallpause.png \
+	    -C resources smallplay.png \
+	    -C resources tick.png \
+	    -C resources soundbank-min.gm \
 	    -C build org/jpc/emulator \
-	    -C build org/jpc/support -C build org/jpc/j2se -C build org/jpc/debugger
+	    -C build org/jpc/support \
+	    -C build org/jpc/j2se \
+	    -C build org/jpc/debugger
 	rm -f jpc.manifest
 
 .PHONY: application
@@ -107,20 +116,25 @@ release: build_core
 	echo "Author: Ian Preston" >> jpc.manifest
 	echo "Main-Class: org.jpc.j2se.JPCApplication" >> jpc.manifest
 	echo "Build-Date: " `date` >> jpc.manifest
-	echo "Default-Args: -fda mem:resources/images/floppy.img -hda mem:resources/images/dosgames.img -boot fda" >> jpc.manifest
+	echo "Default-Args: -fda mem:-C resources images/floppy.img -hda mem:-C resources images/dosgames.img -boot fda" >> jpc.manifest
 	echo "" >> jpc.manifest
 
 	jar -cfm JPCApplication.jar jpc.manifest \
-	    resources/bios/vgabios.bin \
-	    resources/bios/bios.bin resources/images/dosgames.img \
-	    resources/images/floppy.img resources/icon.png \
-	    resources/licence.html resources/jpc.png \
-	    resources/smallpause.png \
-	    resources/smallplay.png \
-	    resources/tick.png \
-	    resources/soundbank-min.gm \
+	    -C resources bios/vgabios.bin \
+	    -C resources bios/bios.bin \
+	    -C resources images/dosgames.img \
+	    -C resources images/floppy.img \
+	    -C resources icon.png \
+	    -C resources licence.html \
+	    -C resources jpc.png \
+	    -C resources smallpause.png \
+	    -C resources smallplay.png \
+	    -C resources tick.png \
+	    -C resources soundbank-min.gm \
 	    -C build org/jpc/emulator \
-	    -C build org/jpc/support -C build org/jpc/j2se -C build org/jpc/debugger
+	    -C build org/jpc/support \
+	    -C build org/jpc/j2se \
+		-C build org/jpc/debugger
 	rm -f jpc.manifest
 	jar -i JPCApplication.jar
 
@@ -129,19 +143,24 @@ secondapplication: build_core
 	echo "Name: JPC Application" > jpc.manifest
 	echo "Main-Class: org.jpc.j2se.JPCApplication" >> jpc.manifest
 	echo "Build-Date: " `date` >> jpc.manifest
-	echo "Default-Args: -fda mem:resources/images/floppy.img -hda mem:resources/images/dosgames.img -boot fda" >> jpc.manifest
+	echo "Default-Args: -fda mem:-C resources images/floppy.img -hda mem:-C resources images/dosgames.img -boot fda" >> jpc.manifest
 	echo "" >> jpc.manifest
 
 	jar -cfm JPCApplication2.jar jpc.manifest \
-	    resources/bios/vgabios.bin \
-	    resources/bios/fuzzerBIOS resources/images/dosgames.img \
-	    resources/images/floppy.img resources/icon.png \
-	    resources/licence.html resources/jpc.png \
-	    resources/smallpause.png \
-	    resources/smallplay.png \
-	    resources/tick.png \
-	    resources/soundbank-min.gm \
+	    -C resources bios/vgabios.bin \
+	    -C resources bios/fuzzerBIOS \
+	    -C resources images/dosgames.img \
+	    -C resources images/floppy.img \
+	    -C resources icon.png \
+	    -C resources licence.html \
+	    -C resources jpc.png \
+	    -C resources smallpause.png \
+	    -C resources smallplay.png \
+	    -C resources tick.png \
+	    -C resources soundbank-min.gm \
 	    -C build org/jpc/emulator \
-	    -C build org/jpc/support -C build org/jpc/j2se -C build org/jpc/debugger
+	    -C build org/jpc/support \
+	    -C build org/jpc/j2se \
+	    -C build org/jpc/debugger
 	rm -f jpc.manifest
 	jar -i JPCApplication2.jar

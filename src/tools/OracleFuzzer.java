@@ -59,7 +59,7 @@ public class OracleFuzzer {
         "-ram",
         "4",
         "-bios",
-        "/resources/bios/fuzzerBIOS" };
+        "/bios/fuzzerBIOS" };
 
     public static byte[] real_mode_idt = new byte[0x120];
     static {

@@ -96,16 +96,10 @@ import org.jpc.support.TreeBlockDevice;
 public class JPCApplication extends PCMonitorFrame implements PCControl {
     private static final Logger LOGGING = Logger.getLogger(JPCApplication.class.getName());
     private static final URI JPC_URI = URI.create("http://jpc.sourceforge.net/");
-    private static final String IMAGES_PATH = "resources/images/";
+    private static final String IMAGES_PATH = "images/";
     private static final int MONITOR_WIDTH = 720;
     private static final int MONITOR_HEIGHT = 400 + 100;
-    private static final String[] DEFAULT_ARGS = {
-        "-fda",
-        "mem:resources/images/floppy.img",
-        "-hda",
-        "mem:resources/images/dosgames.img",
-        "-boot",
-        "fda" };
+    private static final String[] DEFAULT_ARGS = { "-fda", "mem:images/floppy.img", "-hda", "mem:images/dosgames.img", "-boot", "fda" };
     private static final String ABOUT_US = "JPC: Developed since August 2005 in Oxford University's Subdepartment of Particle Physics, and subsequently rewritten by Ian Preston.\n\n"
         + "For more information visit our website at:\n" + JPC_URI.toASCIIString();
     private static final String LICENCE_HTML = "JPC is released under GPL Version 2 and comes with absolutely no warranty<br/><br/>"
@@ -114,7 +108,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
     static {
         ClassLoader context = Thread.currentThread().getContextClassLoader();
-        URL licence = context.getResource("resources/licence.html");
+        URL licence = context.getResource("licence.html");
         if (licence != null) {
             try {
                 LICENCE = new JEditorPane(licence);
@@ -262,7 +256,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             @Override
             public void actionPerformed(ActionEvent evt) {
                 JFrame help = new JFrame("JPC - Getting Started");
-                help.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/icon.png")));
+                help.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("icon.png")));
                 help.getContentPane().add("Center", new JScrollPane(LICENCE));
                 help.setBounds(300, 200, MONITOR_WIDTH + 20, MONITOR_HEIGHT - 70);
                 help.setVisible(true);
@@ -552,41 +546,6 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
         List<String> resources = new ArrayList<String>();
 
-        ClassLoader cl = JPCApplication.class.getClassLoader();
-        if (!(cl instanceof URLClassLoader))
-            throw new IllegalStateException();
-        URL[] urls = ((URLClassLoader)cl).getURLs();
-
-        int slash = directory.lastIndexOf("/");
-        String dir = directory.substring(0, slash + 1);
-        for (URL url : urls) {
-            if (!url.toString().endsWith(".jar"))
-                continue;
-            try {
-                JarInputStream jarStream = new JarInputStream(url.openStream());
-                while (true) {
-                    ZipEntry entry = jarStream.getNextEntry();
-                    if (entry == null)
-                        break;
-                    if (entry.isDirectory())
-                        continue;
-
-                    String name = entry.getName();
-                    slash = name.lastIndexOf("/");
-                    String thisDir = "";
-                    if (slash >= 0)
-                        thisDir = name.substring(0, slash + 1);
-
-                    if (!dir.equals(thisDir))
-                        continue;
-                    resources.add(name);
-                }
-
-                jarStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
         InputStream stream = context.getResourceAsStream(directory);
         try {
             if (stream != null) {
@@ -697,7 +656,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
         app.setBounds(100, 100, MONITOR_WIDTH + 20, MONITOR_HEIGHT + 70);
         try {
-            app.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/icon.png")));
+            app.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("icon.png")));
         } catch (Exception e) {
         }
 

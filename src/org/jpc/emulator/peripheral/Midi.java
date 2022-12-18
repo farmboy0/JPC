@@ -444,14 +444,14 @@ public class Midi {
             } catch (Exception e) {
             }
             if (synth != null) {
-                String fileName = "resources/soundbank-deluxe.gm";
+                String fileName = "soundbank-deluxe.gm";
                 InputStream is = Midi.class.getResourceAsStream(fileName);
                 if (is == null) {
-                    fileName = "resources/soundbank-mid.gm";
+                    fileName = "soundbank-mid.gm";
                     is = Midi.class.getResourceAsStream(fileName);
                 }
                 if (is == null) {
-                    fileName = "resources/soundbank-min.gm";
+                    fileName = "soundbank-min.gm";
                     is = Midi.class.getResourceAsStream(fileName);
                 }
                 if (is != null) {
