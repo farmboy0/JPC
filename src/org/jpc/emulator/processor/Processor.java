@@ -3371,13 +3371,9 @@ public class Processor implements HardwareComponent {
     }
 
     public void waitForInterrupt() {
-        System.out.printf("*****START HALT ticks=%016x\n", vmClock.getTicks());
-        int ints = 0;
         while ((interruptFlags & IFLAGS_HARDWARE_INTERRUPT) == 0) {
             vmClock.updateNowAndProcess(!SKIP_SLEEPS);
-            ints++;
         }
-        System.out.printf("END HALT ticks=%016x, interrupts=%d\n", vmClock.getTicks(), ints);
     }
 
     public void requestReset() {
