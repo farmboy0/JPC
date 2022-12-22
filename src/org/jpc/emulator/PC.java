@@ -99,7 +99,6 @@ import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 import org.jpc.emulator.processor.Segment;
 import org.jpc.emulator.processor.SegmentFactory;
-import org.jpc.j2se.KeyMapping;
 import org.jpc.j2se.Option;
 import org.jpc.j2se.PCMonitor;
 import org.jpc.j2se.VirtualClock;
@@ -353,22 +352,6 @@ public class PC {
 
     public String getScreenText() {
         return ((VGACard)getComponent(VGACard.class)).getText();
-    }
-
-    public void sendKeysDown(String text) {
-        for (char c : text.toCharArray()) {
-            int[] keycodes = KeyMapping.getJavaKeycodes(c);
-            for (int keycode : keycodes)
-                keyboard.keyPressed(KeyMapping.getScancode(keycode));
-        }
-    }
-
-    public void sendKeysUp(String text) {
-        for (char c : text.toCharArray()) {
-            int[] keycodes = KeyMapping.getJavaKeycodes(c);
-            for (int keycode : keycodes)
-                keyboard.keyReleased(KeyMapping.getScancode(keycode));
-        }
     }
 
     public void sendMouse(Integer dx, Integer dy, Integer dz, Integer buttons) {

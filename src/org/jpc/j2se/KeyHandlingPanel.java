@@ -76,7 +76,7 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
 
     private int currentButtons;
     private double mouseSensitivity = 0.5;
-    private Set<Integer> keyPressedSet;
+    private Set<KeyboardKey> keyPressedSet;
 
     private boolean inputsLocked = false, mouseCaptureEnabled = true;
     private int lastMouseX, lastMouseY;
@@ -120,7 +120,7 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
     }
 
     protected void init() {
-        keyPressedSet = new HashSet<Integer>();
+        keyPressedSet = new HashSet<KeyboardKey>();
         setMouseCaptureEnabled(true);
 
         addFocusListener(this);
@@ -136,13 +136,13 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
         setFocusTraversalKeys(KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, Collections.EMPTY_SET);
     }
 
-    protected void keyPressed(int keyCode) {
+    protected void keyPress(KeyboardKey key) {
     }
 
-    protected void keyReleased(int keyCode) {
+    protected void keyRelease(KeyboardKey key) {
     }
 
-    protected void repeatedKeyPress(int keyCode) {
+    protected void repeatedKeyPress(KeyboardKey key) {
     }
 
     @Override
@@ -151,40 +151,42 @@ public class KeyHandlingPanel extends JPanel implements KeyListener, FocusListen
 
     @Override
     public void focusLost(FocusEvent e) {
-        Set<Integer> keysDown;
+        Set<KeyboardKey> keysDown;
 
         synchronized (this) {
             keysDown = keyPressedSet;
-            keyPressedSet = new HashSet<Integer>();
+            keyPressedSet = new HashSet<KeyboardKey>();
         }
 
-        for (Integer code : keysDown)
-            keyReleased(code.intValue());
+        for (KeyboardKey key : keysDown)
+            keyRelease(key);
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         boolean isRepeat;
 
+        KeyboardKey key = new KeyboardKey(e);
         synchronized (this) {
-            isRepeat = !keyPressedSet.add(e.getKeyCode());
+            isRepeat = !keyPressedSet.add(key);
         }
 
         if (isRepeat)
-            repeatedKeyPress(e.getKeyCode());
+            repeatedKeyPress(key);
         else
-            keyPressed(e.getKeyCode());
+            keyPress(key);
 
         e.consume();
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+        KeyboardKey key = new KeyboardKey(e);
         synchronized (this) {
-            keyPressedSet.remove(Integer.valueOf(e.getKeyCode()));
+            keyPressedSet.remove(key);
         }
 
-        keyReleased(e.getKeyCode());
+        keyRelease(key);
         e.consume();
     }
 

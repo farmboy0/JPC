@@ -44,6 +44,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 
 import org.jpc.emulator.Monitor;
 import org.jpc.emulator.PC;
@@ -130,18 +131,18 @@ public class PCMonitor extends KeyHandlingPanel implements Monitor {
     }
 
     @Override
-    public void repeatedKeyPress(int keyCode) {
-        keyboard.keyPressed(KeyMapping.getScancode(keyCode));
+    public void repeatedKeyPress(KeyboardKey key) {
+        keyboard.keyPressed(KeyMapping.getScancode(Locale.getDefault(), key));
     }
 
     @Override
-    public void keyPressed(int keyCode) {
-        keyboard.keyPressed(KeyMapping.getScancode(keyCode));
+    public void keyPress(KeyboardKey key) {
+        keyboard.keyPressed(KeyMapping.getScancode(Locale.getDefault(), key));
     }
 
     @Override
-    public void keyReleased(int keyCode) {
-        keyboard.keyReleased(KeyMapping.getScancode(keyCode));
+    public void keyRelease(KeyboardKey key) {
+        keyboard.keyReleased(KeyMapping.getScancode(Locale.getDefault(), key));
     }
 
     @Override

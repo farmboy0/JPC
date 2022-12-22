@@ -54,6 +54,7 @@ import javax.swing.event.ChangeListener;
  * @author Rhys Newman
  */
 public class KeyTypingPanel extends JPanel {
+    private static final KeyboardKey SHIFT = new KeyboardKey(KeyEvent.KEY_LOCATION_LEFT, KeyEvent.VK_SHIFT);
     private PCMonitor monitor;
 
     public KeyTypingPanel(PCMonitor m) {
@@ -150,11 +151,12 @@ public class KeyTypingPanel extends JPanel {
 
         void typeKeys() {
             if (isShifted)
-                monitor.keyPressed(KeyEvent.VK_SHIFT);
-            monitor.keyPressed(keyCode);
-            monitor.keyReleased(keyCode);
+                monitor.keyPress(SHIFT);
+            KeyboardKey key = new KeyboardKey(keyCode);
+            monitor.keyPress(key);
+            monitor.keyRelease(key);
             if (isShifted)
-                monitor.keyReleased(KeyEvent.VK_SHIFT);
+                monitor.keyRelease(SHIFT);
         }
 
         @Override
