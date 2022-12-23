@@ -43,11 +43,11 @@ public abstract class BasicTableModel extends AbstractTableModel {
     private int[] widths;
     private boolean isEditable;
 
-    public BasicTableModel(String[] columnTitles, int[] columnWidths) {
+    protected BasicTableModel(String[] columnTitles, int[] columnWidths) {
         this(columnTitles, columnWidths, false);
     }
 
-    public BasicTableModel(String[] columnTitles, int[] columnWidths, boolean isEditable) {
+    protected BasicTableModel(String[] columnTitles, int[] columnWidths, boolean isEditable) {
         this.titles = columnTitles;
         this.widths = columnWidths;
         this.isEditable = isEditable;
@@ -78,10 +78,5 @@ public abstract class BasicTableModel extends AbstractTableModel {
             TableColumn col = colModel.getColumn(i);
             col.setPreferredWidth(widths[i]);
         }
-    }
-
-    @Override
-    public void fireTableDataChanged() {
-        super.fireTableDataChanged();
     }
 }

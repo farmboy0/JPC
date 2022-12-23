@@ -62,7 +62,7 @@ import javax.swing.tree.TreeNode;
 public class ReportPanel extends JPanel implements ActionListener {
     private static DateFormat dateFormat = DateFormat.getDateTimeInstance();
 
-    private Icon okIcon, errorIcon, busyIcon;
+    private Icon okIcon, errorIcon;
 
     private JButton status, stop;
     private JLabel statusText;
@@ -77,7 +77,6 @@ public class ReportPanel extends JPanel implements ActionListener {
         infoString = null;
 
         okIcon = new ScaledIcon(UIManager.getIcon("OptionPane.informationIcon"), 17, 17);
-        busyIcon = new ScaledIcon(UIManager.getIcon("OptionPane.warningIcon"), 17, 17);
         errorIcon = new ScaledIcon(UIManager.getIcon("OptionPane.errorIcon"), 17, 17);
 
         stop = new JButton("Stop");

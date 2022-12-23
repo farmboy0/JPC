@@ -39,13 +39,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ObjectDatabase {
-    private Map<Class, Object> table;
+    private Map<Class<?>, Object> table;
 
     public ObjectDatabase() {
-        table = new HashMap<Class, Object>();
+        table = new HashMap<Class<?>, Object>();
     }
 
-    public synchronized boolean addObject(Class cls, Object value) {
+    public synchronized boolean addObject(Class<?> cls, Object value) {
         if ((value == null) || table.containsKey(cls))
             return false;
 
@@ -57,12 +57,12 @@ public class ObjectDatabase {
         if (value == null)
             return false;
 
-        Class cls = value.getClass();
+        Class<?> cls = value.getClass();
 
         return addObject(cls, value);
     }
 
-    public synchronized Object getObject(Class cls) {
+    public synchronized Object getObject(Class<?> cls) {
         return table.get(cls);
     }
 
@@ -73,7 +73,7 @@ public class ObjectDatabase {
         return removeObject(obj.getClass());
     }
 
-    public synchronized Object removeObject(Class cls) {
+    public synchronized Object removeObject(Class<?> cls) {
         if (cls == null)
             return null;
 

@@ -81,7 +81,7 @@ public class ErrorPanel extends JPanel {
     }
 
     public boolean refreshDisplay(Object src) {
-        if (src != null && src instanceof Throwable) {
+        if (src instanceof Throwable) {
             setError((Throwable)src);
             return true;
         }
@@ -104,7 +104,7 @@ public class ErrorPanel extends JPanel {
     }
 
     public static ErrorPanel createDisplayable(Object data) {
-        if (data == null || !(data instanceof Throwable))
+        if (!(data instanceof Throwable))
             return null;
         return new ErrorPanel((Throwable)data);
     }

@@ -96,15 +96,11 @@ public class IconUtils {
     }
 
     public static BufferedImage getImageFromResource(ClassLoader loader, String resourceName) throws IOException {
-        InputStream input = null;
+        InputStream input = loader.getResourceAsStream(resourceName);
         try {
-            input = loader.getResourceAsStream(resourceName);
             return ImageIO.read(input);
         } finally {
-            try {
-                input.close();
-            } catch (Exception e) {
-            }
+            input.close();
         }
     }
 
@@ -202,15 +198,14 @@ public class IconUtils {
         return result;
     }
 
-    private static int BUFFER_SIZE = 200;
-    private static BufferedImage buffer = new BufferedImage(BUFFER_SIZE, BUFFER_SIZE, BufferedImage.TYPE_INT_ARGB);
-    private static Graphics2D bufferGraphics = (Graphics2D)buffer.getGraphics();
+    private static final int BUFFER_SIZE = 200;
+    private static final BufferedImage buffer = new BufferedImage(BUFFER_SIZE, BUFFER_SIZE, BufferedImage.TYPE_INT_ARGB);
+    private static final Graphics2D bufferGraphics = (Graphics2D)buffer.getGraphics();
     static {
         bufferGraphics.setFont(new Font("Monospaced", Font.BOLD, 40));
         bufferGraphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         bufferGraphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         bufferGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
     }
 
     public static BufferedImage createImageFromAsciiMap(String map, int width, int height) {

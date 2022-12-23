@@ -52,14 +52,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-public class UtilityFrame extends JInternalFrame implements PropertyChangeListener, InternalFrameListener {
+public abstract class UtilityFrame extends JInternalFrame implements PropertyChangeListener, InternalFrameListener {
     private ReportPanel reportPanel;
 
-    public UtilityFrame(String title) {
+    protected UtilityFrame(String title) {
         this(title, true, true, true, true);
     }
 
-    public UtilityFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable) {
+    protected UtilityFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable) {
         super(title, resizable, closable, maximizable, iconifiable);
         setPreferredSize(new Dimension(750, 550));
 
@@ -145,15 +145,6 @@ public class UtilityFrame extends JInternalFrame implements PropertyChangeListen
     }
 
     public static Rectangle getCentredDialogBounds(JDialog dialog, Component parent, int defaultWidth, int defaultHeight) {
-        Dimension pref = dialog.getPreferredSize();
-        int w = pref.width;
-        int h = pref.height;
-
-        if (defaultWidth > 0)
-            w = defaultWidth;
-        if (defaultHeight > 0)
-            h = defaultHeight;
-
         Rectangle parentBounds = parent.getBounds();
         Dimension size = new Dimension(defaultWidth, defaultHeight);
         int x = parentBounds.x + (parentBounds.width - size.width) / 2;
