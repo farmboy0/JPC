@@ -41,9 +41,9 @@ import java.util.logging.Logger;
 
 import org.jpc.emulator.AbstractHardwareComponent;
 import org.jpc.emulator.Hibernatable;
+import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.motherboard.IODevice;
 import org.jpc.emulator.motherboard.InterruptController;
-import org.jpc.support.BlockDevice;
 
 /**
  * @author Chris Dennis

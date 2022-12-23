@@ -31,9 +31,11 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator.block.backing;
 
 import java.io.IOException;
+
+import org.jpc.emulator.block.RawBlockDevice;
 
 /**
  * IO device used for backing subclasses of {@link RawBlockDevice}.

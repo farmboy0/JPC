@@ -42,8 +42,8 @@ import org.jpc.emulator.AbstractHardwareComponent;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.Timer;
 import org.jpc.emulator.TimerResponsive;
+import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.peripheral.FloppyController;
-import org.jpc.support.BlockDevice;
 import org.jpc.support.Clock;
 import org.jpc.support.DriveSet;
 

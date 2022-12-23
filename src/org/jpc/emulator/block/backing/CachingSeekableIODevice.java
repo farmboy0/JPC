@@ -31,12 +31,15 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator.block.backing;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.jpc.emulator.block.BlockDevice;
+import org.jpc.emulator.block.RawBlockDevice;
 
 /**
  * IO device used for caching writes.

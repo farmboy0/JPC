@@ -43,13 +43,13 @@ import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.Hibernatable;
 import org.jpc.emulator.Timer;
 import org.jpc.emulator.TimerResponsive;
+import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.motherboard.DMAController;
 import org.jpc.emulator.motherboard.DMATransferCapable;
 import org.jpc.emulator.motherboard.IODevice;
 import org.jpc.emulator.motherboard.IOPortHandler;
 import org.jpc.emulator.motherboard.InterruptController;
 import org.jpc.j2se.Option;
-import org.jpc.support.BlockDevice;
 import org.jpc.support.Clock;
 import org.jpc.support.DriveSet;
 
@@ -827,7 +827,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
         return drives[driveNumber - bootSelect];
     }
 
-    public void changeDisk(org.jpc.support.BlockDevice disk, int i) {
+    public void changeDisk(BlockDevice disk, int i) {
         getDrive(i).changeDisk(disk);
     }
 
@@ -1127,7 +1127,7 @@ public class FloppyController implements IODevice, DMATransferCapable, HardwareC
             readOnly = input.readInt();
         }
 
-        private void changeDisk(org.jpc.support.BlockDevice disk) {
+        private void changeDisk(BlockDevice disk) {
             device = disk;
             revalidate();
         }

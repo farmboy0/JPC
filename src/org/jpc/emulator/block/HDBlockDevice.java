@@ -31,11 +31,12 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator.block;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jpc.emulator.block.backing.SeekableIODevice;
 import org.jpc.j2se.Option;
 
 /**

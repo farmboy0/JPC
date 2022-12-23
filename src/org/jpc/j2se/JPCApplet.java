@@ -66,15 +66,15 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import org.jpc.emulator.PC;
+import org.jpc.emulator.block.BlockDevice;
+import org.jpc.emulator.block.CDROMBlockDevice;
+import org.jpc.emulator.block.FloppyBlockDevice;
+import org.jpc.emulator.block.HDBlockDevice;
+import org.jpc.emulator.block.backing.ArrayBackedSeekableIODevice;
+import org.jpc.emulator.block.backing.RemoteSeekableIODevice;
+import org.jpc.emulator.block.backing.SeekableIODevice;
 import org.jpc.emulator.pci.VGACard;
-import org.jpc.support.ArrayBackedSeekableIODevice;
-import org.jpc.support.BlockDevice;
-import org.jpc.support.CDROMBlockDevice;
 import org.jpc.support.DriveSet;
-import org.jpc.support.FloppyBlockDevice;
-import org.jpc.support.HDBlockDevice;
-import org.jpc.support.RemoteSeekableIODevice;
-import org.jpc.support.SeekableIODevice;
 
 public class JPCApplet extends JApplet {
     public static final String VERSION = "2.035";

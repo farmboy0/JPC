@@ -31,42 +31,62 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator.block;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.jpc.emulator.block.backing.SeekableIODevice;
 
 /**
- * @author Ian Preston
+ * A <code>RawBlockDevice</code> subclass for floppy disk drives.
+ * @author Chris Dennis
  */
-public class RemoteBlockDeviceServer {
-    private static final Logger LOGGING = Logger.getLogger(RemoteBlockDeviceServer.class.getName());
-
-    public static void main(String[] args) throws Exception {
-        DriveSet set = DriveSet.buildFromArgs(args);
-
-        int port = 6666;
-        try {
-            port = Integer.parseInt(ArgProcessor.findVariable(args, "port", "6666"));
-        } catch (NumberFormatException e) {
-        }
-
-        ServerSocket inputsock = new ServerSocket(port);
-        Socket ss = inputsock.accept();
-        InputStream in = ss.getInputStream();
-
-        OutputStream out = ss.getOutputStream();
-
-        RemoteBlockDeviceImpl impl = new RemoteBlockDeviceImpl(in, out, set.getBootDevice());
-
-        LOGGING.log(Level.INFO, "Server accepted connection to {0} on port {1,number,integer}",
-            new Object[] { set.getBootDevice(), Integer.valueOf(port) });
+public class FloppyBlockDevice extends RawBlockDevice {
+    /**
+     * Constructs an instance backed by the given device.
+     * @param data backing device
+     */
+    public FloppyBlockDevice(SeekableIODevice data) {
+        super(data);
     }
 
-    private RemoteBlockDeviceServer() {
+    /**
+     * Returns <code>false</code> as a floppy drive cannot be locked
+     * @return <code>false</code>
+     */
+    @Override
+    public boolean isLocked() {
+        return false;
+    }
+
+    /**
+     * Does nothing, a floppy drive cannot be locked
+     * @param locked dummy
+     */
+    @Override
+    public void setLock(boolean locked) {
+    }
+
+    @Override
+    public int getCylinders() {
+        return -1;
+    }
+
+    @Override
+    public int getHeads() {
+        return -1;
+    }
+
+    @Override
+    public int getSectors() {
+        return -1;
+    }
+
+    @Override
+    public Type getType() {
+        return Type.FLOPPY;
+    }
+
+    @Override
+    public String toString() {
+        return "Floppy: " + super.toString();
     }
 }

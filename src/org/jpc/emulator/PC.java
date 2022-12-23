@@ -58,6 +58,7 @@ import java.util.zip.ZipOutputStream;
 import javax.swing.JPanel;
 
 import org.jpc.debugger.LinearMemoryViewer;
+import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 import org.jpc.emulator.execution.codeblock.PeekableMemoryStream;
@@ -503,7 +504,7 @@ public class PC {
      * @param disk new floppy disk to be inserted.
      * @param index drive which the disk is inserted into.
      */
-    public void changeFloppyDisk(org.jpc.support.BlockDevice disk, int index) {
+    public void changeFloppyDisk(BlockDevice disk, int index) {
         ((FloppyController)getComponent(FloppyController.class)).changeDisk(disk, index);
     }
 

@@ -31,7 +31,7 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator.block.remote;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -40,7 +40,8 @@ import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jpc.support.RemoteBlockDevice.Protocol;
+import org.jpc.emulator.block.BlockDevice;
+import org.jpc.emulator.block.remote.RemoteBlockDevice.Protocol;
 
 /**
  * @author Ian Preston

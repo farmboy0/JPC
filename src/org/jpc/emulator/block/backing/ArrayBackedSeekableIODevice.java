@@ -31,7 +31,7 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator.block.backing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

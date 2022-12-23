@@ -41,6 +41,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.block.BlockDevice;
+import org.jpc.emulator.block.CDROMBlockDevice;
+import org.jpc.emulator.block.FloppyBlockDevice;
+import org.jpc.emulator.block.HDBlockDevice;
+import org.jpc.emulator.block.TreeBlockDevice;
+import org.jpc.emulator.block.backing.ArrayBackedSeekableIODevice;
+import org.jpc.emulator.block.backing.CachingSeekableIODevice;
+import org.jpc.emulator.block.backing.FileBackedSeekableIODevice;
+import org.jpc.emulator.block.backing.RemoteSeekableIODevice;
+import org.jpc.emulator.block.backing.SeekableIODevice;
 
 /**
  * Represents the set of disk drive devices associated with this emulator instance.
@@ -54,28 +64,22 @@ public class DriveSet extends AbstractHardwareComponent {
     }
 
     private enum Devices {
-        DEFAULT("org.jpc.support.FileBackedSeekableIODevice"),
+        DEFAULT(FileBackedSeekableIODevice.class),
 
-        dir("org.jpc.support.TreeBlockDevice"), mem("org.jpc.support.ArrayBackedSeekableIODevice"),
-        net("org.jpc.support.RemoteSeekableIODevice");
+        dir(TreeBlockDevice.class), //
+        mem(ArrayBackedSeekableIODevice.class), //
+        net(RemoteSeekableIODevice.class);
 
-        private final String clazzname;
+        private final Class<?> clazz;
 
-        Devices(String clazz) {
-            clazzname = clazz;
+        Devices(Class<?> clazz) {
+            this.clazz = clazz;
         }
 
         public Object getInstance() {
             try {
-                Class clazz = Class.forName(clazzname);
-                return clazz.newInstance();
-            } catch (ClassNotFoundException e) {
-                LOGGING.log(Level.WARNING, "Drive device class not found", e);
-                return null;
-            } catch (InstantiationException e) {
-                LOGGING.log(Level.WARNING, "Drive device couldn't be instantiated", e);
-                return null;
-            } catch (IllegalAccessException e) {
+                return clazz.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
                 LOGGING.log(Level.WARNING, "Drive device couldn't be instantiated", e);
                 return null;
             }

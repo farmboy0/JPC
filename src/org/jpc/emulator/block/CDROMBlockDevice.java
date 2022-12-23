@@ -31,7 +31,9 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator.block;
+
+import org.jpc.emulator.block.backing.SeekableIODevice;
 
 /**
  * A <code>RawBlockDevice</code> instance representing a cdrom device. Instances of this class will

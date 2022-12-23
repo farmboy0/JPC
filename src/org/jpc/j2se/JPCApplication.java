@@ -79,19 +79,19 @@ import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
 import org.jpc.emulator.PC;
+import org.jpc.emulator.block.BlockDevice;
+import org.jpc.emulator.block.FloppyBlockDevice;
+import org.jpc.emulator.block.HDBlockDevice;
+import org.jpc.emulator.block.TreeBlockDevice;
+import org.jpc.emulator.block.backing.ArrayBackedSeekableIODevice;
+import org.jpc.emulator.block.backing.FileBackedSeekableIODevice;
+import org.jpc.emulator.block.backing.SeekableIODevice;
 import org.jpc.emulator.pci.VGACard;
 import org.jpc.emulator.pci.peripheral.EthernetCard;
 import org.jpc.support.ArgProcessor;
-import org.jpc.support.ArrayBackedSeekableIODevice;
-import org.jpc.support.BlockDevice;
 import org.jpc.support.DriveSet;
 import org.jpc.support.EthernetHub;
 import org.jpc.support.EthernetOutput;
-import org.jpc.support.FileBackedSeekableIODevice;
-import org.jpc.support.FloppyBlockDevice;
-import org.jpc.support.HDBlockDevice;
-import org.jpc.support.SeekableIODevice;
-import org.jpc.support.TreeBlockDevice;
 
 public class JPCApplication extends PCMonitorFrame implements PCControl {
     private static final Logger LOGGING = Logger.getLogger(JPCApplication.class.getName());
