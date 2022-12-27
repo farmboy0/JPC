@@ -25,11 +25,13 @@
     End of licence header
 */
 
-package org.jpc.emulator.memory;
+package org.jpc.emulator.memory.tlb;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+
+import org.jpc.emulator.memory.Memory;
 
 public abstract class TLB {
     public abstract void saveState(DataOutput output) throws IOException;
@@ -58,9 +60,9 @@ public abstract class TLB {
 
     public abstract void setWriteMemoryBlockAt(boolean isSupervisor, int addr, Memory m);
 
-    protected abstract void setPageSize(int addr, byte type);
+    public abstract void setPageSize(int addr, byte type);
 
-    protected abstract void replaceBlocks(Memory oldBlock, Memory newBlock);
+    public abstract void replaceBlocks(Memory oldBlock, Memory newBlock);
 
     /**
      * Invalidate any entries for this address in the translation cache.

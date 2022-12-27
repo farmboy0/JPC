@@ -25,13 +25,16 @@
     End of licence header
 */
 
-package org.jpc.emulator.memory;
+package org.jpc.emulator.memory.tlb;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.jpc.emulator.memory.AddressSpace;
+import org.jpc.emulator.memory.Memory;
 
 public class FastTLB extends TLB {
     private static final byte FOUR_M = (byte)0x01;
@@ -157,12 +160,12 @@ public class FastTLB extends TLB {
     }
 
     @Override
-    protected void setPageSize(int addr, byte type) {
+    public void setPageSize(int addr, byte type) {
         pageSize[addr >>> AddressSpace.INDEX_SHIFT] = type;
     }
 
     @Override
-    protected void replaceBlocks(Memory oldBlock, Memory newBlock) {
+    public void replaceBlocks(Memory oldBlock, Memory newBlock) {
         System.out.println("Replace blocks used!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 

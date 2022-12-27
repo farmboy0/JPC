@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.execution.codeblock.SpanningCodeBlock;
 import org.jpc.emulator.execution.codeblock.SpanningDecodeException;
+import org.jpc.emulator.memory.tlb.FastTLB;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 
