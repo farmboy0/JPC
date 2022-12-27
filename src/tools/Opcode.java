@@ -40,7 +40,7 @@ public class Opcode {
     static {
         try {
             String tmp = "";
-            BufferedReader r = new BufferedReader(new FileReader("HEADER"));
+            BufferedReader r = new BufferedReader(new FileReader("LicenseHeader"));
             String line;
             while ((line = r.readLine()) != null)
                 tmp += line + "\n";
