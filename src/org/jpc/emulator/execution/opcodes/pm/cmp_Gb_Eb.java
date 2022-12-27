@@ -1,5 +1,8 @@
 /*
     JPC: An x86 PC Hardware Emulator for a pure Java Virtual Machine
+    Release Version 3.0
+
+    A project by Ian Preston, ianopolous AT gmail.com
 
     Copyright (C) 2012-2013 Ian Preston
 
@@ -16,7 +19,7 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-    Details (including contact information) can be found at:
+    Details (including current contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
