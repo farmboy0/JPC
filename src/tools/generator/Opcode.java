@@ -27,36 +27,17 @@
 
 package tools.generator;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Opcode {
-    public static String HEADER;
-    static {
-        try {
-            String tmp = "";
-            BufferedReader r = new BufferedReader(new FileReader("LicenseHeader"));
-            String line;
-            while ((line = r.readLine()) != null)
-                tmp += line + "\n";
-            HEADER = tmp + "\n";
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    public static final boolean DEBUG_SIZE = true;
-    final String name;
-    final Operand[] operands;
-    final String snippet;
-    final String ret;
-    final int size;
-    final boolean multiSize;
-    final boolean isMem, isBranch, needsSegment;
+    private final String name;
+    private final Operand[] operands;
+    private final String snippet;
+    private final String ret;
+    private final int size;
+    private final boolean multiSize;
+    private final boolean mem, branch, needsSegment;
 
     private Opcode(String mnemonic, String[] args, int size, String snippet, String ret, boolean isMem, boolean needsSegment) {
         this.needsSegment = needsSegment;
@@ -77,200 +58,51 @@ public class Opcode {
         }
         if (isMem)
             tmp.append("_mem");
-        this.isMem = isMem;
+        this.mem = isMem;
         name = tmp.toString();
         this.snippet = snippet;
         this.ret = ret;
         this.size = size;
-        isBranch = !ret.startsWith("Branch.None");
+        branch = !ret.startsWith("Branch.None");
     }
 
     public String getName() {
         return name;
     }
 
-    public String getSource(String mode) {
-        StringBuilder b = new StringBuilder();
-        b.append(getPreamble(mode));
-        if (needsSegment)
-            b.append("    final int segIndex;\n");
-        for (int i = 0; i < operands.length; i++)
-            b.append(operands[i].define(i + 1));
-        if (isBranch) {
-            b.append("    final int blockLength;\n");
-            b.append("    final int instructionLength;\n");
-        }
-        if (multiSize)
-            b.append("    final int size;\n");
-        b.append(getDirectConstructor());
-        b.append(getExecute());
-        b.append(getBranch());
-        b.append(getToString());
-        b.append("}");
-        return b.toString();
+    public Operand[] getOperands() {
+        return operands;
     }
 
-    private String processSnippet(int size) {
-        String body = snippet;
-        if (operands.length > 0) {
-            if (body.contains("getF") || body.contains("setF")) {
-                body = body.replaceAll("\\$op1.getF", operands[0].getF(1));
-                body = body.replaceAll("\\$op1.setF", operands[0].setF(1));
-                if (operands.length > 1) {
-                    body = body.replaceAll("\\$op2.getF", operands[1].getF(2));
-                    body = body.replaceAll("\\$op2.setF", operands[1].setF(2));
-                    if (operands.length > 2) {
-                        body = body.replaceAll("\\$op3.getF", operands[2].getF(3));
-                        body = body.replaceAll("\\$op3.setF", operands[2].setF(3));
-                    }
-                }
-            }
-            if (body.contains("getA") || body.contains("setA")) {
-                body = body.replaceAll("\\$op1.getA", operands[0].getA(1));
-                body = body.replaceAll("\\$op1.setA", operands[0].setA(1));
-                if (operands.length > 1 && (body.contains("2.getA") || body.contains("2.setA"))) {
-                    body = body.replaceAll("\\$op2.getA", operands[1].getA(2));
-                    body = body.replaceAll("\\$op2.setA", operands[1].setA(2));
-                    if (operands.length > 2) {
-                        body = body.replaceAll("\\$op3.getA", operands[2].getA(3));
-                        body = body.replaceAll("\\$op3.setA", operands[2].setA(3));
-                    }
-                }
-            }
-            if (body.contains("op1.get16") || body.contains("op1.set16")) {
-                body = body.replaceAll("\\$op1.get16", operands[0].get16(1));
-                body = body.replaceAll("\\$op1.set16", operands[0].set16(1));
-            }
-            if (body.contains("op2.get16") || body.contains("op2.set16")) {
-                if (operands.length > 1) {
-                    body = body.replaceAll("\\$op2.get16", operands[1].get16(2));
-                    body = body.replaceAll("\\$op2.set16", operands[1].set16(2));
-                }
-            }
-            if (body.contains("op1.get32") || body.contains("op1.set32")) {
-                body = body.replaceAll("\\$op1.get32", operands[0].get32(1));
-                body = body.replaceAll("\\$op1.set32", operands[0].set32(1));
-            }
-            if (body.contains("op2.get32") || body.contains("op2.set32")) {
-                if (operands.length > 1) {
-                    body = body.replaceAll("\\$op2.get32", operands[1].get32(2));
-                    body = body.replaceAll("\\$op2.set32", operands[1].set32(2));
-                }
-            }
-            body = body.replaceAll("\\$op1.get", operands[0].get(1));
-            body = body.replaceAll("\\$op1.set", operands[0].set(1));
-            if (operands.length > 1) {
-                body = body.replaceAll("\\$op2.get", operands[1].get(2));
-                body = body.replaceAll("\\$op2.set", operands[1].set(2));
-                if (operands.length > 2) {
-                    body = body.replaceAll("\\$op3.get", operands[2].get(3));
-                    body = body.replaceAll("\\$op3.set", operands[2].set(3));
-                }
-            }
-        }
-        body = body.replaceAll("\\$size", size + "");
-        if ((name.startsWith("mul_") || name.startsWith("div_")) && size == 32) {
-            body = body.replaceAll("\\$mask", "0xFFFFFFFFL & ");
-            body = body.replaceAll("\\$cast", "(int)");
-        } else {
-            body = body.replaceAll("\\$cast", getCast(size));
-            if (body.contains("mask2"))
-                body = body.replaceAll("\\$mask2", getMask(operands[1].getSize()));
-            if (body.contains("mask1"))
-                body = body.replaceAll("\\$mask1", getMask(operands[0].getSize()));
-            body = body.replaceAll("\\$mask", getMask(size));
-        }
-        return body;
+    public String getRet() {
+        return ret;
     }
 
-    private String getCast(int size) {
-        if (size == 8)
-            return "(byte)";
-        else if (size == 16)
-            return "(short)";
-        return "";
+    public int getSize() {
+        return size;
     }
 
-    private String getMask(int size) {
-        if (size == 8)
-            return "0xFF&";
-        else if (size == 16)
-            return "0xFFFF&";
-        return "";
+    public String getSnippet() {
+        return snippet;
     }
 
-    private String getExecute() {
-        StringBuilder b = new StringBuilder();
-        b.append("    public Branch execute(Processor cpu)\n    {\n");
-        for (int i = 0; i < operands.length; i++) {
-            String load = operands[i].load(i + 1);
-            if (load.length() > 0)
-                b.append(load + "\n");
-        }
-        if (needsSegment)
-            b.append("        Segment seg = cpu.segs[segIndex];\n");
-        if (multiSize) {
-            b.append("        if (size == 16)\n        {\n");
-            b.append(processSnippet(16));
-            b.append("\n        }\n        else if (size == 32)\n        {\n");
-            for (int i = 0; i < operands.length; i++)
-                operands[i] = Operand.get(operands[i].toString(), 32, isMem);
-            b.append(processSnippet(32));
-            b.append("\n        }");
-            if (DEBUG_SIZE) {
-                b.append("        else throw new IllegalStateException(\"Unknown size \"+size);");
-            }
-        } else
-            b.append(processSnippet(size));
-        if (ret.trim().length() > 0)
-            b.append("\n        return " + ret + ";");
-        b.append("\n    }\n\n");
-        return b.toString();
+    public boolean isMultiSize() {
+        return multiSize;
     }
 
-    private String getConstructor() {
-        StringBuilder b = new StringBuilder();
-        b.append("\n    public " + getName() + "(int blockStart, Instruction parent)\n    {\n        super(blockStart, parent);\n");
-        if (needsSegment) {
-            b.append("        segIndex = Processor.getSegmentIndex(parent.getSegment());\n");
-        }
-        if (multiSize) {
-            b.append("        size = parent.opr_mode;\n");
-        }
-        if (isBranch) {
-            b.append("        blockLength = parent.x86Length+(int)parent.eip-blockStart;\n");
-            b.append("        instructionLength = parent.x86Length;\n");
-        }
-        for (int i = 0; i < operands.length; i++) {
-            String cons = operands[i].construct(i + 1);
-            if (cons.length() > 0)
-                b.append(cons + "\n");
-        }
-        b.append("    }\n\n");
-        return b.toString();
+    public boolean isBranch() {
+        return branch;
     }
 
-    private String getDirectConstructor() {
-        StringBuilder b = new StringBuilder();
-        b.append("\n    public " + getName() + "(" + DecoderGenerator.argsDef + ")\n    {\n        super(blockStart, eip);\n");
-        if (needsModrm())
-            b.append("        int modrm = input.readU8();\n");
-        if (needsSegment)
-            b.append("        segIndex = Prefices.getSegment(prefices, Processor.DS_INDEX);\n");
-        for (int i = 0; i < operands.length; i++) {
-            String cons = operands[i].directConstruct(i + 1);
-            if (cons.length() > 0)
-                b.append(cons + "\n");
-        }
-        if (isBranch) {
-            b.append("        instructionLength = (int)input.getAddress()-eip;\n");
-            b.append("        blockLength = eip-blockStart+instructionLength;\n");
-        }
-        b.append("    }\n\n");
-        return b.toString();
+    public boolean isMem() {
+        return mem;
     }
 
-    private boolean needsModrm() {
+    public boolean isNeedsSegment() {
+        return needsSegment;
+    }
+
+    public boolean needsModrm() {
         for (Operand operand : operands) {
             if (operand instanceof Operand.Address)
                 return true;
@@ -292,39 +124,6 @@ public class Opcode {
         return false;
     }
 
-    private String getCopywriteHeader() {
-        return HEADER;
-    }
-
-    private String getPreamble(String mode) {
-        return getCopywriteHeader() + "package org.jpc.emulator.execution.opcodes." + mode
-            + ";\n\nimport org.jpc.emulator.execution.*;\nimport org.jpc.emulator.execution.decoder.*;\nimport org.jpc.emulator.processor.*;\nimport org.jpc.emulator.processor.fpu64.*;\nimport static org.jpc.emulator.processor.Processor.*;\n\npublic class "
-            + getName() + " extends Executable\n{\n";
-    }
-
-    private String getBranch() {
-        if (ret.equals("Branch.None"))
-            return "    public boolean isBranch()\n    {\n        return false;\n    }\n\n";
-        else
-            return "    public boolean isBranch()\n    {\n        return true;\n    }\n\n";
-    }
-
-    private String getToString() {
-        return "    public String toString()\n    {\n        return this.getClass().getName();\n    }\n";
-    }
-
-    public void writeToFile(String mode) {
-        try {
-            BufferedWriter w = new BufferedWriter(
-                new FileWriter("src/org/jpc/emulator/execution/opcodes/" + mode + "/" + getName() + ".java"));
-            w.write(getSource(mode));
-            w.flush();
-            w.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private static boolean isMem(String[] args) {
         for (String arg : args)
             if (arg.equals("Eb") || arg.equals("Ew") || arg.equals("Ed") || arg.equals("Ob") || arg.equals("Ow") || arg.equals("Od")
@@ -342,7 +141,7 @@ public class Opcode {
         return false;
     }
 
-    public static List<String> enumerateArg(String arg) {
+    private static List<String> enumerateArg(String arg) {
         List<String> res = new LinkedList();
         if (arg.equals("STi")) {
             res.add("ST0");
@@ -358,7 +157,7 @@ public class Opcode {
         return res;
     }
 
-    public static List<String[]> enumerateArgs(String[] in) {
+    private static List<String[]> enumerateArgs(String[] in) {
         List<String[]> res = new LinkedList();
         List<String[]> next = new LinkedList();
         res.add(in);

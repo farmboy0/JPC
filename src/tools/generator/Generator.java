@@ -40,24 +40,17 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class Generator {
-    public static void main(String[] cmd) {
-        int rm = opcodeParse(parseXML("RMPMVM"), "rm", new OpcodeWriter());
-        rm += opcodeParse(parseXML("RMVM"), "rm", new OpcodeWriter());
-        rm += opcodeParse(parseXML("RM"), "rm", new OpcodeWriter());
-        int vm = opcodeParse(parseXML("RMPMVM"), "vm", new OpcodeWriter());
-        vm += opcodeParse(parseXML("RMVM"), "vm", new OpcodeWriter());
-        vm += opcodeParse(parseXML("VM"), "vm", new OpcodeWriter());
-        int pm = opcodeParse(parseXML("RMPMVM"), "pm", new OpcodeWriter());
-        pm += opcodeParse(parseXML("PM"), "pm", new OpcodeWriter());
+    public static void main(String[] cmd) throws IOException {
+        OpcodeWriter writer = new OpcodeWriter();
+        int rm = opcodeParse(parseXML("RMPMVM"), "rm", writer);
+        rm += opcodeParse(parseXML("RMVM"), "rm", writer);
+        rm += opcodeParse(parseXML("RM"), "rm", writer);
+        int vm = opcodeParse(parseXML("RMPMVM"), "vm", writer);
+        vm += opcodeParse(parseXML("RMVM"), "vm", writer);
+        vm += opcodeParse(parseXML("VM"), "vm", writer);
+        int pm = opcodeParse(parseXML("RMPMVM"), "pm", writer);
+        pm += opcodeParse(parseXML("PM"), "pm", writer);
         System.out.printf("Generated %d RM opcodes, %d VM opcodes and %d PM opcodes\n", rm, vm, pm);
-    }
-
-    public static class OpcodeWriter implements Callable {
-        @Override
-        public void call(Opcode op, String mode) {
-            System.out.println(op.getName());
-            op.writeToFile(mode);
-        }
     }
 
     public static int opcodeParse(Document dom, String mode, Callable call) {

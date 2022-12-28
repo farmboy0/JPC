@@ -29,6 +29,34 @@ public abstract class Operand {
 
     public abstract String get(int arg);
 
+    public String get(String type, int arg) {
+        if ("16".equals(type))
+            return get16(arg);
+        if ("32".equals(type))
+            return get32(arg);
+        if ("A".equals(type))
+            return getA(arg);
+        if ("F".equals(type))
+            return getF(arg);
+        if ("".equals(type))
+            return get(arg);
+        throw new IllegalArgumentException("Unknown type " + type);
+    }
+
+    public String set(String type, int arg) {
+        if ("16".equals(type))
+            return set16(arg);
+        if ("32".equals(type))
+            return set32(arg);
+        if ("A".equals(type))
+            return setA(arg);
+        if ("F".equals(type))
+            return setF(arg);
+        if ("".equals(type))
+            return set(arg);
+        throw new IllegalArgumentException("Unknown type " + type);
+    }
+
     public String get16(int arg) {
         throw new IllegalStateException("Unimplemented get16!");
     }

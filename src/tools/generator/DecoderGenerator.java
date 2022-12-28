@@ -27,6 +27,9 @@
 
 package tools.generator;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -425,8 +428,21 @@ public class DecoderGenerator {
                 ops[i].setDuplicateOf(i % 0x200);
     }
 
-    public static void generate() {
-        System.out.println(Opcode.HEADER);
+    public static void generate() throws IOException {
+        StringBuilder header = new StringBuilder();
+        BufferedReader r = new BufferedReader(new FileReader("LicenseHeader"));
+        String line;
+        try {
+            while ((line = r.readLine()) != null) {
+                header.append(line);
+                header.append("\n");
+            }
+        } finally {
+            r.close();
+        }
+        header.append("\n");
+
+        System.out.println(header.toString());
         System.out.println("package org.jpc.emulator.execution.decoder;\n");
         System.out.println("import org.jpc.emulator.execution.*;");
         System.out.println("import org.jpc.emulator.execution.opcodes.rm.*;");
