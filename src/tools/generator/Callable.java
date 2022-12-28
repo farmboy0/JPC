@@ -25,7 +25,7 @@
     End of licence header
 */
 
-package tools;
+package tools.generator;
 
 public interface Callable {
     void call(Opcode op, String mode);

@@ -25,7 +25,7 @@
     End of licence header
 */
 
-package tools;
+package tools.generator;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

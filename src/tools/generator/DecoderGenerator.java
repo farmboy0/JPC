@@ -25,7 +25,7 @@
     End of licence header
 */
 
-package tools;
+package tools.generator;
 
 import java.util.ArrayList;
 import java.util.Arrays;

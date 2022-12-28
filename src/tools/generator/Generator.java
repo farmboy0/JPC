@@ -25,7 +25,7 @@
     End of licence header
 */
 
-package tools;
+package tools.generator;
 
 import java.io.IOException;
 import java.util.List;
@@ -121,7 +121,7 @@ public class Generator {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
-            return db.parse("src/tools/Opcodes_" + mode + ".xml");
+            return db.parse("src/tools/generator/Opcodes_" + mode + ".xml");
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
         } catch (SAXException se) {

@@ -1,5 +1,8 @@
 package tools;
 
+import tools.generator.DecoderGenerator;
+import tools.generator.Generator;
+
 public class Tools {
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
