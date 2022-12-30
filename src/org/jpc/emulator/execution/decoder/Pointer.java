@@ -205,31 +205,16 @@ public class Pointer extends Address {
         if (segment != -1)
             b.append(Processor.getSegmentString(segment) + ":");
         if (base != -1)
-            b.append("regs[" + base + "]");
-        if (scale != 0)
-            b.append(String.format("+regs[%d]*%d", index, scale));
-        if (offset != 0)
-            b.append(String.format("+%08x", offset));
-        return b.toString();
-    }
-
-    public String toSource() {
-        StringBuilder b = new StringBuilder();
-        if (segment != -1) {
-            b.append("((cpu." + Processor.getSegmentString(segment) + " != null) ? " + "cpu." + Processor.getSegmentString(segment)
-                + ".getBase():0)");
-            if (base != -1)
-                b.append("+");
+            b.append(Processor.getRegString(base));
+        if (index != -1 && scale != 0) {
+            b.append(String.format("+%s", Processor.getRegString(index)));
+            if (scale != 1)
+                b.append(String.format("*%d", scale));
         }
-
-        if (base != -1)
-            b.append("cpu.regs[" + base + "].get32()");
-        if (scale != 0)
-            b.append(String.format("+cpu.regs[%d].get32()*%d", index, scale));
-        if (offset != 0)
-            b.append(String.format("+0x%08x", offset));
-        else if (segment == -1 && base == -1 && scale == 0)
-            b.append("0x0");
+        if (offset != 0) {
+            String fmt = base != -1 ? "%s%d" : addrSize ? "%s%08x" : "%s%04x";
+            b.append(String.format(fmt, base != -1 && offset > 0 ? "+" : "", offset));
+        }
         return b.toString();
     }
 }
