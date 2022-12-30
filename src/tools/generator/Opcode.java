@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Opcode {
+    private final String mnemonic;
     private final String name;
     private final Operand[] operands;
     private final String snippet;
@@ -40,6 +41,7 @@ public class Opcode {
     private final boolean mem, branch, needsSegment;
 
     private Opcode(String mnemonic, String[] args, int size, String snippet, String ret, boolean isMem, boolean needsSegment) {
+        this.mnemonic = mnemonic;
         this.needsSegment = needsSegment;
         boolean msize = false;
         for (String s : args)
@@ -64,6 +66,10 @@ public class Opcode {
         this.ret = ret;
         this.size = size;
         branch = !ret.startsWith("Branch.None");
+    }
+
+    public String getMnemonic() {
+        return mnemonic;
     }
 
     public String getName() {
@@ -100,6 +106,24 @@ public class Opcode {
 
     public boolean isNeedsSegment() {
         return needsSegment;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append('"');
+        result.append(mnemonic);
+        result.append('"');
+        if (operands.length > 0) {
+            result.append(" + \" \" + ");
+            for (int i = 0; i < operands.length; i++) {
+                if (i != 0) {
+                    result.append(" + \", \" + ");
+                }
+                result.append(operands[i].toString(i + 1));
+            }
+        }
+        return result.toString();
     }
 
     public boolean needsModrm() {

@@ -19,6 +19,8 @@ public abstract class Operand {
 
     public abstract String define(int arg);
 
+    public abstract String toString(int arg);
+
     public abstract String construct(int arg);
 
     public abstract String directConstruct(int arg);
@@ -112,6 +114,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "getRegString(" + getVal(arg) + ")";
+        }
+
+        @Override
         public String construct(int arg) {
             return "        " + getVal(arg) + " = Processor.getRegIndex(parent.operand[" + (arg - 1) + "].toString());";
         }
@@ -173,6 +180,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "\"CR\" + " + getVal(arg);
+        }
+
+        @Override
         public String construct(int arg) {
             return "        " + getVal(arg) + " = Processor.getCRIndex(parent.operand[" + (arg - 1) + "].toString());";
         }
@@ -216,6 +228,11 @@ public abstract class Operand {
         @Override
         public String define(int arg) {
             return "    final int " + getVal(arg) + ";\n";
+        }
+
+        @Override
+        public String toString(int arg) {
+            return "\"DR\" + " + getVal(arg);
         }
 
         @Override
@@ -264,6 +281,11 @@ public abstract class Operand {
         @Override
         public String define(int arg) {
             return "";
+        }
+
+        @Override
+        public String toString(int arg) {
+            return "\"ST" + num + "\"";
         }
 
         @Override
@@ -318,6 +340,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "\"" + type + "\"";
+        }
+
+        @Override
         public String directConstruct(int arg) {
             return "";
         }
@@ -368,6 +395,11 @@ public abstract class Operand {
         @Override
         public String define(int arg) {
             return "    final Pointer op" + arg + ";\n";
+        }
+
+        @Override
+        public String toString(int arg) {
+            return "\"[\" + op" + arg + ".toString() + \"]\"";
         }
 
         @Override
@@ -457,6 +489,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "getSegmentString(segIndex)";
+        }
+
+        @Override
         public String construct(int arg) {
             return "        segIndex = Processor.getSegmentIndex(parent.operand[" + (arg - 1) + "].toString());";
         }
@@ -505,6 +542,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "\"" + name + "\"";
+        }
+
+        @Override
         public String construct(int arg) {
             return "";
         }
@@ -543,6 +585,11 @@ public abstract class Operand {
         @Override
         public String define(int arg) {
             return "    final Pointer op" + arg + ";\n";
+        }
+
+        @Override
+        public String toString(int arg) {
+            return "\"[\" + op" + arg + ".toString() + \"]\"";
         }
 
         @Override
@@ -612,6 +659,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "Integer.toHexString(" + var + ")";
+        }
+
+        @Override
         public String construct(int arg) {
             return "        " + var + " = (" + cast() + ")parent.operand[" + (arg - 1) + "].lval;";
         }
@@ -666,6 +718,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "\"0x" + Integer.toHexString(val) + "\"";
+        }
+
+        @Override
         public String construct(int arg) {
             return "";
         }
@@ -710,6 +767,11 @@ public abstract class Operand {
         }
 
         @Override
+        public String toString(int arg) {
+            return "jmp";
+        }
+
+        @Override
         public String construct(int arg) {
             return "        jmp = (" + cast() + ")parent.operand[" + (arg - 1) + "].lval;";
         }
@@ -741,7 +803,7 @@ public abstract class Operand {
 
         @Override
         public String get(int arg) {
-            return "imm";
+            return "jmp";
         }
     }
 
@@ -758,6 +820,11 @@ public abstract class Operand {
         @Override
         public String define(int arg) {
             return "    final int cs, targetEip;\n";
+        }
+
+        @Override
+        public String toString(int arg) {
+            return "Integer.toHexString(cs) + \":\" + Integer.toHexString(targetEip)";
         }
 
         @Override
@@ -803,6 +870,11 @@ public abstract class Operand {
         @Override
         public String define(int arg) {
             return "        final Pointer offset;\n";
+        }
+
+        @Override
+        public String toString(int arg) {
+            return "offset.toString()";
         }
 
         @Override

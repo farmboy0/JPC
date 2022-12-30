@@ -59,47 +59,89 @@ public class OpcodeWriter implements Callable {
         }
         if (op.isMultiSize())
             b.append("    final int size;\n");
+        b.append("\n");
         b.append(getDirectConstructor(op));
+        b.append("\n");
         b.append(getExecute(op));
+        b.append("\n");
         b.append(getBranch(op));
+        b.append("\n");
         b.append(getToString(op));
-        b.append("}");
+        b.append("}\n");
         return b.toString();
     }
 
     private static String getPreamble(Opcode op, String mode) {
-        return "package org.jpc.emulator.execution.opcodes." + mode
-            + ";\n\nimport org.jpc.emulator.execution.*;\nimport org.jpc.emulator.execution.decoder.*;\nimport org.jpc.emulator.processor.*;\nimport org.jpc.emulator.processor.fpu64.*;\nimport static org.jpc.emulator.processor.Processor.*;\n\npublic class "
-            + op.getName() + " extends Executable\n{\n";
+        StringBuilder b = new StringBuilder();
+        b.append("package org.jpc.emulator.execution.opcodes." + mode + ";\n");
+        b.append("\n");
+        b.append("import static org.jpc.emulator.processor.Processor.*;\n");
+        b.append("\n");
+        b.append("import org.jpc.emulator.execution.*;\n");
+        b.append("import org.jpc.emulator.execution.decoder.*;\n");
+        b.append("import org.jpc.emulator.processor.*;\n");
+        b.append("import org.jpc.emulator.processor.fpu64.*;\n");
+        b.append("\n");
+        b.append("public class " + op.getName() + " extends Executable {\n");
+        return b.toString();
+    }
+
+    private static String getDirectConstructor(Opcode op) {
+        StringBuilder b = new StringBuilder();
+        b.append("    public " + op.getName() + "(" + DecoderGenerator.argsDef + ") {\n");
+        b.append("        super(blockStart, eip);\n");
+        if (op.needsModrm())
+            b.append("        int modrm = input.readU8();\n");
+        if (op.isNeedsSegment())
+            b.append("        segIndex = Prefices.getSegment(prefices, Processor.DS_INDEX);\n");
+        for (int i = 0; i < op.getOperands().length; i++) {
+            String directConstruct = op.getOperands()[i].directConstruct(i + 1);
+            if (!directConstruct.isEmpty())
+                b.append(directConstruct + "\n");
+        }
+        if (op.isBranch()) {
+            b.append("        instructionLength = (int)input.getAddress() - eip;\n");
+            b.append("        blockLength = eip - blockStart + instructionLength;\n");
+        }
+        b.append("    }\n");
+        return b.toString();
     }
 
     private static String getExecute(Opcode op) {
         StringBuilder b = new StringBuilder();
-        b.append("    public Branch execute(Processor cpu)\n    {\n");
+        b.append("    @Override\n");
+        b.append("    public Branch execute(Processor cpu) {\n");
+
         for (int i = 0; i < op.getOperands().length; i++) {
             String load = op.getOperands()[i].load(i + 1);
-            if (load.length() > 0)
+            if (!load.isEmpty())
                 b.append(load + "\n");
         }
+
         if (op.isNeedsSegment())
             b.append("        Segment seg = cpu.segs[segIndex];\n");
+
         if (op.isMultiSize()) {
-            b.append("        if (size == 16)\n        {\n");
-            b.append(processSnippet(op.getName(), op.getOperands(), op.getSnippet(), 16));
-            b.append("\n        }\n        else if (size == 32)\n        {\n");
             Operand[] op32 = new Operand[op.getSize()];
             for (int i = 0; i < op.getOperands().length; i++)
                 op32[i] = Operand.get(op.getOperands()[i].toString(), 32, op.isMem());
+            b.append("        if (size == 16) {\n");
+            b.append(processSnippet(op.getName(), op.getOperands(), op.getSnippet(), 16));
+            b.append("\n");
+            b.append("        } else if (size == 32) {\n");
             b.append(processSnippet(op.getName(), op32, op.getSnippet(), 32));
-            b.append("\n        }");
+            b.append("\n");
+            b.append("        }");
             if (DEBUG_SIZE) {
-                b.append("        else throw new IllegalStateException(\"Unknown size \"+size);");
+                b.append("        else throw new IllegalStateException(\"Unknown size \" + size);\n");
             }
         } else
             b.append(processSnippet(op.getName(), op.getOperands(), op.getSnippet(), op.getSize()));
-        if (op.getRet().trim().length() > 0)
-            b.append("\n        return " + op.getRet() + ";");
-        b.append("\n    }\n\n");
+
+        if (!op.getRet().isBlank())
+            b.append("\n        return " + op.getRet() + ";\n");
+
+        b.append("    }\n");
         return b.toString();
     }
 
@@ -164,37 +206,21 @@ public class OpcodeWriter implements Callable {
         return "";
     }
 
-    private static String getDirectConstructor(Opcode op) {
-        StringBuilder b = new StringBuilder();
-        b.append("\n");
-        b.append("    public " + op.getName() + "(" + DecoderGenerator.argsDef + ")\n");
-        b.append("    {\n");
-        b.append("        super(blockStart, eip);\n");
-        if (op.needsModrm())
-            b.append("        int modrm = input.readU8();\n");
-        if (op.isNeedsSegment())
-            b.append("        segIndex = Prefices.getSegment(prefices, Processor.DS_INDEX);\n");
-        for (int i = 0; i < op.getOperands().length; i++) {
-            String cons = op.getOperands()[i].directConstruct(i + 1);
-            if (cons.length() > 0)
-                b.append(cons + "\n");
-        }
-        if (op.isBranch()) {
-            b.append("        instructionLength = (int)input.getAddress()-eip;\n");
-            b.append("        blockLength = eip-blockStart+instructionLength;\n");
-        }
-        b.append("    }\n\n");
-        return b.toString();
-    }
-
     private static String getBranch(Opcode op) {
-        if (op.getRet().equals("Branch.None"))
-            return "    public boolean isBranch()\n    {\n        return false;\n    }\n\n";
-        else
-            return "    public boolean isBranch()\n    {\n        return true;\n    }\n\n";
+        StringBuilder isBranch = new StringBuilder();
+        isBranch.append("    @Override\n");
+        isBranch.append("    public boolean isBranch() {\n");
+        isBranch.append("        return " + Boolean.toString(!op.getRet().equals("Branch.None")) + ";\n");
+        isBranch.append("    }\n");
+        return isBranch.toString();
     }
 
     private static String getToString(Opcode op) {
-        return "    public String toString()\n    {\n        return this.getClass().getName();\n    }\n";
+        StringBuilder toString = new StringBuilder();
+        toString.append("    @Override\n");
+        toString.append("    public String toString() {\n");
+        toString.append("        return " + op.toString() + ";\n");
+        toString.append("    }\n");
+        return toString.toString();
     }
 }
