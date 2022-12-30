@@ -325,6 +325,61 @@ public class Processor implements HardwareComponent {
         throw new IllegalStateException("Unknown Register: " + name);
     }
 
+    public static String getRegString(int index) {
+        switch (index) {
+        case EAX_INDEX:
+            return "eax";
+        case AX_INDEX:
+            return "ax";
+        case AH_INDEX:
+            return "ah";
+        case AL_INDEX:
+            return "al";
+        case EBX_INDEX:
+            return "ebx";
+        case BX_INDEX:
+            return "bx";
+        case BH_INDEX:
+            return "bh";
+        case BL_INDEX:
+            return "bl";
+        case ECX_INDEX:
+            return "ecx";
+        case CX_INDEX:
+            return "cx";
+        case CH_INDEX:
+            return "ch";
+        case CL_INDEX:
+            return "cl";
+        case EDX_INDEX:
+            return "edx";
+        case DX_INDEX:
+            return "dx";
+        case DH_INDEX:
+            return "dh";
+        case DL_INDEX:
+            return "dl";
+        case ESI_INDEX:
+            return "edi";
+        case SI_INDEX:
+            return "si";
+        case EDI_INDEX:
+            return "edi";
+        case DI_INDEX:
+            return "di";
+        case ESP_INDEX:
+            return "esp";
+        case SP_INDEX:
+            return "sp";
+        case EBP_INDEX:
+            return "epb";
+        case BP_INDEX:
+            return "bp";
+        default:
+            throw new IllegalStateException("Unknown register index: " + index);
+        }
+    }
+
     public static int getSegmentIndex(String seg) {
         if (seg.equals("cs"))
             return CS_INDEX;
