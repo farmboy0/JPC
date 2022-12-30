@@ -62,6 +62,6 @@ public class fmul_Md_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fmul" + " " + "[" + op1.toString() + "]";
     }
 }

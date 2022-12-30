@@ -67,6 +67,6 @@ public class fldenv_o16_M extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fldenv_o16" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -56,7 +56,7 @@ public class lldt_Ew_mem extends Executable {
             cpu.ldtr = SegmentFactory.NULL_SEGMENT;
         } else {
             Segment newSegment = cpu.getSegment(selector & ~0x4);
-            if ((newSegment.getType() != 0x02) || !newSegment.isPresent())
+            if (newSegment.getType() != 0x02 || !newSegment.isPresent())
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
             cpu.ldtr = newSegment;
         }
@@ -70,6 +70,6 @@ public class lldt_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "lldt" + " " + "[" + op1.toString() + "]";
     }
 }

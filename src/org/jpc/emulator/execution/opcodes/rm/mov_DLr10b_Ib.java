@@ -56,6 +56,6 @@ public class mov_DLr10b_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "DLr10b" + ", " + Integer.toHexString(immb);
     }
 }

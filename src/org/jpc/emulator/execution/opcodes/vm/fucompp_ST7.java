@@ -68,6 +68,6 @@ public class fucompp_ST7 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fucompp" + " " + "ST7";
     }
 }

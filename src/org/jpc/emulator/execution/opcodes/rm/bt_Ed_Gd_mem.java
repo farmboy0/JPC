@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -65,6 +67,6 @@ public class bt_Ed_Gd_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "bt" + " " + "[" + op1.toString() + "]" + ", " + getRegString(op2Index);
     }
 }

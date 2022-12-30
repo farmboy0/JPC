@@ -30,6 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+import static org.jpc.emulator.processor.Processor.getSegmentString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -63,6 +66,6 @@ public class mov_Ew_S extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + getRegString(op1Index) + ", " + getSegmentString(segIndex);
     }
 }

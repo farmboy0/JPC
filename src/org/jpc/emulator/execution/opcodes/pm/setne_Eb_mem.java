@@ -58,6 +58,6 @@ public class setne_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "setne" + " " + "[" + op1.toString() + "]";
     }
 }

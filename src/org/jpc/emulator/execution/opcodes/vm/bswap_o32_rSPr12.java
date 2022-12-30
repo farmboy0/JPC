@@ -53,6 +53,6 @@ public class bswap_o32_rSPr12 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "bswap_o32" + " " + "rSPr12";
     }
 }

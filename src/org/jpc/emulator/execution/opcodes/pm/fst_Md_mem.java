@@ -58,6 +58,6 @@ public class fst_Md_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fst" + " " + "[" + op1.toString() + "]";
     }
 }

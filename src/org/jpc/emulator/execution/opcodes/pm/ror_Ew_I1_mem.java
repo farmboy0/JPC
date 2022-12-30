@@ -68,6 +68,6 @@ public class ror_Ew_I1_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "ror" + " " + "[" + op1.toString() + "]" + ", " + "0x1";
     }
 }

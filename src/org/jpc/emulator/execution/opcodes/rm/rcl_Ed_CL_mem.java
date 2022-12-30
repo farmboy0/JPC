@@ -68,6 +68,6 @@ public class rcl_Ed_CL_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "rcl" + " " + "[" + op1.toString() + "]" + ", " + "CL";
     }
 }

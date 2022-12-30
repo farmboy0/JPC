@@ -54,6 +54,6 @@ public class ffree_ST1 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "ffree" + " " + "ST1";
     }
 }

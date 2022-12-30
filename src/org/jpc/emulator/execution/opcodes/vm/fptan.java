@@ -62,6 +62,6 @@ public class fptan extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fptan";
     }
 }

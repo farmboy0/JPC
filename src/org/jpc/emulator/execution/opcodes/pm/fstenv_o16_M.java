@@ -67,6 +67,6 @@ public class fstenv_o16_M extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fstenv_o16" + " " + "[" + op1.toString() + "]";
     }
 }

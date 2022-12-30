@@ -58,6 +58,6 @@ public class fmul_ST3_ST3 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fmul" + " " + "ST3" + ", " + "ST3";
     }
 }

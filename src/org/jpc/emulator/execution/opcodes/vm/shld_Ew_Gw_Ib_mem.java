@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
@@ -77,6 +79,6 @@ public class shld_Ew_Gw_Ib_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "shld" + " " + "[" + op1.toString() + "]" + ", " + getRegString(op2Index) + ", " + Integer.toHexString(immb);
     }
 }

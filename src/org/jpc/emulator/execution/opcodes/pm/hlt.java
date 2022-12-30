@@ -62,6 +62,6 @@ public class hlt extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "hlt";
     }
 }

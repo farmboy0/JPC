@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -68,6 +70,6 @@ public class bound_o16_Gw_M extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "bound_o16" + " " + getRegString(op1Index) + ", " + "[" + op2.toString() + "]";
     }
 }

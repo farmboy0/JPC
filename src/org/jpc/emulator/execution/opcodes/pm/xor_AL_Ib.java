@@ -59,6 +59,6 @@ public class xor_AL_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "xor" + " " + "AL" + ", " + Integer.toHexString(immb);
     }
 }

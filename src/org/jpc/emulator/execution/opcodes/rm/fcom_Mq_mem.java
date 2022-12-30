@@ -72,6 +72,6 @@ public class fcom_Mq_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fcom" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -61,6 +61,6 @@ public class jmp_Ap extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "jmp" + " " + Integer.toHexString(cs) + ":" + Integer.toHexString(targetEip);
     }
 }

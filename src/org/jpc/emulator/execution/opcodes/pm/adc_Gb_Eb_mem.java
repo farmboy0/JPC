@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
@@ -69,6 +71,6 @@ public class adc_Gb_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "adc" + " " + getRegString(op1Index) + ", " + "[" + op2.toString() + "]";
     }
 }

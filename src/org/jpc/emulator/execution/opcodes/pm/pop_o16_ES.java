@@ -55,6 +55,6 @@ public class pop_o16_ES extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "pop_o16" + " " + "es";
     }
 }

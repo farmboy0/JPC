@@ -63,6 +63,6 @@ public class adc_rAX_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "adc" + " " + "rAX" + ", " + Integer.toHexString(immw);
     }
 }

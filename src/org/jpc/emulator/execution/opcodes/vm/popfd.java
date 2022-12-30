@@ -58,6 +58,6 @@ public class popfd extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "popfd";
     }
 }

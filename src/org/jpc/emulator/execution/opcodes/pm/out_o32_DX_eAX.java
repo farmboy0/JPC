@@ -57,6 +57,6 @@ public class out_o32_DX_eAX extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "out_o32" + " " + "DX" + ", " + "eAX";
     }
 }

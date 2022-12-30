@@ -62,6 +62,6 @@ public class jmp_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "jmp" + " " + "[" + op1.toString() + "]";
     }
 }

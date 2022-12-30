@@ -54,6 +54,6 @@ public class fst_ST3 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fst" + " " + "ST3";
     }
 }

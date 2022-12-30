@@ -71,6 +71,6 @@ public class frstor_o32_M_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "frstor_o32" + " " + "[" + op1.toString() + "]";
     }
 }

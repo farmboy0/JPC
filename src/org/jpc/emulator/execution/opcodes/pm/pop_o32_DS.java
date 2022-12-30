@@ -55,6 +55,6 @@ public class pop_o32_DS extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "pop_o32" + " " + "ds";
     }
 }

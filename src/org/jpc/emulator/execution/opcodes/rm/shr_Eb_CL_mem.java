@@ -66,6 +66,6 @@ public class shr_Eb_CL_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "shr" + " " + "[" + op1.toString() + "]" + ", " + "CL";
     }
 }

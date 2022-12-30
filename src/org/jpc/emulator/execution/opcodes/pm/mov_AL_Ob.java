@@ -57,6 +57,6 @@ public class mov_AL_Ob extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "AL" + ", " + "[" + op2.toString() + "]";
     }
 }

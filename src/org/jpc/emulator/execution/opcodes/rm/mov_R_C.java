@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -64,6 +66,6 @@ public class mov_R_C extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + getRegString(op1Index) + ", " + "CR" + op2Index;
     }
 }

@@ -63,6 +63,6 @@ public class fsubr_Md_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fsubr" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -71,6 +71,6 @@ public class verw_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "verw" + " " + "[" + op1.toString() + "]";
     }
 }

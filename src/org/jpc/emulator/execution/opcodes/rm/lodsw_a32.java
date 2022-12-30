@@ -59,6 +59,6 @@ public class lodsw_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "lodsw_a32";
     }
 }

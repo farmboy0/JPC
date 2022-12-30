@@ -53,6 +53,6 @@ public class wbinvd extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "wbinvd";
     }
 }

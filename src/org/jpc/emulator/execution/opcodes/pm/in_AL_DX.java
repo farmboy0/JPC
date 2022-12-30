@@ -57,6 +57,6 @@ public class in_AL_DX extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "in" + " " + "AL" + ", " + "DX";
     }
 }

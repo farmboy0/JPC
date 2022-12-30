@@ -66,6 +66,6 @@ public class fucom_ST4 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fucom" + " " + "ST4";
     }
 }

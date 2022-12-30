@@ -56,6 +56,6 @@ public class fxch_ST6_ST4 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fxch" + " " + "ST6" + ", " + "ST4";
     }
 }

@@ -70,6 +70,6 @@ public class rcl_Eb_Ib_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "rcl" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immb);
     }
 }

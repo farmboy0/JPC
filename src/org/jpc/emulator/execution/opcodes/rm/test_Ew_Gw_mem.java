@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -64,6 +66,6 @@ public class test_Ew_Gw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "test" + " " + "[" + op1.toString() + "]" + ", " + getRegString(op2Index);
     }
 }

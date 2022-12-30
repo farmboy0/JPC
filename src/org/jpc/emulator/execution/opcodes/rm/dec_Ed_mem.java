@@ -65,6 +65,6 @@ public class dec_Ed_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "dec" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -67,6 +67,6 @@ public class jp_Jd extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "jp" + " " + jmp;
     }
 }

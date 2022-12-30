@@ -59,6 +59,6 @@ public class rep_cmpsw_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "rep_cmpsw_a32";
     }
 }

@@ -60,6 +60,6 @@ public class lgdt_o32_M_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "lgdt_o32" + " " + "[" + op1.toString() + "]";
     }
 }

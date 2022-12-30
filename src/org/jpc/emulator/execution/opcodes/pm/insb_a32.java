@@ -58,6 +58,6 @@ public class insb_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "insb_a32";
     }
 }

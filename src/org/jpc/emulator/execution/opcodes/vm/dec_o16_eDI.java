@@ -60,6 +60,6 @@ public class dec_o16_eDI extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "dec_o16" + " " + "eDI";
     }
 }

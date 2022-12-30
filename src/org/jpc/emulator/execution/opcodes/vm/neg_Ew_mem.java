@@ -63,6 +63,6 @@ public class neg_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "neg" + " " + "[" + op1.toString() + "]";
     }
 }

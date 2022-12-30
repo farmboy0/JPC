@@ -56,6 +56,6 @@ public class mov_rBPr13_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "rBPr13" + ", " + Integer.toHexString(immw);
     }
 }

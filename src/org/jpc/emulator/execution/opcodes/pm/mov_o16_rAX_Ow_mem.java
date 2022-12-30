@@ -57,6 +57,6 @@ public class mov_o16_rAX_Ow_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov_o16" + " " + "rAX" + ", " + "[" + op2.toString() + "]";
     }
 }

@@ -58,6 +58,6 @@ public class push_Ed_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "push" + " " + "[" + op1.toString() + "]";
     }
 }

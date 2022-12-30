@@ -64,6 +64,6 @@ public class fdiv_Md_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fdiv" + " " + "[" + op1.toString() + "]";
     }
 }

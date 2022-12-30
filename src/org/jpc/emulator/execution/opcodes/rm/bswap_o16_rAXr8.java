@@ -53,6 +53,6 @@ public class bswap_o16_rAXr8 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "bswap_o16" + " " + "rAXr8";
     }
 }

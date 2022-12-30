@@ -64,6 +64,6 @@ public class retf_o32_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "retf_o32" + " " + Integer.toHexString(immw);
     }
 }

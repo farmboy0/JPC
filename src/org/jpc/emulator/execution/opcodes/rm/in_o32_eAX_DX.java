@@ -53,6 +53,6 @@ public class in_o32_eAX_DX extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "in_o32" + " " + "eAX" + ", " + "DX";
     }
 }

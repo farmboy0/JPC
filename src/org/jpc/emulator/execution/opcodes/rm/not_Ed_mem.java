@@ -58,6 +58,6 @@ public class not_Ed_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "not" + " " + "[" + op1.toString() + "]";
     }
 }

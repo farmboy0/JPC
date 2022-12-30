@@ -75,6 +75,6 @@ public class fucomip_ST0_ST5 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fucomip" + " " + "ST0" + ", " + "ST5";
     }
 }

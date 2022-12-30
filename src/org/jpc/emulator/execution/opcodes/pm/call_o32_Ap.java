@@ -65,6 +65,6 @@ public class call_o32_Ap extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "call_o32" + " " + Integer.toHexString(cs) + ":" + Integer.toHexString(targetEip);
     }
 }

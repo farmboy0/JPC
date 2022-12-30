@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.StaticOpcodes;
 import org.jpc.emulator.execution.decoder.Modrm;
@@ -63,6 +65,6 @@ public class lsl_Gd_Ew extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "lsl" + " " + getRegString(op1Index) + ", " + getRegString(op2Index);
     }
 }

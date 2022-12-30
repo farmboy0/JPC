@@ -56,6 +56,6 @@ public class mov_CLr9b_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "CLr9b" + ", " + Integer.toHexString(immb);
     }
 }

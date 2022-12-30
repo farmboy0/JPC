@@ -61,6 +61,6 @@ public class fdivrp_ST3_ST3 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fdivrp" + " " + "ST3" + ", " + "ST3";
     }
 }

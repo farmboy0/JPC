@@ -60,6 +60,6 @@ public class fdiv_ST3_ST5 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fdiv" + " " + "ST3" + ", " + "ST5";
     }
 }

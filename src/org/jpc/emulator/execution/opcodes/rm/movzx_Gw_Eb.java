@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -62,6 +64,6 @@ public class movzx_Gw_Eb extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "movzx" + " " + getRegString(op1Index) + ", " + getRegString(op2Index);
     }
 }

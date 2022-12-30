@@ -66,6 +66,6 @@ public class fyl2xp1 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fyl2xp1";
     }
 }

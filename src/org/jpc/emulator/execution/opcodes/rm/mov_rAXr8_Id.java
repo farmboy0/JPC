@@ -56,6 +56,6 @@ public class mov_rAXr8_Id extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "rAXr8" + ", " + Integer.toHexString(immd);
     }
 }

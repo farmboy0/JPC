@@ -56,6 +56,6 @@ public class mov_rCXr9_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "rCXr9" + ", " + Integer.toHexString(immw);
     }
 }

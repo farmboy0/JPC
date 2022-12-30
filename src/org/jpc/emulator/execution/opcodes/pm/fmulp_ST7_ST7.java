@@ -59,6 +59,6 @@ public class fmulp_ST7_ST7 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fmulp" + " " + "ST7" + ", " + "ST7";
     }
 }

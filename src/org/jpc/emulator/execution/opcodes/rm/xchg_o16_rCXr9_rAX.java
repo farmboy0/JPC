@@ -56,6 +56,6 @@ public class xchg_o16_rCXr9_rAX extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "xchg_o16" + " " + "rCXr9" + ", " + "rAX";
     }
 }

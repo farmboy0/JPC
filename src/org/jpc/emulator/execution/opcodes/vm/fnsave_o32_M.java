@@ -66,6 +66,6 @@ public class fnsave_o32_M extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fnsave_o32" + " " + "[" + op1.toString() + "]";
     }
 }

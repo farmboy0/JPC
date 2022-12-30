@@ -67,6 +67,6 @@ public class int_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "int" + " " + Integer.toHexString(immb);
     }
 }

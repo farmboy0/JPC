@@ -62,6 +62,6 @@ public class sub_o16_rAX_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "sub_o16" + " " + "rAX" + ", " + Integer.toHexString(immw);
     }
 }

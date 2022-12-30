@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
@@ -68,6 +70,6 @@ public class add_Eb_Gb extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "add" + " " + getRegString(op1Index) + ", " + getRegString(op2Index);
     }
 }

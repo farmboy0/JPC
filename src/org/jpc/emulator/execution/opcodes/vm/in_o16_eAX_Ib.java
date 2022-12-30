@@ -60,6 +60,6 @@ public class in_o16_eAX_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "in_o16" + " " + "eAX" + ", " + Integer.toHexString(immb);
     }
 }

@@ -67,6 +67,6 @@ public class ftst extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "ftst";
     }
 }

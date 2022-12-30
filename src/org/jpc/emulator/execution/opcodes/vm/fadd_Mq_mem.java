@@ -63,6 +63,6 @@ public class fadd_Mq_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fadd" + " " + "[" + op1.toString() + "]";
     }
 }

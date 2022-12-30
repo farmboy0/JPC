@@ -58,6 +58,6 @@ public class setl_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "setl" + " " + "[" + op1.toString() + "]";
     }
 }

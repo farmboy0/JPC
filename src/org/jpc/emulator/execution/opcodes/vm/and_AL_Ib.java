@@ -59,6 +59,6 @@ public class and_AL_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "and" + " " + "AL" + ", " + Integer.toHexString(immb);
     }
 }

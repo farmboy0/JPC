@@ -58,6 +58,6 @@ public class fiadd_Mw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fiadd" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -61,6 +61,6 @@ public class leave_o16 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "leave_o16";
     }
 }

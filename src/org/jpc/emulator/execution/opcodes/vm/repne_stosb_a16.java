@@ -54,6 +54,6 @@ public class repne_stosb_a16 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "repne_stosb_a16";
     }
 }

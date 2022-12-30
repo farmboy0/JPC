@@ -66,6 +66,6 @@ public class call_Jw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "call" + " " + jmp;
     }
 }

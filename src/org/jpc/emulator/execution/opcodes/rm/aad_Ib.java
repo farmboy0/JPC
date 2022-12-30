@@ -57,6 +57,6 @@ public class aad_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "aad" + " " + Integer.toHexString(immb);
     }
 }

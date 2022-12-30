@@ -69,6 +69,6 @@ public class call_o32_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "call_o32" + " " + "[" + op1.toString() + "]";
     }
 }

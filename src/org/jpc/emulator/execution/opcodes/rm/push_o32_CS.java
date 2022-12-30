@@ -53,6 +53,6 @@ public class push_o32_CS extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "push_o32" + " " + "cs";
     }
 }

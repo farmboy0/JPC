@@ -72,6 +72,6 @@ public class cmpxchg8b_M extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "cmpxchg8b" + " " + "[" + op1.toString() + "]";
     }
 }

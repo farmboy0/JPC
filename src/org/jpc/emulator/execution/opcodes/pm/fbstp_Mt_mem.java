@@ -71,6 +71,6 @@ public class fbstp_Mt_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fbstp" + " " + "[" + op1.toString() + "]";
     }
 }

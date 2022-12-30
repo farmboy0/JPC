@@ -65,6 +65,6 @@ public class jmp_o32_Ep_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "jmp_o32" + " " + offset.toString();
     }
 }

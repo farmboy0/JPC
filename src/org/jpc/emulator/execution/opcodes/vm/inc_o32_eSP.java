@@ -60,6 +60,6 @@ public class inc_o32_eSP extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "inc_o32" + " " + "eSP";
     }
 }

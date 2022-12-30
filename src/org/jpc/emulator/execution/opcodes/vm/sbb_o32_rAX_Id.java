@@ -63,6 +63,6 @@ public class sbb_o32_rAX_Id extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "sbb_o32" + " " + "rAX" + ", " + Integer.toHexString(immd);
     }
 }

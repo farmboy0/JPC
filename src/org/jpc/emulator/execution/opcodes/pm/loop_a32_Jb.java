@@ -68,6 +68,6 @@ public class loop_a32_Jb extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "loop_a32" + " " + jmp;
     }
 }

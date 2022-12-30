@@ -66,6 +66,6 @@ public class fnstenv_o16_M_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fnstenv_o16" + " " + "[" + op1.toString() + "]";
     }
 }

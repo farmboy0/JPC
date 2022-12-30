@@ -73,6 +73,6 @@ public class ltr_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "ltr" + " " + "[" + op1.toString() + "]";
     }
 }

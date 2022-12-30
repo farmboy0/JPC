@@ -64,6 +64,6 @@ public class fdivr_Mq_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fdivr" + " " + "[" + op1.toString() + "]";
     }
 }

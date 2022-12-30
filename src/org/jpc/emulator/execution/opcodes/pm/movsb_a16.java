@@ -59,6 +59,6 @@ public class movsb_a16 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "movsb_a16";
     }
 }

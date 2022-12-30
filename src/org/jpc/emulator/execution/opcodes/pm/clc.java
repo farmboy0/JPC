@@ -54,6 +54,6 @@ public class clc extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "clc";
     }
 }

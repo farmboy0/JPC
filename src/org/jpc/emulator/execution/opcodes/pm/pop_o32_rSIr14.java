@@ -53,6 +53,6 @@ public class pop_o32_rSIr14 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "pop_o32" + " " + "rSIr14";
     }
 }

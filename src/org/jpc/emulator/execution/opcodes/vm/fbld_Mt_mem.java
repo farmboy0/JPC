@@ -72,6 +72,6 @@ public class fbld_Mt_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fbld" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -67,6 +67,6 @@ public class sbb_Ew_Ib_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "sbb" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immb);
     }
 }

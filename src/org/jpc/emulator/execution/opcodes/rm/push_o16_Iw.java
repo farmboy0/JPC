@@ -56,6 +56,6 @@ public class push_o16_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "push_o16" + " " + Integer.toHexString(immw);
     }
 }

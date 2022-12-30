@@ -65,6 +65,6 @@ public class call_o16_Ap extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "call_o16" + " " + Integer.toHexString(cs) + ":" + Integer.toHexString(targetEip);
     }
 }

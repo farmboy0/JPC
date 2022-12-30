@@ -60,6 +60,6 @@ public class out_Ib_AL extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "out" + " " + Integer.toHexString(immb) + ", " + "AL";
     }
 }

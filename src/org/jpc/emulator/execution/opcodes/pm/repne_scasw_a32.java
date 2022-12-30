@@ -54,6 +54,6 @@ public class repne_scasw_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "repne_scasw_a32";
     }
 }

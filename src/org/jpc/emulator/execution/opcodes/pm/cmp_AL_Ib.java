@@ -61,6 +61,6 @@ public class cmp_AL_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "cmp" + " " + "AL" + ", " + Integer.toHexString(immb);
     }
 }

@@ -59,6 +59,6 @@ public class outsd_a16 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "outsd_a16";
     }
 }

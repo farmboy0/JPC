@@ -58,6 +58,6 @@ public class fild_Mw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fild" + " " + "[" + op1.toString() + "]";
     }
 }

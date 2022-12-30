@@ -60,6 +60,6 @@ public class dec_o16_eCX extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "dec_o16" + " " + "eCX";
     }
 }

@@ -56,6 +56,6 @@ public class cdq extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "cdq";
     }
 }

@@ -54,6 +54,6 @@ public class fld_ST0_ST2 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fld" + " " + "ST0" + ", " + "ST2";
     }
 }

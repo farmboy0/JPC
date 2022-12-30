@@ -62,6 +62,6 @@ public class fisttp_Mw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fisttp" + " " + "[" + op1.toString() + "]";
     }
 }

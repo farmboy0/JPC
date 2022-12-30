@@ -66,6 +66,6 @@ public class ret_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "ret" + " " + Integer.toHexString(immw);
     }
 }

@@ -57,6 +57,6 @@ public class out_DX_AL extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "out" + " " + "DX" + ", " + "AL";
     }
 }

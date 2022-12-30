@@ -67,6 +67,6 @@ public class jno_Jb extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "jno" + " " + jmp;
     }
 }

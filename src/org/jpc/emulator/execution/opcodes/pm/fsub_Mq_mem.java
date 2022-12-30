@@ -63,6 +63,6 @@ public class fsub_Mq_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fsub" + " " + "[" + op1.toString() + "]";
     }
 }

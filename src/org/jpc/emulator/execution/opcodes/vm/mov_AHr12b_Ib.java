@@ -56,6 +56,6 @@ public class mov_AHr12b_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "AHr12b" + ", " + Integer.toHexString(immb);
     }
 }

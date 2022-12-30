@@ -59,6 +59,6 @@ public class xor_rAX_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "xor" + " " + "rAX" + ", " + Integer.toHexString(immw);
     }
 }

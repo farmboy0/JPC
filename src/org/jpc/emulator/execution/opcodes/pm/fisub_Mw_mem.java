@@ -58,6 +58,6 @@ public class fisub_Mw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fisub" + " " + "[" + op1.toString() + "]";
     }
 }

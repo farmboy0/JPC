@@ -61,6 +61,6 @@ public class invlpg_M extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "invlpg" + " " + "[" + op1.toString() + "]";
     }
 }

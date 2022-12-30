@@ -65,6 +65,6 @@ public class inc_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "inc" + " " + "[" + op1.toString() + "]";
     }
 }

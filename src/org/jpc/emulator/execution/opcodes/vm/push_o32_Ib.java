@@ -56,6 +56,6 @@ public class push_o32_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "push_o32" + " " + Integer.toHexString(immb);
     }
 }

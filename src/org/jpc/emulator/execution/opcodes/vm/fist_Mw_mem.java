@@ -61,6 +61,6 @@ public class fist_Mw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fist" + " " + "[" + op1.toString() + "]";
     }
 }

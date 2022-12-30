@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
@@ -78,6 +80,6 @@ public class shl_Ew_Gb extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "shl" + " " + getRegString(op1Index) + ", " + getRegString(op2Index);
     }
 }

@@ -57,6 +57,6 @@ public class mov_o32_rAX_Od extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov_o32" + " " + "rAX" + ", " + "[" + op2.toString() + "]";
     }
 }

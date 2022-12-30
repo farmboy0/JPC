@@ -59,6 +59,6 @@ public class repne_cmpsd_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "repne_cmpsd_a32";
     }
 }

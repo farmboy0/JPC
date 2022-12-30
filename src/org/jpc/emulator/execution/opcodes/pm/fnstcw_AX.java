@@ -53,6 +53,6 @@ public class fnstcw_AX extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fnstcw" + " " + "AX";
     }
 }

@@ -58,6 +58,6 @@ public class fld_Md_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fld" + " " + "[" + op1.toString() + "]";
     }
 }

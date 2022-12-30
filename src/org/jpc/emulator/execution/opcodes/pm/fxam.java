@@ -71,6 +71,6 @@ public class fxam extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fxam";
     }
 }

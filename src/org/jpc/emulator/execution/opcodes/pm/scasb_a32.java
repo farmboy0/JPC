@@ -54,6 +54,6 @@ public class scasb_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "scasb_a32";
     }
 }

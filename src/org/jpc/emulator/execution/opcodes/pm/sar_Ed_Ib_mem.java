@@ -69,6 +69,6 @@ public class sar_Ed_Ib_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "sar" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immb);
     }
 }

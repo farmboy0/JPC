@@ -60,6 +60,6 @@ public class mov_Ed_Id_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mov" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immd);
     }
 }

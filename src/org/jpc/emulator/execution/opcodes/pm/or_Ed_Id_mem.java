@@ -63,6 +63,6 @@ public class or_Ed_Id_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "or" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immd);
     }
 }

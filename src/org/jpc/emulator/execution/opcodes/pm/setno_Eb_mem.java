@@ -58,6 +58,6 @@ public class setno_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "setno" + " " + "[" + op1.toString() + "]";
     }
 }

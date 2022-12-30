@@ -59,6 +59,6 @@ public class sidt_o16_M_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "sidt_o16" + " " + "[" + op1.toString() + "]";
     }
 }

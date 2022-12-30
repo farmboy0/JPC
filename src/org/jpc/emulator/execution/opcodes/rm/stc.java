@@ -53,6 +53,6 @@ public class stc extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "stc";
     }
 }

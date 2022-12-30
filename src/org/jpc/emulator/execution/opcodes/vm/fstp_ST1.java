@@ -55,6 +55,6 @@ public class fstp_ST1 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fstp" + " " + "ST1";
     }
 }

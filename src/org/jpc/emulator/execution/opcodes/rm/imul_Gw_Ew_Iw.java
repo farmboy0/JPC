@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -72,6 +74,6 @@ public class imul_Gw_Ew_Iw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "imul" + " " + getRegString(op1Index) + ", " + getRegString(op2Index) + ", " + Integer.toHexString(immw);
     }
 }

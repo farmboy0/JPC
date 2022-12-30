@@ -54,6 +54,6 @@ public class stosb_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "stosb_a32";
     }
 }

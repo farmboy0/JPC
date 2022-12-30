@@ -58,6 +58,6 @@ public class seta_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "seta" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -62,6 +62,6 @@ public class sub_AL_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "sub" + " " + "AL" + ", " + Integer.toHexString(immb);
     }
 }

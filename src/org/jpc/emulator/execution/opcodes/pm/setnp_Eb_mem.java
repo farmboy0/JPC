@@ -58,6 +58,6 @@ public class setnp_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "setnp" + " " + "[" + op1.toString() + "]";
     }
 }

@@ -64,6 +64,6 @@ public class lmsw_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "lmsw" + " " + "[" + op1.toString() + "]";
     }
 }

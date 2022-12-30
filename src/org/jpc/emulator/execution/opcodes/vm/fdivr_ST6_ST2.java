@@ -60,6 +60,6 @@ public class fdivr_ST6_ST2 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fdivr" + " " + "ST6" + ", " + "ST2";
     }
 }

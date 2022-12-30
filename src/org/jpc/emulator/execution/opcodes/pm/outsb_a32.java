@@ -63,6 +63,6 @@ public class outsb_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "outsb_a32";
     }
 }

@@ -58,6 +58,6 @@ public class rep_insw_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "rep_insw_a32";
     }
 }

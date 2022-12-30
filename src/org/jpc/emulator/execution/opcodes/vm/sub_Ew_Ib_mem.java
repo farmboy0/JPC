@@ -66,6 +66,6 @@ public class sub_Ew_Ib_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "sub" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immb);
     }
 }

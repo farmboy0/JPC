@@ -67,6 +67,6 @@ public class jbe_Jw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "jbe" + " " + jmp;
     }
 }

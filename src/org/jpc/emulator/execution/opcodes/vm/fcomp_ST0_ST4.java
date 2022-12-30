@@ -69,6 +69,6 @@ public class fcomp_ST0_ST4 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fcomp" + " " + "ST0" + ", " + "ST4";
     }
 }

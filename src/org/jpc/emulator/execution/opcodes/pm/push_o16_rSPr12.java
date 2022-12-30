@@ -53,6 +53,6 @@ public class push_o16_rSPr12 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "push_o16" + " " + "rSPr12";
     }
 }

@@ -59,6 +59,6 @@ public class fadd_ST5_ST5 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fadd" + " " + "ST5" + ", " + "ST5";
     }
 }

@@ -60,6 +60,6 @@ public class faddp_ST1_ST2 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "faddp" + " " + "ST1" + ", " + "ST2";
     }
 }

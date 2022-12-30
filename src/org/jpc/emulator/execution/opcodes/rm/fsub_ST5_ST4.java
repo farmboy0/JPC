@@ -59,6 +59,6 @@ public class fsub_ST5_ST4 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fsub" + " " + "ST5" + ", " + "ST4";
     }
 }

@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -62,6 +64,6 @@ public class bt_Ed_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "bt" + " " + getRegString(op1Index) + ", " + Integer.toHexString(immb);
     }
 }

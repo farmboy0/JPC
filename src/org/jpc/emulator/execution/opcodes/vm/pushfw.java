@@ -56,6 +56,6 @@ public class pushfw extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "pushfw";
     }
 }

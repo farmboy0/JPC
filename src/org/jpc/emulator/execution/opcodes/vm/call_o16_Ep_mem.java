@@ -65,6 +65,6 @@ public class call_o16_Ep_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "call_o16" + " " + offset.toString();
     }
 }

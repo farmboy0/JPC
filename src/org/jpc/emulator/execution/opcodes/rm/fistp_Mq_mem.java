@@ -59,6 +59,6 @@ public class fistp_Mq_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fistp" + " " + "[" + op1.toString() + "]";
     }
 }

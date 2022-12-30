@@ -63,6 +63,6 @@ public class adc_AL_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "adc" + " " + "AL" + ", " + Integer.toHexString(immb);
     }
 }

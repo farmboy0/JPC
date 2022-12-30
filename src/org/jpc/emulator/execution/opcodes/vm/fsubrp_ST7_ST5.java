@@ -60,6 +60,6 @@ public class fsubrp_ST7_ST5 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fsubrp" + " " + "ST7" + ", " + "ST5";
     }
 }

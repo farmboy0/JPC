@@ -53,6 +53,6 @@ public class fldl2t extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fldl2t";
     }
 }

@@ -64,6 +64,6 @@ public class bts_Ew_Ib_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "bts" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immb);
     }
 }

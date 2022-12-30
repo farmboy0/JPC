@@ -59,6 +59,6 @@ public class rep_movsd_a32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "rep_movsd_a32";
     }
 }

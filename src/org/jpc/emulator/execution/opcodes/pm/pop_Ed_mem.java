@@ -65,6 +65,6 @@ public class pop_Ed_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "pop" + " " + "[" + op1.toString() + "]";
     }
 }

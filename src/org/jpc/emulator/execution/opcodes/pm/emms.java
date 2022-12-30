@@ -53,6 +53,6 @@ public class emms extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "emms";
     }
 }

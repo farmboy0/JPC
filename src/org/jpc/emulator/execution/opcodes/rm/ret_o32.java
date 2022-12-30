@@ -57,6 +57,6 @@ public class ret_o32 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "ret_o32";
     }
 }

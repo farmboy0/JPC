@@ -68,6 +68,6 @@ public class rol_Ed_CL_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "rol" + " " + "[" + op1.toString() + "]" + ", " + "CL";
     }
 }

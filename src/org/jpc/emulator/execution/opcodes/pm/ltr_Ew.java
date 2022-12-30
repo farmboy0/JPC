@@ -30,6 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import static org.jpc.emulator.processor.Processor.getRegString;
+
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.PeekableInputStream;
@@ -56,7 +58,7 @@ public class ltr_Ew extends Executable {
 
         Segment tempSegment = cpu.getSegment(selector);
 
-        if ((tempSegment.getType() != 0x01 && tempSegment.getType() != 0x09) || !tempSegment.isPresent())
+        if (tempSegment.getType() != 0x01 && tempSegment.getType() != 0x09 || !tempSegment.isPresent())
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
 
         long descriptor = cpu.readSupervisorQuadWord(cpu.gdtr, selector & 0xfff8) | 0x1L << 41; // set busy flag in segment descriptor
@@ -74,6 +76,6 @@ public class ltr_Ew extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "ltr" + " " + getRegString(op1Index);
     }
 }

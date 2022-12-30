@@ -64,6 +64,6 @@ public class enter_o32_Iw_Ib extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "enter_o32" + " " + Integer.toHexString(immw) + ", " + Integer.toHexString(immb);
     }
 }

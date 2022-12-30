@@ -58,6 +58,6 @@ public class str_Ew_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "str" + " " + "[" + op1.toString() + "]";
     }
 }

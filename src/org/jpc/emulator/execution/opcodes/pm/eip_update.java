@@ -57,6 +57,6 @@ public class eip_update extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "eip_update";
     }
 }

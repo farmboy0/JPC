@@ -62,6 +62,6 @@ public class mul_Eb_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "mul" + " " + "[" + op1.toString() + "]";
     }
 }

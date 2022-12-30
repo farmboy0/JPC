@@ -63,6 +63,6 @@ public class and_Ew_Iw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "and" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immw);
     }
 }

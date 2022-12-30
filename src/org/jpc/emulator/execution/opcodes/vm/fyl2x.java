@@ -79,6 +79,6 @@ public class fyl2x extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fyl2x";
     }
 }

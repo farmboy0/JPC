@@ -68,6 +68,6 @@ public class fcom_ST0_ST1 extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "fcom" + " " + "ST0" + ", " + "ST1";
     }
 }

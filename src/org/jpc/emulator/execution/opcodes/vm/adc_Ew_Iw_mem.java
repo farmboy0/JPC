@@ -67,6 +67,6 @@ public class adc_Ew_Iw_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "adc" + " " + "[" + op1.toString() + "]" + ", " + Integer.toHexString(immw);
     }
 }

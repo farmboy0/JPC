@@ -66,6 +66,6 @@ public class idiv_Ed_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "idiv" + " " + "[" + op1.toString() + "]";
     }
 }

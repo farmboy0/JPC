@@ -58,6 +58,6 @@ public class smsw_Ed_mem extends Executable {
 
     @Override
     public String toString() {
-        return this.getClass().getName();
+        return "smsw" + " " + "[" + op1.toString() + "]";
     }
 }
