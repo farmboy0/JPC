@@ -81,8 +81,8 @@ public class FastDecoder {
             System.out.printf("Block decode started at %x\n", input.getAddress());
         Executable start = decodeOpcode(startAddr, input, mode, is32Bit);
         if (PRINT_DISAM) {
-            System.out.printf("%d;%s;", operand_size, start.getClass().getName());
-            System.out.println(Disassembler.getRawBytes(input, beginCount));
+            String bytes = Disassembler.getRawBytes(input, beginCount);
+            System.out.printf("(%-2d) %08X %-28s %s%n", operand_size, startAddr, bytes, start.toString());
         }
         if (debug)
             System.out.printf("Disassembled instruction (%d): %s at %x\n", 0, start, input.getAddress());
@@ -106,8 +106,8 @@ public class FastDecoder {
             beginCount = input.getCounter();
             Executable next = decodeOpcode(startAddr, input, mode, is32Bit);
             if (PRINT_DISAM) {
-                System.out.printf("%d;%s;", operand_size, next.getClass().getName());
-                System.out.println(Disassembler.getRawBytes(input, beginCount));
+                String bytes = Disassembler.getRawBytes(input, beginCount);
+                System.out.printf("(%-2d) %08X %-28s %s%n", operand_size, startAddr, bytes, next.toString());
             }
 
             if (debug)
