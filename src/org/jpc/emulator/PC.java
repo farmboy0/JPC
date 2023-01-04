@@ -620,7 +620,7 @@ public class PC {
                 } else if (hwc instanceof EthernetCard) {
                     ((EthernetCard)hwc).loadIOPorts(ioHandler, din);
                 } else if (hwc instanceof VirtualClock) {
-                    ((VirtualClock)hwc).loadState(din, this);
+                    ((VirtualClock)hwc).loadState(din);
                 } else if (hwc instanceof PhysicalAddressSpace) {
                     ((PhysicalAddressSpace)hwc).loadState(din, manager);
                 } else {

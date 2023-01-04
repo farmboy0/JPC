@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jpc.emulator.AbstractHardwareComponent;
-import org.jpc.emulator.PC;
 import org.jpc.emulator.Timer;
 import org.jpc.emulator.TimerResponsive;
 import org.jpc.emulator.motherboard.IntervalTimer;
@@ -78,7 +77,8 @@ public class VirtualClock extends AbstractHardwareComponent implements Clock {
         output.writeLong(getTime());
     }
 
-    public void loadState(DataInput input, PC pc) throws IOException {
+    @Override
+    public void loadState(DataInput input) throws IOException {
         ticksEnabled = input.readBoolean();
         ticksOffset = input.readLong();
         ticksStatic = input.readLong();
