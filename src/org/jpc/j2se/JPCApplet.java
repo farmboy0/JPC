@@ -161,7 +161,6 @@ public class JPCApplet extends JApplet {
 
     static class MonitorPanel extends PCMonitor implements Runnable, PCControl {
         private volatile Thread runner;
-        private volatile KeyTypingPanel keys;
 
         MonitorPanel(PC pc) {
             super(new BorderLayout(10, 10), pc);

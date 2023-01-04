@@ -33,7 +33,6 @@
 
 package org.jpc.j2se;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -66,7 +65,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -74,7 +72,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
@@ -120,7 +117,6 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         }
         LICENCE.setEditable(false);
     }
-    private KeyTypingPanel keys;
     private JFileChooser diskImageChooser;
     private JFileChooser snapshotFileChooser;
 
@@ -287,14 +283,6 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         });
         bar.add(help);
 
-        keys = new KeyTypingPanel(monitor);
-        JPCApplet.PlayPausePanel pp = new JPCApplet.PlayPausePanel(this);
-
-        JPanel p1 = new JPanel(new BorderLayout(10, 10));
-        p1.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        p1.add("Center", keys);
-        p1.add("East", pp);
-
         setSize(monitor.getPreferredSize());
         LICENCE.setPreferredSize(monitor.getPreferredSize());
         getMonitorPane().setViewportView(LICENCE);
@@ -313,7 +301,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
     @Override
     public void setSize(Dimension d) {
-        super.setSize(new Dimension(monitor.getPreferredSize().width, d.height + keys.getPreferredSize().height + 60));
+        super.setSize(new Dimension(monitor.getPreferredSize().width, d.height + monitor.getPreferredSize().height + 60));
         getMonitorPane().setPreferredSize(new Dimension(monitor.getPreferredSize().width + 2, monitor.getPreferredSize().height + 2));
     }
 
