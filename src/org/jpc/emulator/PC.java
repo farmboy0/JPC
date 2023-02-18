@@ -57,11 +57,9 @@ import java.util.zip.ZipOutputStream;
 
 import javax.swing.JPanel;
 
-import org.jpc.debugger.LinearMemoryViewer;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
-import org.jpc.emulator.execution.codeblock.PeekableMemoryStream;
 import org.jpc.emulator.execution.decoder.BasicBlock;
 import org.jpc.emulator.execution.decoder.DebugBasicBlock;
 import org.jpc.emulator.execution.decoder.Disassembler;
@@ -460,19 +458,6 @@ public class PC {
         return mon;
     }
 
-    public Integer savePage(Integer page, byte[] data, Boolean linear) throws IOException {
-        if (!linear)
-            return physicalAddr.getPage(page, data);
-        return physicalAddr.getPage(LinearMemoryViewer.translateLinearAddressToInt(physicalAddr, processor, page), data);
-    }
-
-    public void loadPage(Integer page, byte[] data, Boolean linear) throws IOException {
-        if (!linear)
-            physicalAddr.setPage(page, data);
-        else
-            physicalAddr.setPage(LinearMemoryViewer.translateLinearAddressToInt(physicalAddr, processor, page), data);
-    }
-
     public void triggerSpuriousInterrupt() {
         pic.triggerSpuriousInterrupt();
     }
@@ -734,53 +719,6 @@ public class PC {
         while (processor.eip != breakEip)
             instrs += executeBlock();
         return instrs;
-    }
-
-    public String getInstructionInfo(Integer instrs) {
-        StringBuilder b = new StringBuilder();
-        int eip = processor.getInstructionPointer();
-        for (int c = 0; c < instrs; c++) {
-            PeekableMemoryStream input = new PeekableMemoryStream();
-            try {
-                Instruction in;
-                String e;
-                if (processor.isProtectedMode()) {
-                    if (processor.isVirtual8086Mode()) {
-                        input.set(linearAddr, eip);
-                        in = Disassembler.disassemble16(input);
-                        e = Disassembler.getExecutableName(3, in);
-                    } else {
-                        input.set(linearAddr, eip);
-                        boolean opSize = processor.cs.getDefaultSizeFlag();
-                        if (opSize)
-                            in = Disassembler.disassemble32(input);
-                        else
-                            in = Disassembler.disassemble16(input);
-                        e = Disassembler.getExecutableName(2, in);
-                    }
-                } else {
-                    input.set(physicalAddr, eip);
-                    in = Disassembler.disassemble16(input);
-                    e = Disassembler.getExecutableName(1, in);
-                }
-                b.append(in.toString());
-                b.append(" == ");
-                b.append(e);
-                b.append(" == ");
-                input.seek(-in.x86Length);
-                for (int i = 0; i < in.x86Length; i++)
-                    b.append(String.format("%02x ", input.read8()));
-                b.append("\n");
-                eip += in.x86Length;
-                if (in.toString().equals("sti"))
-                    c--; // do one more instruction
-                if (in.isBranch())
-                    break;
-            } catch (IllegalStateException e) {
-                b.append(e.getMessage());
-            }
-        }
-        return b.toString();
     }
 
     public void getDirtyPages(Set<Integer> res) {

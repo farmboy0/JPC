@@ -79,12 +79,6 @@ public class InterpretedProtectedModeBlock implements ProtectedModeCodeBlock {
                 else
                     cpu.eip += current.next.delta - current.delta;
             }
-
-            if (e.getType() != ProcessorException.Type.PAGE_FAULT) {
-                /*System.out.println("cs selector = " + Integer.toHexString(cpu.cs.getSelector())
-                        + ", cs base = " + Integer.toHexString(cpu.cs.getBase()) + ", EIP = "
-                        + Integer.toHexString(cpu.eip));*/
-            }
             cpu.handleProtectedModeException(e);
             return Branch.Exception;
         } catch (ModeSwitchException e) {
