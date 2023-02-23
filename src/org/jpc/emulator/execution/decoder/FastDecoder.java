@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.opcodes.ExecutableTables;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.j2se.Option;
 

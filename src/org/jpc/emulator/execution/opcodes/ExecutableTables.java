@@ -25,9 +25,13 @@
     End of licence header
 */
 
-package org.jpc.emulator.execution.decoder;
+package org.jpc.emulator.execution.opcodes;
 
 import org.jpc.emulator.execution.Executable;
+import org.jpc.emulator.execution.decoder.Modrm;
+import org.jpc.emulator.execution.decoder.OpcodeDecoder;
+import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.emulator.execution.decoder.Prefices;
 
 public class ExecutableTables {
     public static void populateRMOpcodes(OpcodeDecoder[] ops) {

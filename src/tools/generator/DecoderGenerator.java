@@ -443,11 +443,12 @@ public class DecoderGenerator {
         header.append("\n");
 
         System.out.println(header.toString());
-        System.out.println("package org.jpc.emulator.execution.decoder;\n");
-        System.out.println("import org.jpc.emulator.execution.*;");
-        System.out.println("import org.jpc.emulator.execution.opcodes.rm.*;");
-        System.out.println("import org.jpc.emulator.execution.opcodes.pm.*;");
-        System.out.println("import org.jpc.emulator.execution.opcodes.vm.*;\n");
+        System.out.println("package org.jpc.emulator.execution.opcodes;\n");
+        System.out.println("import org.jpc.emulator.execution.Executable;");
+        System.out.println("import org.jpc.emulator.execution.decoder.Modrm;");
+        System.out.println("import org.jpc.emulator.execution.decoder.OpcodeDecoder;");
+        System.out.println("import org.jpc.emulator.execution.decoder.PeekableInputStream;");
+        System.out.println("import org.jpc.emulator.execution.decoder.Prefices;\n");
         System.out.println("public class ExecutableTables {");
 
         generateMode(1, "RM");
