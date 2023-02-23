@@ -48,6 +48,10 @@ public class DecoderGenerator {
 
     public static byte[] EMPTY = new byte[28];
 
+    public static void main(String[] args) throws IOException {
+        DecoderGenerator.generate();
+    }
+
     public static class OpcodeHolder {
         Map<Instruction, byte[]> myops = new HashMap();
         List<String> names = new ArrayList();
