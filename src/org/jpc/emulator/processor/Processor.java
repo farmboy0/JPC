@@ -77,6 +77,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jpc.assembly.SegmentRegister;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.memory.AlignmentCheckedAddressSpace;
 import org.jpc.emulator.memory.LinearAddressSpace;
@@ -88,7 +89,7 @@ import org.jpc.emulator.processor.fpu64.FpuState64;
 import org.jpc.j2se.Option;
 import org.jpc.support.Clock;
 
-public class Processor implements HardwareComponent {
+public class Processor implements HardwareComponent, SegmentRegister {
     private static final Logger LOGGING = Logger.getLogger(Processor.class.getName());
     private static final boolean USEBOCHS = Option.useBochs.isSet();
 
@@ -154,13 +155,6 @@ public class Processor implements HardwareComponent {
     public static final int SP_INDEX = 21;
     public static final int EBP_INDEX = 22;
     public static final int BP_INDEX = 23;
-    // these coincide with reg encoding of segment
-    public static final int ES_INDEX = 0;
-    public static final int CS_INDEX = 1;
-    public static final int SS_INDEX = 2;
-    public static final int DS_INDEX = 3;
-    public static final int FS_INDEX = 4;
-    public static final int GS_INDEX = 5;
 
     public static final int EFLAGS_VALID_MASK = 0x3f7fd5; // supported bits
     public static final int EFLAGS_CF_BIT = 0;

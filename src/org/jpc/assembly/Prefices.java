@@ -27,8 +27,6 @@
 
 package org.jpc.assembly;
 
-import org.jpc.emulator.processor.Processor;
-
 public class Prefices {
     public static int encodePrefix(int prefices, int b) {
         if (b == 0x66) // Op size
@@ -36,17 +34,17 @@ public class Prefices {
         if (b == 0x67) // addr size
             return prefices ^ 1 << 1;
         if (b == 0x26) // ES
-            return Processor.ES_INDEX << 2 | prefices & ~0x1C;
+            return SegmentRegister.ES_INDEX << 2 | prefices & ~0x1C;
         if (b == 0x2E) // CS
-            return Processor.CS_INDEX << 2 | prefices & ~0x1C;
+            return SegmentRegister.CS_INDEX << 2 | prefices & ~0x1C;
         if (b == 0x36) // SS
-            return Processor.SS_INDEX << 2 | prefices & ~0x1C;
+            return SegmentRegister.SS_INDEX << 2 | prefices & ~0x1C;
         if (b == 0x3E) // DS
-            return Processor.DS_INDEX << 2 | prefices & ~0x1C;
+            return SegmentRegister.DS_INDEX << 2 | prefices & ~0x1C;
         if (b == 0x64) // FS
-            return Processor.FS_INDEX << 2 | prefices & ~0x1C;
+            return SegmentRegister.FS_INDEX << 2 | prefices & ~0x1C;
         if (b == 0x65) // GS
-            return Processor.GS_INDEX << 2 | prefices & ~0x1C;
+            return SegmentRegister.GS_INDEX << 2 | prefices & ~0x1C;
         if (b == 0xF0) // Lock
             return 1 << 5 | prefices;
         if (b == 0xF2) // REPNE
