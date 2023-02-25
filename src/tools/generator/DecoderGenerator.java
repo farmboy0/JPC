@@ -27,439 +27,65 @@
 
 package tools.generator;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.Writer;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.jpc.emulator.execution.decoder.Disassembler;
 import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.execution.decoder.Prefices;
 
 public class DecoderGenerator {
-    public static String args = "blockStart, eip, prefices, input";
-    public static String argsDef = "int blockStart, int eip, int prefices, PeekableInputStream input";
-
-    public static byte[] EMPTY = new byte[28];
+    private static final List<String> IMMEDIATES = Arrays.asList("Jb", "Jw", "Jd", "Ib", "Iw", "Id");
+    private static final byte[] EMPTY = new byte[28];
 
     public static void main(String[] args) throws IOException {
         DecoderGenerator.generate();
     }
 
-    public static class OpcodeHolder {
-        Map<Instruction, byte[]> myops = new HashMap();
-        List<String> names = new ArrayList();
-        Set<String> namesSet = new HashSet();
-        private int modeType;
-        private int copyOf = -1;
-
-        public OpcodeHolder(int modeType) {
-            this.modeType = modeType;
-        }
-
-        public void addOpcode(Instruction in, byte[] raw) {
-            String name = Disassembler.getExecutableName(modeType, in);
-            names.add(name);
-            namesSet.add(name);
-            myops.put(in, raw);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof OpcodeHolder))
-                return false;
-            OpcodeHolder other = (OpcodeHolder)o;
-            if ((myops.size() != other.myops.size()) || !namesSet.equals(other.namesSet) || !names.equals(other.names))
-                return false;
-            return true;
-        }
-
-        public void setDuplicateOf(int index) {
-            copyOf = index;
-        }
-
-        public Map<Instruction, byte[]> getReps() {
-            Map<Instruction, byte[]> reps = new HashMap();
-            for (Instruction in : myops.keySet())
-                if (myops.get(in)[0] == (byte)0xF3)
-                    reps.put(in, myops.get(in));
-            return reps;
-        }
-
-        public Map<Instruction, byte[]> getRepnes() {
-            Map<Instruction, byte[]> reps = new HashMap();
-            for (Instruction in : myops.keySet())
-                if (myops.get(in)[0] == (byte)0xF2)
-                    reps.put(in, myops.get(in));
-            return reps;
-        }
-
-        public Map<Instruction, byte[]> getNonreps() {
-            Map<Instruction, byte[]> reps = new HashMap();
-            for (Instruction in : myops.keySet())
-                if (myops.get(in)[0] != (byte)0xF2 && myops.get(in)[0] != (byte)0xF3)
-                    reps.put(in, myops.get(in));
-            return reps;
-        }
-
-        public boolean hasReps() {
-            for (String opname : namesSet)
-                if (opname.contains("rep"))
-                    return true;
-            return false;
-        }
-
-        public boolean hasUnimplemented() {
-            for (String name : names)
-                if (name.contains("Unimplemented"))
-                    return true;
-            return false;
-        }
-
-        public boolean allUnimplemented() {
-            for (String name : names)
-                if (!name.contains("Unimplemented"))
-                    return false;
-            return true;
-        }
-
-        public boolean isMem() {
-            if (namesSet.size() > 2)
-                return false;
-            String name = null;
-            for (String s : namesSet) {
-                if (name == null)
-                    name = s;
-                else if ((name + "_mem").equals(s))
-                    return true;
-                else if ((s + "_mem").equals(name))
-                    return true;
-            }
-            return false;
-        }
-
-        @Override
-        public String toString() {
-            if (namesSet.size() == 0)
-                return "null;";
-
-            if (copyOf != -1) {
-                return String.format("ops[0x%x];\n", copyOf);
-            }
-
-            StringBuilder b = new StringBuilder();
-            if (namesSet.size() == 1) {
-                b.append(new SingleOpcode(names.get(0)));
-            } else if (isMem()) {
-                String name = null;
-                for (String n : namesSet) {
-                    if (name == null)
-                        name = n;
-                    else if (name.length() > n.length())
-                        name = n;
-                }
-                b.append(new MemoryChooser(name));
-            } else {
-                if (allUnimplemented()) {
-                    b.append(new SingleOpcode(names.get(0)));
-                } else {
-                    b.append(new RepChooser(getReps(), getRepnes(), getNonreps(), modeType));
-                }
-            }
-            return b.toString().trim();
-        }
-    }
-
-    public static class DecoderTemplate {
-        public void writeStart(StringBuilder b) {
-            b.append("new OpcodeDecoder() {\n    public Executable decodeOpcode(" + argsDef + ") {\n");
-        }
-
-        public void writeBody(StringBuilder b) {
-            b.append("throw new IllegalStateException(\"Unimplemented Opcode\");");
-        }
-
-        public void writeEnd(StringBuilder b) {
-            b.append("    }\n};\n");
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder b = new StringBuilder();
-            writeStart(b);
-            writeBody(b);
-            writeEnd(b);
-            return b.toString();
-        }
-    }
-
-    public static class SingleOpcode extends DecoderTemplate {
-        String classname;
-
-        public SingleOpcode(String name) {
-            this.classname = name;
-        }
-
-        @Override
-        public void writeBody(StringBuilder b) {
-            b.append("        return new " + classname + "(" + args + ");\n");
-        }
-    }
-
-    public static class RepChooser extends DecoderTemplate {
-        Map<Instruction, byte[]> reps;
-        Map<Instruction, byte[]> repnes;
-        Map<Instruction, byte[]> normals;
-        int mode;
-
-        public RepChooser(Map<Instruction, byte[]> reps, Map<Instruction, byte[]> repnes, Map<Instruction, byte[]> normals, int mode) {
-            this.reps = reps;
-            this.repnes = repnes;
-            this.normals = normals;
-            this.mode = mode;
-        }
-
-        @Override
-        public void writeBody(StringBuilder b) {
-            Set<String> repNames = new HashSet<String>();
-            for (Instruction in : reps.keySet())
-                repNames.add(Disassembler.getExecutableName(mode, in));
-            Set<String> repneNames = new HashSet<String>();
-            for (Instruction in : repnes.keySet())
-                repneNames.add(Disassembler.getExecutableName(mode, in));
-            Set<String> normalNames = new HashSet<String>();
-            for (Instruction in : normals.keySet())
-                normalNames.add(Disassembler.getExecutableName(mode, in));
-
-            // only add rep clauses if rep name sets are different to normal name set
-            if (!normalNames.containsAll(repneNames))
-                if (repnes.size() > 0) {
-                    b.append("        if (Prefices.isRepne(prefices))\n        {\n");
-                    genericChooser(repnes, mode, b);
-                    b.append("        }\n");
-                }
-            if (!normalNames.containsAll(repNames))
-                if (reps.size() > 0) {
-                    b.append("        if (Prefices.isRep(prefices))\n        {\n");
-                    genericChooser(reps, mode, b);
-                    b.append("        }\n");
-                }
-            genericChooser(normals, mode, b);
-        }
-    }
-
-    public static void genericChooser(Map<Instruction, byte[]> ops, int mode, StringBuilder b) {
-        if (ops.size() == 0)
-            return;
-        if (ops.size() == 1) {
-            for (Instruction in : ops.keySet()) {
-                String name = Disassembler.getExecutableName(mode, in);
-                b.append("            return new " + name + "(" + args + ");\n");
-            }
-            return;
-        }
-        int differentIndex = 0;
-        byte[][] bs = new byte[ops.size()][];
-        int index = 0;
-        for (byte[] bytes : ops.values())
-            bs[index++] = bytes;
-        boolean same = true;
-        while (same) {
-            byte elem = bs[0][differentIndex];
-            for (int i = 1; i < bs.length; i++)
-                if (bs[i][differentIndex] != elem) {
-                    same = false;
-                    break;
-                }
-            if (same)
-                differentIndex++;
-        }
-        // if all names are the same, collapse to 1
-        String prevname = null;
-        boolean allSameName = true;
-        for (Instruction in : ops.keySet()) {
-            String name = Disassembler.getExecutableName(mode, in);
-            if (prevname == null)
-                prevname = name;
-            else if (prevname.equals(name))
-                continue;
-            else {
-                allSameName = false;
-                break;
-            }
-        }
-        if (allSameName) {
-            b.append("        return new " + prevname + "(" + args + ");\n");
-        } else if (isSimpleModrmSplit(ops, mode, differentIndex, b)) {
-
-        } else if (almostIsSimpleModrmSplit(ops, mode, differentIndex, b)) {
-
-        } else {
-            String[] cases = new String[ops.size()];
-            int i = 0;
-            for (Instruction in : ops.keySet()) {
-                String name = Disassembler.getExecutableName(mode, in);
-                cases[i++] = getConstructorLine(name, ops.get(in)[differentIndex]);
-            }
-            b.append("        switch (input.peek()) {\n");
-            Arrays.sort(cases);
-            for (String line : cases)
-                b.append(line);
-            b.append("        }\n        return null;\n");
-        }
-    }
-
-    public static String getConstructorLine(String name, int modrm) {
-        modrm &= 0xff;
-        String[] argTypes;
-        if (name.contains("_"))
-            argTypes = name.substring(name.indexOf("_") + 1).split("_");
-        else
-            argTypes = new String[0];
-        boolean consumesModrm = false;
-        for (String arg : argTypes)
-            if (!Operand.segs.containsKey(arg) && !Operand.reg8.containsKey(arg) && !Operand.reg16.containsKey(arg)
-                && !Operand.reg16only.containsKey(arg))
-                consumesModrm = true;
-        if (!consumesModrm && !name.contains("Unimplemented") && !name.contains("Illegal")) // has zero args, but uses modrm as opcode extension
-            return String.format("            case 0x%02x", modrm) + ": input.read8(); return new " + name + "(" + args + ");\n";
-        else
-            return String.format("            case 0x%02x", modrm) + ": return new " + name + "(" + args + ");\n";
-    }
-
-    public static boolean isSimpleModrmSplit(Map<Instruction, byte[]> ops, int mode, int differentIndex, StringBuilder b) {
-        String[] names = new String[256];
-        for (Instruction in : ops.keySet())
-            names[ops.get(in)[differentIndex] & 0xff] = Disassembler.getExecutableName(mode, in);
-        for (int i = 0; i < 8; i++)
-            for (int k = 0; k < 0xC0; k += 0x40)
-                for (int j = 0; j < 8; j++)
-                    if (!names[j + k + (i << 3)].equals(names[i << 3]))
-                        return false;
-        for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 8; j++)
-                if (!names[j + 0xC0 + (i << 3)].equals(names[0xC0 + (i << 3)]))
-                    return false;
-
-        // write out code
-        b.append("        int modrm = input.peek() & 0xFF;\n");
-        b.append("        int reg = (modrm >> 3) & 7;\n");
-        b.append("        if (modrm < 0xC0)\n        {\n");
-        b.append("            switch (reg) {\n");
-        for (int i = 0; i < 8; i++)
-            if (i + 1 < 8 && names[i * 8].equals(names[i * 8 + 8]))
-                b.append(String.format("            case 0x%02x:\n", i));
-            else
-                b.append(getConstructorLine(names[i * 8], i));
-        b.append("            }\n");
-        b.append("        }\n");
-        b.append("        else\n        {\n");
-        b.append("            switch (reg) {\n");
-        for (int i = 0; i < 8; i++)
-            if (i + 1 < 8 && names[0xc0 + i * 8].equals(names[0xc0 + i * 8 + 8]))
-                b.append(String.format("            case 0x%02x:\n", i));
-            else
-                b.append(getConstructorLine(names[0xc0 + i * 8], i));
-        b.append("            }\n");
-        b.append("        }\n");
-        b.append("        return null;\n");
-        return true;
-    }
-
-    public static boolean almostIsSimpleModrmSplit(Map<Instruction, byte[]> ops, int mode, int differentIndex, StringBuilder b) {
-        String[] names = new String[256];
-        for (Instruction in : ops.keySet())
-            names[ops.get(in)[differentIndex] & 0xff] = Disassembler.getExecutableName(mode, in);
-        boolean subC0Simple = true;
-        for (int i = 0; i < 8; i++)
-            for (int k = 0; k < 0xC0; k += 0x40)
-                for (int j = 0; j < 8; j++)
-                    if (!names[j + k + (i << 3)].equals(names[i << 3]))
-                        subC0Simple = false;
-        boolean postC0Simple = true;
-        for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 8; j++)
-                if (!names[j + 0xC0 + (i << 3)].equals(names[0xC0 + (i << 3)]))
-                    postC0Simple = false;
-
-        if (subC0Simple) {
-            b.append("        int modrm = input.peek() & 0xFF;\n");
-            b.append("        int reg = (modrm >> 3) & 7;\n");
-            b.append("        if (modrm < 0xC0)\n        {\n");
-            b.append("            switch (reg) {\n");
-            for (int i = 0; i < 8; i++)
-                b.append(getConstructorLine(names[i * 8], i));
-            b.append("            }\n");
-            b.append("        }\n");
-
-            // post must be false otherwise IsSimpleModrmSplit would be true
-            b.append("            switch (modrm) {\n");
-            for (int i = 0xc0; i < 0x100; i++)
-                if (i + 1 < 0x100 && names[i].equals(names[i + 1]))
-                    b.append(String.format("            case 0x%02x:\n", i));
-                else
-                    b.append(getConstructorLine(names[i], i));
-            b.append("            }\n");
-            b.append("        return null;\n");
-            return true;
-        } else
-            return false;
-    }
-
-    public static class MemoryChooser extends DecoderTemplate {
-        String name;
-
-        public MemoryChooser(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public void writeBody(StringBuilder b) {
-            b.append("        if (Modrm.isMem(input.peek()))\n            return new " + name + "_mem(" + args
-                + ");\n        else\n            return new " + name + "(" + args + ");\n");
-        }
-    }
-
-    public static void removeDuplicates(OpcodeHolder[] ops) {
-        for (int i = 0x200; i < 0x800; i++)
-            if (ops[i].equals(ops[i % 0x200]))
-                ops[i].setDuplicateOf(i % 0x200);
-    }
-
     public static void generate() throws IOException {
-        System.out.println(GeneratorHelper.readLicenseHeader());
-        System.out.println("package org.jpc.emulator.execution.opcodes;\n");
-        System.out.println("import org.jpc.emulator.execution.Executable;");
-        System.out.println("import org.jpc.emulator.execution.decoder.Modrm;");
-        System.out.println("import org.jpc.emulator.execution.decoder.OpcodeDecoder;");
-        System.out.println("import org.jpc.emulator.execution.decoder.PeekableInputStream;");
-        System.out.println("import org.jpc.emulator.execution.decoder.Prefices;\n");
-        System.out.println("public class ExecutableTables {");
+        final BufferedWriter w = new BufferedWriter(new FileWriter("src/org/jpc/emulator/execution/opcodes/ExecutableTables.java"));
+        try {
+            w.write(GeneratorHelper.readLicenseHeader());
+            w.write("package org.jpc.emulator.execution.opcodes;\n\n");
+            w.write("import org.jpc.emulator.execution.Executable;\n");
+            w.write("import org.jpc.emulator.execution.decoder.Modrm;\n");
+            w.write("import org.jpc.emulator.execution.decoder.OpcodeDecoder;\n");
+            w.write("import org.jpc.emulator.execution.decoder.PeekableInputStream;\n");
+            w.write("import org.jpc.emulator.execution.decoder.Prefices;\n\n");
+            w.write("public class ExecutableTables {\n");
 
-        generateMode(1, "RM");
-        generateMode(2, "PM");
-        generateMode(3, "VM");
+            generateMode(w, 1, "RM");
+            generateMode(w, 2, "PM");
+            generateMode(w, 3, "VM");
 
-        System.out.println("}\n");
+            w.write("}\n");
+
+            w.flush();
+        } finally {
+            w.close();
+        }
     }
 
-    public static void generateMode(int modeType, String mode) {
-        System.out.println("    public static void populate" + mode + "Opcodes(OpcodeDecoder[] ops) {\n");
-        OpcodeHolder[] ops = new OpcodeHolder[0x800];
-        for (int i = 0; i < ops.length; i++)
+    private static void generateMode(Writer w, int modeType, String mode) throws IOException {
+        final OpcodeHolder[] ops = new OpcodeHolder[0x800];
+        for (int i = 0; i < ops.length; i++) {
             ops[i] = new OpcodeHolder(modeType);
+        }
         generateRep(16, ops);
         removeDuplicates(ops);
-        for (int i = 0; i < ops.length; i++)
-            System.out.printf("ops[0x%02x] = " + ops[i] + "\n", i);
-        System.out.println("}\n\n");
+
+        w.write("    public static void populate" + mode + "Opcodes(OpcodeDecoder[] ops) {\n");
+        for (int i = 0; i < ops.length; i++) {
+            w.write(String.format("        ops[0x%02x] = %s\n", i, ops[i]));
+        }
+        w.write("    }\n\n");
     }
 
-    public static void generateRep(int mode, OpcodeHolder[] ops) {
+    private static void generateRep(int mode, OpcodeHolder[] ops) {
         byte[] x86 = new byte[28];
         generateAll(mode, x86, 0, ops);
         x86[0] = (byte)0xF2;
@@ -468,7 +94,7 @@ public class DecoderGenerator {
         generateAll(mode, x86, 1, ops);
     }
 
-    public static void generateAll(int mode, byte[] x86, int opbyte, OpcodeHolder[] ops) {
+    private static void generateAll(int mode, byte[] x86, int opbyte, OpcodeHolder[] ops) {
         Disassembler.ByteArrayPeekStream input = new Disassembler.ByteArrayPeekStream(x86);
 
         int originalOpbyte = opbyte;
@@ -506,7 +132,7 @@ public class DecoderGenerator {
                         }
                         int argumentsLength = input.getCounter() - opcodeLength - preficesLength;
                         String[] args = in.getArgsTypes();
-                        if (args.length == 1 && immediates.contains(args[0])) {
+                        if (args.length == 1 && IMMEDIATES.contains(args[0])) {
                             // don't enumerate immediates
                             ops[base + opcode].addOpcode(in, x86.clone());
                         } else {
@@ -516,7 +142,6 @@ public class DecoderGenerator {
                                 x86[opbyte + 1] = (byte)modrm;
                                 Instruction modin = new Instruction();
                                 try {
-
                                     Disassembler.get_prefixes(mode, input, modin);
                                     Disassembler.search_table(mode, input, modin);
                                     Disassembler.do_mode(mode, modin);
@@ -551,5 +176,9 @@ public class DecoderGenerator {
         }
     }
 
-    public static List<String> immediates = Arrays.asList("Jb", "Jw", "Jd", "Ib", "Iw", "Id");
+    private static void removeDuplicates(OpcodeHolder[] ops) {
+        for (int i = 0x200; i < 0x800; i++)
+            if (ops[i].equals(ops[i % 0x200]))
+                ops[i].setDuplicateOf(i % 0x200);
+    }
 }

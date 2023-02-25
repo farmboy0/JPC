@@ -74,7 +74,7 @@ public class OpcodeWriter implements Callable {
 
     private static String getDirectConstructor(Opcode op) {
         StringBuilder b = new StringBuilder();
-        b.append("    public " + op.getName() + "(" + DecoderGenerator.argsDef + ") {\n");
+        b.append("    public " + op.getName() + "(" + GeneratorHelper.argsDef + ") {\n");
         b.append("        super(blockStart, eip);\n");
         if (op.needsModrm())
             b.append("        int modrm = input.readU8();\n");
