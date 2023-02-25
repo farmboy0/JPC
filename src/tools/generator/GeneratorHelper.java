@@ -1,22 +1,24 @@
 package tools.generator;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class GeneratorHelper {
     public static final String args = "blockStart, eip, prefices, input";
     public static final String argsDef = "int blockStart, int eip, int prefices, PeekableInputStream input";
 
-    private static final String LICENSE_HEADER_FILE = "LicenseHeader";
+    private static final String LICENSE_HEADER_FILE = "/LicenseHeader";
 
     private GeneratorHelper() {
     }
 
     public static String readLicenseHeader() throws IOException {
-        final StringBuilder header = new StringBuilder();
-        final BufferedReader r = new BufferedReader(new FileReader(LICENSE_HEADER_FILE));
+        final InputStream in = GeneratorHelper.class.getResourceAsStream(LICENSE_HEADER_FILE);
+        final BufferedReader r = new BufferedReader(new InputStreamReader(in));
 
+        final StringBuilder header = new StringBuilder();
         String line;
         try {
             while ((line = r.readLine()) != null) {

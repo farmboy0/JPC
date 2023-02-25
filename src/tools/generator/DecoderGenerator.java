@@ -28,6 +28,7 @@
 package tools.generator;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -51,7 +52,12 @@ public class DecoderGenerator {
     public static void main(String[] args) throws Exception {
         OpcodesCollector occ = new OpcodesCollector();
         OpcodesParserHandler.parseUsing(occ);
-        DecoderGenerator.generate();
+        String dir = "src";
+        if (args.length == 1 && args[0] != null)
+            dir = args[0];
+        File fDir = new File(dir);
+        fDir.mkdirs();
+        DecoderGenerator.generate(fDir);
     }
 
     public static String getExecutableName(int mode, Instruction in) {
@@ -94,8 +100,10 @@ public class DecoderGenerator {
         return prefix + "UnimplementedOpcode";
     }
 
-    public static void generate() throws IOException {
-        final BufferedWriter w = new BufferedWriter(new FileWriter("src/org/jpc/emulator/execution/opcodes/ExecutableTables.java"));
+    public static void generate(File dir) throws IOException {
+        final File target = new File(dir, "org/jpc/emulator/execution/opcodes/ExecutableTables.java");
+        target.getParentFile().mkdirs();
+        final BufferedWriter w = new BufferedWriter(new FileWriter(target));
         try {
             w.write(GeneratorHelper.readLicenseHeader());
             w.write("package org.jpc.emulator.execution.opcodes;\n\n");

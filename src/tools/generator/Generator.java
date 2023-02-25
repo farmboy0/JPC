@@ -27,9 +27,16 @@
 
 package tools.generator;
 
+import java.io.File;
+
 public class Generator {
-    public static void main(String[] cmd) throws Exception {
-        OpcodeWriter writer = new OpcodeWriter();
+    public static void main(String[] args) throws Exception {
+        String dir = "src";
+        if (args.length == 1 && args[0] != null)
+            dir = args[0];
+        File fDir = new File(dir);
+        fDir.mkdirs();
+        OpcodeWriter writer = new OpcodeWriter(fDir);
         OpcodesParserHandler.parseUsing(writer);
     }
 }

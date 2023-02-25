@@ -1,6 +1,7 @@
 package tools.generator;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -8,9 +9,11 @@ public class OpcodeWriter implements Callable {
     private static final boolean DEBUG_SIZE = true;
 
     private final String licenseHeader;
+    private final File dir;
 
-    OpcodeWriter() throws IOException {
+    OpcodeWriter(File dir) throws IOException {
         licenseHeader = GeneratorHelper.readLicenseHeader();
+        this.dir = dir;
     }
 
     @Override
@@ -20,9 +23,10 @@ public class OpcodeWriter implements Callable {
     }
 
     private void writeToFile(Opcode op, String mode) {
+        final File target = new File(dir, "org/jpc/emulator/execution/opcodes/" + mode + "/" + op.getName() + ".java");
+        target.getParentFile().mkdirs();
         try {
-            BufferedWriter w = new BufferedWriter(
-                new FileWriter("src/org/jpc/emulator/execution/opcodes/" + mode + "/" + op.getName() + ".java"));
+            BufferedWriter w = new BufferedWriter(new FileWriter(target));
             w.write(licenseHeader);
             w.write(getSource(op, mode));
             w.flush();
