@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jpc.emulator.execution.decoder.Disassembler;
 import org.jpc.emulator.execution.decoder.Instruction;
 
 import tools.generator.template.MemoryChooser;
@@ -26,7 +25,7 @@ class OpcodeHolder {
     }
 
     public void addOpcode(Instruction in, byte[] raw) {
-        String name = Disassembler.getExecutableName(modeType, in);
+        String name = DecoderGenerator.getExecutableName(modeType, in);
         names.add(name);
         namesSet.add(name);
         myops.put(in, raw);

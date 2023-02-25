@@ -32,7 +32,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jpc.emulator.execution.decoder.Disassembler;
 import org.jpc.emulator.execution.decoder.Instruction;
@@ -42,8 +44,54 @@ public class DecoderGenerator {
     private static final List<String> IMMEDIATES = Arrays.asList("Jb", "Jw", "Jd", "Ib", "Iw", "Id");
     private static final byte[] EMPTY = new byte[28];
 
-    public static void main(String[] args) throws IOException {
+    private static final Set<String> RM_OPS = new HashSet<String>();
+    private static final Set<String> PM_OPS = new HashSet<String>();
+    private static final Set<String> VM_OPS = new HashSet<String>();
+
+    public static void main(String[] args) throws Exception {
+        OpcodesCollector occ = new OpcodesCollector();
+        OpcodesParserHandler.parseUsing(occ);
         DecoderGenerator.generate();
+    }
+
+    public static String getExecutableName(int mode, Instruction in) {
+        Set<String> instructions;
+        String prefix;
+        switch (mode) {
+        case 1:
+            instructions = RM_OPS;
+            prefix = "org.jpc.emulator.execution.opcodes.rm.";
+            break;
+        case 2:
+            instructions = PM_OPS;
+            prefix = "org.jpc.emulator.execution.opcodes.pm.";
+            break;
+        case 3:
+            instructions = VM_OPS;
+            prefix = "org.jpc.emulator.execution.opcodes.vm.";
+            break;
+        default:
+            throw new IllegalStateException("Unknown mode: " + mode);
+        }
+        String gen;
+        try {
+            gen = in.getGeneralClassName(false, false);
+        } catch (IllegalStateException e) {
+            return prefix + "InvalidOpcode/*(DecoderGenerator.java line 80)*/";
+        }
+
+        if (instructions.contains(gen))
+            return prefix + gen;
+
+        if (instructions.contains(in.getGeneralClassName(true, false)))
+            return prefix + in.getGeneralClassName(true, false);
+        if (instructions.contains(in.getGeneralClassName(false, true)))
+            return prefix + in.getGeneralClassName(false, true);
+        if (instructions.contains(in.getGeneralClassName(true, true)))
+            return prefix + in.getGeneralClassName(true, true);
+        if (gen.equals("invalid"))
+            return prefix + "InvalidOpcode";
+        return prefix + "UnimplementedOpcode";
     }
 
     public static void generate() throws IOException {
@@ -180,5 +228,20 @@ public class DecoderGenerator {
         for (int i = 0x200; i < 0x800; i++)
             if (ops[i].equals(ops[i % 0x200]))
                 ops[i].setDuplicateOf(i % 0x200);
+    }
+
+    private static class OpcodesCollector implements Callable {
+        @Override
+        public void call(Opcode op, String mode) {
+            if ("rm".equals(mode)) {
+                RM_OPS.add(op.getName());
+            } else if ("pm".equals(mode)) {
+                PM_OPS.add(op.getName());
+            } else if ("vm".equals(mode)) {
+                VM_OPS.add(op.getName());
+            } else {
+                throw new IllegalArgumentException("Unknown mode: " + mode);
+            }
+        }
     }
 }

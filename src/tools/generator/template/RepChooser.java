@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jpc.emulator.execution.decoder.Disassembler;
 import org.jpc.emulator.execution.decoder.Instruction;
 
+import tools.generator.DecoderGenerator;
 import tools.generator.GeneratorHelper;
 
 public class RepChooser extends DecoderTemplate {
@@ -29,13 +29,13 @@ public class RepChooser extends DecoderTemplate {
     public void writeBody(StringBuilder b) {
         Set<String> repNames = new HashSet<String>();
         for (Instruction in : reps.keySet())
-            repNames.add(Disassembler.getExecutableName(mode, in));
+            repNames.add(DecoderGenerator.getExecutableName(mode, in));
         Set<String> repneNames = new HashSet<String>();
         for (Instruction in : repnes.keySet())
-            repneNames.add(Disassembler.getExecutableName(mode, in));
+            repneNames.add(DecoderGenerator.getExecutableName(mode, in));
         Set<String> normalNames = new HashSet<String>();
         for (Instruction in : normals.keySet())
-            normalNames.add(Disassembler.getExecutableName(mode, in));
+            normalNames.add(DecoderGenerator.getExecutableName(mode, in));
 
         // only add rep clauses if rep name sets are different to normal name set
         if (!normalNames.containsAll(repneNames))
@@ -58,7 +58,7 @@ public class RepChooser extends DecoderTemplate {
             return;
         if (ops.size() == 1) {
             for (Instruction in : ops.keySet()) {
-                String name = Disassembler.getExecutableName(mode, in);
+                String name = DecoderGenerator.getExecutableName(mode, in);
                 b.append("            return new " + name + "(" + GeneratorHelper.args + ");\n");
             }
             return;
@@ -83,7 +83,7 @@ public class RepChooser extends DecoderTemplate {
         String prevname = null;
         boolean allSameName = true;
         for (Instruction in : ops.keySet()) {
-            String name = Disassembler.getExecutableName(mode, in);
+            String name = DecoderGenerator.getExecutableName(mode, in);
             if (prevname == null)
                 prevname = name;
             else if (prevname.equals(name))
@@ -103,7 +103,7 @@ public class RepChooser extends DecoderTemplate {
             String[] cases = new String[ops.size()];
             int i = 0;
             for (Instruction in : ops.keySet()) {
-                String name = Disassembler.getExecutableName(mode, in);
+                String name = DecoderGenerator.getExecutableName(mode, in);
                 cases[i++] = getConstructorLine(name, ops.get(in)[differentIndex]);
             }
             b.append("        switch (input.peek()) {\n");
@@ -117,7 +117,7 @@ public class RepChooser extends DecoderTemplate {
     private static boolean almostIsSimpleModrmSplit(Map<Instruction, byte[]> ops, int mode, int differentIndex, StringBuilder b) {
         String[] names = new String[256];
         for (Instruction in : ops.keySet())
-            names[ops.get(in)[differentIndex] & 0xff] = Disassembler.getExecutableName(mode, in);
+            names[ops.get(in)[differentIndex] & 0xff] = DecoderGenerator.getExecutableName(mode, in);
         boolean subC0Simple = true;
         for (int i = 0; i < 8; i++)
             for (int k = 0; k < 0xC0; k += 0x40)
@@ -157,7 +157,7 @@ public class RepChooser extends DecoderTemplate {
     private static boolean isSimpleModrmSplit(Map<Instruction, byte[]> ops, int mode, int differentIndex, StringBuilder b) {
         String[] names = new String[256];
         for (Instruction in : ops.keySet())
-            names[ops.get(in)[differentIndex] & 0xff] = Disassembler.getExecutableName(mode, in);
+            names[ops.get(in)[differentIndex] & 0xff] = DecoderGenerator.getExecutableName(mode, in);
         for (int i = 0; i < 8; i++)
             for (int k = 0; k < 0xC0; k += 0x40)
                 for (int j = 0; j < 8; j++)
