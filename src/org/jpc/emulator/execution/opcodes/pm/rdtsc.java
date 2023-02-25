@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 
@@ -43,7 +43,7 @@ public class rdtsc extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        if (cpu.getCPL() == 0 || (cpu.getCR4() & 0x4) == 0) {
+        if ((cpu.getCPL() == 0) || ((cpu.getCR4() & 0x4) == 0)) {
             long tsc = cpu.getClockCount();
             cpu.r_eax.set32((int)tsc);
             cpu.r_edx.set32((int)(tsc >> 32));

@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class cmc extends Executable {
@@ -42,7 +42,7 @@ public class cmc extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        cpu.cf = !cpu.cf();
+        cpu.cf = cpu.cf() ^ true;
         cpu.flagStatus &= NCF;
         return Branch.None;
     }

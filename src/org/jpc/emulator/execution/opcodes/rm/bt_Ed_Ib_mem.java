@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -50,9 +50,9 @@ public class bt_Ed_Ib_mem extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         cpu.zf(cpu.zf());
-        int bit = 1 << (immb & 32 - 1);
-        int offset = (immb & ~(32 - 1)) / 8;
-        cpu.cf((op1.get32(cpu, offset) & bit) != 0);
+        int bit = 1 << (immb & (32 - 1));
+        int offset = ((immb & ~(32 - 1)) / 8);
+        cpu.cf(((op1.get32(cpu, offset) & bit) != 0));
         return Branch.None;
     }
 

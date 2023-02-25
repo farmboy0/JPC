@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -63,8 +63,8 @@ public class shrd_Ew_Gw_Ib extends Executable {
             else
                 cpu.flagOp1 = op2.get16();
             cpu.flagOp2 = shift;
-            long rot = (long)op1.get16() << 2 * 16 | (0xFFFF & op2.get16()) << 16 | 0xFFFF & op1.get16();
-            cpu.flagResult = (short)(int)(rot >> shift);
+            long rot = ((long)op1.get16() << (2 * 16)) | ((0xFFFF & op2.get16()) << 16) | (0xFFFF & op1.get16());
+            cpu.flagResult = (short)((int)(rot >> shift));
             op1.set16((short)cpu.flagResult);
             cpu.flagIns = UCodes.SHRD16;
             cpu.flagStatus = OSZAPC;

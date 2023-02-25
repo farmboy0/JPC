@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -51,7 +51,7 @@ public class dec_Ed_mem extends Executable {
         cpu.cf = cpu.cf();
         cpu.flagOp1 = op1.get32(cpu);
         cpu.flagOp2 = 1;
-        cpu.flagResult = cpu.flagOp1 - 1;
+        cpu.flagResult = (cpu.flagOp1 - 1);
         op1.set32(cpu, cpu.flagResult);
         cpu.flagIns = UCodes.SUB32;
         cpu.flagStatus = NCF;

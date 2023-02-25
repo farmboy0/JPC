@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class cmp_o32_rAX_Id extends Executable {
@@ -48,7 +48,7 @@ public class cmp_o32_rAX_Id extends Executable {
     public Branch execute(Processor cpu) {
         cpu.flagOp1 = cpu.r_eax.get32();
         cpu.flagOp2 = immd;
-        cpu.flagResult = cpu.flagOp1 - cpu.flagOp2;
+        cpu.flagResult = (cpu.flagOp1 - cpu.flagOp2);
         cpu.flagIns = UCodes.SUB32;
         cpu.flagStatus = OSZAPC;
         return Branch.None;

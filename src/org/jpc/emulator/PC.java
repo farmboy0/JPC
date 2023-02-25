@@ -57,13 +57,13 @@ import java.util.zip.ZipOutputStream;
 
 import javax.swing.JPanel;
 
+import org.jpc.assembly.Disassembler;
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 import org.jpc.emulator.execution.decoder.BasicBlock;
 import org.jpc.emulator.execution.decoder.DebugBasicBlock;
-import org.jpc.emulator.execution.decoder.Disassembler;
-import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.memory.LinearAddressSpace;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
 import org.jpc.emulator.motherboard.BochsPIT;

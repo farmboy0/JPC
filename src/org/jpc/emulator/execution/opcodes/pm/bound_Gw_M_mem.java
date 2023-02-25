@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
@@ -57,7 +57,7 @@ public class bound_Gw_M_mem extends Executable {
         short lower = op2.get16(cpu, 0);
         short upper = op2.get16(cpu, 2);
         short index = op1.get16();
-        if (index < lower || index > upper)
+        if ((index < lower) || (index > upper))
             throw ProcessorException.BOUND_RANGE;
         return Branch.None;
     }

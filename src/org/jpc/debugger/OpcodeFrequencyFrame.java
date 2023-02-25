@@ -46,11 +46,11 @@ import java.util.logging.Logger;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.jpc.assembly.Instruction;
 import org.jpc.debugger.util.BasicTableModel;
 import org.jpc.debugger.util.UtilityFrame;
 import org.jpc.emulator.execution.codeblock.AbstractCodeBlockWrapper;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
-import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.memory.AddressSpace;
 
 public class OpcodeFrequencyFrame extends UtilityFrame implements PCListener, ActionListener, CodeBlockListener, Comparator {

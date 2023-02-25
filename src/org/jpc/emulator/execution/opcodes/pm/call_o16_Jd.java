@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 
@@ -51,7 +51,7 @@ public class call_o16_Jd extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         cpu.eip += blockLength;
-        int tmpEip = 0xffff & cpu.eip + jmp;
+        int tmpEip = 0xffff & (cpu.eip + jmp);
         cpu.cs.checkAddress(tmpEip);
         if ((0xffff & cpu.r_sp.get16()) < 2)
             throw ProcessorException.STACK_SEGMENT_0;

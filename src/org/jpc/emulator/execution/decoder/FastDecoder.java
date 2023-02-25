@@ -30,6 +30,10 @@ package org.jpc.emulator.execution.decoder;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jpc.assembly.Disassembler;
+import org.jpc.assembly.Instruction;
+import org.jpc.assembly.PeekableInputStream;
+import org.jpc.assembly.Prefices;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.opcodes.ExecutableTables;
 import org.jpc.emulator.processor.Processor;

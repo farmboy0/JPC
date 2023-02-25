@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -53,10 +53,10 @@ public class btc_Ed_Gd extends Executable {
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         Reg op2 = cpu.regs[op2Index];
-        int bit = 1 << (op2.get32() & 32 - 1);
-        cpu.cf = 0 != (op1.get32() & bit);
+        int bit = 1 << (op2.get32() & (32 - 1));
+        cpu.cf = (0 != (op1.get32() & bit));
         cpu.flagStatus &= NCF;
-        op1.set32(op1.get32() ^ bit);
+        op1.set32((op1.get32() ^ bit));
         return Branch.None;
     }
 

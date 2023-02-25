@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 

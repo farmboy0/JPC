@@ -27,6 +27,7 @@
 
 package org.jpc.emulator.execution.decoder;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 
 /**

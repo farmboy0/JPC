@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
@@ -54,9 +54,9 @@ public class bt_Ed_Gd_mem extends Executable {
     public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
         cpu.zf(cpu.zf());
-        int bit = 1 << (op2.get32() & 32 - 1);
-        int offset = (op2.get32() & ~(32 - 1)) / 8;
-        cpu.cf((op1.get32(cpu, offset) & bit) != 0);
+        int bit = 1 << (op2.get32() & (32 - 1));
+        int offset = ((op2.get32() & ~(32 - 1)) / 8);
+        cpu.cf(((op1.get32(cpu, offset) & bit) != 0));
         return Branch.None;
     }
 

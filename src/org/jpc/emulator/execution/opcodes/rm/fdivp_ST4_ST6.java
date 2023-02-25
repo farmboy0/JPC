@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class fdivp_ST4_ST6 extends Executable {
@@ -45,9 +45,9 @@ public class fdivp_ST4_ST6 extends Executable {
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(4);
         double freg1 = cpu.fpu.ST(6);
-        if (freg0 == 0.0 && freg1 == 0.0 || Double.isInfinite(freg0) && Double.isInfinite(freg1))
+        if (((freg0 == 0.0) && (freg1 == 0.0)) || (Double.isInfinite(freg0) && Double.isInfinite(freg1)))
             cpu.fpu.setInvalidOperation();
-        if (freg1 == 0.0 && !Double.isNaN(freg0) && !Double.isInfinite(freg0))
+        if ((freg1 == 0.0) && !Double.isNaN(freg0) && !Double.isInfinite(freg0))
             cpu.fpu.setZeroDivide();
         cpu.fpu.setST(4, freg0 / freg1);
         cpu.fpu.pop();

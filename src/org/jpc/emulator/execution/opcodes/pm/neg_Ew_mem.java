@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -49,7 +49,7 @@ public class neg_Ew_mem extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         cpu.flagOp1 = op1.get16(cpu);
-        cpu.flagResult = (short)-cpu.flagOp1;
+        cpu.flagResult = (short)(-cpu.flagOp1);
         op1.set16(cpu, (short)cpu.flagResult);
         cpu.flagIns = UCodes.NEG16;
         cpu.flagStatus = OSZAPC;

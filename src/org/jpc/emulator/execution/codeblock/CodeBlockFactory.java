@@ -33,7 +33,7 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.assembly.PeekableInputStream;
 
 /**
  * Converts a stream of x86 bytecodes into an executable codeblock.

@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -54,7 +54,7 @@ public class cmovle_Gd_Ed extends Executable {
         Reg op1 = cpu.regs[op1Index];
         Reg op2 = cpu.regs[op2Index];
         int tmp = op2.get32();
-        if (cpu.zf() || cpu.sf() != cpu.of())
+        if (cpu.zf() || (cpu.sf() != cpu.of()))
             op1.set32(tmp);
         return Branch.None;
     }

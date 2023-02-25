@@ -32,8 +32,8 @@
 */
 package org.jpc.emulator.execution.codeblock;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.FastDecoder;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 
 /**
  * @author Ian Preston

@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class or_o32_rAX_Id extends Executable {
@@ -46,7 +46,7 @@ public class or_o32_rAX_Id extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         cpu.of = cpu.af = cpu.cf = false;
-        cpu.flagResult = cpu.r_eax.get32() | immd;
+        cpu.flagResult = (cpu.r_eax.get32() | immd);
         cpu.r_eax.set32(cpu.flagResult);
         cpu.flagStatus = SZP;
         return Branch.None;

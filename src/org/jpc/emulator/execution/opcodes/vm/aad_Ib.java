@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.StaticOpcodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class aad_Ib extends Executable {

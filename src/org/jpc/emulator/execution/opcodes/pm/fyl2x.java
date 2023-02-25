@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class fyl2x extends Executable {
@@ -53,7 +53,7 @@ public class fyl2x extends Executable {
                 cpu.fpu.setST(1, freg0);
             else
                 cpu.fpu.setST(1, -freg0);
-        } else if (freg0 == 1 && Double.isInfinite(freg1))
+        } else if ((freg0 == 1) && (Double.isInfinite(freg1)))
             cpu.fpu.setInvalidOperation();
         else if (freg0 == 0) {
             if (freg1 == 0)

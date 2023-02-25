@@ -33,9 +33,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 import static org.jpc.emulator.processor.Processor.getRegString;
 import static org.jpc.emulator.processor.Processor.getSegmentString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 import org.jpc.emulator.processor.ProcessorException;

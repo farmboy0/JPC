@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
@@ -53,11 +53,11 @@ public class verw_Ew_mem extends Executable {
         try {
             Segment test = cpu.getSegment(op1.get16(cpu) & 0xffff);
             int type = test.getType();
-            if ((type & ProtectedModeSegment.DESCRIPTOR_TYPE_CODE_DATA) == 0 || (type & ProtectedModeSegment.TYPE_CODE_CONFORMING) == 0
-                && (cpu.getCPL() > test.getDPL() || test.getRPL() > test.getDPL()))
+            if (((type & ProtectedModeSegment.DESCRIPTOR_TYPE_CODE_DATA) == 0) || (((type & ProtectedModeSegment.TYPE_CODE_CONFORMING) == 0)
+                && ((cpu.getCPL() > test.getDPL()) || (test.getRPL() > test.getDPL()))))
                 cpu.zf(false);
             else
-                cpu.zf((type & ProtectedModeSegment.TYPE_CODE) == 0 && (type & ProtectedModeSegment.TYPE_DATA_WRITABLE) != 0);
+                cpu.zf(((type & ProtectedModeSegment.TYPE_CODE) == 0) && ((type & ProtectedModeSegment.TYPE_DATA_WRITABLE) != 0));
         } catch (ProcessorException e) {
             cpu.zf(false);
         }

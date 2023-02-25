@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -51,7 +51,7 @@ public class inc_Ed_mem extends Executable {
         cpu.cf = Processor.getCarryFlag(cpu.flagStatus, cpu.cf, cpu.flagOp1, cpu.flagOp2, cpu.flagResult, cpu.flagIns);
         cpu.flagOp1 = op1.get32(cpu);
         cpu.flagOp2 = 1;
-        cpu.flagResult = cpu.flagOp1 + 1;
+        cpu.flagResult = (cpu.flagOp1 + 1);
         op1.set32(cpu, cpu.flagResult);
         cpu.flagIns = UCodes.ADD32;
         cpu.flagStatus = NCF;

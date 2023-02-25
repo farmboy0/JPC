@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class loope_a32_Jb extends Executable {
@@ -50,7 +50,7 @@ public class loope_a32_Jb extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         cpu.r_ecx.set32(cpu.r_ecx.get32() - 1);
-        if (cpu.r_cx.get32() != 0 && cpu.zf()) {
+        if ((cpu.r_cx.get32() != 0) && cpu.zf()) {
             int tmpEip = cpu.eip + jmp + blockLength;
             cpu.cs.checkAddress(tmpEip);
             cpu.eip = tmpEip;

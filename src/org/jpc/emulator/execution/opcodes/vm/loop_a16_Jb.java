@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class loop_a16_Jb extends Executable {
@@ -51,7 +51,7 @@ public class loop_a16_Jb extends Executable {
     public Branch execute(Processor cpu) {
         cpu.r_cx.set16(cpu.r_cx.get16() - 1);
         if (cpu.r_cx.get16() != 0) {
-            int target = cpu.eip + jmp + blockLength & 0xffff;
+            int target = (cpu.eip + jmp + blockLength) & 0xffff;
             cpu.cs.checkAddress(target);
             cpu.eip = target;
             return Branch.T1;

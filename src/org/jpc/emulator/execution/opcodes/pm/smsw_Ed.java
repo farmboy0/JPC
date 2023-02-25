@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -50,7 +50,7 @@ public class smsw_Ed extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-        op1.set32(0xFFFF & cpu.getCR0());
+        op1.set32((0xFFFF & cpu.getCR0()));
         return Branch.None;
     }
 

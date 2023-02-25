@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class xchg_o16_rSPr12_rAX extends Executable {

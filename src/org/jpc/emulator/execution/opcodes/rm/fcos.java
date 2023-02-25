@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class fcos extends Executable {
@@ -45,7 +45,7 @@ public class fcos extends Executable {
         double freg0 = cpu.fpu.ST(0);
         if (Double.isInfinite(freg0))
             cpu.fpu.setInvalidOperation();
-        if (freg0 > Long.MAX_VALUE || freg0 < Long.MIN_VALUE)
+        if ((freg0 > Long.MAX_VALUE) || (freg0 < Long.MIN_VALUE))
             cpu.fpu.conditionCode |= 4; // set C2
         else
             cpu.fpu.setST(0, Math.cos(freg0));

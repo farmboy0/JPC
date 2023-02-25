@@ -25,6 +25,7 @@ debugger: build_core
 	    -C resources smallpause.png \
 	    -C resources smallplay.png \
 	    -C resources tick.png \
+	    -C build org/jpc/assembly \
 	    -C build org/jpc/emulator \
 	    -C build org/jpc/support \
 	    -C build org/jpc/j2se \
@@ -35,7 +36,9 @@ debugger: build_core
 .PHONY: build_core
 build_core:
 	mkdir -p build
-	javac $(JAVA_BUILD_OPTS) -d build `find src/org/jpc/emulator -name \*.java` \
+	javac $(JAVA_BUILD_OPTS) -d build \
+	    `find src/org/jpc/assembly -name \*.java` \
+	    `find src/org/jpc/emulator -name \*.java` \
 	    `find src/org/jpc/support -name \*.java` \
 	    `find src/org/jpc/debugger -name \*.java` \
 	    `find src/org/jpc/j2se -name \*.java`
@@ -101,6 +104,7 @@ fast: build_core
 	    -C resources smallplay.png \
 	    -C resources tick.png \
 	    -C resources soundbank-min.gm \
+	    -C build org/jpc/assembly \
 	    -C build org/jpc/emulator \
 	    -C build org/jpc/support \
 	    -C build org/jpc/j2se \
@@ -132,6 +136,7 @@ release: build_core
 	    -C resources smallplay.png \
 	    -C resources tick.png \
 	    -C resources soundbank-min.gm \
+	    -C build org/jpc/assembly \
 	    -C build org/jpc/emulator \
 	    -C build org/jpc/support \
 	    -C build org/jpc/j2se \
@@ -159,6 +164,7 @@ secondapplication: build_core
 	    -C resources smallplay.png \
 	    -C resources tick.png \
 	    -C resources soundbank-min.gm \
+	    -C build org/jpc/assembly \
 	    -C build org/jpc/emulator \
 	    -C build org/jpc/support \
 	    -C build org/jpc/j2se \

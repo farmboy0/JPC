@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -58,8 +58,8 @@ public class shld_Ed_Gd_CL extends Executable {
             int shift = cpu.r_cl.get8() & 0x1f;
             cpu.flagOp1 = op1.get32();
             cpu.flagOp2 = shift;
-            long rot = (0xffffffffL & op2.get32()) << 32 | 0xffffffffL & op1.get32();
-            cpu.flagResult = (int)(rot << shift | rot >>> 2 * 32 - shift);
+            long rot = ((0xffffffffL & op2.get32()) << 32) | (0xffffffffL & op1.get32());
+            cpu.flagResult = ((int)((rot << shift) | (rot >>> (2 * 32 - shift))));
             op1.set32(cpu.flagResult);
             cpu.flagIns = UCodes.SHLD32;
             cpu.flagStatus = OSZAPC;

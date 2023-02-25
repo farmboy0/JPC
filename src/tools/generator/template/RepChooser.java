@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.assembly.Instruction;
 
 import tools.generator.DecoderGenerator;
 import tools.generator.GeneratorHelper;

@@ -27,11 +27,11 @@
 
 package org.jpc.emulator.execution.codeblock;
 
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.Executable.Branch;
 import org.jpc.emulator.execution.SelfModifyingCodeException;
 import org.jpc.emulator.execution.decoder.BasicBlock;
-import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.ModeSwitchException;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;

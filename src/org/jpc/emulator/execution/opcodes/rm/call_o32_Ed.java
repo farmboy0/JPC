@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 import org.jpc.emulator.processor.ProcessorException;
@@ -56,7 +56,7 @@ public class call_o32_Ed extends Executable {
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         cpu.eip += blockLength;
-        if (cpu.r_esp.get32() < 4 && cpu.r_esp.get32() > 0)
+        if ((cpu.r_esp.get32() < 4) && (cpu.r_esp.get32() > 0))
             throw ProcessorException.STACK_SEGMENT_0;
         int target = op1.get32();
         cpu.push32(cpu.eip);

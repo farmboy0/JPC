@@ -36,9 +36,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jpc.emulator.execution.decoder.Disassembler;
-import org.jpc.emulator.execution.decoder.Instruction;
-import org.jpc.emulator.execution.decoder.Prefices;
+import org.jpc.assembly.Disassembler;
+import org.jpc.assembly.Instruction;
+import org.jpc.assembly.Prefices;
 
 public class DecoderGenerator {
     private static final List<String> IMMEDIATES = Arrays.asList("Jb", "Jw", "Jd", "Ib", "Iw", "Id");
@@ -99,11 +99,11 @@ public class DecoderGenerator {
         try {
             w.write(GeneratorHelper.readLicenseHeader());
             w.write("package org.jpc.emulator.execution.opcodes;\n\n");
+            w.write("import org.jpc.assembly.PeekableInputStream;\n");
+            w.write("import org.jpc.assembly.Prefices;\n");
             w.write("import org.jpc.emulator.execution.Executable;\n");
             w.write("import org.jpc.emulator.execution.decoder.Modrm;\n");
-            w.write("import org.jpc.emulator.execution.decoder.OpcodeDecoder;\n");
-            w.write("import org.jpc.emulator.execution.decoder.PeekableInputStream;\n");
-            w.write("import org.jpc.emulator.execution.decoder.Prefices;\n\n");
+            w.write("import org.jpc.emulator.execution.decoder.OpcodeDecoder;\n\n");
             w.write("public class ExecutableTables {\n");
 
             generateMode(w, 1, "RM");

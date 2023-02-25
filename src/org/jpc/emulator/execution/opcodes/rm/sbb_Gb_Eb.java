@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -54,7 +54,7 @@ public class sbb_Gb_Eb extends Executable {
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         Reg op2 = cpu.regs[op2Index];
-        int add = cpu.cf() ? 1 : 0;
+        int add = (cpu.cf() ? 1 : 0);
         cpu.flagOp1 = op1.get8();
         cpu.flagOp2 = op2.get8();
         cpu.flagResult = (byte)(cpu.flagOp1 - (cpu.flagOp2 + add));

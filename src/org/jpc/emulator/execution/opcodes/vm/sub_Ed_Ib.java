@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.vm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -55,7 +55,7 @@ public class sub_Ed_Ib extends Executable {
         Reg op1 = cpu.regs[op1Index];
         cpu.flagOp1 = op1.get32();
         cpu.flagOp2 = immb;
-        cpu.flagResult = cpu.flagOp1 - cpu.flagOp2;
+        cpu.flagResult = (cpu.flagOp1 - cpu.flagOp2);
         op1.set32(cpu.flagResult);
         cpu.flagIns = UCodes.SUB32;
         cpu.flagStatus = OSZAPC;

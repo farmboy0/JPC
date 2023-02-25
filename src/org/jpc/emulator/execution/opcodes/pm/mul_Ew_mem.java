@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -52,7 +52,7 @@ public class mul_Ew_mem extends Executable {
         cpu.r_eax.set16((short)res64);
         cpu.r_edx.set16((short)(res64 >> 16));
         cpu.setOSZAPC_Logic16((int)res64);
-        cpu.cf = cpu.of = cpu.r_edx.get16() != 0;
+        cpu.cf = cpu.of = (cpu.r_edx.get16() != 0);
         return Branch.None;
     }
 

@@ -27,6 +27,7 @@
 
 package org.jpc.emulator.execution.decoder;
 
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.fpu64.FpuState64;
 

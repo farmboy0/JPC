@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 import org.jpc.emulator.processor.ProcessorException;
@@ -59,7 +59,10 @@ public class lldt_Ew extends Executable {
             cpu.ldtr = SegmentFactory.NULL_SEGMENT;
         } else {
             Segment newSegment = cpu.getSegment(selector & ~0x4);
-            if ((newSegment.getType() != 0x02) || !newSegment.isPresent())
+            if (newSegment.getType() != 0x02)
+                throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
+
+            if (!(newSegment.isPresent()))
                 throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, selector, true);
             cpu.ldtr = newSegment;
         }

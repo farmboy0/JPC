@@ -37,12 +37,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.PC;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 import org.jpc.emulator.execution.codeblock.SpanningDecodeException;
-import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.memory.AddressSpace;
 import org.jpc.emulator.memory.LazyCodeBlockMemory;
 import org.jpc.emulator.memory.LinearAddressSpace;

@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 
@@ -46,7 +46,7 @@ public class sti extends Executable {
         if (Processor.cpuLevel >= 5) {
             if ((cpu.getCR4() & 2) != 0) // Protected mode Virtual Interrupts enabled
             {
-                if (cpu.getCPL() == 3 && cpu.getIOPrivilegeLevel() < 3) {
+                if ((cpu.getCPL() == 3) && (cpu.getIOPrivilegeLevel() < 3)) {
                     if (cpu.getVIP())
                         throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);
                     cpu.eflagsVirtualInterrupt = true;

@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -54,7 +54,7 @@ public class fbld_Mt_mem extends Executable {
             byte b = data[i];
             n += (b & 0xf) * decade;
             decade *= 10;
-            n += (b >> 4 & 0xf) * decade;
+            n += ((b >> 4) & 0xf) * decade;
             decade *= 10;
         }
         byte sign = data[9];

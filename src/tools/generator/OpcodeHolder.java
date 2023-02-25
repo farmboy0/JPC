@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.assembly.Instruction;
 
 import tools.generator.template.MemoryChooser;
 import tools.generator.template.RepChooser;

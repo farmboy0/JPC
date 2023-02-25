@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.vm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
@@ -61,8 +61,9 @@ public class shld_Ew_Gw_CL_mem extends Executable {
             else
                 cpu.flagOp1 = op2.get16();
             cpu.flagOp2 = shift;
-            long rot = (long)(0xFFFF & op1.get16(cpu)) << 2 * 16 | (0xffffffffL & 0xFFFF & op2.get16()) << 16 | 0xFFFF & op1.get16(cpu);
-            cpu.flagResult = (short)(int)(rot << shift | rot >>> 2 * 16 - shift);
+            long rot = ((long)(0xFFFF & op1.get16(cpu)) << (2 * 16)) | ((0xffffffffL & 0xFFFF & op2.get16()) << 16)
+                | (0xFFFF & op1.get16(cpu));
+            cpu.flagResult = (short)((int)((rot << shift) | (rot >>> (2 * 16 - shift))));
             op1.set16(cpu, (short)cpu.flagResult);
             cpu.flagIns = UCodes.SHLD16;
             cpu.flagStatus = OSZAPC;

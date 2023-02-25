@@ -1,7 +1,7 @@
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 

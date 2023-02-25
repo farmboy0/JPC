@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class fsubp_ST3_ST6 extends Executable {
@@ -45,8 +45,8 @@ public class fsubp_ST3_ST6 extends Executable {
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(3);
         double freg1 = cpu.fpu.ST(6);
-        if (freg0 == Double.NEGATIVE_INFINITY && freg1 == Double.NEGATIVE_INFINITY
-            || freg0 == Double.POSITIVE_INFINITY && freg1 == Double.POSITIVE_INFINITY)
+        if ((freg0 == Double.NEGATIVE_INFINITY && freg1 == Double.NEGATIVE_INFINITY)
+            || (freg0 == Double.POSITIVE_INFINITY && freg1 == Double.POSITIVE_INFINITY))
             cpu.fpu.setInvalidOperation();
         cpu.fpu.setST(3, freg0 - freg1);
         cpu.fpu.pop();

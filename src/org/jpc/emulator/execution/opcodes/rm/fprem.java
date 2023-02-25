@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class fprem extends Executable {
@@ -63,9 +63,9 @@ public class fprem extends Executable {
             cpu.fpu.conditionCode |= 4; // set C2
             int n = 63; // implementation dependent in manual
             double f = Math.pow(2.0, d - n);
-            double z = freg0 / freg1 / f;
-            double qq = z < 0 ? Math.ceil(z) : Math.floor(z);
-            freg0 = freg0 - freg1 * qq * f;
+            double z = (freg0 / freg1) / f;
+            double qq = (z < 0) ? Math.ceil(z) : Math.floor(z);
+            freg0 = freg0 - (freg1 * qq * f);
         }
         cpu.fpu.setST(0, freg0);
         return Branch.None;

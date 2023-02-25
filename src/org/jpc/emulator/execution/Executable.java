@@ -27,7 +27,7 @@
 
 package org.jpc.emulator.execution;
 
-import org.jpc.emulator.execution.decoder.Instruction;
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.processor.Processor;
 
 public abstract class Executable {

@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -52,7 +52,7 @@ public class add_Ed_Id_mem extends Executable {
     public Branch execute(Processor cpu) {
         cpu.flagOp1 = op1.get32(cpu);
         cpu.flagOp2 = immd;
-        cpu.flagResult = cpu.flagOp1 + cpu.flagOp2;
+        cpu.flagResult = (cpu.flagOp1 + cpu.flagOp2);
         op1.set32(cpu, cpu.flagResult);
         cpu.flagIns = UCodes.ADD32;
         cpu.flagStatus = OSZAPC;

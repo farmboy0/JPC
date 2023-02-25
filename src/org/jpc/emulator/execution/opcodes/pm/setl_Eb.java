@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -50,7 +50,7 @@ public class setl_Eb extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-        op1.set8((byte)(cpu.sf() != cpu.of() ? 1 : 0));
+        op1.set8((byte)((cpu.sf() != cpu.of()) ? 1 : 0));
         return Branch.None;
     }
 

@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -56,7 +56,7 @@ public class lmsw_Ew extends Executable {
         Reg op1 = cpu.regs[op1Index];
         cpu.eip += blockLength;
         cpu.eip &= 0xFFFF;
-        cpu.setCR0(cpu.getCR0() & ~0xf | op1.get16() & 0xf);
+        cpu.setCR0((cpu.getCR0() & ~0xf) | (op1.get16() & 0xf));
         return Branch.Jmp_Unknown;
     }
 

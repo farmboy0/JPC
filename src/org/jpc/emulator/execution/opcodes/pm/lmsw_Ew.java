@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 import org.jpc.emulator.processor.ProcessorException;
@@ -57,7 +57,7 @@ public class lmsw_Ew extends Executable {
         Reg op1 = cpu.regs[op1Index];
         if (cpu.getCPL() != 0)
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
-        cpu.setCR0(cpu.getCR0() & ~0xe | op1.get16() & 0xe);
+        cpu.setCR0((cpu.getCR0() & ~0xe) | (op1.get16() & 0xe));
         cpu.eip += blockLength;
         return Branch.Jmp_Unknown;
     }

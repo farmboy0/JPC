@@ -25,16 +25,32 @@
     End of licence header
 */
 
-package org.jpc.emulator.execution.decoder;
+package org.jpc.assembly;
 
-public class ZygoteInstruction {
-    String operator;
-    ZygoteOperand[] operand;
-    int prefix;
+public interface PeekableInputStream {
+    void seek(int delta);
 
-    public ZygoteInstruction(String mnemonic, ZygoteOperand op1, ZygoteOperand op2, ZygoteOperand op3, int prefix) {
-        this.operator = mnemonic;
-        this.operand = new ZygoteOperand[] { op1, op2, op3 };
-        this.prefix = prefix;
-    }
+    int peek();
+
+    void forward();
+
+    byte read8();
+
+    short read16();
+
+    int read32();
+
+    long readU(long bits);
+
+    int readU8();
+
+    int readU16();
+
+    long readU32();
+
+    int getCounter();
+
+    long getAddress();
+
+    void resetCounter();
 }

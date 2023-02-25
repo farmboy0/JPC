@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.vm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -53,7 +53,7 @@ public class test_Ed_Id extends Executable {
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         cpu.of = cpu.af = cpu.cf = false;
-        cpu.flagResult = op1.get32() & immd;
+        cpu.flagResult = (op1.get32() & immd);
         cpu.flagStatus = SZP;
         return Branch.None;
     }

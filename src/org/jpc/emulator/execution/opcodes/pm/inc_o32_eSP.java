@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class inc_o32_eSP extends Executable {
@@ -46,7 +46,7 @@ public class inc_o32_eSP extends Executable {
         cpu.cf = Processor.getCarryFlag(cpu.flagStatus, cpu.cf, cpu.flagOp1, cpu.flagOp2, cpu.flagResult, cpu.flagIns);
         cpu.flagOp1 = cpu.r_esp.get32();
         cpu.flagOp2 = 1;
-        cpu.flagResult = cpu.flagOp1 + 1;
+        cpu.flagResult = (cpu.flagOp1 + 1);
         cpu.r_esp.set32(cpu.flagResult);
         cpu.flagIns = UCodes.ADD32;
         cpu.flagStatus = NCF;

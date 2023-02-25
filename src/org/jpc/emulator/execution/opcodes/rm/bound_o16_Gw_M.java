@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
@@ -58,7 +58,7 @@ public class bound_o16_Gw_M extends Executable {
         short lower = cpu.physicalMemory.getWord(addr);
         short upper = cpu.physicalMemory.getWord(addr + 2);
         short index = op1.get16();
-        if (index < lower || index > upper)
+        if ((index < lower) || (index > upper))
             throw ProcessorException.BOUND_RANGE;
         return Branch.None;
     }

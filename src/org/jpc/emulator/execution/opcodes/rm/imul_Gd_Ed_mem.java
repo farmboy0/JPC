@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
@@ -55,7 +55,7 @@ public class imul_Gd_Ed_mem extends Executable {
         Reg op1 = cpu.regs[op1Index];
         int iop1 = op1.get32();
         int iop2 = op2.get32(cpu);
-        long res64 = (long)iop1 * iop2;
+        long res64 = (((long)iop1) * iop2);
         op1.set32((int)res64);
         cpu.setOSZAPC_Logic32((int)res64);
         if (res64 != (int)res64) {

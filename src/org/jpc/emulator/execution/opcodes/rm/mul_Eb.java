@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -54,7 +54,7 @@ public class mul_Eb extends Executable {
         int res16 = (op1.get8() & 0xff) * (0xFF & cpu.r_eax.get8());
         cpu.r_eax.set16(res16);
         cpu.setOSZAPC_Logic8(res16);
-        cpu.cf = cpu.of = cpu.r_eax.getHigh() != 0;
+        cpu.cf = cpu.of = (cpu.r_eax.getHigh() != 0);
         return Branch.None;
     }
 

@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -50,7 +50,7 @@ public class fld_Mt_mem extends Executable {
         byte[] raw = op1.getF80(cpu);
         long val = 0L;
         for (int i = 0; i < 8; i++)
-            val |= (0xff & raw[i]) << 8 * i;
+            val |= ((0xff & raw[i]) << (8 * i));
         cpu.fpu.push(Double.longBitsToDouble(val));
         return Branch.None;
     }

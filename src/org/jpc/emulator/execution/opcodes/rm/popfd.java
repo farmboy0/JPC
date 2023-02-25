@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class popfd extends Executable {
@@ -42,7 +42,7 @@ public class popfd extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        cpu.setEFlags(cpu.getEFlags() & 0x20000 | cpu.pop32() & ~0x1a0000);
+        cpu.setEFlags((cpu.getEFlags() & 0x20000) | (cpu.pop32() & ~0x1a0000));
         return Branch.None;
     }
 

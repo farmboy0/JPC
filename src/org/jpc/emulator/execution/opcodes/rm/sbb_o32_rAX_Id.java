@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class sbb_o32_rAX_Id extends Executable {
@@ -46,10 +46,10 @@ public class sbb_o32_rAX_Id extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        int add = cpu.cf() ? 1 : 0;
+        int add = (cpu.cf() ? 1 : 0);
         cpu.flagOp1 = cpu.r_eax.get32();
         cpu.flagOp2 = immd;
-        cpu.flagResult = cpu.flagOp1 - (cpu.flagOp2 + add);
+        cpu.flagResult = (cpu.flagOp1 - (cpu.flagOp2 + add));
         cpu.r_eax.set32(cpu.flagResult);
         cpu.flagIns = UCodes.SBB32;
         cpu.flagStatus = OSZAPC;

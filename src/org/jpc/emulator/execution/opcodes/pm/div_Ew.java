@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 import org.jpc.emulator.processor.ProcessorException;
@@ -53,7 +53,7 @@ public class div_Ew extends Executable {
         Reg op1 = cpu.regs[op1Index];
         if (op1.get16() == 0)
             throw ProcessorException.DIVIDE_ERROR;
-        long ldiv = (0xffffL & cpu.r_edx.get16()) << 16 | 0xFFFF & cpu.r_eax.get16();
+        long ldiv = ((0xffffL & cpu.r_edx.get16()) << 16) | (0xFFFF & cpu.r_eax.get16());
         int quot32 = (int)(ldiv / (0xFFFF & op1.get16()));
         if (quot32 != (quot32 & 0xffff))
             throw ProcessorException.DIVIDE_ERROR;

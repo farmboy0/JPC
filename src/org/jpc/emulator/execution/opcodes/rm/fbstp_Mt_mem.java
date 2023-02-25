@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -51,14 +51,14 @@ public class fbstp_Mt_mem extends Executable {
         long n = (long)Math.abs(cpu.fpu.ST(0));
         long decade = 1;
         for (int i = 0; i < 9; i++) {
-            int val = (int)(n % (decade * 10) / decade);
+            int val = (int)((n % (decade * 10)) / decade);
             byte b = (byte)val;
             decade *= 10;
-            val = (int)(n % (decade * 10) / decade);
-            b |= val << 4;
+            val = (int)((n % (decade * 10)) / decade);
+            b |= (val << 4);
             data[i] = b;
         }
-        data[9] = cpu.fpu.ST(0) < 0 ? (byte)0x80 : (byte)0x00;
+        data[9] = (cpu.fpu.ST(0) < 0) ? (byte)0x80 : (byte)0x00;
         op1.setF80(cpu, data);
         cpu.fpu.pop();
         return Branch.None;

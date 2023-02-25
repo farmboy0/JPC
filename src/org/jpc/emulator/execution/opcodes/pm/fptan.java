@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class fptan extends Executable {
@@ -43,7 +43,7 @@ public class fptan extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(0);
-        if (freg0 > Math.pow(2.0, 63.0) || freg0 < -1.0 * Math.pow(2.0, 63.0)) {
+        if ((freg0 > Math.pow(2.0, 63.0)) || (freg0 < -1.0 * Math.pow(2.0, 63.0))) {
             if (Double.isInfinite(freg0))
                 cpu.fpu.setInvalidOperation();
             cpu.fpu.conditionCode |= 4;

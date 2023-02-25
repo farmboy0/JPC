@@ -1,5 +1,8 @@
 /*
     JPC: An x86 PC Hardware Emulator for a pure Java Virtual Machine
+    Release Version 3.0
+
+    A project by Ian Preston, ianopolous AT gmail.com
 
     Copyright (C) 2012-2013 Ian Preston
 
@@ -16,7 +19,7 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-    Details (including contact information) can be found at:
+    Details (including current contact information) can be found at:
 
     jpc.sourceforge.net
     or the developer website
@@ -27,15 +30,14 @@
 
 package org.jpc.emulator.execution.opcodes;
 
+import org.jpc.assembly.PeekableInputStream;
+import org.jpc.assembly.Prefices;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
 import org.jpc.emulator.execution.decoder.OpcodeDecoder;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
-import org.jpc.emulator.execution.decoder.Prefices;
 
 public class ExecutableTables {
     public static void populateRMOpcodes(OpcodeDecoder[] ops) {
-
         ops[0x00] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
@@ -699,7 +701,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -723,7 +725,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -776,7 +778,10 @@ public class ExecutableTables {
         ops[0x6c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.insb_a16(blockStart, eip, prefices, input);
@@ -785,7 +790,10 @@ public class ExecutableTables {
         ops[0x6d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_insw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_insw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.insw_a16(blockStart, eip, prefices, input);
@@ -794,7 +802,10 @@ public class ExecutableTables {
         ops[0x6e] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_outsb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_outsb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.outsb_a16(blockStart, eip, prefices, input);
@@ -803,7 +814,10 @@ public class ExecutableTables {
         ops[0x6f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_outsw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_outsw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.outsw_a16(blockStart, eip, prefices, input);
@@ -909,7 +923,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -956,7 +970,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1003,7 +1017,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1050,7 +1064,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1178,7 +1192,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1202,7 +1216,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -1222,7 +1236,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1381,7 +1395,10 @@ public class ExecutableTables {
         ops[0xa4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_movsb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_movsb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.movsb_a16(blockStart, eip, prefices, input);
@@ -1390,7 +1407,10 @@ public class ExecutableTables {
         ops[0xa5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_movsw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_movsw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.movsw_a16(blockStart, eip, prefices, input);
@@ -1435,7 +1455,10 @@ public class ExecutableTables {
         ops[0xaa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_stosb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_stosb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.stosb_a16(blockStart, eip, prefices, input);
@@ -1444,7 +1467,10 @@ public class ExecutableTables {
         ops[0xab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_stosw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_stosw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.stosw_a16(blockStart, eip, prefices, input);
@@ -1453,7 +1479,10 @@ public class ExecutableTables {
         ops[0xac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_lodsb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_lodsb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.lodsb_a16(blockStart, eip, prefices, input);
@@ -1462,7 +1491,10 @@ public class ExecutableTables {
         ops[0xad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.lodsw_a16(blockStart, eip, prefices, input);
@@ -1592,7 +1624,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1639,7 +1671,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1698,7 +1730,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1722,7 +1754,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -1733,7 +1765,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1757,7 +1789,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -1768,7 +1800,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1805,7 +1837,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1890,7 +1922,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1937,7 +1969,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -1984,7 +2016,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2031,7 +2063,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2102,7 +2134,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2260,7 +2292,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2432,7 +2464,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2533,7 +2565,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2645,7 +2677,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2788,7 +2820,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -2920,7 +2952,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3069,7 +3101,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3296,7 +3328,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3341,7 +3373,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3422,7 +3454,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3461,7 +3493,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3511,7 +3543,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3554,7 +3586,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3799,7 +3831,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3836,7 +3868,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3869,7 +3901,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3902,7 +3934,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3935,7 +3967,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -3968,7 +4000,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -4001,7 +4033,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -4034,7 +4066,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -4514,7 +4546,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -4567,7 +4599,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -4620,7 +4652,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -5069,7 +5101,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -5133,7 +5165,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -5157,7 +5189,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -5177,7 +5209,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -5201,7 +5233,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -5212,7 +5244,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -5236,7 +5268,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -5274,7 +5306,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -5401,7 +5433,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -5625,7 +5657,10 @@ public class ExecutableTables {
         ops[0x1e6] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
@@ -6269,7 +6304,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6293,7 +6328,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -6341,7 +6376,10 @@ public class ExecutableTables {
         ops[0x26d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_insd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_insd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -6352,7 +6390,10 @@ public class ExecutableTables {
         ops[0x26f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_outsd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_outsd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.outsd_a16(blockStart, eip, prefices, input);
@@ -6396,7 +6437,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6445,7 +6486,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6545,7 +6586,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6569,7 +6610,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -6586,7 +6627,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6720,7 +6761,10 @@ public class ExecutableTables {
         ops[0x2a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_movsd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_movsd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.movsd_a16(blockStart, eip, prefices, input);
@@ -6753,7 +6797,10 @@ public class ExecutableTables {
         ops[0x2ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_stosd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_stosd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.stosd_a16(blockStart, eip, prefices, input);
@@ -6764,7 +6811,10 @@ public class ExecutableTables {
         ops[0x2ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.lodsd_a16(blockStart, eip, prefices, input);
@@ -6854,7 +6904,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6909,7 +6959,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6933,7 +6983,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -6944,7 +6994,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -6968,7 +7018,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -6981,7 +7031,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7048,7 +7098,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7097,7 +7147,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7154,7 +7204,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7332,7 +7382,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7535,7 +7585,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7594,7 +7644,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7644,7 +7694,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -7685,7 +7735,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -8008,7 +8058,10 @@ public class ExecutableTables {
         ops[0x36c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -8017,7 +8070,10 @@ public class ExecutableTables {
         ops[0x36d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -8037,7 +8093,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -8347,7 +8403,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -8371,7 +8427,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -8391,7 +8447,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -8415,7 +8471,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -8426,7 +8482,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -8450,7 +8506,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -8483,7 +8539,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -8589,7 +8645,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -9120,7 +9176,10 @@ public class ExecutableTables {
         ops[0x4a4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_movsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_movsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.movsb_a32(blockStart, eip, prefices, input);
@@ -9129,7 +9188,10 @@ public class ExecutableTables {
         ops[0x4a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_movsw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_movsw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.movsw_a32(blockStart, eip, prefices, input);
@@ -9166,7 +9228,10 @@ public class ExecutableTables {
         ops[0x4aa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_stosb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_stosb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.stosb_a32(blockStart, eip, prefices, input);
@@ -9175,7 +9240,10 @@ public class ExecutableTables {
         ops[0x4ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_stosw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_stosw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.stosw_a32(blockStart, eip, prefices, input);
@@ -9184,7 +9252,10 @@ public class ExecutableTables {
         ops[0x4ac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_lodsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_lodsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.lodsb_a32(blockStart, eip, prefices, input);
@@ -9193,7 +9264,10 @@ public class ExecutableTables {
         ops[0x4ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_lodsw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_lodsw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.lodsw_a32(blockStart, eip, prefices, input);
@@ -10403,7 +10477,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -10427,7 +10501,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -10532,7 +10606,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -10581,7 +10655,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -10681,7 +10755,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -10705,7 +10779,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -10722,7 +10796,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -10854,7 +10928,10 @@ public class ExecutableTables {
         ops[0x6a4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_movsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_movsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.movsb_a32(blockStart, eip, prefices, input);
@@ -10863,7 +10940,10 @@ public class ExecutableTables {
         ops[0x6a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_movsd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_movsd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.movsd_a32(blockStart, eip, prefices, input);
@@ -10904,7 +10984,10 @@ public class ExecutableTables {
         ops[0x6aa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_stosb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_stosb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.stosb_a32(blockStart, eip, prefices, input);
@@ -10913,7 +10996,10 @@ public class ExecutableTables {
         ops[0x6ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_stosd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_stosd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.stosd_a32(blockStart, eip, prefices, input);
@@ -10922,7 +11008,10 @@ public class ExecutableTables {
         ops[0x6ac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_lodsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_lodsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.lodsb_a32(blockStart, eip, prefices, input);
@@ -10931,7 +11020,10 @@ public class ExecutableTables {
         ops[0x6ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.rep_lodsd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.rep_lodsd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.lodsd_a32(blockStart, eip, prefices, input);
@@ -11031,7 +11123,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11086,7 +11178,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11110,7 +11202,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -11121,7 +11213,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11145,7 +11237,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -11158,7 +11250,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11225,7 +11317,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11274,7 +11366,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11335,7 +11427,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11513,7 +11605,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11732,7 +11824,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11791,7 +11883,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11841,7 +11933,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -11882,7 +11974,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -12205,7 +12297,10 @@ public class ExecutableTables {
         ops[0x76c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -12214,7 +12309,10 @@ public class ExecutableTables {
         ops[0x76d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.rm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -12234,7 +12332,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -12544,7 +12642,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -12568,7 +12666,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -12588,7 +12686,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -12612,7 +12710,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -12623,7 +12721,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -12647,7 +12745,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.rm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -12680,7 +12778,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -12786,7 +12884,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -12982,7 +13080,6 @@ public class ExecutableTables {
     }
 
     public static void populatePMOpcodes(OpcodeDecoder[] ops) {
-
         ops[0x00] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
@@ -13646,7 +13743,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -13670,7 +13767,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -13723,7 +13820,10 @@ public class ExecutableTables {
         ops[0x6c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.insb_a16(blockStart, eip, prefices, input);
@@ -13738,7 +13838,10 @@ public class ExecutableTables {
         ops[0x6e] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.outsb_a16(blockStart, eip, prefices, input);
@@ -13747,7 +13850,10 @@ public class ExecutableTables {
         ops[0x6f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.outsw_a16(blockStart, eip, prefices, input);
@@ -13853,7 +13959,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -13900,7 +14006,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -13947,7 +14053,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -13994,7 +14100,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14122,7 +14228,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14146,7 +14252,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -14166,7 +14272,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14325,7 +14431,10 @@ public class ExecutableTables {
         ops[0xa4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_movsb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_movsb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.movsb_a16(blockStart, eip, prefices, input);
@@ -14334,7 +14443,10 @@ public class ExecutableTables {
         ops[0xa5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_movsw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_movsw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.movsw_a16(blockStart, eip, prefices, input);
@@ -14379,7 +14491,10 @@ public class ExecutableTables {
         ops[0xaa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_stosb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_stosb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.stosb_a16(blockStart, eip, prefices, input);
@@ -14388,7 +14503,10 @@ public class ExecutableTables {
         ops[0xab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_stosw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_stosw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.stosw_a16(blockStart, eip, prefices, input);
@@ -14397,7 +14515,10 @@ public class ExecutableTables {
         ops[0xac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_lodsb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_lodsb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.lodsb_a16(blockStart, eip, prefices, input);
@@ -14406,7 +14527,10 @@ public class ExecutableTables {
         ops[0xad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.lodsw_a16(blockStart, eip, prefices, input);
@@ -14536,7 +14660,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14583,7 +14707,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14642,7 +14766,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14666,7 +14790,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -14677,7 +14801,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14701,7 +14825,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -14712,7 +14836,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14749,7 +14873,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14834,7 +14958,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14881,7 +15005,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14928,7 +15052,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -14975,7 +15099,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -15046,7 +15170,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -15204,7 +15328,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -15376,7 +15500,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -15477,7 +15601,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -15589,7 +15713,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -15732,7 +15856,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -15864,7 +15988,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16013,7 +16137,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16240,7 +16364,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16285,7 +16409,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16366,7 +16490,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16405,7 +16529,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16455,7 +16579,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16502,7 +16626,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16753,7 +16877,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16790,7 +16914,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16823,7 +16947,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16856,7 +16980,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16889,7 +17013,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16922,7 +17046,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16955,7 +17079,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -16988,7 +17112,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -17510,7 +17634,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -17563,7 +17687,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -17616,7 +17740,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -18083,7 +18207,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -18153,7 +18277,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -18177,7 +18301,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -18197,7 +18321,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -18221,7 +18345,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -18232,7 +18356,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -18256,7 +18380,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -18294,7 +18418,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -18427,7 +18551,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -18653,7 +18777,10 @@ public class ExecutableTables {
         ops[0x1e6] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
@@ -19297,7 +19424,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19321,7 +19448,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -19373,7 +19500,10 @@ public class ExecutableTables {
         ops[0x26f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.outsd_a16(blockStart, eip, prefices, input);
@@ -19417,7 +19547,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19466,7 +19596,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19566,7 +19696,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19590,7 +19720,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -19610,7 +19740,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19744,7 +19874,10 @@ public class ExecutableTables {
         ops[0x2a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_movsd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_movsd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.movsd_a16(blockStart, eip, prefices, input);
@@ -19777,7 +19910,10 @@ public class ExecutableTables {
         ops[0x2ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_stosd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_stosd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.stosd_a16(blockStart, eip, prefices, input);
@@ -19788,7 +19924,10 @@ public class ExecutableTables {
         ops[0x2ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.lodsd_a16(blockStart, eip, prefices, input);
@@ -19878,7 +20017,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19937,7 +20076,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19961,7 +20100,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -19972,7 +20111,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -19996,7 +20135,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -20009,7 +20148,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20084,7 +20223,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20133,7 +20272,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20190,7 +20329,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20368,7 +20507,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20567,7 +20706,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20626,7 +20765,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20676,7 +20815,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -20723,7 +20862,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -21164,7 +21303,10 @@ public class ExecutableTables {
         ops[0x36c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -21173,7 +21315,10 @@ public class ExecutableTables {
         ops[0x36d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -21193,7 +21338,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -21510,7 +21655,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -21534,7 +21679,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -21554,7 +21699,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -21578,7 +21723,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -21589,7 +21734,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -21613,7 +21758,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -21646,7 +21791,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -21760,7 +21905,7 @@ public class ExecutableTables {
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 if (Prefices.isRepne(prefices)) {
                     int modrm = input.peek() & 0xFF;
-                    int reg = modrm >> 3 & 7;
+                    int reg = (modrm >> 3) & 7;
                     if (modrm < 0xC0) {
                         switch (reg) {
                         case 0x00:
@@ -21797,7 +21942,7 @@ public class ExecutableTables {
                     return null;
                 }
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -22200,7 +22345,10 @@ public class ExecutableTables {
         ops[0x46c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_insb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_insb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.insb_a32(blockStart, eip, prefices, input);
@@ -22209,7 +22357,10 @@ public class ExecutableTables {
         ops[0x46d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_insw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_insw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.insw_a32(blockStart, eip, prefices, input);
@@ -22218,7 +22369,10 @@ public class ExecutableTables {
         ops[0x46e] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_outsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_outsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.outsb_a32(blockStart, eip, prefices, input);
@@ -22227,7 +22381,10 @@ public class ExecutableTables {
         ops[0x46f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_outsw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_outsw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -22340,7 +22497,10 @@ public class ExecutableTables {
         ops[0x4a4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_movsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_movsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.movsb_a32(blockStart, eip, prefices, input);
@@ -22349,7 +22509,10 @@ public class ExecutableTables {
         ops[0x4a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_movsw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_movsw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.movsw_a32(blockStart, eip, prefices, input);
@@ -22386,7 +22549,10 @@ public class ExecutableTables {
         ops[0x4aa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_stosb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_stosb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.stosb_a32(blockStart, eip, prefices, input);
@@ -22395,7 +22561,10 @@ public class ExecutableTables {
         ops[0x4ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_stosw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_stosw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.stosw_a32(blockStart, eip, prefices, input);
@@ -22404,7 +22573,10 @@ public class ExecutableTables {
         ops[0x4ac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_lodsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_lodsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.lodsb_a32(blockStart, eip, prefices, input);
@@ -22413,7 +22585,10 @@ public class ExecutableTables {
         ops[0x4ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_lodsw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_lodsw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.lodsw_a32(blockStart, eip, prefices, input);
@@ -23623,7 +23798,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -23647,7 +23822,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -23693,7 +23868,10 @@ public class ExecutableTables {
         ops[0x66c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_insb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_insb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.insb_a32(blockStart, eip, prefices, input);
@@ -23702,7 +23880,10 @@ public class ExecutableTables {
         ops[0x66d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_insd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_insd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -23711,7 +23892,10 @@ public class ExecutableTables {
         ops[0x66e] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_outsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_outsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.outsb_a32(blockStart, eip, prefices, input);
@@ -23720,7 +23904,10 @@ public class ExecutableTables {
         ops[0x66f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_outsd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_outsd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.outsd_a32(blockStart, eip, prefices, input);
@@ -23764,7 +23951,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -23813,7 +24000,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -23913,7 +24100,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -23937,7 +24124,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -23957,7 +24144,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24089,7 +24276,10 @@ public class ExecutableTables {
         ops[0x6a4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_movsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_movsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.movsb_a32(blockStart, eip, prefices, input);
@@ -24098,7 +24288,10 @@ public class ExecutableTables {
         ops[0x6a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_movsd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_movsd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.movsd_a32(blockStart, eip, prefices, input);
@@ -24139,7 +24332,10 @@ public class ExecutableTables {
         ops[0x6aa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_stosb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_stosb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.stosb_a32(blockStart, eip, prefices, input);
@@ -24148,7 +24344,10 @@ public class ExecutableTables {
         ops[0x6ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_stosd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_stosd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.stosd_a32(blockStart, eip, prefices, input);
@@ -24157,7 +24356,10 @@ public class ExecutableTables {
         ops[0x6ac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_lodsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_lodsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.lodsb_a32(blockStart, eip, prefices, input);
@@ -24166,7 +24368,10 @@ public class ExecutableTables {
         ops[0x6ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.rep_lodsd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.rep_lodsd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.lodsd_a32(blockStart, eip, prefices, input);
@@ -24266,7 +24471,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24325,7 +24530,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24349,7 +24554,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -24360,7 +24565,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24384,7 +24589,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -24397,7 +24602,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24472,7 +24677,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24521,7 +24726,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24582,7 +24787,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24760,7 +24965,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -24975,7 +25180,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -25034,7 +25239,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -25084,7 +25289,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -25131,7 +25336,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -25572,7 +25777,10 @@ public class ExecutableTables {
         ops[0x76c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -25581,7 +25789,10 @@ public class ExecutableTables {
         ops[0x76d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.pm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -25601,7 +25812,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -25918,7 +26129,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -25942,7 +26153,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -25962,7 +26173,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -25986,7 +26197,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -25997,7 +26208,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -26021,7 +26232,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.pm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -26054,7 +26265,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -26168,7 +26379,7 @@ public class ExecutableTables {
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 if (Prefices.isRepne(prefices)) {
                     int modrm = input.peek() & 0xFF;
-                    int reg = modrm >> 3 & 7;
+                    int reg = (modrm >> 3) & 7;
                     if (modrm < 0xC0) {
                         switch (reg) {
                         case 0x00:
@@ -26205,7 +26416,7 @@ public class ExecutableTables {
                     return null;
                 }
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -26401,7 +26612,6 @@ public class ExecutableTables {
     }
 
     public static void populateVMOpcodes(OpcodeDecoder[] ops) {
-
         ops[0x00] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
@@ -27065,7 +27275,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27089,7 +27299,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -27148,7 +27358,10 @@ public class ExecutableTables {
         ops[0x6d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_insw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_insw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.insw_a16(blockStart, eip, prefices, input);
@@ -27163,7 +27376,10 @@ public class ExecutableTables {
         ops[0x6f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_outsw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_outsw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.outsw_a16(blockStart, eip, prefices, input);
@@ -27269,7 +27485,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27316,7 +27532,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27363,7 +27579,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27410,7 +27626,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27538,7 +27754,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27562,7 +27778,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -27582,7 +27798,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27741,7 +27957,10 @@ public class ExecutableTables {
         ops[0xa4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_movsb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_movsb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.movsb_a16(blockStart, eip, prefices, input);
@@ -27750,7 +27969,10 @@ public class ExecutableTables {
         ops[0xa5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_movsw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_movsw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.movsw_a16(blockStart, eip, prefices, input);
@@ -27795,7 +28017,10 @@ public class ExecutableTables {
         ops[0xaa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_stosb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_stosb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.stosb_a16(blockStart, eip, prefices, input);
@@ -27804,7 +28029,10 @@ public class ExecutableTables {
         ops[0xab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_stosw_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_stosw_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.stosw_a16(blockStart, eip, prefices, input);
@@ -27813,7 +28041,10 @@ public class ExecutableTables {
         ops[0xac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_lodsb_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_lodsb_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.lodsb_a16(blockStart, eip, prefices, input);
@@ -27822,7 +28053,10 @@ public class ExecutableTables {
         ops[0xad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.lodsw_a16(blockStart, eip, prefices, input);
@@ -27952,7 +28186,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -27999,7 +28233,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28058,7 +28292,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28082,7 +28316,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -28093,7 +28327,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28117,7 +28351,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -28128,7 +28362,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28165,7 +28399,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28250,7 +28484,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28297,7 +28531,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28344,7 +28578,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28391,7 +28625,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28462,7 +28696,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28620,7 +28854,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28792,7 +29026,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -28893,7 +29127,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29005,7 +29239,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29148,7 +29382,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29280,7 +29514,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29429,7 +29663,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29656,7 +29890,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29701,7 +29935,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29782,7 +30016,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29821,7 +30055,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29871,7 +30105,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -29914,7 +30148,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30158,7 +30392,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30195,7 +30429,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30228,7 +30462,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30261,7 +30495,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30294,7 +30528,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30327,7 +30561,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30360,7 +30594,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30393,7 +30627,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30867,7 +31101,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30920,7 +31154,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -30973,7 +31207,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -31392,7 +31626,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -31456,7 +31690,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -31480,7 +31714,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -31500,7 +31734,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -31524,7 +31758,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -31535,7 +31769,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -31559,7 +31793,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -31597,7 +31831,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -31721,7 +31955,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -31945,7 +32179,10 @@ public class ExecutableTables {
         ops[0x1e6] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
@@ -32628,7 +32865,10 @@ public class ExecutableTables {
         ops[0x26d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_insd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_insd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -32639,7 +32879,10 @@ public class ExecutableTables {
         ops[0x26f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_outsd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_outsd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.outsd_a16(blockStart, eip, prefices, input);
@@ -32683,7 +32926,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -32732,7 +32975,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -32832,7 +33075,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -32856,7 +33099,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -32873,7 +33116,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33007,7 +33250,10 @@ public class ExecutableTables {
         ops[0x2a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_movsd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_movsd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.movsd_a16(blockStart, eip, prefices, input);
@@ -33040,7 +33286,10 @@ public class ExecutableTables {
         ops[0x2ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_stosd_a16(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_stosd_a16(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.stosd_a16(blockStart, eip, prefices, input);
@@ -33051,7 +33300,10 @@ public class ExecutableTables {
         ops[0x2ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.lodsd_a16(blockStart, eip, prefices, input);
@@ -33141,7 +33393,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33196,7 +33448,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33220,7 +33472,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -33231,7 +33483,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33255,7 +33507,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -33268,7 +33520,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33335,7 +33587,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33384,7 +33636,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33441,7 +33693,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33619,7 +33871,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33818,7 +34070,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33877,7 +34129,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33927,7 +34179,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -33968,7 +34220,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -34282,7 +34534,10 @@ public class ExecutableTables {
         ops[0x36c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -34291,7 +34546,10 @@ public class ExecutableTables {
         ops[0x36d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -34311,7 +34569,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -34621,7 +34879,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -34645,7 +34903,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -34665,7 +34923,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -34689,7 +34947,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -34700,7 +34958,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -34724,7 +34982,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -34757,7 +35015,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -34856,7 +35114,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -35379,7 +35637,10 @@ public class ExecutableTables {
         ops[0x4a4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_movsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_movsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.movsb_a32(blockStart, eip, prefices, input);
@@ -35388,7 +35649,10 @@ public class ExecutableTables {
         ops[0x4a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_movsw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_movsw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.movsw_a32(blockStart, eip, prefices, input);
@@ -35425,7 +35689,10 @@ public class ExecutableTables {
         ops[0x4aa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_stosb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_stosb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.stosb_a32(blockStart, eip, prefices, input);
@@ -35434,7 +35701,10 @@ public class ExecutableTables {
         ops[0x4ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_stosw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_stosw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.stosw_a32(blockStart, eip, prefices, input);
@@ -35443,7 +35713,10 @@ public class ExecutableTables {
         ops[0x4ac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_lodsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_lodsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.lodsb_a32(blockStart, eip, prefices, input);
@@ -35452,7 +35725,10 @@ public class ExecutableTables {
         ops[0x4ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_lodsw_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_lodsw_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.lodsw_a32(blockStart, eip, prefices, input);
@@ -36709,7 +36985,10 @@ public class ExecutableTables {
         ops[0x66f] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.outsd_a32(blockStart, eip, prefices, input);
@@ -36753,7 +37032,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -36802,7 +37081,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -36902,7 +37181,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -36926,7 +37205,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -36943,7 +37222,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37075,7 +37354,10 @@ public class ExecutableTables {
         ops[0x6a4] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_movsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_movsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.movsb_a32(blockStart, eip, prefices, input);
@@ -37084,7 +37366,10 @@ public class ExecutableTables {
         ops[0x6a5] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_movsd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_movsd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.movsd_a32(blockStart, eip, prefices, input);
@@ -37125,7 +37410,10 @@ public class ExecutableTables {
         ops[0x6aa] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_stosb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_stosb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.stosb_a32(blockStart, eip, prefices, input);
@@ -37134,7 +37422,10 @@ public class ExecutableTables {
         ops[0x6ab] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_stosd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_stosd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.stosd_a32(blockStart, eip, prefices, input);
@@ -37143,7 +37434,10 @@ public class ExecutableTables {
         ops[0x6ac] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_lodsb_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_lodsb_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.lodsb_a32(blockStart, eip, prefices, input);
@@ -37152,7 +37446,10 @@ public class ExecutableTables {
         ops[0x6ad] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.rep_lodsd_a32(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.rep_lodsd_a32(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.lodsd_a32(blockStart, eip, prefices, input);
@@ -37252,7 +37549,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37307,7 +37604,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37331,7 +37628,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -37342,7 +37639,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37366,7 +37663,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -37379,7 +37676,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37446,7 +37743,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37495,7 +37792,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37556,7 +37853,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37734,7 +38031,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -37949,7 +38246,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38008,7 +38305,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38058,7 +38355,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38099,7 +38396,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38413,7 +38710,10 @@ public class ExecutableTables {
         ops[0x76c] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -38422,7 +38722,10 @@ public class ExecutableTables {
         ops[0x76d] = new OpcodeDecoder() {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
-                if (Prefices.isRepne(prefices) || Prefices.isRep(prefices)) {
+                if (Prefices.isRepne(prefices)) {
+                    return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
+                }
+                if (Prefices.isRep(prefices)) {
                     return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode(blockStart, eip, prefices, input);
                 }
                 return new org.jpc.emulator.execution.opcodes.vm.UnimplementedOpcode(blockStart, eip, prefices, input);
@@ -38442,7 +38745,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38752,7 +39055,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38776,7 +39079,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -38796,7 +39099,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38820,7 +39123,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -38831,7 +39134,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38855,7 +39158,7 @@ public class ExecutableTables {
                     case 0x06:
                     case 0x07:
                         input.read8();
-                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(Disassembler.java line 189)*/(blockStart, eip,
+                        return new org.jpc.emulator.execution.opcodes.vm.InvalidOpcode/*(DecoderGenerator.java line 80)*/(blockStart, eip,
                             prefices, input);
                     }
                 }
@@ -38888,7 +39191,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:
@@ -38987,7 +39290,7 @@ public class ExecutableTables {
             @Override
             public Executable decodeOpcode(int blockStart, int eip, int prefices, PeekableInputStream input) {
                 int modrm = input.peek() & 0xFF;
-                int reg = modrm >> 3 & 7;
+                int reg = (modrm >> 3) & 7;
                 if (modrm < 0xC0) {
                     switch (reg) {
                     case 0x00:

@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -52,11 +52,11 @@ public class rcr_Eb_I1_mem extends Executable {
         if (shift != 0) {
             long val = 0xFF & op1.get8(cpu);
             val |= cpu.cf() ? 1L << 8 : 0;
-            val = val >>> shift | val << 8 + 1 - shift;
+            val = (val >>> shift) | (val << (8 + 1 - shift));
             op1.set8(cpu, (byte)(int)val);
-            boolean bit30 = (val & 1L << 8 - 2) != 0;
-            boolean bit31 = (val & 1L << 8 - 1) != 0;
-            cpu.cf((val & 1L << 8) != 0);
+            boolean bit30 = (val & (1L << (8 - 2))) != 0;
+            boolean bit31 = (val & (1L << (8 - 1))) != 0;
+            cpu.cf((val & (1L << 8)) != 0);
             if (shift == 1)
                 cpu.of(bit30 ^ bit31);
         }

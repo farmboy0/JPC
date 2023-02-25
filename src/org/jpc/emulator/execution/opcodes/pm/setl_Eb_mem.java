@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -47,7 +47,7 @@ public class setl_Eb_mem extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        op1.set8(cpu, (byte)(cpu.sf() != cpu.of() ? 1 : 0));
+        op1.set8(cpu, (byte)((cpu.sf() != cpu.of()) ? 1 : 0));
         return Branch.None;
     }
 

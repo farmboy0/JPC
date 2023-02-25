@@ -25,7 +25,7 @@
     End of licence header
 */
 
-package org.jpc.emulator.execution.decoder;
+package org.jpc.assembly;
 
 import org.jpc.emulator.processor.Processor;
 

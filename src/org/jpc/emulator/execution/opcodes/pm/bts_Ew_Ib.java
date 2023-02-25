@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -52,8 +52,8 @@ public class bts_Ew_Ib extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-        int bit = 1 << (immb & 16 - 1);
-        cpu.cf = 0 != (op1.get16() & bit);
+        int bit = 1 << (immb & (16 - 1));
+        cpu.cf = (0 != (op1.get16() & bit));
         cpu.flagStatus &= NCF;
         op1.set16((short)(op1.get16() | bit));
         return Branch.None;

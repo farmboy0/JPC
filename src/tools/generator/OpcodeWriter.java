@@ -63,6 +63,7 @@ public class OpcodeWriter implements Callable {
         b.append("\n");
         b.append("import static org.jpc.emulator.processor.Processor.*;\n");
         b.append("\n");
+        b.append("import org.jpc.assembly.*;\n");
         b.append("import org.jpc.emulator.execution.*;\n");
         b.append("import org.jpc.emulator.execution.decoder.*;\n");
         b.append("import org.jpc.emulator.processor.*;\n");

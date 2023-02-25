@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class popfd extends Executable {
@@ -43,12 +43,12 @@ public class popfd extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         if (cpu.getCPL() == 0)
-            cpu.setEFlags(cpu.getEFlags() & 0x20000 | cpu.pop32() & ~(0x20000 | 0x180000));
+            cpu.setEFlags(((cpu.getEFlags() & 0x20000) | (cpu.pop32() & ~(0x20000 | 0x180000))));
         else {
             if (cpu.getCPL() > cpu.eflagsIOPrivilegeLevel)
-                cpu.setEFlags(cpu.getEFlags() & 0x23200 | cpu.pop32() & ~(0x23200 | 0x180000));
+                cpu.setEFlags(((cpu.getEFlags() & 0x23200) | (cpu.pop32() & ~(0x23200 | 0x180000))));
             else
-                cpu.setEFlags(cpu.getEFlags() & 0x23000 | cpu.pop32() & ~(0x23000 | 0x180000));
+                cpu.setEFlags(((cpu.getEFlags() & 0x23000) | (cpu.pop32() & ~(0x23000 | 0x180000))));
         }
         return Branch.None;
     }

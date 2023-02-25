@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 
@@ -46,7 +46,7 @@ public class popfw extends Executable {
         if (cpu.eflagsIOPrivilegeLevel < 3)
             throw ProcessorException.GENERAL_PROTECTION_0;
         int flags = cpu.getEFlags() & ~0xcfff;
-        flags |= cpu.pop16() & 0xcfff;
+        flags |= (cpu.pop16() & 0xcfff);
         cpu.setFlags((short)flags);
         return Branch.None;
     }

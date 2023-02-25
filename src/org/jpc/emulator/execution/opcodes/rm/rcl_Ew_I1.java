@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -54,10 +54,10 @@ public class rcl_Ew_I1 extends Executable {
         shift %= 16 + 1;
         long val = 0xFFFF & op1.get16();
         val |= cpu.cf() ? 1L << 16 : 0;
-        val = val << shift | val >>> 16 + 1 - shift;
+        val = (val << shift) | (val >>> (16 + 1 - shift));
         op1.set16((short)(int)val);
-        boolean bit31 = (val & 1L << 16 - 1) != 0;
-        boolean bit32 = (val & 1L << 16) != 0;
+        boolean bit31 = (val & (1L << (16 - 1))) != 0;
+        boolean bit32 = (val & (1L << (16))) != 0;
         cpu.cf(bit32);
         if (shift == 1)
             cpu.of(bit31 ^ bit32);

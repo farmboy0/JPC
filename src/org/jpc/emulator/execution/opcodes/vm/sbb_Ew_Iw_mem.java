@@ -30,10 +30,10 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -50,7 +50,7 @@ public class sbb_Ew_Iw_mem extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        int add = cpu.cf() ? 1 : 0;
+        int add = (cpu.cf() ? 1 : 0);
         cpu.flagOp1 = op1.get16(cpu);
         cpu.flagOp2 = immw;
         cpu.flagResult = (short)(cpu.flagOp1 - (cpu.flagOp2 + add));

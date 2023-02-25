@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -49,8 +49,8 @@ public class fadd_Mq_mem extends Executable {
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(0);
         double freg1 = op1.getF64(cpu);
-        if (freg0 == Double.NEGATIVE_INFINITY && freg1 == Double.POSITIVE_INFINITY
-            || freg0 == Double.POSITIVE_INFINITY && freg1 == Double.NEGATIVE_INFINITY)
+        if ((freg0 == Double.NEGATIVE_INFINITY && freg1 == Double.POSITIVE_INFINITY)
+            || (freg0 == Double.POSITIVE_INFINITY && freg1 == Double.NEGATIVE_INFINITY))
             cpu.fpu.setInvalidOperation();
         cpu.fpu.setST(0, freg0 + freg1);
         return Branch.None;

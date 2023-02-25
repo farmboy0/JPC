@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 
@@ -45,7 +45,7 @@ public class wrmsr extends Executable {
     public Branch execute(Processor cpu) {
         if (cpu.getCPL() != 0)
             throw new ProcessorException(ProcessorException.Type.GENERAL_PROTECTION, 0, true);//ProcessorException.GENERAL_PROTECTION_0;
-        cpu.setMSR(cpu.r_ecx.get32(), cpu.r_eax.get32() & 0xffffffffL | (cpu.r_edx.get32() & 0xffffffffL) << 32);
+        cpu.setMSR(cpu.r_ecx.get32(), (cpu.r_eax.get32() & 0xffffffffl) | ((cpu.r_edx.get32() & 0xffffffffl) << 32));
         return Branch.None;
     }
 

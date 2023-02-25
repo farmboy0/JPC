@@ -30,8 +30,8 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class fdivr_ST7_ST2 extends Executable {
@@ -45,9 +45,9 @@ public class fdivr_ST7_ST2 extends Executable {
     public Branch execute(Processor cpu) {
         double freg0 = cpu.fpu.ST(7);
         double freg1 = cpu.fpu.ST(2);
-        if (freg0 == 0.0 && freg1 == 0.0 || Double.isInfinite(freg0) && Double.isInfinite(freg1))
+        if (((freg0 == 0.0) && (freg1 == 0.0)) || (Double.isInfinite(freg0) && Double.isInfinite(freg1)))
             cpu.fpu.setInvalidOperation();
-        if (freg0 == 0.0 && !Double.isNaN(freg1) && !Double.isInfinite(freg1))
+        if ((freg0 == 0.0) && !Double.isNaN(freg1) && !Double.isInfinite(freg1))
             cpu.fpu.setZeroDivide();
         cpu.fpu.setST(7, freg1 / freg0);
         return Branch.None;

@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
@@ -53,9 +53,9 @@ public class bts_Ew_Gw_mem extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         Reg op2 = cpu.regs[op2Index];
-        int bit = 1 << (op2.get16() & 16 - 1);
-        int offset = (op2.get16() & ~(16 - 1)) / 8;
-        cpu.cf = 0 != (op1.get16(cpu, offset) & bit);
+        int bit = 1 << (op2.get16() & (16 - 1));
+        int offset = ((op2.get16() & ~(16 - 1)) / 8);
+        cpu.cf = (0 != (op1.get16(cpu, offset) & bit));
         cpu.flagStatus &= NCF;
         op1.set16(cpu, offset, (short)(op1.get16(cpu, offset) | bit));
         return Branch.None;

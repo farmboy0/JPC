@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -53,7 +53,7 @@ public class bt_Ed_Ib extends Executable {
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         cpu.zf(cpu.zf());
-        cpu.cf((op1.get32() & 1 << (immb & 32 - 1)) != 0);
+        cpu.cf(((op1.get32() & (1 << (immb & (32 - 1)))) != 0));
         return Branch.None;
     }
 

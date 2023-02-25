@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.vm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -52,7 +52,7 @@ public class neg_Eb extends Executable {
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         cpu.flagOp1 = op1.get8();
-        cpu.flagResult = (byte)-cpu.flagOp1;
+        cpu.flagResult = (byte)(-cpu.flagOp1);
         op1.set8((byte)cpu.flagResult);
         cpu.flagIns = UCodes.NEG8;
         cpu.flagStatus = OSZAPC;

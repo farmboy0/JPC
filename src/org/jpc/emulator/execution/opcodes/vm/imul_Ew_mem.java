@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -49,7 +49,7 @@ public class imul_Ew_mem extends Executable {
     public Branch execute(Processor cpu) {
         int iop1 = op1.get16(cpu);
         int iop2 = cpu.r_eax.get16();
-        int res32 = (short)iop1 * (short)iop2;
+        int res32 = (((short)iop1) * ((short)iop2));
         cpu.r_eax.set16((short)res32);
         cpu.r_edx.set16((short)(res32 >> 16));
         cpu.setOSZAPC_Logic16(res32);

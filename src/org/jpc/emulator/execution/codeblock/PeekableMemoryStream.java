@@ -27,7 +27,7 @@
 
 package org.jpc.emulator.execution.codeblock;
 
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.memory.Memory;
 
 /**

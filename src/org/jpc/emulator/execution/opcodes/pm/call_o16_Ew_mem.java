@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
@@ -55,7 +55,7 @@ public class call_o16_Ew_mem extends Executable {
         cpu.eip += blockLength;
         int tempEIP = op1.get16(cpu) & 0xffff;
         cpu.cs.checkAddress(tempEIP);
-        if (cpu.r_sp.get16() < 2 && cpu.r_sp.get16() > 0)
+        if ((cpu.r_sp.get16() < 2) && (cpu.r_sp.get16() > 0))
             throw ProcessorException.STACK_SEGMENT_0;
         cpu.push16((short)cpu.eip);
         cpu.eip = tempEIP;

@@ -27,6 +27,8 @@
 
 package org.jpc.emulator.execution.decoder;
 
+import org.jpc.assembly.PeekableInputStream;
+import org.jpc.assembly.Prefices;
 import org.jpc.emulator.processor.Processor;
 
 public class Sib {

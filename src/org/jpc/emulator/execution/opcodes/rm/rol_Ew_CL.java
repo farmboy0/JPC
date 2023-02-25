@@ -32,9 +32,9 @@ package org.jpc.emulator.execution.opcodes.rm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -50,12 +50,12 @@ public class rol_Ew_CL extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
-        int shift = cpu.r_cl.get8() & 16 - 1;
+        int shift = cpu.r_cl.get8() & (16 - 1);
         int reg0 = 0xFFFF & op1.get16();
-        int res = reg0 << shift | reg0 >>> 16 - shift;
+        int res = (reg0 << shift) | (reg0 >>> (16 - shift));
         op1.set16((short)res);
         boolean bit0 = (res & 1) != 0;
-        boolean bit31 = (res & 1 << 16 - 1) != 0;
+        boolean bit31 = (res & (1 << (16 - 1))) != 0;
         if ((0x1F & cpu.r_cl.get8()) > 0) {
             cpu.cf = bit0;
             cpu.of = bit0 ^ bit31;

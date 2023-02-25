@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.vm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
 
@@ -51,7 +51,7 @@ public class call_Jd extends Executable {
     @Override
     public Branch execute(Processor cpu) {
         cpu.eip += blockLength;
-        if (cpu.r_esp.get32() < 4 && cpu.r_esp.get32() > 0)
+        if ((cpu.r_esp.get32() < 4) && (cpu.r_esp.get32() > 0))
             throw ProcessorException.STACK_SEGMENT_0;
         cpu.push32(cpu.eip);
         cpu.eip += jmp;

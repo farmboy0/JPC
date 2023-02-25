@@ -33,8 +33,8 @@
 
 package org.jpc.emulator.execution.codeblock;
 
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.execution.Executable;
-import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.Processor;
 
 /**

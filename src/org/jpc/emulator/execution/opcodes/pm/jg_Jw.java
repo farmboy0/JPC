@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class jg_Jw extends Executable {
@@ -49,7 +49,7 @@ public class jg_Jw extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        if (!cpu.zf() && cpu.sf() == cpu.of()) {
+        if (!cpu.zf() && (cpu.sf() == cpu.of())) {
             int tmpEip = cpu.eip + jmp + blockLength;
             cpu.cs.checkAddress(tmpEip);
             cpu.eip = tmpEip;

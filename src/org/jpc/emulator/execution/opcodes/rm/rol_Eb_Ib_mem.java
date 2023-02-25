@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 
@@ -49,12 +49,12 @@ public class rol_Eb_Ib_mem extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        int shift = immb & 8 - 1;
+        int shift = immb & (8 - 1);
         int reg0 = 0xFF & op1.get8(cpu);
-        int res = reg0 << shift | reg0 >>> 8 - shift;
+        int res = (reg0 << shift) | (reg0 >>> (8 - shift));
         op1.set8(cpu, (byte)res);
         boolean bit0 = (res & 1) != 0;
-        boolean bit31 = (res & 1 << 8 - 1) != 0;
+        boolean bit31 = (res & (1 << (8 - 1))) != 0;
         if ((0x1F & immb) > 0) {
             cpu.cf = bit0;
             cpu.of = bit0 ^ bit31;

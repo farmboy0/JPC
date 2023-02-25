@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.rm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 
 public class jle_Jd extends Executable {
@@ -49,8 +49,8 @@ public class jle_Jd extends Executable {
 
     @Override
     public Branch execute(Processor cpu) {
-        if (cpu.zf() || cpu.sf() != cpu.of()) {
-            int target = cpu.eip + jmp + blockLength & 0xffff;
+        if (cpu.zf() || (cpu.sf() != cpu.of())) {
+            int target = (cpu.eip + jmp + blockLength) & 0xffff;
             cpu.cs.checkAddress(target);
             cpu.eip = target;
             return Branch.T1;

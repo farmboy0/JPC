@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jpc.assembly.Instruction;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
 import org.jpc.emulator.execution.codeblock.CodeBlockReplacementException;
@@ -12,7 +13,6 @@ import org.jpc.emulator.execution.codeblock.RealModeCodeBlock;
 import org.jpc.emulator.execution.codeblock.SpanningCodeBlock;
 import org.jpc.emulator.execution.codeblock.SpanningDecodeException;
 import org.jpc.emulator.execution.codeblock.Virtual8086ModeCodeBlock;
-import org.jpc.emulator.execution.decoder.Instruction;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.j2se.Option;
 

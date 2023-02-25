@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
@@ -58,12 +58,12 @@ public class xadd_Ed_Gd_mem extends Executable {
         int tmp2 = op2.get32();
         cpu.flagOp1 = tmp1;
         cpu.flagOp2 = tmp2;
-        cpu.flagResult = cpu.flagOp1 + cpu.flagOp2;
+        cpu.flagResult = (cpu.flagOp1 + cpu.flagOp2);
         op1.set32(cpu, cpu.flagResult);
         cpu.flagIns = UCodes.ADD32;
         cpu.flagStatus = OSZAPC;
         op2.set32(tmp1);
-        op1.set32(cpu, tmp1 + tmp2);
+        op1.set32(cpu, (tmp1 + tmp2));
         return Branch.None;
     }
 

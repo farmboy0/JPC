@@ -32,10 +32,10 @@ package org.jpc.emulator.execution.opcodes.pm;
 
 import static org.jpc.emulator.processor.Processor.getRegString;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.UCodes;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.Processor.Reg;
 
@@ -54,10 +54,10 @@ public class sbb_Gd_Ed extends Executable {
     public Branch execute(Processor cpu) {
         Reg op1 = cpu.regs[op1Index];
         Reg op2 = cpu.regs[op2Index];
-        int add = cpu.cf() ? 1 : 0;
+        int add = (cpu.cf() ? 1 : 0);
         cpu.flagOp1 = op1.get32();
         cpu.flagOp2 = op2.get32();
-        cpu.flagResult = cpu.flagOp1 - (cpu.flagOp2 + add);
+        cpu.flagResult = (cpu.flagOp1 - (cpu.flagOp2 + add));
         op1.set32(cpu.flagResult);
         cpu.flagIns = UCodes.SBB32;
         cpu.flagStatus = OSZAPC;

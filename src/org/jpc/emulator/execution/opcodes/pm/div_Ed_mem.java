@@ -30,9 +30,9 @@
 
 package org.jpc.emulator.execution.opcodes.pm;
 
+import org.jpc.assembly.PeekableInputStream;
 import org.jpc.emulator.execution.Executable;
 import org.jpc.emulator.execution.decoder.Modrm;
-import org.jpc.emulator.execution.decoder.PeekableInputStream;
 import org.jpc.emulator.execution.decoder.Pointer;
 import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.ProcessorException;
@@ -50,7 +50,7 @@ public class div_Ed_mem extends Executable {
     public Branch execute(Processor cpu) {
         if (op1.get32(cpu) == 0)
             throw ProcessorException.DIVIDE_ERROR;
-        long ldiv = (0xffffffffL & cpu.r_edx.get32()) << 32 | 0xffffffffL & cpu.r_eax.get32();
+        long ldiv = ((0xffffffffL & cpu.r_edx.get32()) << 32) | (0xffffffffL & cpu.r_eax.get32());
         long quot64 = ldiv / (0xffffffffL & op1.get32(cpu));
         if (quot64 != (quot64 & 0xffffffffL))
             throw ProcessorException.DIVIDE_ERROR;
