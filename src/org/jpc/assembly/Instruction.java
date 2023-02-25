@@ -33,8 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jpc.j2se.Option;
-
 public class Instruction {
     private static Set<String> invalid = new HashSet();
     private static Set<String> call = new HashSet();
@@ -355,12 +353,7 @@ public class Instruction {
                 }
             } else if (type.equals("OP_JIMM")) {
                 if (!pattern) {
-                    if (Option.debug_blocks.value()) {
-                        if (lval < 0)
-                            b.append(String.format("0x%x", lval & (1L << maxSize) - 1));
-                        else
-                            b.append(String.format("0x%x", lval));
-                    } else if (eip + x86Length + lval < 0)
+                    if (eip + x86Length + lval < 0)
                         b.append(String.format("0x%x", eip + x86Length + lval & (1L << maxSize) - 1));
                     else
                         b.append(String.format("0x%x", eip + x86Length + lval));
