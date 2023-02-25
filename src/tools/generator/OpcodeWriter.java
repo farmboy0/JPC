@@ -138,7 +138,7 @@ public class OpcodeWriter implements Callable {
         } else
             b.append(processSnippet(op.getName(), op.getOperands(), op.getSnippet(), op.getSize()));
 
-        if (!op.getRet().isBlank())
+        if (!op.getRet().trim().isEmpty())
             b.append("\n        return " + op.getRet() + ";\n");
 
         b.append("    }\n");

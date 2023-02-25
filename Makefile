@@ -43,7 +43,8 @@ build_core:
 .PHONY: tools
 tools: build_core
 	mkdir -p build
-	javac $(JAVA_BUILD_OPTS) -cp build/ -d build `find src/tools -name \*.java`
+	javac $(JAVA_BUILD_OPTS) -cp build/ -d build `find src/tools -name \*.java` \
+	    `find src/tools/generator -name \*.java`
 	echo "Name: JPC Tools" > jpc.manifest
 	echo "Main-Class: tools.Tools" >> jpc.manifest
 	echo "Author: Ian Preston" >> jpc.manifest
