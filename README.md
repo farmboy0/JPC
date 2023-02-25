@@ -5,19 +5,17 @@ JPC is a fast modern x86 PC emulator capable of booting Windows up to Windows 95
 
 ### Running
 To get started with JPC just run it with:<br>
-java -jar JPCApplication.jar -boot hda -hda yourdiskimage.img<br><br>
+java -jar jpc-application-<version>.jar -boot hda -hda yourdiskimage.img<br><br>
 or get a list of options by running:<br>
-java -jar JPCApplication.jar -help
+java -jar jpc-application-<version>.jar -help
 
 ### Building
 To build JPC run:<br>
-make application
-
-To build the debugger run:<br>
-make debugger
+./mvnw -f jpc-assembly/pom.xml clean install
+./mvnw clean package
 
 To run some dos games easily, put them in a directory on your real computer and use JPC's ability to view a directory tree as a virtual FAT32 drive. For example, if some games are in "dosgames" in the directory where you expanded all the JPC files then type:<br/>
-	java -jar JPCApplication.jar -boot fda -fda resources/images/floppy.img -hda dir:dosgames<br/>
+	java -jar jpc-application-<version>.jar -boot fda -fda images/floppy.img -hda dir:dosgames<br/>
 This won't save any writes you make to the virtual FAT32 drive. If you would like to sync write to the underlying files, run with -hda dir:sync:dosgames<br/>
 
 ### Debugger
