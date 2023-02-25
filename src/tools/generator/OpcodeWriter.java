@@ -1,8 +1,6 @@
 package tools.generator;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -12,19 +10,7 @@ public class OpcodeWriter implements Callable {
     private final String licenseHeader;
 
     OpcodeWriter() throws IOException {
-        StringBuilder header = new StringBuilder();
-        BufferedReader r = new BufferedReader(new FileReader("LicenseHeader"));
-        String line;
-        try {
-            while ((line = r.readLine()) != null) {
-                header.append(line);
-                header.append("\n");
-            }
-        } finally {
-            r.close();
-        }
-        header.append("\n");
-        licenseHeader = header.toString();
+        licenseHeader = GeneratorHelper.readLicenseHeader();
     }
 
     @Override

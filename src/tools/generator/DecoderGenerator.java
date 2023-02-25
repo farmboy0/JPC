@@ -27,8 +27,6 @@
 
 package tools.generator;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -433,20 +431,7 @@ public class DecoderGenerator {
     }
 
     public static void generate() throws IOException {
-        StringBuilder header = new StringBuilder();
-        BufferedReader r = new BufferedReader(new FileReader("LicenseHeader"));
-        String line;
-        try {
-            while ((line = r.readLine()) != null) {
-                header.append(line);
-                header.append("\n");
-            }
-        } finally {
-            r.close();
-        }
-        header.append("\n");
-
-        System.out.println(header.toString());
+        System.out.println(GeneratorHelper.readLicenseHeader());
         System.out.println("package org.jpc.emulator.execution.opcodes;\n");
         System.out.println("import org.jpc.emulator.execution.Executable;");
         System.out.println("import org.jpc.emulator.execution.decoder.Modrm;");
