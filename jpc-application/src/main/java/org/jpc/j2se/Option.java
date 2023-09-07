@@ -39,80 +39,96 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class Option {
-    private static final Hashtable<String, Option> names2options = new Hashtable();
+    private static final Map<String, Option> names2options = new HashMap<>();
 
-    public static final Opt config = opt("config"); // This one is special...
+    public static final Opt config = new Opt("config"); // This one is special...
 
-    public static final Switch track_writes = createSwitch("track-writes"); // needed to use -mem with compare
-    public static final Switch debug_blocks = createSwitch("debug-blocks");
-    public static final Switch log_disam = createSwitch("log-disam");
-    public static final Switch log_disam_addresses = createSwitch("log-disam-addresses");
-    public static final Switch log_state = createSwitch("log-state");
-    public static final Switch log_blockentry = createSwitch("log-block-entry");
-    public static final Switch log_memory_maps = createSwitch("log-memory-maps");
-    public static final Switch compile = createSwitch("compile");
-    public static final Switch fullscreen = createSwitch("fullscreen");
-    public static final Switch history = createSwitch("history");
-    public static final Switch useBochs = createSwitch("bochs");
+    public static final Switch track_writes = new Switch("track-writes"); // needed to use -mem with compare
+    public static final Switch debug_blocks = new Switch("debug-blocks");
+    public static final Switch log_disam = new Switch("log-disam");
+    public static final Switch log_disam_addresses = new Switch("log-disam-addresses");
+    public static final Switch log_state = new Switch("log-state");
+    public static final Switch log_blockentry = new Switch("log-block-entry");
+    public static final Switch log_memory_maps = new Switch("log-memory-maps");
+    public static final Switch compile = new Switch("compile");
+    public static final Switch fullscreen = new Switch("fullscreen");
+    public static final Switch history = new Switch("history");
+    public static final Switch useBochs = new Switch("bochs");
 
-    public static final Switch printCHS = createSwitch("printCHS");
-    public static final Switch help = createSwitch("help");
-    public static final Opt min_addr_watch = opt("min-addr-watch");
-    public static final Opt max_addr_watch = opt("max-addr-watch");
+    public static final Switch printCHS = new Switch("printCHS");
+    public static final Switch help = new Switch("help");
+    public static final Opt min_addr_watch = new Opt("min-addr-watch");
+    public static final Opt max_addr_watch = new Opt("max-addr-watch");
 
     // required for deterministic execution
-    public static final Switch deterministic = createSwitch("deterministic");
-    public static final Opt startTime = opt("start-time");
-    public static final Switch noScreen = createSwitch("no-screen");
+    public static final Switch deterministic = new Switch("deterministic");
+    public static final Opt startTime = new Opt("start-time");
+    public static final Switch noScreen = new Switch("no-screen");
 
-    public static final Opt ss = opt("ss");
-    public static final Opt ram = opt("ram");
-    public static final Opt ips = opt("ips");
-    public static final Opt cpulevel = opt("cpulevel");
-    public static final Opt timeslowdown = opt("time-slowdown");
-    public static final Switch singlesteptime = createSwitch("single-step-time");
-    public static final Opt max_instructions_per_block = opt("max-block-size");
-    public static final Opt boot = opt("boot");
-    public static final Opt fda = opt("fda");
-    public static final Opt fdb = opt("fdb");
-    public static final Opt hda = opt("hda");
-    public static final Opt hdb = opt("hdb");
-    public static final Opt hdc = opt("hdc");
-    public static final Opt hdd = opt("hdd");
-    public static final Opt cdrom = opt("cdrom");
-    public static final Opt bios = opt("bios");
-    public static final Switch ethernet = createSwitch("ethernet");
+    public static final Opt ss = new Opt("ss");
+    public static final Opt ram = new Opt("ram");
+    public static final Opt ips = new Opt("ips");
+    public static final Opt cpulevel = new Opt("cpulevel");
+    public static final Opt timeslowdown = new Opt("time-slowdown");
+    public static final Switch singlesteptime = new Switch("single-step-time");
+    public static final Opt max_instructions_per_block = new Opt("max-block-size");
+    public static final Opt boot = new Opt("boot");
+    public static final Opt fda = new Opt("fda");
+    public static final Opt fdb = new Opt("fdb");
+    public static final Opt hda = new Opt("hda");
+    public static final Opt hdb = new Opt("hdb");
+    public static final Opt hdc = new Opt("hdc");
+    public static final Opt hdd = new Opt("hdd");
+    public static final Opt cdrom = new Opt("cdrom");
+    public static final Opt bios = new Opt("bios");
+    public static final Switch ethernet = new Switch("ethernet");
+    public static final Opt port = new Opt("port");
+    public static final Opt net = new Opt("net");
 
-    public static final Switch sound = createSwitch("sound");
-    public static final Opt sounddevice = opt("sounddevice");
-    public static final Opt mixer_rate = opt("mixer_rate");
-    public static final Opt mixer_javabuffer = opt("mixer_java-buffer");
-    public static final Opt mixer_blocksize = opt("mixer_block-size");
-    public static final Switch mixer_nosound = createSwitch("mixer_no-sound");
-    public static final Opt mixer_prebuffer = opt("mixer_prebuffer");
+    public static final Switch sound = new Switch("sound");
+    public static final Opt sounddevice = new Opt("sounddevice");
+    public static final Opt mixer_rate = new Opt("mixer_rate");
+    public static final Opt mixer_javabuffer = new Opt("mixer_java-buffer");
+    public static final Opt mixer_blocksize = new Opt("mixer_block-size");
+    public static final Switch mixer_nosound = new Switch("mixer_no-sound");
+    public static final Opt mixer_prebuffer = new Opt("mixer_prebuffer");
 
-    public static final Opt mpu401 = opt("mpu401");
-    public static final Opt mididevice = opt("midi-device");
-    public static final Opt midiconfig = opt("midi-config");
+    public static final Opt mpu401 = new Opt("mpu401");
+    public static final Opt mididevice = new Opt("midi-device");
+    public static final Opt midiconfig = new Opt("midi-config");
 
-    public static final Opt sbbase = opt("sbbase");
-    public static final Opt sb_irq = opt("sb_irq");
-    public static final Opt sb_dma = opt("sb_dma");
-    public static final Opt sb_hdma = opt("sb_hdma");
-    public static final Switch sbmixer = createSwitch("sbmixer");
-    public static final Opt sbtype = opt("sbtype");
-    public static final Opt oplemu = opt("oplemu");
-    public static final Opt oplrate = opt("oplrate");
+    public static final Opt sbbase = new Opt("sbbase");
+    public static final Opt sb_irq = new Opt("sb_irq");
+    public static final Opt sb_dma = new Opt("sb_dma");
+    public static final Opt sb_hdma = new Opt("sb_hdma");
+    public static final Switch sbmixer = new Switch("sbmixer");
+    public static final Opt sbtype = new Opt("sbtype");
+    public static final Opt oplemu = new Opt("oplemu");
+    public static final Opt oplrate = new Opt("oplrate");
+
+    private final String name;
+    private boolean set;
+
+    protected Option(String name) {
+        this.name = name;
+        names2options.put(name, this);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isSet() {
+        return set;
+    }
 
     public static void printHelp() {
         System.out.println("JPC Help");
@@ -139,185 +155,77 @@ public abstract class Option {
             "-max-block-size $num - maximum number of instructions per basic block (A value of 1 will still have some blocks of length 2 due to mov ss,X, pop ss and sti)");
     }
 
-    public static String[] parse(String[] source) {
-        ArrayList<String> tmp = new ArrayList<String>();
-        for (Option next : names2options.values()) {
-            next.set = false;
-        }
-        int index = 0;
-        for (; index < source.length; index++) {
+    public static void parse(String[] source) throws IOException {
+        boolean parseConfig = false;
+        for (int index = 0; index < source.length; index++) {
             String arg = source[index];
-            if (arg.startsWith("-")) {
-                arg = arg.substring(1);
+            if (!arg.startsWith("-")) {
+                throw new IllegalArgumentException("Error parsing arguments at option " + arg);
             }
-            Option opt = names2options.get(arg);
-            if (opt == null) {
-                tmp.add(source[index]);
-            } else if (opt == config && config.value() != null) {
-                // exit recursion
-                opt.set = false;
-                index = opt.update(source, index);
-            } else {
-                opt.set = true;
-                index = opt.update(source, index);
+            Option option = names2options.get(arg.substring(1));
+            if (option == null) {
+                throw new IllegalArgumentException("Error parsing arguments at option " + arg);
+            } else if (!option.isSet()) {
+                option.set = true;
+                index = option.update(source, index);
+                parseConfig |= config == option;
             }
         }
-        if (config.isSet())
-            return loadConfig(config.value());
-        if (config.value() != null)
-            ((Option)config).set = true;
-        if (tmp.size() == source.length) {
-            return source;
-        } else {
-            return tmp.toArray(new String[tmp.size()]);
+        if (parseConfig)
+            loadConfig(config.value());
+    }
+
+    public static void loadConfig(String file) throws IOException {
+        loadConfig(new File(file));
+    }
+
+    public static void loadConfig(File f) throws IOException {
+        StringBuilder b = new StringBuilder();
+        try (BufferedReader r = new BufferedReader(new FileReader(f))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                b.append(line + " ");
+            }
+            parse(b.toString().split(" "));
         }
     }
 
     public static void saveConfig(File f) throws IOException {
         String conf = saveConfig();
-        BufferedWriter w = new BufferedWriter(new FileWriter(f));
-        w.write(conf);
-        w.flush();
-        w.close();
-    }
-
-    public static String[] loadConfig(String file) {
-        try {
-            return loadConfig(new File(file));
-        } catch (IOException e) {
-            System.out.println("Error loading config from file " + file);
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(f))) {
+            w.write(conf);
+            w.flush();
         }
-        return null;
-    }
-
-    public static String[] loadConfig(File f) throws IOException {
-        StringBuilder b = new StringBuilder();
-        BufferedReader r = new BufferedReader(new FileReader(f));
-        String line;
-        while ((line = r.readLine()) != null) {
-            b.append(line + " ");
-        }
-        String[] current = saveConfig().split("\n");
-        for (String s : current)
-            b.append(s + " ");
-        return parse(b.toString().split(" "));
     }
 
     public static String saveConfig() {
-        StringBuilder b = new StringBuilder();
-        for (Option opt : names2options.values()) {
-            if (opt instanceof Switch) {
-                if (opt.isSet())
-                    b.append("-" + opt.getName() + "\n");
-            } else if (opt instanceof Opt) {
-                if (opt.isSet())
-                    b.append("-" + opt.getName() + " " + ((Opt)opt).value() + "\n");
+        StringBuilder sb = new StringBuilder();
+        for (Option option : names2options.values()) {
+            if (!option.isSet())
+                continue;
+            sb.append("-");
+            sb.append(option.getName());
+            if (option instanceof Opt o) {
+                sb.append(" ");
+                sb.append(o.value());
             }
+            sb.append("\n");
         }
-        return b.toString();
+        return sb.toString();
     }
-
-    public static Option getParameter(String name) {
-        return names2options.get(name);
-    }
-
-    public static Switch createSwitch(String name) {
-        Switch sw = (Switch)names2options.get(name);
-        if (sw == null) {
-            sw = new Switch(name);
-        }
-        return sw;
-    }
-
-    public static Opt opt(String name) {
-        Opt opt = (Opt)names2options.get(name);
-        if (opt == null) {
-            opt = new Opt(name);
-        }
-        return opt;
-    }
-
-    public static OptSet optSet(String name) {
-        OptSet opt = (OptSet)names2options.get(name);
-        if (opt == null) {
-            opt = new OptSet(name);
-        }
-        return opt;
-    }
-
-    public static Select select(String name) {
-        return select(name, "default");
-    }
-
-    public static Select select(String name, String defaultKey) {
-        Select opt = (Select)names2options.get(name);
-        if (opt == null) {
-            opt = new Select(name, defaultKey);
-        }
-        return opt;
-    }
-
-    private final String name;
-    private boolean set;
-
-    protected Option(String name) {
-        this.name = name;
-        names2options.put(name, this);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isSet() {
-        return set;
-    }
-
-    public abstract Object getValue();
 
     protected abstract int update(String[] args, int index);
 
-    public Object getInstance() {
-        return getInstance(null);
-    }
-
-    public Object getInstance(String defaultClass) {
-        Object o = getValue();
-        Class clazz = null;
-        try {
-            if (o instanceof Class) {
-                clazz = (Class)o;
-            } else if (o instanceof String) {
-                clazz = Class.forName(o.toString());
-            } else if (defaultClass != null) {
-                clazz = Class.forName(defaultClass);
-            } else {
-                return null;
-            }
-            return clazz.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public static class OptSet extends Option {
-        private Collection<String> values = new LinkedHashSet<String>();
+        private Set<String> values = new LinkedHashSet<>();
 
         public OptSet(String name, String... defaults) {
             super(name);
-            for (String s : defaults) {
-                values.add(s);
-            }
-        }
-
-        @Override
-        public Object getValue() {
-            return values.toArray(new String[values.size()]);
+            values.addAll(Arrays.asList(defaults));
         }
 
         public String[] values() {
-            return (String[])getValue();
+            return values.toArray(new String[0]);
         }
 
         @Override
@@ -339,15 +247,15 @@ public abstract class Option {
             super(name);
         }
 
+        public void set(String value) {
+            this.value = value;
+            super.set = true;
+        }
+
         @Override
         public int update(String[] args, int index) {
             this.value = args[++index];
             return index;
-        }
-
-        @Override
-        public Object getValue() {
-            return value;
         }
 
         public int intValue(int defaultValue) {
@@ -393,45 +301,6 @@ public abstract class Option {
         public String value() {
             return value;
         }
-
-        public Object valueOf(Class type, Object defaultValue) {
-            if (value == null)
-                return defaultValue;
-            Throwable t = null;
-            try {
-                try {
-                    Method valueOf = type.getMethod("valueOf", String.class);
-                    return valueOf.invoke(type, value);
-                } catch (NoSuchMethodException e) {
-                    System.err.println(type + " :No suitable method");
-                }
-                try {
-                    Constructor constructor = type.getConstructor(String.class);
-                    return constructor.newInstance(value);
-                } catch (NoSuchMethodException e) {
-                    System.err.println(type + " :No suitable Constructor");
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Nested Exception" + type, e);
-            }
-            throw new RuntimeException("Unable obtain value of " + type);
-        }
-
-        public Object instance(String defaultClassName) {
-            if (value == null) {
-                value = defaultClassName;
-            }
-            try {
-                return Class.forName(value.trim()).newInstance();
-            } catch (InstantiationException e) {
-                throw new RuntimeException("Nested Exception", e);
-
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Nested Exception", e);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Nested Exception", e);
-            }
-        }
     }
 
     public static class Switch extends Option {
@@ -441,13 +310,9 @@ public abstract class Option {
             super(name);
         }
 
-        public boolean value() {
-            return value;
-        }
-
-        @Override
-        public Object getValue() {
-            return Boolean.valueOf(value);
+        public void set(boolean value) {
+            this.value = value;
+            super.set = true;
         }
 
         @Override
@@ -455,13 +320,16 @@ public abstract class Option {
             value = true;
             return index; // No Arguments
         }
+
+        public boolean value() {
+            return value;
+        }
     }
 
     public static class Select extends Option {
-
-        private Map<String, Object> values = new LinkedHashMap<String, Object>();
-        private String defaultValue;
+        private final Map<String, Object> values = new LinkedHashMap<>();
         private String key;
+        private final String defaultValue;
 
         public Select(String name, String defaultValue) {
             super(name);
@@ -469,35 +337,21 @@ public abstract class Option {
             this.defaultValue = defaultValue;
         }
 
-        @Override
-        public Object getValue() {
-            Object o = values.get(key);
-            if (o == null)
-                return values.get(defaultValue);
-            return o;
-        }
-
         public Select entry(String key, Object value) {
             values.put(key, value);
             return this;
         }
 
-        @Override
-        public Object getInstance() {
-            Object o = getValue();
-            Class clazz = null;
-            try {
-                if (o instanceof Class) {
-                    clazz = (Class)o;
-                } else if (o instanceof String) {
-                    clazz = Class.forName(o.toString());
-                } else {
-                    return null;
+        public void set(Object value) {
+            key = null;
+            super.set = true;
+            if (value == null) {
+                return;
+            }
+            for (Map.Entry<String, Object> e : values.entrySet()) {
+                if (value.equals(e.getValue())) {
+                    key = e.getKey();
                 }
-                return clazz.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
             }
         }
 
@@ -506,6 +360,9 @@ public abstract class Option {
             this.key = args[++index];
             return index;
         }
-    }
 
+        public Object value() {
+            return values.containsKey(key) ? values.get(key) : values.get(defaultValue);
+        }
+    }
 }

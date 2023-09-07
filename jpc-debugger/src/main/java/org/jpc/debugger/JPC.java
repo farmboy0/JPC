@@ -46,8 +46,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -840,15 +838,12 @@ public class JPC extends ApplicationFrame implements ActionListener {
     }
 
     public static void main(String[] args) throws IOException {
-        List<String> tmp = new ArrayList<String>();
-        tmp.add("-debug-blocks");
-        tmp.add("-fullscreen");
-        tmp.addAll(Arrays.asList(args));
-        args = Option.parse(tmp.toArray(new String[tmp.size()]));
+        Option.debug_blocks.set(true);
+        Option.fullscreen.set(true);
+        Option.parse(args);
         initialise();
 
-        boolean fullScreen = Option.fullscreen.isSet();
-        instance = new JPC(fullScreen);
+        instance = new JPC(true);
         instance.validate();
         instance.setVisible(true);
 

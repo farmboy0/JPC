@@ -260,7 +260,7 @@ public class PCMonitorFrame extends JFrame implements Runnable {
 
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-        args = Option.parse(args);
+        Option.parse(args);
         if (args.length == 0) {
             ClassLoader cl = JPCApplication.class.getClassLoader();
             if (cl instanceof URLClassLoader) {

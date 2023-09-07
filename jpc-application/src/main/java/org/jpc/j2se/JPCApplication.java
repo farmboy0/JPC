@@ -580,7 +580,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             LOGGING.log(Level.INFO, "System Look-and-Feel not loaded", e);
         }
 
-        args = Option.parse(args);
+        Option.parse(args);
         if (Option.help.isSet()) {
             Option.printHelp();
             System.exit(0);
