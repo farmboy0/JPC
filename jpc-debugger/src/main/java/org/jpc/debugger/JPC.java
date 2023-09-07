@@ -80,7 +80,6 @@ import org.jpc.emulator.processor.Processor;
 import org.jpc.emulator.processor.fpu64.FpuState64;
 import org.jpc.j2se.Option;
 import org.jpc.j2se.VirtualClock;
-import org.jpc.support.ArgProcessor;
 
 public class JPC extends ApplicationFrame implements ActionListener {
 
@@ -728,7 +727,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         PC pc = new PC(new VirtualClock(), args);
         loadNewPC(pc);
 
-        String snapShot = ArgProcessor.findVariable(args, "ss", null);
+        String snapShot = Option.ss.value();
         if (snapShot == null) {
             return pc;
         }

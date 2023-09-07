@@ -101,7 +101,6 @@ import org.jpc.emulator.processor.SegmentFactory;
 import org.jpc.j2se.Option;
 import org.jpc.j2se.PCMonitor;
 import org.jpc.j2se.VirtualClock;
-import org.jpc.support.ArgProcessor;
 import org.jpc.support.Clock;
 
 /**
@@ -112,8 +111,6 @@ public class PC {
     public static final int DEFAULT_RAM_SIZE = Option.ram.intValue(16) * 1024 * 1024;
     public static final int INSTRUCTIONS_BETWEEN_INTERRUPTS = 1;
     public static final boolean ETHERNET = Option.ethernet.isSet();
-
-    public static volatile boolean compile = Option.compile.isSet();
 
     public static final boolean HISTORY = Option.history.isSet();
     public static final int HISTORY_SIZE = 200;
@@ -984,9 +981,6 @@ public class PC {
                 LOGGING.log(Level.INFO, "Using configuration specified on command line");
             }
 
-            if (ArgProcessor.findVariable(args, "compile", "yes").equalsIgnoreCase("no")) {
-                compile = false;
-            }
             PC pc = new PC(new VirtualClock(), args, Calendar.getInstance());
             pc.start();
             try {

@@ -50,7 +50,7 @@ import org.jpc.emulator.block.backing.CachingSeekableIODevice;
 import org.jpc.emulator.block.backing.FileBackedSeekableIODevice;
 import org.jpc.emulator.block.backing.RemoteSeekableIODevice;
 import org.jpc.emulator.block.backing.SeekableIODevice;
-import org.jpc.support.ArgProcessor;
+import org.jpc.j2se.Option;
 
 /**
  * Represents the set of disk drive devices associated with this emulator instance.
@@ -293,20 +293,20 @@ public class DriveSet extends AbstractHardwareComponent {
     public static DriveSet buildFromArgs(String[] args) {
         String[] initialArgs = args.clone();
 
-        BlockDevice floppyA = createFloppyBlockDevice(ArgProcessor.findVariable(args, "-fda", null));
-        BlockDevice floppyB = createFloppyBlockDevice(ArgProcessor.findVariable(args, "-fdb", null));
+        BlockDevice floppyA = createFloppyBlockDevice(Option.fda.value());
+        BlockDevice floppyB = createFloppyBlockDevice(Option.fdb.value());
 
-        BlockDevice hardDiskA = createHardDiskBlockDevice(ArgProcessor.findVariable(args, "-hda", null));
-        BlockDevice hardDiskB = createHardDiskBlockDevice(ArgProcessor.findVariable(args, "-hdb", null));
-        BlockDevice hardDiskC = createHardDiskBlockDevice(ArgProcessor.findVariable(args, "-hdc", null));
-        BlockDevice hardDiskD = createHardDiskBlockDevice(ArgProcessor.findVariable(args, "-hdd", null));
+        BlockDevice hardDiskA = createHardDiskBlockDevice(Option.hda.value());
+        BlockDevice hardDiskB = createHardDiskBlockDevice(Option.hdb.value());
+        BlockDevice hardDiskC = createHardDiskBlockDevice(Option.hdc.value());
+        BlockDevice hardDiskD = createHardDiskBlockDevice(Option.hdd.value());
 
-        String cdromSpec = ArgProcessor.findVariable(args, "-cdrom", null);
+        String cdromSpec = Option.cdrom.value();
         if (cdromSpec != null)
             hardDiskC = createCdRomBlockDevice(cdromSpec);
 
         BootType boot = BootType.FLOPPY;
-        String bootArg = ArgProcessor.findVariable(args, "-boot", null);
+        String bootArg = Option.boot.value();
         if ("fda".equalsIgnoreCase(bootArg))
             boot = BootType.FLOPPY;
         else if ("hda".equalsIgnoreCase(bootArg))

@@ -41,7 +41,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jpc.emulator.DriveSet;
-import org.jpc.support.ArgProcessor;
+import org.jpc.j2se.Option;
 
 /**
  * @author Ian Preston
@@ -54,7 +54,7 @@ public class RemoteBlockDeviceServer {
 
         int port = 6666;
         try {
-            port = Integer.parseInt(ArgProcessor.findVariable(args, "port", "6666"));
+            port = Integer.parseInt(Option.port.value());
         } catch (NumberFormatException e) {
         }
 

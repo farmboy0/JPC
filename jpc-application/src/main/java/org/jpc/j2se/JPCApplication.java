@@ -86,7 +86,6 @@ import org.jpc.emulator.block.backing.FileBackedSeekableIODevice;
 import org.jpc.emulator.block.backing.SeekableIODevice;
 import org.jpc.emulator.pci.VGACard;
 import org.jpc.emulator.pci.peripheral.EthernetCard;
-import org.jpc.support.ArgProcessor;
 import org.jpc.support.EthernetHub;
 import org.jpc.support.EthernetOutput;
 
@@ -121,15 +120,14 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
     private JFileChooser snapshotFileChooser;
 
     public JPCApplication(String[] args, PC pc) throws Exception {
-        super("JPC - " + ArgProcessor.findVariable(args, "hda", null), pc, args);
+        super("JPC", pc, args);
         diskImageChooser = new JFileChooser(System.getProperty("user.dir"));
         snapshotFileChooser = new JFileChooser(System.getProperty("user.dir"));
 
-        String snapShot = ArgProcessor.findVariable(args, "ss", null);
+        String snapShot = Option.ss.value();
         if (snapShot != null)
             loadSnapshot(new File(snapShot));
         JMenuBar bar = getJMenuBar();
-
         JMenu snap = new JMenu("Snapshot");
         snap.add("Save Snapshot").addActionListener(new ActionListener() {
             @Override
@@ -626,8 +624,8 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
 
         PC pc = new PC(new VirtualClock(), args);
 
-        String net = ArgProcessor.findVariable(args, "net", "no");
-        if (net.startsWith("hub:")) {
+        String net = Option.net.value();
+        if (Option.net.isSet() && net.startsWith("hub:")) {
             int port = 80;
             String server;
             int index = net.indexOf(":", 5);
