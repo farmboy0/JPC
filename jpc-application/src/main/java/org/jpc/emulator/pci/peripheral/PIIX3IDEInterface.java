@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jpc.emulator.DriveSet;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
@@ -49,7 +50,6 @@ import org.jpc.emulator.pci.IORegion;
 import org.jpc.emulator.pci.PCIBus;
 import org.jpc.emulator.pci.PCIDevice;
 import org.jpc.emulator.pci.PCIISABridge;
-import org.jpc.support.DriveSet;
 
 /**
  * @author Chris Dennis

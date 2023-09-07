@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jpc.emulator.DriveSet;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.Hibernatable;
 import org.jpc.emulator.Timer;
@@ -51,7 +52,6 @@ import org.jpc.emulator.motherboard.IOPortHandler;
 import org.jpc.emulator.motherboard.InterruptController;
 import org.jpc.j2se.Option;
 import org.jpc.support.Clock;
-import org.jpc.support.DriveSet;
 
 /**
  * @author Chris Dennis

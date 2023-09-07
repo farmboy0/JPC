@@ -72,6 +72,7 @@ import javax.swing.JRadioButtonMenuItem;
 
 import org.jpc.debugger.util.ApplicationFrame;
 import org.jpc.debugger.util.ObjectDatabase;
+import org.jpc.emulator.DriveSet;
 import org.jpc.emulator.PC;
 import org.jpc.emulator.memory.LinearAddressSpace;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
@@ -82,7 +83,6 @@ import org.jpc.emulator.processor.fpu64.FpuState64;
 import org.jpc.j2se.Option;
 import org.jpc.j2se.VirtualClock;
 import org.jpc.support.ArgProcessor;
-import org.jpc.support.DriveSet;
 
 public class JPC extends ApplicationFrame implements ActionListener {
 

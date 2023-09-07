@@ -40,8 +40,8 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jpc.emulator.DriveSet;
 import org.jpc.support.ArgProcessor;
-import org.jpc.support.DriveSet;
 
 /**
  * @author Ian Preston

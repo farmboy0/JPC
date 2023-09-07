@@ -75,6 +75,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
+import org.jpc.emulator.DriveSet;
 import org.jpc.emulator.PC;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.block.FloppyBlockDevice;
@@ -86,7 +87,6 @@ import org.jpc.emulator.block.backing.SeekableIODevice;
 import org.jpc.emulator.pci.VGACard;
 import org.jpc.emulator.pci.peripheral.EthernetCard;
 import org.jpc.support.ArgProcessor;
-import org.jpc.support.DriveSet;
 import org.jpc.support.EthernetHub;
 import org.jpc.support.EthernetOutput;
 

@@ -65,6 +65,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+import org.jpc.emulator.DriveSet;
 import org.jpc.emulator.PC;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.block.CDROMBlockDevice;
@@ -74,7 +75,6 @@ import org.jpc.emulator.block.backing.ArrayBackedSeekableIODevice;
 import org.jpc.emulator.block.backing.RemoteSeekableIODevice;
 import org.jpc.emulator.block.backing.SeekableIODevice;
 import org.jpc.emulator.pci.VGACard;
-import org.jpc.support.DriveSet;
 
 public class JPCApplet extends JApplet {
     public static final String VERSION = "2.035";

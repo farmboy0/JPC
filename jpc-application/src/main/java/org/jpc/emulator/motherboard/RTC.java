@@ -39,13 +39,13 @@ import java.io.IOException;
 import java.util.Calendar;
 
 import org.jpc.emulator.AbstractHardwareComponent;
+import org.jpc.emulator.DriveSet;
 import org.jpc.emulator.HardwareComponent;
 import org.jpc.emulator.Timer;
 import org.jpc.emulator.TimerResponsive;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.peripheral.FloppyController;
 import org.jpc.support.Clock;
-import org.jpc.support.DriveSet;
 
 /**
  * Emulation of an MC146818 Real-time Clock.

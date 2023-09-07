@@ -31,7 +31,7 @@
     End of licence header
 */
 
-package org.jpc.support;
+package org.jpc.emulator;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jpc.emulator.AbstractHardwareComponent;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.block.CDROMBlockDevice;
 import org.jpc.emulator.block.FloppyBlockDevice;
@@ -51,6 +50,7 @@ import org.jpc.emulator.block.backing.CachingSeekableIODevice;
 import org.jpc.emulator.block.backing.FileBackedSeekableIODevice;
 import org.jpc.emulator.block.backing.RemoteSeekableIODevice;
 import org.jpc.emulator.block.backing.SeekableIODevice;
+import org.jpc.support.ArgProcessor;
 
 /**
  * Represents the set of disk drive devices associated with this emulator instance.

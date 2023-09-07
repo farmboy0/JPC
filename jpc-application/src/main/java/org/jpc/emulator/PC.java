@@ -103,7 +103,6 @@ import org.jpc.j2se.PCMonitor;
 import org.jpc.j2se.VirtualClock;
 import org.jpc.support.ArgProcessor;
 import org.jpc.support.Clock;
-import org.jpc.support.DriveSet;
 
 /**
  * This class represents the emulated PC and holds references to the hardware components.
