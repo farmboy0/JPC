@@ -35,6 +35,8 @@ package org.jpc.emulator.block.backing;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,13 +48,16 @@ import org.jpc.emulator.block.RawBlockDevice;
  * @author Ian Preston
  */
 public class CachingSeekableIODevice implements SeekableIODevice {
-
     private static final Logger LOGGING = Logger.getLogger(RawBlockDevice.class.getName());
-    private SeekableIODevice parent;
+
+    private final Map<Long, byte[]> sectors = new HashMap<>();
+
+    private final SeekableIODevice parent;
+
     private long byteOffset;
-    private HashMap<Long, byte[]> sectors = new HashMap<Long, byte[]>();
 
     public CachingSeekableIODevice(SeekableIODevice parent) {
+        Objects.requireNonNull(parent);
         this.parent = parent;
     }
 
@@ -165,14 +170,7 @@ public class CachingSeekableIODevice implements SeekableIODevice {
     }
 
     @Override
-    public void configure(String opts) throws IOException, IllegalArgumentException {
-        parent.configure(opts);
-    }
-
-    @Override
     public String toString() {
-        if (parent == null)
-            return "caching:null";
         return "caching: " + parent.toString();
     }
 }

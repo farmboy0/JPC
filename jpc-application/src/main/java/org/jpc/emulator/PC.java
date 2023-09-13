@@ -55,8 +55,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.swing.JPanel;
-
 import org.jpc.assembly.Disassembler;
 import org.jpc.assembly.Instruction;
 import org.jpc.emulator.block.BlockDevice;
@@ -66,7 +64,6 @@ import org.jpc.emulator.execution.decoder.BasicBlock;
 import org.jpc.emulator.execution.decoder.DebugBasicBlock;
 import org.jpc.emulator.memory.LinearAddressSpace;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
-import org.jpc.emulator.motherboard.BochsPIT;
 import org.jpc.emulator.motherboard.DMAController;
 import org.jpc.emulator.motherboard.GateA20Handler;
 import org.jpc.emulator.motherboard.IODevice;
@@ -79,7 +76,6 @@ import org.jpc.emulator.motherboard.VGABIOS;
 import org.jpc.emulator.pci.PCIBus;
 import org.jpc.emulator.pci.PCIHostBridge;
 import org.jpc.emulator.pci.PCIISABridge;
-import org.jpc.emulator.pci.VGACard;
 import org.jpc.emulator.pci.peripheral.DefaultVGACard;
 import org.jpc.emulator.pci.peripheral.EthernetCard;
 import org.jpc.emulator.pci.peripheral.PIIX3IDEInterface;
@@ -99,7 +95,6 @@ import org.jpc.emulator.processor.ProcessorException;
 import org.jpc.emulator.processor.Segment;
 import org.jpc.emulator.processor.SegmentFactory;
 import org.jpc.j2se.Option;
-import org.jpc.j2se.PCMonitor;
 import org.jpc.j2se.VirtualClock;
 import org.jpc.support.Clock;
 
@@ -108,6 +103,8 @@ import org.jpc.support.Clock;
  * @author Ian Preston
  */
 public class PC {
+    private static final Logger LOGGING = Logger.getLogger(PC.class.getName());
+
     public static final int DEFAULT_RAM_SIZE = Option.ram.intValue(16) * 1024 * 1024;
     public static final int INSTRUCTIONS_BETWEEN_INTERRUPTS = 1;
     public static final boolean ETHERNET = Option.ethernet.isSet();
@@ -118,8 +115,6 @@ public class PC {
     private static int historyIndex = 0;
     private static int insHistoryIndex = 0;
     private static CodeBlock[] prevBlocks = new CodeBlock[HISTORY_SIZE];
-
-    private static final Logger LOGGING = Logger.getLogger(PC.class.getName());
 
     private final Processor processor;
     private final PhysicalAddressSpace physicalAddr;
@@ -153,7 +148,7 @@ public class PC {
      * @throws java.io.IOException propagated from bios resource loading
      */
     public PC(Clock clock, DriveSet drives, int ramSize, Calendar startTime) throws IOException {
-        parts = new LinkedList<HardwareComponent>();
+        parts = new LinkedList<>();
 
         vmClock = clock;
         parts.add(vmClock);
@@ -227,72 +222,11 @@ public class PC {
         }
     }
 
-    public PC(Clock clock, DriveSet drives, int ramSize) throws IOException {
-        this(clock, drives, ramSize, getStartTime());
-    }
-
-    /**
-     * Constructs a new <code>PC</code> instance with the specified external time-source and a drive set
-     * constructed by parsing args.
-     * @param clock <code>Clock</code> object used as a time source
-     * @param args command-line args specifying the drive set to use.
-     * @throws java.io.IOException propogates from <code>DriveSet</code> construction
-     */
-    public PC(Clock clock, String[] args, Calendar startTime) throws IOException {
-        this(clock, DriveSet.buildFromArgs(args), startTime);
-    }
-
-    public PC(Clock clock, String[] args) throws IOException {
-        this(clock, DriveSet.buildFromArgs(args), getStartTime());
-    }
-
-    /**
-     * Constructs a new <code>PC</code> instance with the specified external time-source and a drive set
-     * constructed by parsing args.
-     * @param clock <code>Clock</code> object used as a time source
-     * @param args command-line args specifying the drive set to use.
-     * @param ramSize the size of the system ram for the virtual machine in bytes.
-     * @throws java.io.IOException propagates from <code>DriveSet</code> construction
-     */
-    public PC(Clock clock, String[] args, int ramSize) throws IOException {
-        this(clock, DriveSet.buildFromArgs(args), ramSize);
-    }
-
-    public PC(String[] args, Calendar startTime) throws IOException {
-        this(new VirtualClock(), args, startTime);
-    }
-
-    public PC(String[] args) throws IOException {
-        this(new VirtualClock(), args, getStartTime());
-    }
-
     private static Calendar getStartTime() {
         Calendar start = Calendar.getInstance();
         if (Option.startTime.isSet())
             start.setTimeInMillis(Long.parseLong(Option.startTime.value()));
         return start;
-    }
-
-    public void hello() {
-        System.out.println("Hello from the new JPC!");
-    }
-
-    public Instruction getInstruction() {
-        return getInstruction(processor.getInstructionPointer());
-    }
-
-    public Instruction getInstruction(int addr) {
-        if (processor.isProtectedMode()) {
-            byte[] code = new byte[15];
-            linearAddr.copyContentsIntoArray(addr, code, 0, code.length);
-            if (processor.cs.getDefaultSizeFlag())
-                return Disassembler.disassemble32(new Disassembler.ByteArrayPeekStream(code));
-            else
-                return Disassembler.disassemble16(new Disassembler.ByteArrayPeekStream(code));
-        }
-        byte[] code = new byte[15];
-        physicalAddr.copyContentsIntoArray(addr, code, 0, code.length);
-        return Disassembler.disassemble16(new Disassembler.ByteArrayPeekStream(code));
     }
 
     public void setState(int[] s) {
@@ -326,31 +260,6 @@ public class PC {
         for (int i = 0; i < 8; i++)
             newFPUStack[i] = Double.longBitsToDouble(0xffffffffL & s[2 * i + 37] | (0xffffffffL & s[2 * i + 38]) << 32);
         processor.fpu.setStack(newFPUStack);
-    }
-
-    public void setPhysicalMemory(Integer addr, byte[] data) {
-        physicalAddr.copyArrayIntoContents(addr, data, 0, data.length);
-    }
-
-    public Boolean getPITIrqLevel() {
-        return BochsPIT.getIrqLevel();
-    }
-
-    public void setCode(byte[] code) {
-        if (processor.isProtectedMode()) {
-            // assume paging is off
-            physicalAddr.copyArrayIntoContents(processor.getInstructionPointer(), code, 0, code.length);
-        } else {
-            physicalAddr.copyArrayIntoContents(processor.getInstructionPointer(), code, 0, code.length);
-        }
-    }
-
-    public String getScreenText() {
-        return ((VGACard)getComponent(VGACard.class)).getText();
-    }
-
-    public void sendMouse(Integer dx, Integer dy, Integer dz, Integer buttons) {
-        keyboard.putMouseEvent(dx, dy, dz, buttons);
     }
 
     public int[] getState() {
@@ -438,30 +347,6 @@ public class PC {
         return 0;
     }
 
-    public byte[] getCMOS() {
-        RTC rtc = (RTC)getComponent(RTC.class);
-        return rtc.getCMOS();
-    }
-
-    public int[] getPit() {
-        IntervalTimer pit = (IntervalTimer)getComponent(IntervalTimer.class);
-        return pit.getState();
-    }
-
-    public JPanel getNewMonitor() {
-        PCMonitor mon = new PCMonitor(this);
-        mon.startUpdateThread();
-        return mon;
-    }
-
-    public void triggerSpuriousInterrupt() {
-        pic.triggerSpuriousInterrupt();
-    }
-
-    public void triggerSpuriousMasterInterrupt() {
-        pic.triggerSpuriousMasterInterrupt();
-    }
-
     /**
      * Starts this PC's attached clock instance.
      */
@@ -486,7 +371,8 @@ public class PC {
      * @param index drive which the disk is inserted into.
      */
     public void changeFloppyDisk(BlockDevice disk, int index) {
-        ((FloppyController)getComponent(FloppyController.class)).changeDisk(disk, index);
+        getComponent(FloppyController.class).changeDisk(disk, index);
+        getDriveSet().setFloppyDrive(index, disk);
     }
 
     private boolean configure() {
@@ -660,13 +546,6 @@ public class PC {
         }
     }
 
-    public void destroy() {
-        for (HardwareComponent hwc : parts) {
-            if (hwc instanceof DriveSet)
-                ((DriveSet)hwc).close();
-        }
-    }
-
     /**
      * Reset this PC back to its initial state.
      * <p>
@@ -687,14 +566,14 @@ public class PC {
      * @param cls component type required.
      * @return an instance of class <code>cls</code>, or <code>null</code> on failure
      */
-    public HardwareComponent getComponent(Class<? extends HardwareComponent> cls) {
+    public <T extends HardwareComponent> T getComponent(Class<T> cls) {
         if (!HardwareComponent.class.isAssignableFrom(cls)) {
             return null;
         }
 
         for (HardwareComponent hwc : parts) {
             if (cls.isInstance(hwc)) {
-                return hwc;
+                return (T)hwc;
             }
         }
         return null;
@@ -708,17 +587,8 @@ public class PC {
         return processor;
     }
 
-    private static int staticClockx86Count = 0;
-
-    public int eipBreak(Integer breakEip) {
-        int instrs = 0;
-        while (processor.eip != breakEip)
-            instrs += executeBlock();
-        return instrs;
-    }
-
-    public void getDirtyPages(Set<Integer> res) {
-        physicalAddr.getDirtyPages(res);
+    public DriveSet getDriveSet() {
+        return getComponent(DriveSet.class);
     }
 
     public static String disam(byte[] code, Integer ops, Boolean is32Bit) {
@@ -730,12 +600,6 @@ public class PC {
             b.append(disam.toString() + "\n");
         }
         return b.toString();
-    }
-
-    public static Integer x86Length(byte[] code, Boolean is32Bit) {
-        Disassembler.ByteArrayPeekStream mem = new Disassembler.ByteArrayPeekStream(code);
-        Instruction disam = is32Bit ? Disassembler.disassemble32(mem) : Disassembler.disassemble16(mem);
-        return disam.x86Length;
     }
 
     public int executeBlock() {
@@ -981,7 +845,8 @@ public class PC {
                 LOGGING.log(Level.INFO, "Using configuration specified on command line");
             }
 
-            PC pc = new PC(new VirtualClock(), args, Calendar.getInstance());
+            Option.parse(args);
+            PC pc = new PC(new VirtualClock(), new DriveSet(), Calendar.getInstance());
             pc.start();
             try {
                 while (true) {

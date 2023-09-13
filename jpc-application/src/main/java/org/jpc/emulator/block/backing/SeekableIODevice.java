@@ -86,13 +86,4 @@ public interface SeekableIODevice {
      * Closes and releases the resources associated with this instance.
      */
     void close() throws IOException;
-
-    /**
-     * Configure device using the given <code>String</code>. What this object chooses to do with the
-     * given <code>String</code> is implementation dependant.
-     * @param opts configuration string
-     * @throws java.io.IOException on an I/O error configuring the device
-     * @throws java.lang.IllegalArgumentException if the configuration string is invalid.
-     */
-    void configure(String opts) throws IOException, IllegalArgumentException;
 }

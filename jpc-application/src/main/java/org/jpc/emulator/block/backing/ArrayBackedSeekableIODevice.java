@@ -53,34 +53,12 @@ public class ArrayBackedSeekableIODevice implements SeekableIODevice {
     private int imageOffset, length;
 
     /**
-     * Constructs an unconfigured instance, which must be configured by calling <code>configure</code>
-     * before first use.
-     */
-    public ArrayBackedSeekableIODevice() {
-    }
-
-    class ExposedByteArrayOutputStream extends ByteArrayOutputStream {
-        ExposedByteArrayOutputStream(int length) {
-            super(length);
-        }
-
-        byte[] getBuffer() {
-            return buf;
-        }
-
-        int getPosition() {
-            return count;
-        }
-    }
-
-    /**
-     * Configures this device. The passed configuration string is the fully-qualified name of the
-     * resource to load as the disk image.
-     * @param spec resource to load
+     * Constructs an <code>ArrayBackedSeekableIODevice</code> instance whose data is loaded from the
+     * given resource.
+     * @param spec data to load
      * @throws java.io.IOException if the resource cannot be found or loaded
      */
-    @Override
-    public void configure(String spec) throws IOException {
+    public ArrayBackedSeekableIODevice(String spec) throws IOException {
         resource = spec;
         imageOffset = 0;
 
@@ -111,16 +89,6 @@ public class ArrayBackedSeekableIODevice implements SeekableIODevice {
             } catch (IOException e) {
             }
         }
-    }
-
-    /**
-     * Constructs an <code>ArrayBackedSeekableIODevice</code> instance whose data is loaded from the
-     * given resource. <code>configure</code> before first use.
-     * @param resource data to load
-     * @throws java.io.IOException if the resource cannot be found or loaded
-     */
-    public ArrayBackedSeekableIODevice(String resource) throws IOException {
-        configure(resource);
     }
 
     /**
@@ -209,5 +177,19 @@ public class ArrayBackedSeekableIODevice implements SeekableIODevice {
     @Override
     public String toString() {
         return resource;
+    }
+
+    class ExposedByteArrayOutputStream extends ByteArrayOutputStream {
+        ExposedByteArrayOutputStream(int length) {
+            super(length);
+        }
+
+        byte[] getBuffer() {
+            return buf;
+        }
+
+        int getPosition() {
+            return count;
+        }
     }
 }

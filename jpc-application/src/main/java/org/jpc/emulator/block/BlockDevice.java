@@ -33,8 +33,6 @@
 
 package org.jpc.emulator.block;
 
-import java.io.IOException;
-
 /**
  * Object which provides data backing for a disk device. Currently this includes IDE devices and
  * floppy drives.
@@ -141,12 +139,4 @@ public interface BlockDevice {
      * @return type constant
      */
     Type getType();
-
-    /**
-     * Configure the device with given string configuration information.
-     * @param spec configuration information
-     * @throws java.io.IOException if configuration failed for I/O reasons
-     * @throws java.lang.IllegalArgumentException if the configuration information is invalid
-     */
-    void configure(String spec) throws IOException, IllegalArgumentException;
 }

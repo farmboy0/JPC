@@ -37,13 +37,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +48,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import org.jpc.emulator.PC;
@@ -61,8 +55,9 @@ import org.jpc.emulator.PC;
 /**
  * @author Mike Moleschi
  */
-public class PCMonitorFrame extends JFrame implements Runnable {
+public abstract class PCMonitorFrame extends JFrame implements Runnable {
     private static final Logger LOGGING = Logger.getLogger(PCMonitorFrame.class.getName());
+
     private static final DecimalFormat TWO_DP = new DecimalFormat("0.00");
     private static final DecimalFormat THREE_DP = new DecimalFormat("0.000");
     private static final int COUNTDOWN = 10000000;
@@ -78,7 +73,7 @@ public class PCMonitorFrame extends JFrame implements Runnable {
     private volatile boolean running;
     private Thread runner;
 
-    public PCMonitorFrame(String title, PC pc, String[] args) {
+    protected PCMonitorFrame(String title, PC pc) {
         super(title);
         configFileChooser = new JFileChooser(System.getProperty("user.dir"));
 
@@ -253,58 +248,5 @@ public class PCMonitorFrame extends JFrame implements Runnable {
             pc.stop();
             LOGGING.log(Level.INFO, "PC Stopped");
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        Option.parse(args);
-
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-        Option.parse(args);
-        if (args.length == 0) {
-            ClassLoader cl = JPCApplication.class.getClassLoader();
-            if (cl instanceof URLClassLoader) {
-                for (URL url : ((URLClassLoader)cl).getURLs()) {
-                    InputStream in = url.openStream();
-                    try {
-                        JarInputStream jar = new JarInputStream(in);
-                        Manifest manifest = jar.getManifest();
-                        if (manifest == null)
-                            continue;
-
-                        String defaultArgs = manifest.getMainAttributes().getValue("Default-Args");
-                        if (defaultArgs == null)
-                            continue;
-
-                        args = defaultArgs.split("\\s");
-                        break;
-                    } catch (IOException e) {
-                        System.err.println("Not a JAR file " + url);
-                    } finally {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                        }
-                    }
-                }
-            }
-
-            if (args.length == 0) {
-                LOGGING.log(Level.INFO, "No configuration specified, using defaults");
-                args = new String[] { "-fda", "mem:images/floppy.img", "-hda", "mem:images/dosgames.img", "-boot", "fda" };
-            } else {
-                LOGGING.log(Level.INFO, "Using configuration specified in manifest");
-            }
-        } else {
-            LOGGING.log(Level.INFO, "Using configuration specified on command line");
-        }
-
-        PC pc = new PC(new VirtualClock(), args);
-
-        PCMonitorFrame result = new PCMonitorFrame("JPC Monitor", pc, args);
-        result.validate();
-        result.setVisible(true);
-        result.setBounds(100, 100, 760, 500);
-        result.start();
     }
 }

@@ -72,6 +72,7 @@ import org.jpc.debugger.util.ApplicationFrame;
 import org.jpc.debugger.util.ObjectDatabase;
 import org.jpc.emulator.DriveSet;
 import org.jpc.emulator.PC;
+import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.memory.LinearAddressSpace;
 import org.jpc.emulator.memory.PhysicalAddressSpace;
 import org.jpc.emulator.pci.VGACard;
@@ -382,25 +383,25 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 File hardImage = hardDisk.getSelectedFile();
                 File cdImage = cdrom.getSelectedFile();
 
-                DriveSet.BootType bootType;
+                BlockDevice.Type bootType;
                 if (floppyDisk.isBootDevice()) {
                     if (!floppyImage.exists()) {
                         alert("Floppy Image: " + floppyImage + " does not exist", "Boot", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    bootType = DriveSet.BootType.FLOPPY;
+                    bootType = BlockDevice.Type.FLOPPY;
                 } else if (hardDisk.isBootDevice()) {
                     if (!hardImage.exists()) {
                         alert("Hard disk Image: " + hardImage + " does not exist", "Boot", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    bootType = DriveSet.BootType.HARD_DRIVE;
+                    bootType = BlockDevice.Type.HARDDRIVE;
                 } else {
                     if (!cdImage.exists()) {
                         alert("CD Image: " + cdImage + " does not exist", "Boot", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    bootType = DriveSet.BootType.CDROM;
+                    bootType = BlockDevice.Type.CDROM;
                 }
 
                 String[] args;
@@ -434,16 +435,16 @@ public class JPC extends ApplicationFrame implements ActionListener {
                 }
                 if (pos <= argc - 2) {
                     args[pos++] = "-boot";
-                    if (bootType == DriveSet.BootType.HARD_DRIVE) {
+                    if (bootType == BlockDevice.Type.HARDDRIVE) {
                         args[pos++] = "hda";
-                    } else if (bootType == DriveSet.BootType.CDROM) {
+                    } else if (bootType == BlockDevice.Type.CDROM) {
                         args[pos++] = "cdrom";
                     } else {
                         args[pos++] = "fda";
                     }
                 }
 
-                instance.createPC(args);
+                instance.createPC();
                 resyncImageSelection(new File(System.getProperty("user.dir")));
             } catch (Exception e) {
                 alert("Failed to create PC: " + e, "Boot", JOptionPane.ERROR_MESSAGE);
@@ -700,7 +701,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
             }
         }
 
-        setTitle("JPC Debugger - Boot Device: " + ((DriveSet)pc.getComponent(DriveSet.class)).getBootDevice());
+        setTitle("JPC Debugger - Boot Device: " + pc.getComponent(DriveSet.class).getBootDevice());
         objects.addObject(pc);
         objects.addObject(pc.getProcessor());
         objects.addObject(pc.getComponent(LinearAddressSpace.class));
@@ -723,8 +724,8 @@ public class JPC extends ApplicationFrame implements ActionListener {
         return pc;
     }
 
-    public PC createPC(String[] args) throws IOException {
-        PC pc = new PC(new VirtualClock(), args);
+    public PC createPC() throws IOException {
+        PC pc = new PC(new VirtualClock(), new DriveSet());
         loadNewPC(pc);
 
         String snapShot = Option.ss.value();
@@ -847,7 +848,7 @@ public class JPC extends ApplicationFrame implements ActionListener {
         instance.setVisible(true);
 
         if (args.length > 0 || Option.config.isSet() || Option.boot.isSet()) {
-            instance.createPC(args);
+            instance.createPC();
         }
         instance.initialLayout();
     }

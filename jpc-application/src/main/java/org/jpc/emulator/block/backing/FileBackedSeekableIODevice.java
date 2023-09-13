@@ -51,20 +51,10 @@ public class FileBackedSeekableIODevice implements SeekableIODevice {
     private boolean readOnly;
 
     /**
-     * Constructs an unconfigured instance.
-     * <p>
-     * This must be configured by calling <code>configure</code> before first use.
+     * Constructs an instance using the specified file as backing.
+     * @param file file path
      */
-    public FileBackedSeekableIODevice() {
-    }
-
-    /**
-     * Configures this instance to use the file identified as its backing.
-     * @param spec file path
-     * @throws java.io.IOException if the file cannot be opened
-     */
-    @Override
-    public void configure(String spec) throws IOException {
+    public FileBackedSeekableIODevice(String spec) throws IOException {
         fileName = spec;
 
         try {
@@ -80,14 +70,6 @@ public class FileBackedSeekableIODevice implements SeekableIODevice {
                 throw f;
             }
         }
-    }
-
-    /**
-     * Constructs an instance using the specified file as backing.
-     * @param file file path
-     */
-    public FileBackedSeekableIODevice(String file) throws IOException {
-        configure(file);
     }
 
     @Override

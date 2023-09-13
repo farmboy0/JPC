@@ -61,7 +61,6 @@ public abstract class RawBlockDevice implements BlockDevice {
     public int read(long sectorNumber, byte[] buffer, int size) {
         Integer t;
         try {
-
             data.seek(sectorNumber * SECTOR_SIZE);
             int pos = 0;
             int toRead = Math.min(buffer.length, SECTOR_SIZE * size);
@@ -115,11 +114,6 @@ public abstract class RawBlockDevice implements BlockDevice {
         } catch (IOException e) {
             LOGGING.log(Level.INFO, "Couldn't close device", e);
         }
-    }
-
-    @Override
-    public void configure(String specs) throws IOException {
-        data.configure(specs);
     }
 
     /**

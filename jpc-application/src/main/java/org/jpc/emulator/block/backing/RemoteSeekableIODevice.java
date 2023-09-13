@@ -41,6 +41,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class RemoteSeekableIODevice implements SeekableIODevice {
     public static final int DEFAULT_SECTOR_SIZE = 4 * 1024;
@@ -50,15 +51,16 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
     private URI drive;
     private int sectorSize, cacheSectors;
     private long length, position;
-    private HashMap writtenSectors;
-    private LinkedHashMap sectorIndex;
+    private Map<Integer, byte[]> writtenSectors;
+    private Map<Integer, byte[]> sectorIndex;
 
-    public RemoteSeekableIODevice() throws IOException {
-        this(null);
-    }
-
-    public RemoteSeekableIODevice(URI drive) throws IOException {
-        this(drive, DEFAULT_SECTOR_SIZE, DEFAULT_CACHE_SIZE);
+    public RemoteSeekableIODevice(String spec) throws IOException {
+        this(null, DEFAULT_SECTOR_SIZE, DEFAULT_CACHE_SIZE);
+        try {
+            setImageLocation(new URI(spec));
+        } catch (URISyntaxException e) {
+            throw new IOException("Invalid URI specified: '" + spec + "'");
+        }
     }
 
     public RemoteSeekableIODevice(URI drive, int sectorSize, int cacheSize) throws IOException {
@@ -70,15 +72,6 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
 
         if (drive != null)
             setImageLocation(drive);
-    }
-
-    @Override
-    public void configure(String spec) throws IOException {
-        try {
-            setImageLocation(new URI(spec));
-        } catch (URISyntaxException e) {
-            throw new IOException("Invalid URI specified: '" + spec + "'");
-        }
     }
 
     public synchronized void setImageLocation(URI drive) throws IOException {
@@ -103,8 +96,8 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
         if (length <= 0)
             throw new IOException("Invalid length for remote HDD (" + length + ")");
 
-        sectorIndex = new LinkedHashMap(cacheSectors, 1.0f, true);
-        writtenSectors = new HashMap();
+        sectorIndex = new LinkedHashMap<>(cacheSectors, 1.0f, true);
+        writtenSectors = new HashMap<>();
     }
 
     @Override
@@ -136,7 +129,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
 
     private synchronized byte[] getSector(int index) throws IOException {
         Integer key = index;
-        byte[] result = (byte[])sectorIndex.get(key);
+        byte[] result = sectorIndex.get(key);
         if (result != null)
             return result;
 
@@ -164,7 +157,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
                 input.close();
 
                 if (sectorIndex.size() >= cacheSectors) {
-                    Iterator itt = sectorIndex.keySet().iterator();
+                    Iterator<Integer> itt = sectorIndex.keySet().iterator();
                     itt.next();
                     itt.remove();
                 }
@@ -199,7 +192,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
 
             Integer index = (int)(position / sectorSize);
             int off = (int)(position % sectorSize);
-            byte[] s = (byte[])writtenSectors.get(index);
+            byte[] s = writtenSectors.get(index);
             if (s == null)
                 s = getSector(index.intValue());
 
@@ -230,7 +223,7 @@ public class RemoteSeekableIODevice implements SeekableIODevice {
             Integer index = (int)(position / sectorSize);
             int off = (int)(position % sectorSize);
 
-            byte[] s = (byte[])writtenSectors.get(index);
+            byte[] s = writtenSectors.get(index);
             if (s == null) {
                 s = getSector(index.intValue());
                 sectorIndex.remove(index);

@@ -53,12 +53,9 @@ import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -91,6 +88,7 @@ import org.jpc.support.EthernetOutput;
 
 public class JPCApplication extends PCMonitorFrame implements PCControl {
     private static final Logger LOGGING = Logger.getLogger(JPCApplication.class.getName());
+
     private static final URI JPC_URI = URI.create("http://jpc.sourceforge.net/");
     private static final String IMAGES_PATH = "images/";
     private static final int MONITOR_WIDTH = 720;
@@ -100,8 +98,8 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         + "For more information visit our website at:\n" + JPC_URI.toASCIIString();
     private static final String LICENCE_HTML = "JPC is released under GPL Version 2 and comes with absolutely no warranty<br/><br/>"
         + "See " + JPC_URI.toASCIIString() + " for more details";
-    private static JEditorPane LICENCE;
 
+    private static JEditorPane LICENCE;
     static {
         ClassLoader context = Thread.currentThread().getContextClassLoader();
         URL licence = context.getResource("licence.html");
@@ -116,11 +114,12 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
         }
         LICENCE.setEditable(false);
     }
+
     private JFileChooser diskImageChooser;
     private JFileChooser snapshotFileChooser;
 
-    public JPCApplication(String[] args, PC pc) throws Exception {
-        super("JPC", pc, args);
+    public JPCApplication(PC pc) throws Exception {
+        super("JPC", pc);
         diskImageChooser = new JFileChooser(System.getProperty("user.dir"));
         snapshotFileChooser = new JFileChooser(System.getProperty("user.dir"));
 
@@ -572,11 +571,6 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             System.out.println(PC.disam(m, 1, is32Bit));
             return;
         }
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            LOGGING.log(Level.INFO, "System Look-and-Feel not loaded", e);
-        }
 
         Option.parse(args);
         if (Option.help.isSet()) {
@@ -584,45 +578,7 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             System.exit(0);
         }
 
-        if (args.length == 0 && !Option.boot.isSet() && !Option.hda.isSet() && !Option.cdrom.isSet() && !Option.fda.isSet()) {
-            ClassLoader cl = JPCApplication.class.getClassLoader();
-            if (cl instanceof URLClassLoader) {
-                for (URL url : ((URLClassLoader)cl).getURLs()) {
-                    InputStream in = url.openStream();
-                    try {
-                        JarInputStream jar = new JarInputStream(in);
-                        Manifest manifest = jar.getManifest();
-                        if (manifest == null) {
-                            continue;
-                        }
-                        String defaultArgs = manifest.getMainAttributes().getValue("Default-Args");
-                        if (defaultArgs == null) {
-                            continue;
-                        }
-                        args = defaultArgs.split("\\s");
-                        break;
-                    } catch (IOException e) {
-                        System.err.println("Not a JAR file " + url);
-                    } finally {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                        }
-                    }
-                }
-            }
-
-            if (args.length == 0) {
-                LOGGING.log(Level.INFO, "No configuration specified, using defaults");
-                args = DEFAULT_ARGS;
-            } else {
-                LOGGING.log(Level.INFO, "Using configuration specified in manifest");
-            }
-        } else {
-            LOGGING.log(Level.INFO, "Using configuration specified on command line");
-        }
-
-        PC pc = new PC(new VirtualClock(), args);
+        PC pc = new PC(new VirtualClock(), new DriveSet());
 
         String net = Option.net.value();
         if (Option.net.isSet() && net.startsWith("hub:")) {
@@ -638,14 +594,16 @@ public class JPCApplication extends PCMonitorFrame implements PCControl {
             EthernetCard card = (EthernetCard)pc.getComponent(EthernetCard.class);
             card.setOutputDevice(hub);
         }
-        final JPCApplication app = new JPCApplication(args, pc);
 
-        app.setBounds(100, 100, MONITOR_WIDTH + 20, MONITOR_HEIGHT + 70);
         try {
-            app.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("icon.png")));
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
+            LOGGING.log(Level.INFO, "System Look-and-Feel not loaded", e);
         }
 
+        final JPCApplication app = new JPCApplication(pc);
+        app.setBounds(100, 100, MONITOR_WIDTH + 20, MONITOR_HEIGHT + 70);
+        app.setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("icon.png")));
         app.validate();
         app.setVisible(true);
         app.start();

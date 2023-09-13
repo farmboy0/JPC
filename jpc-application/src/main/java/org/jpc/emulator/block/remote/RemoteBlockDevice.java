@@ -53,8 +53,7 @@ public class RemoteBlockDevice implements BlockDevice {
     private DataInputStream in;
     private DataOutputStream out;
 
-    @Override
-    public void configure(String spec) throws IOException {
+    public RemoteBlockDevice(String spec) throws IOException {
         String server = spec;
         int port = 6666;
         int colon = spec.indexOf(':');
@@ -67,9 +66,6 @@ public class RemoteBlockDevice implements BlockDevice {
         this.in = new DataInputStream(sock.getInputStream());
         this.out = new DataOutputStream(sock.getOutputStream());
 
-    }
-
-    public RemoteBlockDevice() {
     }
 
     public RemoteBlockDevice(InputStream in, OutputStream out) {

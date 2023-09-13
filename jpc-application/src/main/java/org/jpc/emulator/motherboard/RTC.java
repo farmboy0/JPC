@@ -102,7 +102,7 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
     private InterruptController irqDevice;
     private Clock timeSource;
     private int ioPortBase;
-    private DriveSet.BootType bootType;
+    private BlockDevice.Type bootType;
     private boolean ioportRegistered;
     private boolean drivesInited;
     private boolean floppiesInited;
@@ -181,7 +181,7 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
 
         nextSecondTime = input.readLong();
         ioPortBase = input.readInt();
-        bootType = DriveSet.BootType.values()[input.readInt()];
+        bootType = BlockDevice.Type.values()[input.readInt()];
         ioportRegistered = input.readBoolean();
         drivesInited = input.readBoolean();
         floppiesInited = input.readBoolean();
@@ -239,7 +239,7 @@ public class RTC extends AbstractHardwareComponent implements IODevice {
             cmosData[0x3d] = (byte)0x01; /* floppy boot */
             break;
         default:
-        case HARD_DRIVE:
+        case HARDDRIVE:
             cmosData[0x3d] = (byte)0x02; /* hard drive boot */
             break;
         case CDROM:

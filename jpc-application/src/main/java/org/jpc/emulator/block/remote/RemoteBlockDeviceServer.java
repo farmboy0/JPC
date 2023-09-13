@@ -50,7 +50,8 @@ public class RemoteBlockDeviceServer {
     private static final Logger LOGGING = Logger.getLogger(RemoteBlockDeviceServer.class.getName());
 
     public static void main(String[] args) throws Exception {
-        DriveSet set = DriveSet.buildFromArgs(args);
+        Option.parse(args);
+        DriveSet set = new DriveSet();
 
         int port = 6666;
         try {

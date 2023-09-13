@@ -62,6 +62,7 @@ import java.util.logging.Logger;
  */
 public class TreeBlockDevice implements BlockDevice {
     private static final Logger LOGGING = Logger.getLogger(TreeBlockDevice.class.getName());
+
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
     private static final Charset UTF_16LE = Charset.forName("UTF-16LE");
 
@@ -134,9 +135,10 @@ public class TreeBlockDevice implements BlockDevice {
 
     private int numberOfOpenFiles = 0;
 
-    private Map<Long, FatEntry> sectorToFatEntry = new HashMap<Long, FatEntry>();
-    private Map<Long, byte[]> bufferedWrites = new HashMap<Long, byte[]>();
-    private Set<Long> unmappedClusters = new HashSet<Long>();
+    private final Map<Long, FatEntry> sectorToFatEntry = new HashMap<>();
+    private final Map<Long, byte[]> bufferedWrites = new HashMap<>();
+    private final Set<Long> unmappedClusters = new HashSet<>();
+
     private OpenFilesCache fileCache;
     private boolean bufferWrites = false;
     private int dataSectionStart;
@@ -148,10 +150,14 @@ public class TreeBlockDevice implements BlockDevice {
        in an array
     */
 
-    /**
-     * Constructs an unconfigured instance.
-     */
-    public TreeBlockDevice() {
+    public TreeBlockDevice(String spec) throws IOException {
+        boolean buffer = true;
+        String rootName = spec;
+        if (spec.startsWith("sync:")) {
+            buffer = false;
+            rootName = spec.substring(5);
+        }
+        configure(new File(rootName), buffer);
     }
 
     /**
@@ -164,27 +170,7 @@ public class TreeBlockDevice implements BlockDevice {
      * @throws java.io.IOException
      */
     public TreeBlockDevice(File root, boolean buffer) throws IOException {
-        this.configure(root, buffer);
-    }
-
-    /**
-     * Configure the given drive using this specification string.
-     * <p>
-     * The string is either of the form "$lt;path$gt;" or "sync:$lt;path$gt;". The sync prefix indicates
-     * that writes should be written back to the local filesystem.
-     * @param specs specification string
-     * @throws java.io.IOException on an underlying fs error
-     */
-    @Override
-    public void configure(String specs) throws IOException {
-        boolean buffer = true;
-        String rootName = specs;
-        if (specs.startsWith("sync:")) {
-            buffer = false;
-            rootName = specs.substring(5);
-        }
-
-        configure(new File(rootName), buffer);
+        configure(root, buffer);
     }
 
     private void configure(File directory, boolean buffer) throws IOException {
@@ -194,7 +180,7 @@ public class TreeBlockDevice implements BlockDevice {
         //read in directory structure
         DirectoryEntry root = new DirectoryEntry(directory, 2, null);
 
-        Map<Long, FatEntry> fat = new HashMap<Long, FatEntry>();
+        Map<Long, FatEntry> fat = new HashMap<>();
         root.buildTree(fat);
 
         long dataSize = FREE_SPACE_FACTOR * (root.getDirectorySubClusters() + root.getSizeInClusters());
@@ -212,7 +198,7 @@ public class TreeBlockDevice implements BlockDevice {
         dataSectionStart = HEADER_SECTION_LENGTH + FAT_COPIES * fatSize;
 
         fatImage = createFatImage(fat);
-        sectorToFatEntry = createDataMap(fat);
+        sectorToFatEntry.putAll(createDataMap(fat));
 
         start = new byte[SECTOR_SIZE * HEADER_SECTION_LENGTH];
 
@@ -566,7 +552,7 @@ public class TreeBlockDevice implements BlockDevice {
 
     //convert FATmap to data map
     private Map<Long, FatEntry> createDataMap(Map<Long, FatEntry> fat) {
-        Map<Long, FatEntry> dataMap = new HashMap<Long, FatEntry>();
+        Map<Long, FatEntry> dataMap = new HashMap<>();
 
         for (Map.Entry<Long, FatEntry> entry : fat.entrySet()) {
             FatEntry fatEntry = entry.getValue();
@@ -587,7 +573,7 @@ public class TreeBlockDevice implements BlockDevice {
         {
             if (root.isDirectory() && root.canWrite()) {
                 //convert fatImage to Hashmap
-                Map hashFAT = new HashMap();
+                Map<Integer, Integer> hashFAT = new HashMap<>();
                 int sum;
                 for (int j = 2; j < fatImage.length / 4; j++) {
                     //convert fatImage entry to an int
@@ -607,8 +593,8 @@ public class TreeBlockDevice implements BlockDevice {
     }
 
     //method to read a directory or file from this TBD and write it out to a new physical one
-    private void readToWrite(Map hashFAT, int startingCluster, File file) //make this return an int to signify success
-    {
+    // TODO: make this return an int to signify success
+    private void readToWrite(Map<Integer, Integer> hashFAT, int startingCluster, File file) {
         int cluster = startingCluster;
         byte[] buffer = new byte[SECTOR_SIZE];
 
@@ -631,7 +617,7 @@ public class TreeBlockDevice implements BlockDevice {
                 dir = newdir;
 
                 //check for more clusters
-                cluster = ((Integer)hashFAT.get(Integer.valueOf(cluster))).intValue();
+                cluster = hashFAT.get(Integer.valueOf(cluster)).intValue();
                 if (cluster == 268435455)//251592447) //endmark
                     break;
             }
@@ -691,7 +677,7 @@ public class TreeBlockDevice implements BlockDevice {
                                 break;
 
                             //if sector ends in a 0 and we are in the last cluster, then trim the zeroes from the end
-                            if (((Integer)hashFAT.get(Integer.valueOf(cluster))).intValue() == 268435455 && buffer[511] == 0) {
+                            if (hashFAT.get(Integer.valueOf(cluster)).intValue() == 268435455 && buffer[511] == 0) {
                                 int index = 511;
                                 while (buffer[index] == 0) {
                                     index--;
@@ -706,7 +692,7 @@ public class TreeBlockDevice implements BlockDevice {
                     }
 
                     //check for more clusters
-                    cluster = ((Integer)hashFAT.get(Integer.valueOf(cluster))).intValue();
+                    cluster = hashFAT.get(Integer.valueOf(cluster)).intValue();
                     if (cluster == 268435455) //EOF marker
                         break;
                 }
@@ -909,7 +895,7 @@ public class TreeBlockDevice implements BlockDevice {
 
             if (backing == null || !backing.getFD().valid()) {
                 backing = fileCache.getBackingFor(getFile());
-                backingFile = new WeakReference(backing);
+                backingFile = new WeakReference<>(backing);
             }
             backing.seek(offset);
             int len = Math.min(SECTOR_SIZE, (int)(backing.length() - offset));
