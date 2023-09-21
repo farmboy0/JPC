@@ -38,16 +38,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -55,8 +51,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.jpc.assembly.Disassembler;
-import org.jpc.assembly.Instruction;
 import org.jpc.emulator.block.BlockDevice;
 import org.jpc.emulator.execution.codeblock.CodeBlock;
 import org.jpc.emulator.execution.codeblock.CodeBlockManager;
@@ -125,6 +119,8 @@ public class PC {
     private final CodeBlockManager manager;
     private EthernetCard ethernet;
     private final Keyboard keyboard;
+
+    private boolean running;
 
     /**
      * Constructs a new <code>PC</code> instance with the specified external time-source and drive set.
@@ -354,15 +350,21 @@ public class PC {
         vmClock.resume();
         if (Option.sound.value())
             AudioLayer.open(Option.mixer_javabuffer.intValue(8820), Option.mixer_rate.intValue(SBlaster.OPL_RATE));
+        running = true;
     }
 
     /**
      * Stops this PC's attached clock instance
      */
     public void stop() {
+        running = false;
         vmClock.pause();
         if (Option.sound.value())
             AudioLayer.stop();
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     /**
@@ -466,7 +468,7 @@ public class PC {
         physicalAddr.reset();
         ZipInputStream zin = new ZipInputStream(in);
         Set<HardwareComponent> newParts = new HashSet<HardwareComponent>();
-        IOPortHandler ioHandler = (IOPortHandler)getComponent(IOPortHandler.class);
+        IOPortHandler ioHandler = getComponent(IOPortHandler.class);
         ioHandler.reset();
         newParts.add(ioHandler);
         try {
@@ -589,17 +591,6 @@ public class PC {
 
     public DriveSet getDriveSet() {
         return getComponent(DriveSet.class);
-    }
-
-    public static String disam(byte[] code, Integer ops, Boolean is32Bit) {
-        Disassembler.ByteArrayPeekStream mem = new Disassembler.ByteArrayPeekStream(code);
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; i < ops; i++) {
-            Instruction disam = is32Bit ? Disassembler.disassemble32(mem) : Disassembler.disassemble16(mem);
-            mem.seek(disam.x86Length);
-            b.append(disam.toString() + "\n");
-        }
-        return b.toString();
     }
 
     public int executeBlock() {
@@ -801,64 +792,5 @@ public class PC {
                 "Mode switch in VM8086 @ cs:eip " + Integer.toHexString(processor.cs.getBase()) + ":" + Integer.toHexString(processor.eip));
         }
         return x86Count;
-    }
-
-    public static void main(String[] args) {
-        try {
-            if (args.length == 0) {
-                ClassLoader cl = PC.class.getClassLoader();
-                if (cl instanceof URLClassLoader) {
-                    for (URL url : ((URLClassLoader)cl).getURLs()) {
-                        InputStream in = url.openStream();
-                        try {
-                            JarInputStream jar = new JarInputStream(in);
-                            Manifest manifest = jar.getManifest();
-                            if (manifest == null) {
-                                continue;
-                            }
-
-                            String defaultArgs = manifest.getMainAttributes().getValue("Default-Args");
-                            if (defaultArgs == null) {
-                                continue;
-                            }
-
-                            args = defaultArgs.split("\\s");
-                            break;
-                        } catch (IOException e) {
-                            System.err.println("Not a JAR file " + url);
-                        } finally {
-                            try {
-                                in.close();
-                            } catch (IOException e) {
-                            }
-                        }
-                    }
-                }
-
-                if (args.length == 0) {
-                    LOGGING.log(Level.INFO, "No configuration specified, using defaults");
-                    args = new String[] { "-fda", "mem:images/floppy.img", "-hda", "mem:images/dosgames.img", "-boot", "fda" };
-                } else {
-                    LOGGING.log(Level.INFO, "Using configuration specified in manifest");
-                }
-            } else {
-                LOGGING.log(Level.INFO, "Using configuration specified on command line");
-            }
-
-            Option.parse(args);
-            PC pc = new PC(new VirtualClock(), new DriveSet(), Calendar.getInstance());
-            pc.start();
-            try {
-                while (true) {
-                    pc.execute();
-                }
-            } finally {
-                pc.stop();
-                LOGGING.log(Level.INFO, "PC Stopped");
-                pc.getProcessor().printState();
-            }
-        } catch (IOException e) {
-            System.err.println("IOError starting PC");
-        }
     }
 }
